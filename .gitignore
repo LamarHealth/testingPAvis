@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# DocIt
+/node_modules/
+Docit/nodemon.json
+Docit/image_processing/env
+client_docs/
+.vscode/
+*.pem
+*.crt
+*.key
