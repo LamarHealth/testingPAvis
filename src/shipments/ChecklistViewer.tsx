@@ -19,7 +19,6 @@ const Column = styled.div`
   justify-content: flex-start;
   flex-direction: column;
   align-items: stretch;
-  margin: 1em;
   background-color: lightgray;
   border: solid;
   display: flex;

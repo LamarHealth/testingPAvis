@@ -1,7 +1,7 @@
 import * as React from "react";
 import DocViewer from "./DocViewer";
 import { DocumentInfo } from "./DocViewer";
-import InfoHeader from "./InfoHeader";
+import InfoHeader, { Damages } from "./InfoHeader";
 import styled from "styled-components";
 import { ChecklistViewer, IDetail } from "./ChecklistViewer";
 
@@ -9,6 +9,12 @@ const placholder: DocumentInfo = {
   docName: "Doc 1231a",
   docType: "Bill of Lading",
   filePath: "123123"
+};
+
+const damagesPlaceholder: Damages = {
+  type: "Inspection Penalty",
+  amount: 300,
+  description: "Your goods will face a customs fee due to mismarked goods"
 };
 
 const checklistPlaceholder: Array<IDetail> = [
@@ -48,6 +54,7 @@ class ShipmentsDashboard extends React.Component {
             departurePoint="felixstow"
             destinationPoint="kelang"
             isGood={false}
+            damages={[damagesPlaceholder, damagesPlaceholder]}
           />
           <ChecklistViewer details={checklistPlaceholder} />
         </ChecklistColumn>

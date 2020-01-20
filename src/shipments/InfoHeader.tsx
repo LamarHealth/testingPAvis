@@ -9,15 +9,10 @@ interface IHeaderContainer {
   damages?: Array<Damages>;
 }
 
-interface Damages {
+export interface Damages {
   type: String;
   amount: number;
   description?: String;
-}
-
-interface IState {
-  icon: "error" | "tick-circle";
-  intent: Intent;
 }
 
 const Arrow = (props: IHeaderContainer) => {
@@ -62,46 +57,53 @@ class ItineraryContainer extends React.Component<IHeaderContainer> {
   }
 }
 
-class StatusContainer extends React.Component<{ isGood: Boolean }> {
+const DamagesSubsection = (props: Damages) => {
+  return (
+    <h3 style={{ margin: "0.25em 0em" }}>
+      Estimated <u>${props.amount.toString()}</u> {props.type}.{" "}
+      {props.description || ""}
+    </h3>
+  );
+};
+
+class StatusContainer extends React.Component<{
+  isGood: Boolean;
+  damages?: Array<Damages>;
+}> {
   render() {
-    const Container = styled.div`
+    const RowContainer = styled.div`
       display: flex;
       align-items: center;
+    `;
+    const ColContainer = styled.div`
+      display: flex;
+      flex-direction: column;
       justify-content: center;
     `;
     return (
-      <Container>
-        <Icon
-          icon={this.props.isGood ? "tick-circle" : "error"}
-          iconSize={50}
-          intent={this.props.isGood ? Intent.SUCCESS : Intent.DANGER}
-          style={{ padding: "1em" }}
-        />
-        <h1>
-          {this.props.isGood
-            ? "All of your information has been checked and verified"
-            : "There are critical errors in your shipping documents"}
-        </h1>
-      </Container>
+      <ColContainer>
+        <RowContainer>
+          <Icon
+            icon={this.props.isGood ? "tick-circle" : "error"}
+            iconSize={50}
+            intent={this.props.isGood ? Intent.SUCCESS : Intent.DANGER}
+            style={{ padding: "0 1em 0 0 " }}
+          />
+          <h1>
+            {this.props.isGood
+              ? "All of your information has been checked and verified"
+              : "There are critical errors in your shipping documents"}
+          </h1>
+        </RowContainer>
+        {this.props.damages === undefined ||
+          this.props.damages.map(damage => {
+            return <DamagesSubsection {...damage} />;
+          })}
+      </ColContainer>
     );
   }
 }
-
-class ChecklistContainer extends React.Component {
-  render() {
-    return <div />;
-  }
-}
-
 class InfoHeader extends React.Component<IHeaderContainer> {
-  constructor(props: IHeaderContainer) {
-    super(props);
-    this.state = {
-      // icon: isGood ? "tick-circle" : "error",
-      // intent: isGood ? Intent.SUCCESS : Intent.DANGER
-    };
-  }
-
   render() {
     const HeaderContainer = styled.div`
       justify-content: center;
@@ -116,7 +118,10 @@ class InfoHeader extends React.Component<IHeaderContainer> {
           destinationPoint={this.props.destinationPoint}
           isGood={this.props.isGood}
         />
-        <StatusContainer isGood={this.props.isGood} />
+        <StatusContainer
+          isGood={this.props.isGood}
+          damages={this.props.damages}
+        />
       </HeaderContainer>
     );
   }
