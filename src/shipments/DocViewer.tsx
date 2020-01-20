@@ -22,8 +22,8 @@ const Column = styled.div`
   background-color: lightgray;
   border: solid;
   display: inline-block;
-  min-width: 15em;
   height: 100%;
+  width: 25%;
 `;
 
 /**

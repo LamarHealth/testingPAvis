@@ -1,13 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-// Load dotenv
-import dotenv from 'dotenv'
-dotenv.config()
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
+// blueprintjs
+import "@blueprintjs/core/lib/css/blueprint.css";
 
-ReactDOM.render(<App />, document.getElementById('root'));
+// Load dotenv
+import dotenv from "dotenv";
+dotenv.config();
+
+ReactDOM.render(<App />, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
