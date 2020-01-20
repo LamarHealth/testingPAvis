@@ -39,6 +39,7 @@ class ShipmentsDashboard extends React.Component {
   render() {
     const Container = styled.div`
       display: flex;
+      height: 90vh;
     `;
     const ChecklistColumn = styled.div`
       display: flex;

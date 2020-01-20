@@ -21,9 +21,11 @@ const Column = styled.div`
   align-items: stretch;
   background-color: lightgray;
   border: solid;
-  display: flex;
+  display: inline-block;
   width: 100%;
   padding: 1em 0;
+  height: 100%;
+  overflow: scroll;
 `;
 
 /**
@@ -35,10 +37,8 @@ const Box = styled.div`
   margin: 0.25em 0.5em;
   border: solid;
   background-color: white;
+  min-height: 10%;
 `;
-
-const Name = styled.h1``;
-const Type = styled.h3``;
 
 class Detail extends React.PureComponent<IDetail> {
   render() {

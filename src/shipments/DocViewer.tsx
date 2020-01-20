@@ -24,6 +24,7 @@ const Column = styled.div`
   display: inline-block;
   height: 100%;
   width: 25%;
+  overflow: auto;
 `;
 
 /**
