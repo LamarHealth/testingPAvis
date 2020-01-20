@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components";
-import { Icon, Intent } from "@blueprintjs/core";
+import { Icon } from "@blueprintjs/core";
 
 export interface IDetail {
   statusIcon: "error" | "tick-circle" | "warning-sign";
