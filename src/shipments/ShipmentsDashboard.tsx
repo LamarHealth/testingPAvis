@@ -3,6 +3,7 @@ import DocViewer from "./DocViewer";
 import { DocumentInfo } from "./DocViewer";
 import InfoHeader from "./InfoHeader";
 import styled from "styled-components";
+import { ChecklistViewer, IDetail } from "./ChecklistViewer";
 
 const placholder: DocumentInfo = {
   docName: "Doc 1231a",
@@ -10,13 +11,34 @@ const placholder: DocumentInfo = {
   filePath: "123123"
 };
 
+const checklistPlaceholder: Array<IDetail> = [
+  {
+    statusIcon: "error",
+    fieldName: "7501",
+    detail: "ya done goofed"
+  },
+  {
+    statusIcon: "tick-circle",
+    fieldName: "7501",
+    detail: "ya done goofed"
+  },
+  {
+    statusIcon: "warning-sign",
+    fieldName: "7501",
+    detail: ""
+  }
+];
+
 class ShipmentsDashboard extends React.Component {
   render() {
     const Container = styled.div`
       display: flex;
     `;
     const ChecklistColumn = styled.div`
-      justify-content: center;
+      display: flex;
+      justify-content: flex-start;
+      flex-direction: column;
+      width: 60%;
     `;
     return (
       <Container>
@@ -26,7 +48,8 @@ class ShipmentsDashboard extends React.Component {
             departurePoint="felixstow"
             destinationPoint="kelang"
             isGood={false}
-          ></InfoHeader>
+          />
+          <ChecklistViewer details={checklistPlaceholder} />
         </ChecklistColumn>
       </Container>
     );

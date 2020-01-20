@@ -23,7 +23,7 @@ interface IState {
 const Arrow = (props: IHeaderContainer) => {
   const ArrowLine = styled.div`
     height: 1px;
-    width: 5em;
+    width: 30%;
     display: flex;
     background-color: black;
   `;
@@ -106,7 +106,7 @@ class InfoHeader extends React.Component<IHeaderContainer> {
     const HeaderContainer = styled.div`
       justify-content: center;
       flex-direction: column;
-      width: 50%;
+      width: 100%;
       padding-right: 1em;
     `;
     return (
