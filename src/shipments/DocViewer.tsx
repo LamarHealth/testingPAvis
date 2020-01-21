@@ -59,11 +59,12 @@ export default class DocViewer extends React.PureComponent<IDocViewerProps> {
   render() {
     return (
       <Column>
-        {this.props.documents.map(doc => (
+        {this.props.documents.map((doc, ndx) => (
           <DocCell
             docName={doc.docName}
             docType={doc.docType}
             filePath={doc.filePath}
+            key={ndx}
           />
         ))}
         <Box>Upload more documents</Box>

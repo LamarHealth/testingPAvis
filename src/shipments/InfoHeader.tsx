@@ -96,8 +96,8 @@ class StatusContainer extends React.Component<{
           </h1>
         </RowContainer>
         {this.props.damages === undefined ||
-          this.props.damages.map(damage => {
-            return <DamagesSubsection {...damage} />;
+          this.props.damages.map((damage, ndx) => {
+            return <DamagesSubsection {...damage} key={ndx} />;
           })}
       </ColContainer>
     );

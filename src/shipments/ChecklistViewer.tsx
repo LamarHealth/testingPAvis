@@ -60,12 +60,13 @@ class Detail extends React.PureComponent<IDetail> {
 export const ChecklistViewer = (props: IDetailList) => {
   return (
     <Column>
-      {props.details.map(detail => {
+      {props.details.map((detail, ndx) => {
         return (
           <Detail
             statusIcon={detail.statusIcon}
             fieldName={detail.fieldName}
             detail={detail.detail || ""}
+            key={ndx}
           ></Detail>
         );
       })}
