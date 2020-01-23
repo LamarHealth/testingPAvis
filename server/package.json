@@ -12,9 +12,7 @@
     "express": "^4.17.1"
   },
   "scripts": {
-    "build": "babel . --ignore node_modules,build --out-dir build",
-    "start": "nodemon -r babel-register server.js",
-    "start:prod": "node build/server.js"
+    "start": "nodemon server.js"
   },
   "devDependencies": {
     "babel-register": "^6.26.0",
