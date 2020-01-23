@@ -3,6 +3,11 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const app = express();
 const port = process.env.PORT || 5000;
+
+// Load dotenv
+const dotenv = require("dotenv");
+dotenv.config();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // API calls
