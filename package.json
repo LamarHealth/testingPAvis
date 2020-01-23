@@ -14,8 +14,13 @@
     "start:prod": "cd server && yarn start:prod"
   },
   "dependencies": {
+    "@types/jest": "^24.9.0",
+    "@types/node": "^13.1.8",
+    "@types/react": "^16.9.19",
+    "@types/react-dom": "^16.9.5",
     "@types/styled-components": "^4.4.2",
     "concurrently": "^5.0.2",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "typescript": "^3.7.5"
   }
 }
