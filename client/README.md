@@ -1,4 +1,15 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Docit Readme
+
+## Running locally
+
+To run both client and server `yarn start`
+
+To run client and server, run client and server in individual shells.
+Shell 1:
+`cd client && yarn start`
+
+Shell 2:
+`cd server && yarn start`
 
 ## Available Scripts
 
