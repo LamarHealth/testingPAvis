@@ -43,8 +43,24 @@ const router = express.Router();
 const staticFiles = express.static(path.join(__dirname, "../../client/build"));
 app.use(staticFiles);
 
+router.get("/api/timed", (req, res) => {
+  setTimeout(() => {
+    res.json({ files: { id_1: "plumbus", id_2: "slurm", id_3: "cabbage" } });
+  }, 2000);
+});
+
 router.get("/api/hello", (req, res) => {
   res.json({ express: "Hello From Express" });
+});
+
+router.post("/api/timedpost", (req, res) => {
+  let waitedResponse;
+  setTimeout(() => {
+    console.log("sdflsjkdfjkls");
+    // waitedResponse = { express: "Hello From Express" + `File: ${req.name}` };
+    res.json({ express: "Hello From Express" + `File: ${req.name}` });
+  }, 3000);
+  // res.json(waitedResponse);
 });
 
 router.post("/api/world", (req, res) => {

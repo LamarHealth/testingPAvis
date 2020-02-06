@@ -41,32 +41,32 @@ class ShipmentsDashboard extends React.Component {
     post: "",
     responseToPost: ""
   };
-  componentDidMount() {
-    this.callApi()
-      .then(res => this.setState({ response: res.express }))
-      .catch(err => console.log(err));
-  }
+  // componentDidMount() {
+  //   this.callApi()
+  //     .then(res => this.setState({ response: res.express }))
+  //     .catch(err => console.log(err));
+  // }
 
-  callApi = async () => {
-    const response = await fetch("/api/hello");
-    const body = await response.json();
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
+  // callApi = async () => {
+  //   const response = await fetch("/api/hello");
+  //   const body = await response.json();
+  //   if (response.status !== 200) throw Error(body.message);
+  //   return body;
+  // };
 
-  handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const response = await fetch("/api/world", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ post: this.state.post })
-    });
-    const body = await response.text();
-    console.log(body);
-    this.setState({ responseToPost: body });
-  };
+  // handleSubmit = async (e: any) => {
+  //   e.preventDefault();
+  //   const response = await fetch("/api/world", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     body: JSON.stringify({ post: this.state.post })
+  //   });
+  //   const body = await response.text();
+  //   console.log(body);
+  //   this.setState({ responseToPost: body });
+  // };
 
   render() {
     const Container = styled.div`
@@ -81,7 +81,7 @@ class ShipmentsDashboard extends React.Component {
     `;
     return (
       <Container>
-        <p>{this.state.response}</p>
+        {/* <p>{this.state.response}</p>
         <form onSubmit={this.handleSubmit}>
           <p>
             <strong>Post to Server:</strong>
@@ -93,7 +93,7 @@ class ShipmentsDashboard extends React.Component {
           />
           <button type="submit">Submit</button>
         </form>
-        <p>{this.state.responseToPost}</p>
+        <p>{this.state.responseToPost}</p> */}
         <DocViewer documents={[placholder, placholder, placholder]} />
         <ChecklistColumn>
           <InfoHeader

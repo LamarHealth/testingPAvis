@@ -1,5 +1,6 @@
 import * as React from "react";
 import styled from "styled-components";
+import { StyledDropzone } from "./DocUploader";
 
 interface IDocViewerProps {
   documents: Array<DocumentInfo>;
@@ -25,13 +26,14 @@ const Column = styled.div`
   height: 100%;
   width: 25%;
   overflow: auto;
+  padding: 0px 5px 1em;
 `;
 
 /**
  * Cell containing doc info
  */
 const Box = styled.div`
-  margin: 1em 0.5em;
+  margin: 1em 0em;
   padding: 5px;
   border: solid;
   background-color: white;
@@ -67,7 +69,7 @@ export default class DocViewer extends React.PureComponent<IDocViewerProps> {
             key={ndx}
           />
         ))}
-        <Box>Upload more documents</Box>
+        <StyledDropzone />
       </Column>
     );
   }
