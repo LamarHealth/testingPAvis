@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { Icon } from "@blueprintjs/core";
 import { colors } from "../common/colors";
+import { UploadingList } from "./UploadThumbnails";
 
 const getColor = (props: any) => {
   if (props.isDragAccept) {
@@ -58,93 +59,27 @@ const UploadBufferContainer = styled.div`
   padding: 1em 0;
 `;
 
-const ThumbnailList = styled.div`
-  display: block;
-  width: 100;
-  height: 100;
-`;
-
-const ThumbnailContainer = styled.div`
-  background-color: white;
-  display: inline-flex;
-  border-radius: 2;
-  border: 1px solid #eaeaea;
-  margin: 8px;
-  width: 100px;
-  height: 100px;
-  padding: 4px;
-`;
-
-const ThumbInner = styled.div`
-  display: flex;
-  minwidth: 0;
-  overflow: hidden;
-  position: relative;
-`;
-
-const Thumbnail = styled.img`
-  position: relative;
-  display: block;
-  width: auto;
-  height: 100%;
-`;
-
-const ThumbnailIcon = styled(Icon)`
-  position: absolute;
-  height: 16px;
-  width: 16px;
-  margin: 2px;
-  display: inline-block;
-  z-index: 3;
-`;
-
-const SuccessIcon = styled(ThumbnailIcon)`
-  color: green;
-`;
-
-const RefreshIcon = styled(ThumbnailIcon)`
-  animation: spin 3s linear infinite;
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-      transform-origin: center center;
-    }
-    to {
-      transform: rotate(360deg);
-      transform-origin: center center;
-    }
-  }
-`;
-
-const UploadingList = (props: any) => {
-  return (
-    <UploadBufferContainer>
-      <ThumbnailList>
-        <h2>Uploading...</h2>
-        {props.thumbs}
-      </ThumbnailList>
-    </UploadBufferContainer>
-  );
-};
-
 export function StyledDropzone(props: any) {
   // Declare state
+  // Files can be declared as an object that we can later iterate over with object.entries()
   const [newFileThumbnails, setNewFiles] = useState([]);
 
   // On Drop
   const onDrop = React.useCallback((acceptedFiles: any) => {
     console.log("DICKSHITTISTAN");
+
     setNewFiles(
       acceptedFiles.map((file: any) => {
         return Object.assign(file, {
           preview: URL.createObjectURL(file),
-          uploadReceived:
-            setTimeout(() => {
-              return true;
-            }, 4000) || false
+          uploadReceived: true
         });
       })
     );
+
+    console.log(newFileThumbnails);
+
+    // endblock
   }, []);
 
   const handleNewUpload = async (file: any) => {
@@ -165,32 +100,22 @@ export function StyledDropzone(props: any) {
     }
   };
 
+  // Check to see whether the content should be updated
   useEffect(() => {
     // TODO: Check user ID
     // TODO: Update list of files based on what's in storage
-    fetch("/api/timedpost", {
+    let isOk = fetch("/api/timed", {
       method: "GET",
       headers: { "CONTENT-TYPE": "application/json" }
-    }).then(({ response }: any) => {});
+    }).then(({ response }: any) => {
+      return response;
+    });
   });
 
   // onDragOver- Use this to make fancy animations with other components
   const onDragOver = React.useCallback((acceptedFiles: any) => {
     console.log("dragging");
   }, []);
-
-  const thumbs = newFileThumbnails.map((file: any) => (
-    <ThumbnailContainer>
-      <ThumbInner>
-        {!file.uploadReceived ? (
-          <RefreshIcon icon={"refresh"} />
-        ) : (
-          <SuccessIcon icon={"small-tick"} iconSize={30} />
-        )}
-        <Thumbnail src={file.preview} />
-      </ThumbInner>
-    </ThumbnailContainer>
-  ));
 
   useEffect(
     () => () => {
@@ -224,7 +149,7 @@ export function StyledDropzone(props: any) {
         <p>Drag and drop or click to select files</p>
         <Icon icon={"cloud-upload"} iconSize={25} />
       </Container>
-      {thumbs.length === 0 || <UploadingList thumbs={thumbs} />}
+      {newFileThumbnails.length === 0 || UploadingList(newFileThumbnails)}
     </>
   );
 }
