@@ -49,6 +49,20 @@ router.get("/api/timed", (req, res) => {
   }, 2000);
 });
 
+router.post("/api/upload_status", (req, res) => {
+  // INTERACT WITH BACKEND. SOMEHOW
+  console.log("hit api");
+  if (req) {
+    setTimeout(() => {
+      res.json({ status: "complete" });
+    }, 2000);
+  } else {
+    setTimeout(() => {
+      res.json({ filesLeft: 0 });
+    }, 2000);
+  }
+});
+
 router.get("/api/hello", (req, res) => {
   res.json({ express: "Hello From Express" });
 });

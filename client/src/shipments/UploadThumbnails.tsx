@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
-import { Icon } from "@blueprintjs/core";
+import { Icon, ProgressBar } from "@blueprintjs/core";
 import { colors } from "../common/colors";
 
 const UploadBufferContainer = styled.div`
@@ -50,6 +50,7 @@ const Thumbnail = styled.img`
   display: block;
   width: auto;
   height: 100%;
+  filter: ${(props: { blur: boolean }) => (props.blur ? "blur(8px)" : 0)};
 `;
 
 const ThumbnailIcon = styled(Icon)`
@@ -63,6 +64,10 @@ const ThumbnailIcon = styled(Icon)`
 
 const SuccessIcon = styled(ThumbnailIcon)`
   color: green;
+`;
+
+const FailureIcon = styled(ThumbnailIcon)`
+  color: red;
 `;
 
 const RefreshIcon = styled(ThumbnailIcon)`
@@ -79,28 +84,76 @@ const RefreshIcon = styled(ThumbnailIcon)`
   }
 `;
 
-export const UploadingList = (thumbs: any) => {
+export const UploadingList = (props: any) => {
+  const [uploadsComplete, setUploadsComplete] = useState(false);
+
+  const progressInitialState = props.thumbs.length;
+  const reducer = (state: number, action: string) => {
+    switch (action) {
+      case "decrement":
+        return state - 1;
+      case "reset":
+        return progressInitialState;
+      default:
+        return state;
+    }
+  };
+
+  const [count, dispatch] = useReducer(reducer, progressInitialState);
+
+  useEffect(() => {
+    let isOk = async () => {
+      const result = await fetch("/api/upload_status", {
+        method: "POST",
+        headers: { "CONTENT-TYPE": "application/json" },
+        body: JSON.stringify({ post: "FILEIDORSOMETHING" })
+      });
+      setUploadsComplete(result.ok);
+    };
+    isOk();
+  });
+
   return (
     <UploadBufferContainer>
       <ThumbnailList>
-        <h2>Uploading...</h2>
-        {UploadThumbnails(thumbs)}
+        <h3>
+          {count === 0 ? "Files Uploaded" : <ProgressBar intent={"primary"} />}
+        </h3>
+        {props.thumbs.map((file: any, ndx: number) => (
+          <FileStatus key={ndx} file={file} onComplete={dispatch} />
+        ))}
       </ThumbnailList>
     </UploadBufferContainer>
   );
 };
 
-const UploadThumbnails = (thumbs: any) => {
-  return thumbs.map((file: any, ndx: number) => (
-    <ThumbnailContainer key={ndx}>
+const FileStatus = (props: any) => {
+  const [fileStatus, setProcessStatus] = useState();
+  useEffect(() => {
+    let isOk = async () => {
+      const result = await fetch("/api/upload_status", {
+        method: "POST",
+        headers: { "CONTENT-TYPE": "application/json" },
+        body: JSON.stringify({ post: "FILEIDORSOMETHING" })
+      });
+      props.onComplete("decrement");
+      setProcessStatus(result.status);
+    };
+    isOk();
+  }, []);
+
+  return (
+    <ThumbnailContainer key={props.ndx}>
       <ThumbInner>
-        {!file.uploadReceived ? (
+        {!fileStatus ? (
           <RefreshIcon icon={"refresh"} />
-        ) : (
+        ) : fileStatus === 200 ? (
           <SuccessIcon icon={"small-tick"} iconSize={30} />
+        ) : (
+          <FailureIcon icon={"cross"} iconSize={30} />
         )}
-        <Thumbnail src={file.preview} />
+        <Thumbnail src={props.file.preview} blur={fileStatus === 400} />
       </ThumbInner>
     </ThumbnailContainer>
-  ));
+  );
 };

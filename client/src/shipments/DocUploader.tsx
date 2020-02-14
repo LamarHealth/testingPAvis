@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { Icon } from "@blueprintjs/core";
@@ -65,52 +65,24 @@ export function StyledDropzone(props: any) {
   const [newFileThumbnails, setNewFiles] = useState([]);
 
   // On Drop
-  const onDrop = React.useCallback((acceptedFiles: any) => {
-    console.log("DICKSHITTISTAN");
+  const onDrop = React.useCallback(
+    (acceptedFiles: any) => {
+      console.log("DICKSHITTISTAN");
 
-    setNewFiles(
-      acceptedFiles.map((file: any) => {
+      // Assign new properties to files
+      let droppedFiles = acceptedFiles.map((file: any) => {
         return Object.assign(file, {
           preview: URL.createObjectURL(file),
           uploadReceived: true
         });
-      })
-    );
-
-    console.log(newFileThumbnails);
-
-    // endblock
-  }, []);
-
-  const handleNewUpload = async (file: any) => {
-    try {
-      const response = await fetch("/api/timedpost", {
-        method: "POST",
-        headers: {},
-        body: file
       });
-      if (!response.ok) {
-        throw new Error("Received improper response");
-      }
-      console.log("got response", response.ok);
-      console.log("got response", response.json());
-      return response.ok;
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
-  // Check to see whether the content should be updated
-  useEffect(() => {
-    // TODO: Check user ID
-    // TODO: Update list of files based on what's in storage
-    let isOk = fetch("/api/timed", {
-      method: "GET",
-      headers: { "CONTENT-TYPE": "application/json" }
-    }).then(({ response }: any) => {
-      return response;
-    });
-  });
+      setNewFiles(newFileThumbnails.concat(droppedFiles));
+
+      // endblock
+    },
+    [newFileThumbnails]
+  );
 
   // onDragOver- Use this to make fancy animations with other components
   const onDragOver = React.useCallback((acceptedFiles: any) => {
@@ -149,7 +121,9 @@ export function StyledDropzone(props: any) {
         <p>Drag and drop or click to select files</p>
         <Icon icon={"cloud-upload"} iconSize={25} />
       </Container>
-      {newFileThumbnails.length === 0 || UploadingList(newFileThumbnails)}
+      {newFileThumbnails.length === 0 || (
+        <UploadingList thumbs={newFileThumbnails} />
+      )}
     </>
   );
 }
