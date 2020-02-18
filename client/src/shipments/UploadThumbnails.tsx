@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  createContext,
+  useContext
+} from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { Icon, ProgressBar } from "@blueprintjs/core";
@@ -83,6 +89,7 @@ const RefreshIcon = styled(ThumbnailIcon)`
     }
   }
 `;
+const CountContext = createContext({} as any);
 
 export const UploadingList = (props: any) => {
   const [uploadsComplete, setUploadsComplete] = useState(false);
@@ -92,6 +99,8 @@ export const UploadingList = (props: any) => {
     switch (action) {
       case "decrement":
         return state - 1;
+      case "increment":
+        return state + 1;
       case "reset":
         return progressInitialState;
       default:
@@ -99,44 +108,54 @@ export const UploadingList = (props: any) => {
     }
   };
 
-  const [count, dispatch] = useReducer(reducer, progressInitialState);
+  const [count, dispatch] = useReducer(reducer, 0);
 
-  useEffect(() => {
-    let isOk = async () => {
-      const result = await fetch("/api/upload_status", {
-        method: "POST",
-        headers: { "CONTENT-TYPE": "application/json" },
-        body: JSON.stringify({ post: "FILEIDORSOMETHING" })
-      });
-      setUploadsComplete(result.ok);
-    };
-    isOk();
-  });
+  // useEffect(() => {
+  //   let isOk = async () => {
+  //     const result = await fetch("/api/upload_status", {
+  //       method: "POST",
+  //       headers: { "CONTENT-TYPE": "application/json" },
+  //       body: JSON.stringify({ post: "FILEIDORSOMETHING" })
+  //     });
+  //     setUploadsComplete(result.ok);
+  //   };
+  //   isOk();
+  // });
 
   return (
-    <UploadBufferContainer>
-      <ThumbnailList>
-        <h3>
-          {count === 0 ? "Files Uploaded" : <ProgressBar intent={"primary"} />}
-        </h3>
-        {props.thumbs.map((file: any, ndx: number) => (
-          <FileStatus key={ndx} file={file} onComplete={dispatch} />
-        ))}
-      </ThumbnailList>
-    </UploadBufferContainer>
+    <CountContext.Provider
+      value={{ countState: count, countDispatch: dispatch }}
+    >
+      <UploadBufferContainer>
+        <ThumbnailList>
+          <h3>
+            {count === 0 ? (
+              "Files Uploaded"
+            ) : (
+              <ProgressBar intent={"primary"} />
+            )}
+          </h3>
+          {props.thumbs.map((file: any, ndx: number) => (
+            <FileStatus key={ndx} file={file} onComplete={dispatch} />
+          ))}
+        </ThumbnailList>
+      </UploadBufferContainer>
+    </CountContext.Provider>
   );
 };
 
 const FileStatus = (props: any) => {
   const [fileStatus, setProcessStatus] = useState();
+  const countContext = useContext(CountContext);
   useEffect(() => {
+    countContext.countDispatch("increment");
     let isOk = async () => {
       const result = await fetch("/api/upload_status", {
         method: "POST",
         headers: { "CONTENT-TYPE": "application/json" },
         body: JSON.stringify({ post: "FILEIDORSOMETHING" })
       });
-      props.onComplete("decrement");
+      countContext.countDispatch("decrement");
       setProcessStatus(result.status);
     };
     isOk();
