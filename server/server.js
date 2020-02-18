@@ -58,7 +58,7 @@ router.post("/api/upload_status", (req, res) => {
     }, 2000);
   } else {
     setTimeout(() => {
-      res.json({ filesLeft: 0 });
+      res.console.error("Could not process document");
     }, 2000);
   }
 });

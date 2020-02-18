@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
-import { Icon, ProgressBar } from "@blueprintjs/core";
+import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
 import { colors } from "../common/colors";
 
 const UploadBufferContainer = styled.div`
@@ -169,7 +169,13 @@ const FileStatus = (props: any) => {
         ) : fileStatus === 200 ? (
           <SuccessIcon icon={"small-tick"} iconSize={30} />
         ) : (
-          <FailureIcon icon={"cross"} iconSize={30} />
+          <Popover
+            interactionKind={"hover"}
+            position={Position.TOP}
+            content={<div>Unable to process document</div>}
+          >
+            <FailureIcon icon={"cross"} iconSize={30} />
+          </Popover>
         )}
         <Thumbnail src={props.file.preview} blur={fileStatus === 400} />
       </ThumbInner>

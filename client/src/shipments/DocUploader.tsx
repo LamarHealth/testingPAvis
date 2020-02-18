@@ -67,8 +67,6 @@ export function StyledDropzone(props: any) {
   // On Drop
   const onDrop = React.useCallback(
     (acceptedFiles: any) => {
-      console.log("DICKSHITTISTAN");
-
       // Assign new properties to files
       let droppedFiles = acceptedFiles.map((file: any) => {
         return Object.assign(file, {
