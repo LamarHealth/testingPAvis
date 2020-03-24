@@ -57,13 +57,12 @@ router.get("/api/timed", (req, res) => {
 
 router.post("/api/upload_status", (req, res) => {
   // INTERACT WITH BACKEND. SOMEHOW
-  console.log("hit api");
   if (req) {
     setTimeout(() => {
       res.json({
         status: "complete",
         docType: "Bill of Lading",
-        docName: req.docName,
+        docName: req.body.docName,
         filePath: ""
       });
     }, 2000);

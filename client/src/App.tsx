@@ -20,7 +20,7 @@ function App() {
     //     </a>
     //   </header>
     // </div>
-    <ShipmentsDashboard></ShipmentsDashboard>
+    <ShipmentsDashboard />
   );
 }
 

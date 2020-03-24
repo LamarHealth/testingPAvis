@@ -1,8 +1,8 @@
-import * as React from "react";
+import React, { useReducer, createContext } from "react";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
 
-interface IDocViewerProps {
+interface IDocViewer {
   documents: Array<DocumentInfo>;
 }
 
@@ -11,6 +11,14 @@ export interface DocumentInfo {
   docName: String;
   filePath: String;
 }
+
+export interface IFileDispatch {
+  type: String;
+  documentInfo: DocumentInfo;
+}
+
+export const CountContext = createContext({} as any);
+export const FileInfoContext = createContext({} as any);
 
 /**
  * Sidebar column container
@@ -52,25 +60,59 @@ class DocCell extends React.PureComponent<DocumentInfo> {
   }
 }
 
+const InstructionsCell = () => {
+  return (
+    <Box>
+      <Type>Select your files to get started </Type>
+    </Box>
+  );
+};
+
+export const fileReducer = (
+  state: IDocViewer,
+  action: IFileDispatch
+): IDocViewer => {
+  switch (action.type) {
+    case "append":
+      let currentDocs = state.documents || [];
+      return { documents: [...currentDocs, action.documentInfo] };
+    default:
+      return state;
+  }
+};
+
 /**
  * Stateful Componenet Sidebar that contains a list of the docs the user has uploaded
  * @constructor
  * @param {[DocumentInfo]} docs List of documents to show
  */
-export default class DocViewer extends React.PureComponent<IDocViewerProps> {
-  render() {
-    return (
+
+const initialState = {} as IDocViewer;
+const DocViewer = () => {
+  const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
+
+  return (
+    <FileInfoContext.Provider
+      value={{ fileInfoList: fileList, fileDispatch: fileDispatch }}
+    >
       <Column>
-        {this.props.documents.map((doc, ndx) => (
-          <DocCell
-            docName={doc.docName}
-            docType={doc.docType}
-            filePath={doc.filePath}
-            key={ndx}
-          />
-        ))}
+        {fileList.documents ? (
+          fileList.documents.map((doc, ndx) => (
+            <DocCell
+              docName={doc.docName}
+              docType={doc.docType}
+              filePath={doc.filePath}
+              key={ndx}
+            />
+          ))
+        ) : (
+          <InstructionsCell />
+        )}
+
         <StyledDropzone />
       </Column>
-    );
-  }
-}
+    </FileInfoContext.Provider>
+  );
+};
+
+export default DocViewer;

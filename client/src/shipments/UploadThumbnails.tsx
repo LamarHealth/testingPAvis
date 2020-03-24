@@ -9,6 +9,7 @@ import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
 import { colors } from "../common/colors";
+import { CountContext, FileInfoContext } from "./DocViewer";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -89,7 +90,6 @@ const RefreshIcon = styled(ThumbnailIcon)`
     }
   }
 `;
-const CountContext = createContext({} as any);
 
 export const UploadingList = (props: any) => {
   const [uploadsComplete, setUploadsComplete] = useState(false);
@@ -147,7 +147,9 @@ export const UploadingList = (props: any) => {
 const FileStatus = (props: any) => {
   const [fileStatus, setProcessStatus] = useState();
   const countContext = useContext(CountContext);
+  const fileInfoContext = useContext(FileInfoContext);
   useEffect(() => {
+    // Increment load counter
     countContext.countDispatch("increment");
     let isOk = async () => {
       const result = await fetch("/api/upload_status", {
@@ -155,7 +157,15 @@ const FileStatus = (props: any) => {
         headers: { "CONTENT-TYPE": "application/json" },
         body: JSON.stringify({ post: "FILEIDORSOMETHING", docName: "plumbus" })
       });
+      // Decrement laod counter
       countContext.countDispatch("decrement");
+
+      // Add document info to list
+      const docPayload: any = {
+        type: "append",
+        documentInfo: await result.json()
+      };
+      fileInfoContext.fileDispatch(docPayload);
       setProcessStatus(result.status);
     };
     isOk();
