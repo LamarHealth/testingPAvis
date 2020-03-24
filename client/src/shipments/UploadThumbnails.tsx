@@ -153,7 +153,7 @@ const FileStatus = (props: any) => {
       const result = await fetch("/api/upload_status", {
         method: "POST",
         headers: { "CONTENT-TYPE": "application/json" },
-        body: JSON.stringify({ post: "FILEIDORSOMETHING" })
+        body: JSON.stringify({ post: "FILEIDORSOMETHING", docName: "plumbus" })
       });
       countContext.countDispatch("decrement");
       setProcessStatus(result.status);

@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { ChecklistViewer, IDetail } from "./ChecklistViewer";
 
 const placholder: DocumentInfo = {
-  docName: "Doc 1231a",
+  docName: "Temp document [0]",
   docType: "Bill of Lading",
   filePath: "123123"
 };

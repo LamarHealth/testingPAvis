@@ -46,15 +46,26 @@ app.use(staticFiles);
 router.get("/api/timed", (req, res) => {
   setTimeout(() => {
     res.json({ files: { id_1: "plumbus", id_2: "slurm", id_3: "cabbage" } });
-  }, 2000);
+  }, 1000 * Math.random() * 10);
 });
+
+// export interface DocumentInfo {
+//   docType: String;
+//   docName: String;
+//   filePath: String;
+// }
 
 router.post("/api/upload_status", (req, res) => {
   // INTERACT WITH BACKEND. SOMEHOW
   console.log("hit api");
   if (req) {
     setTimeout(() => {
-      res.json({ status: "complete" });
+      res.json({
+        status: "complete",
+        docType: "Bill of Lading",
+        docName: req.docName,
+        filePath: ""
+      });
     }, 2000);
   } else {
     setTimeout(() => {
