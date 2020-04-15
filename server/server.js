@@ -34,7 +34,17 @@ import bodyParser from "body-parser";
 import express from "express";
 import path from "path";
 import multer from "multer";
+import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 // Routes
+
+// AWS
+const config = require("./config");
+
+AWS.config.update({
+  accessKeyId: config.awsAccesskeyID,
+  secretAccessKey: config.awsSecretAccessKey,
+  region: config.awsRegion
+});
 
 const app = express();
 
@@ -44,6 +54,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const router = express.Router();
 
 const staticFiles = express.static(path.join(__dirname, "../../client/build"));
+
 app.use(staticFiles);
 
 // TODO: Run this through Textract
@@ -53,15 +64,66 @@ router.post("/api/upload_status", (req, res) => {
   var upload = multer({}).any();
   upload(req, res, () => {
     if (req) {
-      console.log(req.files[0]);
-      setTimeout(() => {
-        res.json({
-          status: "complete",
-          docType: req.files[0].mimetype.split("/")[1],
-          docName: req.files[0].originalname.split(".")[0],
-          filePath: ""
+      const textract = new Textract();
+      const sagemakerruntime = new SageMakerRuntime();
+      const s3 = new S3();
+      var textractParams = {
+        Document: {
+          /* required */
+          Bytes: req.files[0].buffer
+        },
+        FeatureTypes: [
+          /* required */
+          "FORMS",
+          "TABLES"
+          /* more items */
+        ]
+      };
+      var sagemakerParams = {
+        Body: req.files[0].buffer,
+        EndpointName: "doc-classifier-endpoint-v2" /* required */,
+        ContentType: "application/pdf"
+      };
+
+      var s3params = {
+        Bucket: "doc-classifier-bucket",
+        Key: req.files[0].originalname,
+        Body: req.files[0].buffer
+      };
+
+      let docClass = "Other";
+
+      s3.upload(s3params, function(err, data) {
+        console.log(err, data);
+
+        // Sagemaker Inference
+        sagemakerruntime.invokeEndpoint(sagemakerParams, function(err, data) {
+          if (err) console.log(err, err.stack);
+          // an error occurred
+          else {
+            docClass = data.Body.toString().replace("_", " ");
+            console.log(docClass);
+            console.log("Success !hip hip!");
+          } // successful response
+
+          // Textract Inference after Inference (TODO: Convert PDFs to images, this only works with photos)
+          textract.analyzeDocument(textractParams, (err, data) => {
+            if (err) console.log(err, err.stack);
+            // an error occurred
+            else console.log(data); // successful response
+          });
+
+          res.json({
+            status: "complete",
+            docType: req.files[0].mimetype.split("/")[1],
+            docClass: docClass,
+            docName: req.files[0].originalname.split(".")[0],
+            filePath: ""
+          });
         });
-      }, 2000);
+      });
+
+      console.log(req.files[0]);
     } else {
       setTimeout(() => {
         res.console.error("Could not process document");

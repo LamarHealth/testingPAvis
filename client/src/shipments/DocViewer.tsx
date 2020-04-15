@@ -1,7 +1,7 @@
 import React, { useReducer, createContext } from "react";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-
+import { Icon, Button } from "@blueprintjs/core";
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -9,6 +9,7 @@ interface IDocumentList {
 export interface DocumentInfo {
   docType: String;
   docName: String;
+  docClass: String;
   filePath: String;
 }
 
@@ -45,16 +46,24 @@ const Box = styled.div`
   padding: 5px;
   border: solid;
   background-color: white;
+  overflow: auto;
 `;
-const Name = styled.h1``;
-const Type = styled.h3``;
+const Name = styled.h2``;
+const Type = styled.h4`
+  display: flex;
+`;
 
 class DocCell extends React.PureComponent<DocumentInfo> {
   render() {
     return (
       <Box>
         <Name>{this.props.docName}</Name>
-        <Type>{this.props.docType}</Type>
+        <Type>
+          <Icon icon={"rotate-document"} />
+          Document Type: {this.props.docClass}
+        </Type>
+        <Type>Format: {this.props.docType}</Type>
+        <Button>Complete Forms on Page</Button>
       </Box>
     );
   }
@@ -100,6 +109,7 @@ const DocViewer = () => {
               docName={doc.docName}
               docType={doc.docType}
               filePath={doc.filePath}
+              docClass={doc.docClass}
               key={ndx}
             />
           ))
