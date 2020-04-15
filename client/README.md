@@ -1,5 +1,7 @@
 # Docit Readme
 
+COPYRIGHT ALEX REIBMAN, ALL RIGHTS RESERVED
+
 ## Running locally
 
 To run both client and server `yarn start`

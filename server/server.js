@@ -35,6 +35,8 @@ import express from "express";
 import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
+import fs from "fs";
+import { parseTextract } from "./textractParser";
 // Routes
 
 // AWS
@@ -74,9 +76,8 @@ router.post("/api/upload_status", (req, res) => {
         },
         FeatureTypes: [
           /* required */
-          "FORMS",
-          "TABLES"
-          /* more items */
+          "FORMS"
+          /* TABLES */
         ]
       };
       var sagemakerParams = {
@@ -98,32 +99,59 @@ router.post("/api/upload_status", (req, res) => {
 
         // Sagemaker Inference
         sagemakerruntime.invokeEndpoint(sagemakerParams, function(err, data) {
-          if (err) console.log(err, err.stack);
+          if (err) {
+            console.log(err, err.stack);
+            textract.analyzeDocument(textractParams, (err, data) => {
+              if (err) {
+                console.log(err, err.stack);
+                res.json({
+                  status: "complete",
+                  docType: req.files[0].mimetype.split("/")[1],
+                  docClass: docClass,
+                  docName: req.files[0].originalname.split(".")[0],
+                  filePath: "",
+                  keyValuePairs: "NA"
+                });
+              }
+              // an error occurred
+              else {
+                // console.log(JSON.stringify(data));
+                // fs.writeFile("test.json", JSON.stringify(data), function(err) {
+                //   if (err) {
+                //     console.log(err);
+                //   }
+                // });
+                // console.log(parseTextract(data));
+
+                res.json({
+                  status: "complete",
+                  docType: req.files[0].mimetype.split("/")[1],
+                  docClass: docClass,
+                  docName: req.files[0].originalname.split(".")[0],
+                  filePath: "",
+                  keyValuePairs: parseTextract(data)
+                });
+              } // successful response
+            });
+          }
           // an error occurred
           else {
             docClass = data.Body.toString().replace("_", " ");
             console.log(docClass);
             console.log("Success !hip hip!");
+            res.json({
+              status: "complete",
+              docType: req.files[0].mimetype.split("/")[1],
+              docClass: docClass,
+              docName: req.files[0].originalname.split(".")[0],
+              filePath: "",
+              keyValuePairs: "NA"
+            });
           } // successful response
 
           // Textract Inference after Inference (TODO: Convert PDFs to images, this only works with photos)
-          textract.analyzeDocument(textractParams, (err, data) => {
-            if (err) console.log(err, err.stack);
-            // an error occurred
-            else console.log(data); // successful response
-          });
-
-          res.json({
-            status: "complete",
-            docType: req.files[0].mimetype.split("/")[1],
-            docClass: docClass,
-            docName: req.files[0].originalname.split(".")[0],
-            filePath: ""
-          });
         });
       });
-
-      console.log(req.files[0]);
     } else {
       setTimeout(() => {
         res.console.error("Could not process document");

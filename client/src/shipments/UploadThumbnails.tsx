@@ -163,6 +163,7 @@ const FileStatus = (props: any) => {
           type: "append",
           documentInfo: await result.json()
         };
+        console.log(postSuccessResponse);
         fileInfoContext.fileDispatch(postSuccessResponse);
         setUploadStatus(result.status);
       } catch {
