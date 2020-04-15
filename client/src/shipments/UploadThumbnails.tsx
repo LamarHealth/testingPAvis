@@ -1,15 +1,8 @@
-import React, {
-  useState,
-  useEffect,
-  useReducer,
-  createContext,
-  useContext
-} from "react";
-import { useDropzone } from "react-dropzone";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import styled from "styled-components";
 import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
-import { colors } from "../common/colors";
-import { CountContext, FileInfoContext } from "./DocViewer";
+import { CountContext, FileContext } from "./DocViewer";
+import { IFileWithPreview } from "./DocUploader";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -91,10 +84,8 @@ const RefreshIcon = styled(ThumbnailIcon)`
   }
 `;
 
-export const UploadingList = (props: any) => {
-  const [uploadsComplete, setUploadsComplete] = useState(false);
-
-  const progressInitialState = props.thumbs.length;
+export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
+  const progressInitialState = props.files.length;
   const reducer = (state: number, action: string) => {
     switch (action) {
       case "decrement":
@@ -135,8 +126,12 @@ export const UploadingList = (props: any) => {
               <ProgressBar intent={"primary"} />
             )}
           </h3>
-          {props.thumbs.map((file: any, ndx: number) => (
-            <FileStatus key={ndx} file={file} onComplete={dispatch} />
+          {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => (
+            <FileStatus
+              key={ndx}
+              fileWithPreview={fileWithPreview}
+              onComplete={dispatch}
+            />
           ))}
         </ThumbnailList>
       </UploadBufferContainer>
@@ -145,38 +140,48 @@ export const UploadingList = (props: any) => {
 };
 
 const FileStatus = (props: any) => {
-  const [fileStatus, setProcessStatus] = useState();
+  const [uploadStatus, setUploadStatus] = useState(Number);
   const countContext = useContext(CountContext);
-  const fileInfoContext = useContext(FileInfoContext);
+  const fileInfoContext = useContext(FileContext);
   useEffect(() => {
     // Increment load counter
     countContext.countDispatch("increment");
-    let isOk = async () => {
-      const result = await fetch("/api/upload_status", {
-        method: "POST",
-        headers: { "CONTENT-TYPE": "application/json" },
-        body: JSON.stringify({ post: "FILEIDORSOMETHING", docName: "plumbus" })
-      });
-      // Decrement laod counter
-      countContext.countDispatch("decrement");
 
-      // Add document info to list
-      const docPayload: any = {
-        type: "append",
-        documentInfo: await result.json()
-      };
-      fileInfoContext.fileDispatch(docPayload);
-      setProcessStatus(result.status);
+    // Upload file to backend
+    console.log(props.fileWithPreview);
+    const formData = new FormData();
+    formData.append("myfile", props.fileWithPreview.file);
+    const uploadFile = async () => {
+      try {
+        const result = await fetch("/api/upload_status", {
+          method: "POST",
+          body: formData
+        });
+
+        // Add document info to list
+        const postSuccessResponse: any = {
+          type: "append",
+          documentInfo: await result.json()
+        };
+        fileInfoContext.fileDispatch(postSuccessResponse);
+        setUploadStatus(result.status);
+      } catch {
+        setUploadStatus(400);
+      }
+
+      // Decrement load counter
+      countContext.countDispatch("decrement");
     };
-    isOk();
+    uploadFile();
+    // TODO: Set default to be pre-loaded documents
   }, []);
 
   return (
     <ThumbnailContainer key={props.ndx}>
       <ThumbInner>
-        {!fileStatus ? (
+        {!uploadStatus ? (
           <RefreshIcon icon={"refresh"} />
-        ) : fileStatus === 200 ? (
+        ) : uploadStatus === 200 ? (
           <SuccessIcon icon={"small-tick"} iconSize={30} />
         ) : (
           <Popover
@@ -187,7 +192,10 @@ const FileStatus = (props: any) => {
             <FailureIcon icon={"cross"} iconSize={30} />
           </Popover>
         )}
-        <Thumbnail src={props.file.preview} blur={fileStatus === 400} />
+        <Thumbnail
+          src={props.fileWithPreview.preview}
+          blur={uploadStatus === 400}
+        />
       </ThumbInner>
     </ThumbnailContainer>
   );

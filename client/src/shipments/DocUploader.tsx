@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import { Icon } from "@blueprintjs/core";
@@ -42,44 +42,31 @@ const Container = styled.div`
   }
 `;
 
-const UploadBufferContainer = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-width: 2px;
-  border-radius: 2px;
-  background-color: white;
-  color: gray;
-  outline: none;
-  transition: border 0.24s ease-in-out;
-  transition: background-color 0.24s ease-in-out;
-  text-align: center;
-  justify-content: center;
-  padding: 1em 0;
-`;
+export interface IFileWithPreview {
+  file: File;
+  preview: string;
+}
 
-export function StyledDropzone(props: any) {
-  // Declare state
+export const StyledDropzone = () => {
   // Files can be declared as an object that we can later iterate over with object.entries()
-  const [newFileThumbnails, setNewFiles] = useState([]);
+  const [newFiles, setNewFiles] = useState([] as IFileWithPreview[]);
 
   // On Drop
   const onDrop = React.useCallback(
-    (acceptedFiles: any) => {
-      // Assign new properties to files
-      let droppedFiles = acceptedFiles.map((file: any) => {
-        return Object.assign(file, {
-          preview: URL.createObjectURL(file),
-          uploadReceived: true
-        });
+    (acceptedFiles: Array<File>) => {
+      // Create dictionary containing file and preview
+      const filesWithThumbnails = acceptedFiles.map((file: File) => {
+        return {
+          file,
+          preview: URL.createObjectURL(file)
+        };
       });
 
-      setNewFiles(newFileThumbnails.concat(droppedFiles));
+      setNewFiles(newFiles.concat(filesWithThumbnails));
 
       // endblock
     },
-    [newFileThumbnails]
+    [newFiles]
   );
 
   // onDragOver- Use this to make fancy animations with other components
@@ -90,11 +77,11 @@ export function StyledDropzone(props: any) {
   useEffect(
     () => () => {
       // Make sure to revoke the data uris to avoid memory leaks
-      newFileThumbnails.forEach((file: any) =>
-        URL.revokeObjectURL(file.preview)
+      newFiles.forEach((fileWithPreview: IFileWithPreview) =>
+        URL.revokeObjectURL(fileWithPreview.preview)
       );
     },
-    [newFileThumbnails]
+    [newFiles]
   );
 
   // Dropzone Hook
@@ -119,9 +106,7 @@ export function StyledDropzone(props: any) {
         <p>Drag and drop or click to select files</p>
         <Icon icon={"cloud-upload"} iconSize={25} />
       </Container>
-      {newFileThumbnails.length === 0 || (
-        <UploadingList thumbs={newFileThumbnails} />
-      )}
+      {!newFiles.length || <UploadingList files={newFiles} />}
     </>
   );
-}
+};

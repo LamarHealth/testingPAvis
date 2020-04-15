@@ -2,7 +2,7 @@ import React, { useReducer, createContext } from "react";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
 
-interface IDocViewer {
+interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
 
@@ -18,7 +18,7 @@ export interface IFileDispatch {
 }
 
 export const CountContext = createContext({} as any);
-export const FileInfoContext = createContext({} as any);
+export const FileContext = createContext({} as any);
 
 /**
  * Sidebar column container
@@ -69,9 +69,9 @@ const InstructionsCell = () => {
 };
 
 export const fileReducer = (
-  state: IDocViewer,
+  state: IDocumentList,
   action: IFileDispatch
-): IDocViewer => {
+): IDocumentList => {
   switch (action.type) {
     case "append":
       let currentDocs = state.documents || [];
@@ -87,14 +87,12 @@ export const fileReducer = (
  * @param {[DocumentInfo]} docs List of documents to show
  */
 
-const initialState = {} as IDocViewer;
+const initialState = {} as IDocumentList;
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
 
   return (
-    <FileInfoContext.Provider
-      value={{ fileInfoList: fileList, fileDispatch: fileDispatch }}
-    >
+    <FileContext.Provider value={{ fileList, fileDispatch }}>
       <Column>
         {fileList.documents ? (
           fileList.documents.map((doc, ndx) => (
@@ -111,7 +109,7 @@ const DocViewer = () => {
 
         <StyledDropzone />
       </Column>
-    </FileInfoContext.Provider>
+    </FileContext.Provider>
   );
 };
 

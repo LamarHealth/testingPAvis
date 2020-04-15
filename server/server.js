@@ -33,6 +33,10 @@
 import bodyParser from "body-parser";
 import express from "express";
 import path from "path";
+import multer from "multer";
+// Routes
+import "./fileUpload";
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -43,34 +47,28 @@ const router = express.Router();
 const staticFiles = express.static(path.join(__dirname, "../../client/build"));
 app.use(staticFiles);
 
-router.get("/api/timed", (req, res) => {
-  setTimeout(() => {
-    res.json({ files: { id_1: "plumbus", id_2: "slurm", id_3: "cabbage" } });
-  }, 1000 * Math.random() * 10);
-});
-
-// export interface DocumentInfo {
-//   docType: String;
-//   docName: String;
-//   filePath: String;
-// }
-
+// TODO: Run this through Textract
+// var upload = multer({ storage: multer.memoryStorage() }).any();
 router.post("/api/upload_status", (req, res) => {
-  // INTERACT WITH BACKEND. SOMEHOW
-  if (req) {
-    setTimeout(() => {
-      res.json({
-        status: "complete",
-        docType: "Bill of Lading",
-        docName: req.body.docName,
-        filePath: ""
-      });
-    }, 2000);
-  } else {
-    setTimeout(() => {
-      res.console.error("Could not process document");
-    }, 2000);
-  }
+  // Currently doesn't save anywhere
+  var upload = multer({}).any();
+  upload(req, res, () => {
+    if (req) {
+      console.log(req.files[0]);
+      setTimeout(() => {
+        res.json({
+          status: "complete",
+          docType: req.files[0].mimetype.split("/")[1],
+          docName: req.files[0].originalname.split(".")[0],
+          filePath: ""
+        });
+      }, 2000);
+    } else {
+      setTimeout(() => {
+        res.console.error("Could not process document");
+      }, 2000);
+    }
+  });
 });
 
 router.get("/api/hello", (req, res) => {
@@ -87,14 +85,6 @@ router.post("/api/timedpost", (req, res) => {
   // res.json(waitedResponse);
 });
 
-router.post("/api/world", (req, res) => {
-  const cities = [
-    { name: "New York City", population: 8175133 },
-    { name: "Los Angeles", population: 3792621 },
-    { name: "Chicago", population: 2695598 }
-  ];
-  res.json(cities);
-});
 app.use(router);
 
 // any routes not picked up by the server api will be handled by the react router

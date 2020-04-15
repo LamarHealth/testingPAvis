@@ -1,15 +1,8 @@
 import * as React from "react";
 import DocViewer from "./DocViewer";
-import { DocumentInfo } from "./DocViewer";
 import InfoHeader, { Damages } from "./InfoHeader";
 import styled from "styled-components";
 import { ChecklistViewer, IDetail } from "./ChecklistViewer";
-
-const placholder: DocumentInfo = {
-  docName: "Temp document [0]",
-  docType: "Bill of Lading",
-  filePath: "123123"
-};
 
 const damagesPlaceholder: Damages = {
   type: "Inspection Penalty",
