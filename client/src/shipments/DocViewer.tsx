@@ -1,7 +1,7 @@
-import React, { useReducer, createContext } from "react";
+import React, { useReducer, useState, createContext } from "react";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-import { Icon, Button } from "@blueprintjs/core";
+import { Icon, Button, Collapse } from "@blueprintjs/core";
 import $ from "jquery";
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -29,16 +29,27 @@ const Column = styled.div`
   justify-content: flex-start;
   flex-direction: column;
   align-items: stretch;
-  margin: 2em;
+  margin: 1em 0em;
   background-color: lightgray;
   border: solid;
   display: inline-block;
   height: 100%;
   width: 25%;
+  margin-left: ${(props: { open: boolean }) =>
+    props.open ? "calc(-25% )" : "0.5em"};
   overflow: auto;
   padding: 0px 5px 1em;
-  transform: ${(props: { open: boolean }) =>
-    props ? "translateX(0)" : "translateX(-100%)"};
+  transition: all 1s;
+`;
+
+const ExpandButton = styled.button`
+  position: relative;
+  width: 3em;
+  height: 3em;
+  top: 50%;
+  right: 1.5em;
+  margin: 1em 1em 1em 0em;
+  transform: rotate(90deg);
 `;
 
 /**
@@ -59,20 +70,20 @@ const Type = styled.h4`
 class DocCell extends React.PureComponent<DocumentInfo> {
   render() {
     const onClick = () => {
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input1]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "Date: 7/5/2019");
             }
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input2]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr(
                 "value",
@@ -82,60 +93,60 @@ class DocCell extends React.PureComponent<DocumentInfo> {
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input3]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "477195");
             }
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input4]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "CID#: 13144-f-6885");
             }
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input5]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "SID# 321312-a-2131");
             }
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input6]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "FOB x");
             }
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input7]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "COD Amount: $");
             }
           });
       });
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $("div")
           .find("input[id=text-input8]")
-          .each(function(ev) {
+          .each(function (ev) {
             if (!$(this).val()) {
               $(this).attr("value", "BAR CODE SPACE");
             }
@@ -186,10 +197,11 @@ export const fileReducer = (
 const initialState = {} as IDocumentList;
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
+  const [isOpen, setOpen] = useState(true);
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
-      <Column open={true}>
+      <Column open={isOpen}>
         {fileList.documents ? (
           fileList.documents.map((doc, ndx) => (
             <DocCell
@@ -206,6 +218,9 @@ const DocViewer = () => {
 
         <StyledDropzone />
       </Column>
+      <ExpandButton onClick={() => setOpen(!isOpen)}>
+        <Icon icon={isOpen ? "expand-all" : "collapse-all"} />
+      </ExpandButton>
     </FileContext.Provider>
   );
 };

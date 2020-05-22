@@ -8,25 +8,25 @@ import { FormGroup, InputGroup } from "@blueprintjs/core";
 const damagesPlaceholder: Damages = {
   type: "Inspection Penalty",
   amount: 300,
-  description: "Your goods will face a customs fee due to mismarked goods"
+  description: "Your goods will face a customs fee due to mismarked goods",
 };
 
 const checklistPlaceholder: Array<IDetail> = [
   {
     statusIcon: "error",
     fieldName: "7501",
-    detail: "ya done goofed"
+    detail: "ya done goofed",
   },
   {
     statusIcon: "tick-circle",
     fieldName: "7501",
-    detail: "ya done goofed"
+    detail: "ya done goofed",
   },
   {
     statusIcon: "warning-sign",
     fieldName: "7501",
-    detail: ""
-  }
+    detail: "",
+  },
 ];
 
 class ShipmentsDashboard extends React.Component {
@@ -34,34 +34,8 @@ class ShipmentsDashboard extends React.Component {
     response: "",
     post: "",
     responseToPost: "",
-    clicked: false
+    clicked: false,
   };
-  // componentDidMount() {
-  //   this.callApi()
-  //     .then(res => this.setState({ response: res.express }))
-  //     .catch(err => console.log(err));
-  // }
-
-  // callApi = async () => {
-  //   const response = await fetch("/api/hello");
-  //   const body = await response.json();
-  //   if (response.status !== 200) throw Error(body.message);
-  //   return body;
-  // };
-
-  // handleSubmit = async (e: any) => {
-  //   e.preventDefault();
-  //   const response = await fetch("/api/world", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify({ post: this.state.post })
-  //   });
-  //   const body = await response.text();
-  //   console.log(body);
-  //   this.setState({ responseToPost: body });
-  // };
 
   render() {
     const Container = styled.div`

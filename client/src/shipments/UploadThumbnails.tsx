@@ -22,7 +22,7 @@ const UploadBufferContainer = styled.div`
 `;
 
 const ThumbnailList = styled.div`
-  display: block;
+  display: table-column;
   width: 100;
   height: 100;
 `;
@@ -101,18 +101,6 @@ export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
 
   const [count, dispatch] = useReducer(reducer, 0);
 
-  // useEffect(() => {
-  //   let isOk = async () => {
-  //     const result = await fetch("/api/upload_status", {
-  //       method: "POST",
-  //       headers: { "CONTENT-TYPE": "application/json" },
-  //       body: JSON.stringify({ post: "FILEIDORSOMETHING" })
-  //     });
-  //     setUploadsComplete(result.ok);
-  //   };
-  //   isOk();
-  // });
-
   return (
     <CountContext.Provider
       value={{ countState: count, countDispatch: dispatch }}
@@ -155,16 +143,25 @@ const FileStatus = (props: any) => {
       try {
         const result = await fetch("/api/upload_status", {
           method: "POST",
-          body: formData
+          body: formData,
         });
+        // Status code cases
+        switch (result.status) {
+          case 200:
+            // Add document info to list
+            const postSuccessResponse: any = {
+              type: "append",
+              documentInfo: await result.json(),
+            };
+            fileInfoContext.fileDispatch(postSuccessResponse);
+            console.log(postSuccessResponse);
 
-        // Add document info to list
-        const postSuccessResponse: any = {
-          type: "append",
-          documentInfo: await result.json()
-        };
-        console.log(postSuccessResponse);
-        fileInfoContext.fileDispatch(postSuccessResponse);
+            break;
+          case 400:
+          default:
+            setUploadStatus(400);
+        }
+
         setUploadStatus(result.status);
       } catch {
         setUploadStatus(400);

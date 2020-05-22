@@ -45,7 +45,7 @@ const config = require("./config");
 AWS.config.update({
   accessKeyId: config.awsAccesskeyID,
   secretAccessKey: config.awsSecretAccessKey,
-  region: config.awsRegion
+  region: config.awsRegion,
 });
 
 const app = express();
@@ -72,84 +72,49 @@ router.post("/api/upload_status", (req, res) => {
       var textractParams = {
         Document: {
           /* required */
-          Bytes: req.files[0].buffer
+          Bytes: req.files[0].buffer,
         },
         FeatureTypes: [
           /* required */
-          "FORMS"
+          "FORMS",
           /* TABLES */
-        ]
-      };
-      var sagemakerParams = {
-        Body: req.files[0].buffer,
-        EndpointName: "doc-classifier-endpoint-v2" /* required */,
-        ContentType: "application/pdf"
+        ],
       };
 
       var s3params = {
         Bucket: "doc-classifier-bucket",
         Key: req.files[0].originalname,
-        Body: req.files[0].buffer
+        Body: req.files[0].buffer,
       };
 
-      let docClass = "Other";
+      let docClass = "";
 
-      s3.upload(s3params, function(err, data) {
+      s3.upload(s3params, function (err, data) {
         console.log(err, data);
 
-        // Sagemaker Inference
-        sagemakerruntime.invokeEndpoint(sagemakerParams, function(err, data) {
+        textract.analyzeDocument(textractParams, (err, data) => {
           if (err) {
             console.log(err, err.stack);
-            textract.analyzeDocument(textractParams, (err, data) => {
-              if (err) {
-                console.log(err, err.stack);
-                res.json({
-                  status: "complete",
-                  docType: req.files[0].mimetype.split("/")[1],
-                  docClass: docClass,
-                  docName: req.files[0].originalname.split(".")[0],
-                  filePath: "",
-                  keyValuePairs: "NA"
-                });
-              }
-              // an error occurred
-              else {
-                // console.log(JSON.stringify(data));
-                // fs.writeFile("test.json", JSON.stringify(data), function(err) {
-                //   if (err) {
-                //     console.log(err);
-                //   }
-                // });
-                // console.log(parseTextract(data));
-
-                res.json({
-                  status: "complete",
-                  docType: req.files[0].mimetype.split("/")[1],
-                  docClass: docClass,
-                  docName: req.files[0].originalname.split(".")[0],
-                  filePath: "",
-                  keyValuePairs: parseTextract(data)
-                });
-              } // successful response
+            res.status(400).send({
+              status: "error",
+              docType: req.files[0].mimetype.split("/")[1],
+              docClass: docClass,
+              docName: req.files[0].originalname.split(".")[0],
+              filePath: "",
+              keyValuePairs: "NA",
             });
           }
           // an error occurred
           else {
-            docClass = data.Body.toString().replace("_", " ");
-            console.log(docClass);
-            console.log("Success !hip hip!");
             res.json({
               status: "complete",
               docType: req.files[0].mimetype.split("/")[1],
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
               filePath: "",
-              keyValuePairs: "NA"
+              keyValuePairs: parseTextract(data),
             });
           } // successful response
-
-          // Textract Inference after Inference (TODO: Convert PDFs to images, this only works with photos)
         });
       });
     } else {
