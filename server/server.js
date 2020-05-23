@@ -36,6 +36,7 @@ import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import fs from "fs";
+import uuidv4 from "uuid";
 import { parseTextract } from "./textractParser";
 // Routes
 
@@ -97,6 +98,7 @@ router.post("/api/upload_status", (req, res) => {
             console.log(err, err.stack);
             res.status(400).send({
               status: "error",
+              docID: uuidv4(),
               docType: req.files[0].mimetype.split("/")[1],
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
@@ -108,6 +110,7 @@ router.post("/api/upload_status", (req, res) => {
           else {
             res.json({
               status: "complete",
+              docID: uuidv4(),
               docType: req.files[0].mimetype.split("/")[1],
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],

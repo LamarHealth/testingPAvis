@@ -1,6 +1,6 @@
 import * as React from "react";
 import DocViewer from "./DocViewer";
-import InfoHeader, { Damages } from "./InfoHeader";
+import { Damages } from "./InfoHeader";
 import styled from "styled-components";
 import { ChecklistViewer, IDetail } from "./ChecklistViewer";
 import { FormGroup, InputGroup } from "@blueprintjs/core";

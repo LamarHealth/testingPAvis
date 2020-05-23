@@ -84,6 +84,17 @@ const RefreshIcon = styled(ThumbnailIcon)`
   }
 `;
 
+const updateLocalStorage = (documentInfo: any) => {
+  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  let updatedList = Array.isArray(storedDocs)
+    ? storedDocs.filter((item: any) => {
+        return typeof item === "object";
+      })
+    : [];
+  updatedList.push(documentInfo);
+  localStorage.setItem("docList", JSON.stringify(updatedList));
+};
+
 export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
   const progressInitialState = props.files.length;
   const reducer = (state: number, action: string) => {
@@ -153,9 +164,8 @@ const FileStatus = (props: any) => {
               type: "append",
               documentInfo: await result.json(),
             };
+            updateLocalStorage(postSuccessResponse.documentInfo);
             fileInfoContext.fileDispatch(postSuccessResponse);
-            console.log(postSuccessResponse);
-
             break;
           case 400:
           default:
