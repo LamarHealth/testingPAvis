@@ -39,7 +39,10 @@ const Column = styled.div`
 	flex-direction: column;
 	align-items: stretch;
 	margin: 1em 0em;
-	border: 1px solid hsl(210, 95%, 20%);
+	border: ${(props: { open: boolean }) =>
+		props.open
+			? "1px solid hsla(210, 95%, 20%, 0)"
+			: "1px solid hsla(210, 95%, 20%, 1)"};
 	border-radius: 10px;
 	display: inline-block;
 	height: 100%;
