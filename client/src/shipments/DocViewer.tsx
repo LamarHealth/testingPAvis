@@ -40,7 +40,6 @@ const Column = styled.div`
 	align-items: stretch;
 	margin: 1em 0em;
 	border: 2px solid rgb(1, 23, 47);
-	background-color: hsla(32, 100%, 97%, 0.5);
 	border-radius: 10px;
 	display: inline-block;
 	height: 100%;
@@ -63,7 +62,7 @@ const ExpandButton = styled.button`
 	justify-content: center;
 	background-color: rgb(1, 23, 47);
 	color: rgb(255, 248, 240);
-	opacity: 0.4;
+	opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
 	transition: 0.5s;
 	border: none;
 	border-radius: 0% 25% 25% 0%;
@@ -71,11 +70,16 @@ const ExpandButton = styled.button`
 	&:hover {
 		opacity: 1;
 	}
+
+	&:focus {
+		outline: none;
+	}
 `;
 
 const Chevron = styled(Icon)`
 	position: relative;
 	top: 25%; //CCC: to get chevron in middle... idk exactly why this works but it does
+	// display flex here is the property at work
 `;
 
 /**
@@ -283,13 +287,6 @@ const DocViewer = () => {
 	const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
 	const [isOpen, setOpen] = useState(true);
 
-	// CCC didn't know where else to put this guy
-	const buttonOpacity = () => {
-		if (!isOpen) {
-			return { opacity: 1 };
-		}
-	};
-
 	return (
 		<FileContext.Provider value={{ fileList, fileDispatch }}>
 			<Column open={isOpen}>
@@ -311,7 +308,7 @@ const DocViewer = () => {
 
 				<StyledDropzone />
 			</Column>
-			<ExpandButton onClick={() => setOpen(!isOpen)} style={buttonOpacity()}>
+			<ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
 				<Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
 			</ExpandButton>
 		</FileContext.Provider>

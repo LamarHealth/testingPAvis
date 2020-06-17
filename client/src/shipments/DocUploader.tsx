@@ -27,7 +27,7 @@ const Container = styled.div`
 	border-radius: 2px;
 	border-color: ${(props) => getColor(props)};
 	border-style: dashed;
-	background-color: white;
+	background-color: hsla(140, 16%, 96%);
 	color: gray;
 	outline: none;
 	transition: border 0.24s ease-in-out;
@@ -36,7 +36,7 @@ const Container = styled.div`
 	justify-content: center;
 	padding: 1em 0;
 	:hover {
-		background-color: hsla(211, 96%, 9%, 0.15);
+		background-color: hsl(196, 100%, 88%);
 		color: rgb(1, 23, 47);
 		border-color: rgb(1, 23, 47);
 	}
