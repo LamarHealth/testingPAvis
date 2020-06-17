@@ -39,7 +39,7 @@ const Column = styled.div`
 	flex-direction: column;
 	align-items: stretch;
 	margin: 1em 0em;
-	border: 2px solid rgb(1, 23, 47);
+	border: 1px solid hsl(210, 95%, 20%);
 	border-radius: 10px;
 	display: inline-block;
 	height: 100%;
@@ -55,12 +55,13 @@ const ExpandButton = styled.button`
 	width: 2em;
 	height: 3em;
 	top: 50%;
-	right: 1em; //CCC: changed from 1.5 to 1 to keep button from overlapping the div
+	right: 1em;
 	margin: 1em 1em 1em 1em;
 	padding: 0;
 	display: flex;
 	justify-content: center;
-	background-color: rgb(1, 23, 47);
+	align-items: center;
+	background-color: hsl(210, 95%, 20%);
 	color: rgb(255, 248, 240);
 	opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
 	transition: 0.5s;
@@ -78,8 +79,6 @@ const ExpandButton = styled.button`
 
 const Chevron = styled(Icon)`
 	position: relative;
-	top: 25%; //CCC: to get chevron in middle... idk exactly why this works but it does
-	// display flex here is the property at work
 `;
 
 /**
