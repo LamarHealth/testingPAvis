@@ -39,15 +39,17 @@ const Column = styled.div`
   flex-direction: column;
   align-items: stretch;
   margin: 1em 0em;
-  background-color: lightgray;
-  border: solid;
+  border: ${(props: { open: boolean }) =>
+    props.open
+      ? "1px solid hsla(210, 95%, 20%, 0)"
+      : "1px solid hsla(210, 95%, 20%, 1)"};
+  border-radius: 10px;
   display: inline-block;
   height: 100%;
   width: 25%;
   margin-left: ${(props: { open: boolean }) =>
     props.open ? "calc(-25% )" : "0.5em"};
   overflow: auto;
-  padding: 0px 5px 1em;
   transition: all 1s;
 `;
 
@@ -56,11 +58,26 @@ const ExpandButton = styled.button`
   width: 2em;
   height: 3em;
   top: 50%;
-  right: 1.5em;
+  right: 1em;
   margin: 1em 1em 1em 1em;
   padding: 0;
   display: flex;
   justify-content: center;
+  align-items: center;
+  background-color: hsl(210, 95%, 20%);
+  color: rgb(255, 248, 240);
+  opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
+  transition: 0.5s;
+  border: none;
+  border-radius: 0% 25% 25% 0%;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const Chevron = styled(Icon)`
@@ -70,6 +87,13 @@ const Chevron = styled(Icon)`
 /**
  * Cell containing doc info
  */
+
+const Instructions = styled.div`
+  text-align: center;
+  padding: 2em 2em 0em 2em;
+  color: rgb(1, 23, 47);
+`;
+
 const Box = styled.div`
   margin: 1em 0em;
   padding: 5px;
@@ -224,11 +248,7 @@ const DocCell = (props: DocumentInfo) => {
 };
 
 const InstructionsCell = () => {
-  return (
-    <Box>
-      <Type>Select your files to get started </Type>
-    </Box>
-  );
+  return <Instructions>Add files to get started</Instructions>;
 };
 const removeDocument = (docID: String) => {
   const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
@@ -290,7 +310,7 @@ const DocViewer = () => {
 
         <StyledDropzone />
       </Column>
-      <ExpandButton onClick={() => setOpen(!isOpen)}>
+      <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
         <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
       </ExpandButton>
     </FileContext.Provider>

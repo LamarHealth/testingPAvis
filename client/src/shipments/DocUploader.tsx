@@ -25,9 +25,9 @@ const Container = styled.div`
   align-items: center;
   border-width: 2px;
   border-radius: 2px;
-  border-color: ${props => getColor(props)};
+  border-color: ${(props) => getColor(props)};
   border-style: dashed;
-  background-color: white;
+  background-color: hsla(140, 16%, 96%);
   color: gray;
   outline: none;
   transition: border 0.24s ease-in-out;
@@ -36,9 +36,14 @@ const Container = styled.div`
   justify-content: center;
   padding: 1em 0;
   :hover {
-    background-color: ${colors.LIGHTBLUE};
-    color: white;
-    border-color: white;
+    background-color: hsl(196, 100%, 88%);
+    color: rgb(1, 23, 47);
+    border-color: rgb(1, 23, 47);
+  }
+  margin: 2em;
+
+  & > p {
+    padding: 1em;
   }
 `;
 
@@ -58,7 +63,7 @@ export const StyledDropzone = () => {
       const filesWithThumbnails = acceptedFiles.map((file: File) => {
         return {
           file,
-          preview: URL.createObjectURL(file)
+          preview: URL.createObjectURL(file),
         };
       });
 
@@ -90,11 +95,11 @@ export const StyledDropzone = () => {
     getInputProps,
     isDragActive,
     isDragAccept,
-    isDragReject
+    isDragReject,
   } = useDropzone({
     accept: ["application/pdf", "image/*"],
     onDrop,
-    onDragOver
+    onDragOver,
   });
 
   return (
