@@ -5,19 +5,6 @@ import { Icon } from "@blueprintjs/core";
 import { colors } from "../common/colors";
 import { UploadingList } from "./UploadThumbnails";
 
-// import pdfjs from "pdfjs-dist";
-// import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
-// const PDFJS: any = require("pdfjs-dist");
-
-// const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
-
-// PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
-import pdfjs from "pdfjs-dist";
-// import pdfjsWorker from "pdfjs-dist/build/pdf.worker.js";
-
-pdfjs.disableWorker = true;
-
 const getColor = (props: any) => {
   if (props.isDragAccept) {
     return "#00e676";
@@ -68,31 +55,21 @@ export interface IFileWithPreview {
 export const StyledDropzone = () => {
   // Files can be declared as an object that we can later iterate over with object.entries()
   const [newFiles, setNewFiles] = useState([] as IFileWithPreview[]);
+  const [indexCount, setIndexCount] = useState(0);
 
   // On Drop
   const onDrop = React.useCallback(
     (acceptedFiles: Array<File>) => {
       // Create dictionary containing file and preview
       const filesWithThumbnails = acceptedFiles.map((file: File) => {
-        // console.log(file.arrayBuffer().then((d: any) => console.log(d)));
-
-        // const fileArrayBuffer = await file.arrayBuffer();
-
-        // var x = new Uint8Array(fileArrayBuffer);
-
-        const url = URL.createObjectURL(file);
-
-        console.log("url", url);
-
-        // pdfjs.getDocument(url).promise.then((d: any) => {
-        //   console.log("success", d);
-        // });
-
         return {
           file,
+          index: indexCount,
           preview: URL.createObjectURL(file),
         };
       });
+
+      setIndexCount(indexCount + 1);
 
       setNewFiles(newFiles.concat(filesWithThumbnails));
 
