@@ -174,7 +174,7 @@ const FileStatus = (props: any) => {
     PDFDocumentProxy.getPage(1).then((page: any) => {
       // set scale. in this case, affects resolution of thumbnail, and how much is cut off
       const viewport = page.getViewport({ scale: 0.5 });
-      const canvas: any = document.querySelector("#pdf-canvas");
+      const canvas: any = document.querySelector(`#pdf-canvas${index}`);
       const ctx = canvas.getContext("2d");
 
       // setting context for rendering
@@ -264,7 +264,7 @@ const FileStatus = (props: any) => {
           </Popover>
         )}
         <div id="thumbnail-wrapper">
-          <Canvas id="pdf-canvas" />
+          <Canvas id={`pdf-canvas${index}`} />
           <Thumbnail
             id={`thumbnail${index}`}
             src={thumbnailSrc}

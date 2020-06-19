@@ -55,21 +55,23 @@ export interface IFileWithPreview {
 export const StyledDropzone = () => {
   // Files can be declared as an object that we can later iterate over with object.entries()
   const [newFiles, setNewFiles] = useState([] as IFileWithPreview[]);
-  const [indexCount, setIndexCount] = useState(0);
 
   // On Drop
   const onDrop = React.useCallback(
     (acceptedFiles: Array<File>) => {
+      let index = 0;
+
       // Create dictionary containing file and preview
       const filesWithThumbnails = acceptedFiles.map((file: File) => {
+        let thisIndex = index;
+        index++;
+
         return {
           file,
-          index: indexCount,
+          index: thisIndex,
           preview: URL.createObjectURL(file),
         };
       });
-
-      setIndexCount(indexCount + 1);
 
       setNewFiles(newFiles.concat(filesWithThumbnails));
 
