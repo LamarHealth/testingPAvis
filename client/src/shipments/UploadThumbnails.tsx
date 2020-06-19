@@ -147,7 +147,7 @@ const FileStatus = (props: any) => {
     countContext.countDispatch("increment");
 
     // Upload file to backend
-    console.log(props.fileWithPreview);
+    // console.log(props.fileWithPreview);
     const formData = new FormData();
     formData.append("myfile", props.fileWithPreview.file);
     const uploadFile = async () => {

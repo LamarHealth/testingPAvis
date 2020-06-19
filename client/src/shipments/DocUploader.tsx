@@ -5,6 +5,19 @@ import { Icon } from "@blueprintjs/core";
 import { colors } from "../common/colors";
 import { UploadingList } from "./UploadThumbnails";
 
+// import pdfjs from "pdfjs-dist";
+// import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+// const PDFJS: any = require("pdfjs-dist");
+
+// const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
+
+// PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+import pdfjs from "pdfjs-dist";
+// import pdfjsWorker from "pdfjs-dist/build/pdf.worker.js";
+
+pdfjs.disableWorker = true;
+
 const getColor = (props: any) => {
   if (props.isDragAccept) {
     return "#00e676";
@@ -61,6 +74,20 @@ export const StyledDropzone = () => {
     (acceptedFiles: Array<File>) => {
       // Create dictionary containing file and preview
       const filesWithThumbnails = acceptedFiles.map((file: File) => {
+        // console.log(file.arrayBuffer().then((d: any) => console.log(d)));
+
+        // const fileArrayBuffer = await file.arrayBuffer();
+
+        // var x = new Uint8Array(fileArrayBuffer);
+
+        const url = URL.createObjectURL(file);
+
+        console.log("url", url);
+
+        // pdfjs.getDocument(url).promise.then((d: any) => {
+        //   console.log("success", d);
+        // });
+
         return {
           file,
           preview: URL.createObjectURL(file),
