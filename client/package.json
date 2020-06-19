@@ -6,7 +6,6 @@
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.6.1",
     "@blueprintjs/core": "^3.23.0",
-    "@bundled-es-modules/pdfjs-dist": "^2.2.228-alpha1",
     "@mikecousins/react-pdf": "^5.5.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
