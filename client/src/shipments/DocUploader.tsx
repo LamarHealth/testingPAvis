@@ -60,15 +60,17 @@ export const StyledDropzone = () => {
   // On Drop
   const onDrop = React.useCallback(
     (acceptedFiles: Array<File>) => {
+      let mapIndex = 0;
+      setIndex(index + mapIndex);
+
       // Create dictionary containing file and preview
       const filesWithThumbnails = acceptedFiles.map((file: File) => {
-        let thisIndex = index;
-        index++;
-        setIndex(index + 1);
+        const currentIndex = mapIndex + index;
+        mapIndex++;
 
         return {
           file,
-          index: thisIndex,
+          index: currentIndex,
           preview: URL.createObjectURL(file),
         };
       });
