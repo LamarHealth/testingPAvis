@@ -218,7 +218,7 @@ const FileStatus = (props: any) => {
           method: "POST",
           body: formData,
         });
-
+        console.log(result);
         // Status code cases
         switch (result.status) {
           case 200:

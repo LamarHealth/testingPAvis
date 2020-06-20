@@ -43,7 +43,6 @@
     "validator": "^12.1.0"
   },
   "scripts": {
-    "start": "react-scripts --expose-gc --max-old-space-size=8192 start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
