@@ -161,6 +161,7 @@ const FileStatus = (props: any) => {
   const countContext = useContext(CountContext);
   const fileInfoContext = useContext(FileContext);
 
+  let fileType = props.fileWithPreview.file.type;
   let thumbnailSrc = props.fileWithPreview.preview;
   let index = props.fileWithPreview.index;
 
@@ -168,7 +169,7 @@ const FileStatus = (props: any) => {
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
 
-  // function assigned to onDocumentLoadSuccess, called after pdf is rendered to canvas
+  // function assigned to onDocumentLoadSuccess, called after pdf is loaded
   const returnUrl = (PDFDocumentProxy: any) => {
     // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
     PDFDocumentProxy.getPage(1).then((page: any) => {
@@ -197,12 +198,20 @@ const FileStatus = (props: any) => {
     });
   };
 
+  // handle pdf doc load failure (i.e. when it's not a pdf? )
+  const handleFail = () => {
+    console.log(
+      `document failed to load to PDF.js. document is of type ${fileType}`
+    );
+  };
+
   // the PDFJS usePdf hook
   const { pdfDocument, pdfPage } = usePdf({
-    file: thumbnailSrc,
+    file: thumbnailSrc, // set the file source of the hook to the pdf URL passed through the props
     page: 1,
     canvasRef,
     onDocumentLoadSuccess: returnUrl,
+    onDocumentLoadFail: handleFail,
   });
 
   useEffect(() => {
@@ -218,7 +227,6 @@ const FileStatus = (props: any) => {
           method: "POST",
           body: formData,
         });
-        console.log(result);
         // Status code cases
         switch (result.status) {
           case 200:
