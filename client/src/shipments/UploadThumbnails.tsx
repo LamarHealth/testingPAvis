@@ -161,16 +161,53 @@ const FileStatus = (props: any) => {
   const countContext = useContext(CountContext);
   const fileInfoContext = useContext(FileContext);
 
-  let fileType = props.fileWithPreview.file.type;
-  let thumbnailSrc = props.fileWithPreview.preview;
-  let index = props.fileWithPreview.index;
+  const file = props.fileWithPreview.file;
+  const thumbnailSrc = props.fileWithPreview.preview;
+  const index = props.fileWithPreview.index;
+
+  // upload file function
+  const uploadImageFile = async (file: File) => {
+    // Increment load counter
+    countContext.countDispatch("increment");
+
+    const formData = new FormData();
+    formData.append("myfile", props.fileWithPreview.file);
+    try {
+      const result = await fetch("/api/upload_status", {
+        method: "POST",
+        body: formData,
+      });
+      // Status code cases
+      switch (result.status) {
+        case 200:
+          // Add document info to list
+          const postSuccessResponse: any = {
+            type: "append",
+            documentInfo: await result.json(),
+          };
+          updateLocalStorage(postSuccessResponse.documentInfo);
+          fileInfoContext.fileDispatch(postSuccessResponse);
+          break;
+        case 400:
+        default:
+          setUploadStatus(400);
+      }
+
+      setUploadStatus(result.status);
+    } catch {
+      setUploadStatus(400);
+    }
+
+    // Decrement load counter
+    countContext.countDispatch("decrement");
+  };
 
   ////// PDFJS //////
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
 
-  // function assigned to onDocumentLoadSuccess, called after pdf is loaded
-  const returnUrl = (PDFDocumentProxy: any) => {
+  // function assigned to onDocumentLoadSuccess, called after pdf is loaded. Note that this will only fire if the URL passed through the props points to a pdf; if it points to an image, the usePdf hook will fail and onDocumentLoadFail will fire instead (here left undefined)
+  const convertPdfToImage = (PDFDocumentProxy: any) => {
     // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
     PDFDocumentProxy.getPage(1).then((page: any) => {
       // set scale. in this case, affects resolution of thumbnail, and how much is cut off
@@ -198,60 +235,22 @@ const FileStatus = (props: any) => {
     });
   };
 
-  // handle pdf doc load failure (i.e. when it's not a pdf? )
-  const handleFail = () => {
-    console.log(
-      `document failed to load to PDF.js. document is of type ${fileType}`
-    );
-  };
-
   // the PDFJS usePdf hook
   const { pdfDocument, pdfPage } = usePdf({
-    file: thumbnailSrc, // set the file source of the hook to the pdf URL passed through the props
+    file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,
-    onDocumentLoadSuccess: returnUrl,
-    onDocumentLoadFail: handleFail,
+    onDocumentLoadSuccess: convertPdfToImage,
   });
 
   useEffect(() => {
-    // Increment load counter
-    countContext.countDispatch("increment");
+    // only upload an image file
+    if (file.type !== "image/png" && file.type !== "image/jpeg") {
+      return;
+    }
 
-    // Upload file to backend
-    const formData = new FormData();
-    formData.append("myfile", props.fileWithPreview.file);
-    const uploadFile = async () => {
-      try {
-        const result = await fetch("/api/upload_status", {
-          method: "POST",
-          body: formData,
-        });
-        // Status code cases
-        switch (result.status) {
-          case 200:
-            // Add document info to list
-            const postSuccessResponse: any = {
-              type: "append",
-              documentInfo: await result.json(),
-            };
-            updateLocalStorage(postSuccessResponse.documentInfo);
-            fileInfoContext.fileDispatch(postSuccessResponse);
-            break;
-          case 400:
-          default:
-            setUploadStatus(400);
-        }
+    uploadImageFile(file);
 
-        setUploadStatus(result.status);
-      } catch {
-        setUploadStatus(400);
-      }
-
-      // Decrement load counter
-      countContext.countDispatch("decrement");
-    };
-    uploadFile();
     // TODO: Set default to be pre-loaded documents
   }, []);
 
