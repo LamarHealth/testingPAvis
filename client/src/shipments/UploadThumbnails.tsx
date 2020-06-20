@@ -1,8 +1,15 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useRef,
+} from "react";
 import styled from "styled-components";
 import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
+import { usePdf } from "@mikecousins/react-pdf";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -43,6 +50,15 @@ const ThumbInner = styled.div`
   minwidth: 0;
   overflow: hidden;
   position: relative;
+`;
+
+// canvas element for PDFJS
+const Canvas = styled.canvas`
+  position: relative;
+  display: block;
+  width: auto;
+  height: 100%;
+  display: none;
 `;
 
 const Thumbnail = styled.img`
@@ -125,13 +141,15 @@ export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
               <ProgressBar intent={"primary"} />
             )}
           </h3>
-          {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => (
-            <FileStatus
-              key={ndx}
-              fileWithPreview={fileWithPreview}
-              onComplete={dispatch}
-            />
-          ))}
+          {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
+            return (
+              <FileStatus
+                key={ndx}
+                fileWithPreview={fileWithPreview}
+                onComplete={dispatch}
+              />
+            );
+          })}
         </ThumbnailList>
       </UploadBufferContainer>
     </CountContext.Provider>
@@ -142,12 +160,56 @@ const FileStatus = (props: any) => {
   const [uploadStatus, setUploadStatus] = useState(Number);
   const countContext = useContext(CountContext);
   const fileInfoContext = useContext(FileContext);
+
+  let thumbnailSrc = props.fileWithPreview.preview;
+  let index = props.fileWithPreview.index;
+
+  ////// PDFJS //////
+  // canvas reference so usePdf hook can select the canvas
+  const canvasRef = useRef(null);
+
+  // function assigned to onDocumentLoadSuccess, called after pdf is rendered to canvas
+  const returnUrl = (PDFDocumentProxy: any) => {
+    // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
+    PDFDocumentProxy.getPage(1).then((page: any) => {
+      // set scale. in this case, affects resolution of thumbnail, and how much is cut off
+      const viewport = page.getViewport({ scale: 0.5 });
+      const canvas: any = document.querySelector(`#pdf-canvas${index}`);
+      const ctx = canvas.getContext("2d");
+
+      // setting context for rendering
+      canvas.height = viewport.height;
+      canvas.witdh = viewport.width;
+
+      const renderCtx = {
+        canvasContext: ctx,
+        viewport: viewport,
+      };
+
+      // render to canvas
+      page.render(renderCtx).promise.then(() => {
+        // after render, then convert to URL via .toDataURL()
+        const dataUrl = canvas.toDataURL();
+        // need unique thumbnail ids, hence the index
+        const thumbnail: any = document.querySelector(`#thumbnail${index}`);
+        thumbnail.src = dataUrl;
+      });
+    });
+  };
+
+  // the PDFJS usePdf hook
+  const { pdfDocument, pdfPage } = usePdf({
+    file: thumbnailSrc,
+    page: 1,
+    canvasRef,
+    onDocumentLoadSuccess: returnUrl,
+  });
+
   useEffect(() => {
     // Increment load counter
     countContext.countDispatch("increment");
 
     // Upload file to backend
-    console.log(props.fileWithPreview);
     const formData = new FormData();
     formData.append("myfile", props.fileWithPreview.file);
     const uploadFile = async () => {
@@ -156,6 +218,7 @@ const FileStatus = (props: any) => {
           method: "POST",
           body: formData,
         });
+        console.log(result);
         // Status code cases
         switch (result.status) {
           case 200:
@@ -185,7 +248,7 @@ const FileStatus = (props: any) => {
   }, []);
 
   return (
-    <ThumbnailContainer key={props.ndx}>
+    <ThumbnailContainer key={index}>
       <ThumbInner>
         {!uploadStatus ? (
           <RefreshIcon icon={"refresh"} />
@@ -200,10 +263,14 @@ const FileStatus = (props: any) => {
             <FailureIcon icon={"cross"} iconSize={30} />
           </Popover>
         )}
-        <Thumbnail
-          src={props.fileWithPreview.preview}
-          blur={uploadStatus === 400}
-        />
+        <div id="thumbnail-wrapper">
+          <Canvas id={`pdf-canvas${index}`} />
+          <Thumbnail
+            id={`thumbnail${index}`}
+            src={thumbnailSrc}
+            blur={uploadStatus === 400}
+          />
+        </div>
       </ThumbInner>
     </ThumbnailContainer>
   );

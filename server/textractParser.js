@@ -1,31 +1,36 @@
 // const fs = require("fs");
 
-export const parseTextract = results => {
+export const parseTextract = (results) => {
   const keyValueBlocks = results.Blocks.filter(
-    block => block.BlockType === "KEY_VALUE_SET"
+    (block) => block.BlockType === "KEY_VALUE_SET"
   );
 
-  const lines = results.Blocks.filter(block => block.BlockType === "LINE");
-  const words = results.Blocks.filter(block => block.BlockType === "WORD");
+  const lines = results.Blocks.filter((block) => block.BlockType === "LINE");
+  const words = results.Blocks.filter((block) => block.BlockType === "WORD");
 
-  const keys = keyValueBlocks.filter(block => block.EntityTypes[0] === "KEY");
+  const keys = keyValueBlocks.filter((block) => block.EntityTypes[0] === "KEY");
   const values = keyValueBlocks.filter(
-    block => block.EntityTypes[0] === "VALUE"
+    (block) => block.EntityTypes[0] === "VALUE"
   );
 
   //   console.log(lines);
 
   const keyValueSets = keys.reduce((acc, current) => {
     let returnObj = {};
+    console.log(current);
 
     let keyId = current.Id;
     let keyChildIds = current.Relationships.filter(
-      item => item.Type === "CHILD"
-    )[0].Ids;
+      (item) => item.Type === "CHILD"
+    )[0];
 
-    let keyLineText = keyChildIds.reduce(
+    if (!!!keyChildIds) {
+      return acc;
+    }
+
+    let keyLineText = keyChildIds.Ids.reduce(
       (accum, childId) =>
-        accum + " " + words.filter(block => block.Id === childId)[0].Text,
+        accum + " " + words.filter((block) => block.Id === childId)[0].Text,
       ""
     );
 
@@ -42,7 +47,7 @@ export const parseTextract = results => {
       return acc;
     } else {
       let valueChildIds = current.Relationships.filter(
-        item => item.Type === "VALUE"
+        (item) => item.Type === "VALUE"
       )[0].Ids;
 
       //   console.log(valueChildIds);
@@ -51,7 +56,7 @@ export const parseTextract = results => {
 
       //   We got the key, now we have to search for the KVS that has that entity type
       let correspondingKVP = values.filter(
-        block => block.Id === valueChildIds[0]
+        (block) => block.Id === valueChildIds[0]
       )[0];
 
       //   Thsi shows the KVP that has the value we're looking for
@@ -68,7 +73,7 @@ export const parseTextract = results => {
       let KVPChildIds = correspondingKVP.Relationships[0].Ids;
       //   console.log(KVPChildIds);
 
-      let containingLine = lines.filter(block =>
+      let containingLine = lines.filter((block) =>
         block.Relationships[0].Ids.includes(KVPChildIds[0])
       );
       //   console.log("&&&&&&");
