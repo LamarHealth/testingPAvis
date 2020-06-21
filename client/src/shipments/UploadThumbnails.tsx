@@ -10,6 +10,7 @@ import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
+import { PAGE_SCALE } from "../common/constants";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -211,7 +212,7 @@ const FileStatus = (props: any) => {
     // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
     PDFDocumentProxy.getPage(1).then((page: any) => {
       // set scale. in this case, affects resolution of thumbnail
-      const viewport = page.getViewport({ scale: 1.5 });
+      const viewport = page.getViewport({ scale: PAGE_SCALE });
       const canvas: any = document.querySelector(`#pdf-canvas${index}`);
       const ctx = canvas.getContext("2d");
 
@@ -236,7 +237,8 @@ const FileStatus = (props: any) => {
         const base64 = dataUrl.split(",")[1];
         const mime = dataUrl.split(",")[0].match(/:(.*?);/)[1];
         const bin = atob(base64);
-        const buf = new ArrayBuffer(bin.length);
+        const length = bin.length;
+        const buf = new ArrayBuffer(length);
         const arr = new Uint8Array(buf);
         bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
 
@@ -244,15 +246,24 @@ const FileStatus = (props: any) => {
           type: mime,
         });
 
-        //upload
-        imageFileFromPdf.type.includes("image/") &&
-          uploadImageFile(imageFileFromPdf);
+        //upload, and handle errors
+        if (
+          imageFileFromPdf.type !== "image/png" &&
+          imageFileFromPdf.type !== "image/jpeg"
+        ) {
+          console.log(
+            "something went wrong converting the following pdf to an image: " +
+              currentFile.name
+          );
+          return;
+        }
+        uploadImageFile(imageFileFromPdf);
       });
     });
   };
 
   // the PDFJS usePdf hook
-  usePdf({
+  const { pdfDocument, pdfPage } = usePdf({
     file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,
@@ -261,7 +272,11 @@ const FileStatus = (props: any) => {
 
   useEffect(() => {
     // only upload image files, pdfs are handled above
-    currentFile.type.includes("image/") && uploadImageFile(currentFile);
+    if (currentFile.type !== "image/png" && currentFile.type !== "image/jpeg") {
+      return;
+    }
+
+    uploadImageFile(currentFile);
 
     // TODO: Set default to be pre-loaded documents
   }, []);
