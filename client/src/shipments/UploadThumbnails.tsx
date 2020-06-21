@@ -171,7 +171,7 @@ const FileStatus = (props: any) => {
     countContext.countDispatch("increment");
 
     const formData = new FormData();
-    formData.append("myfile", props.fileWithPreview.file);
+    formData.append("myfile", file);
     try {
       const result = await fetch("/api/upload_status", {
         method: "POST",
@@ -210,14 +210,14 @@ const FileStatus = (props: any) => {
   const convertPdfToImage = (PDFDocumentProxy: any) => {
     // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
     PDFDocumentProxy.getPage(1).then((page: any) => {
-      // set scale. in this case, affects resolution of thumbnail, and how much is cut off
-      const viewport = page.getViewport({ scale: 0.5 });
+      // set scale. in this case, affects resolution of thumbnail
+      const viewport = page.getViewport({ scale: 1.5 });
       const canvas: any = document.querySelector(`#pdf-canvas${index}`);
       const ctx = canvas.getContext("2d");
 
       // setting context for rendering
       canvas.height = viewport.height;
-      canvas.witdh = viewport.width;
+      canvas.width = viewport.width;
 
       const renderCtx = {
         canvasContext: ctx,
@@ -231,6 +231,30 @@ const FileStatus = (props: any) => {
         // need unique thumbnail ids, hence the index
         const thumbnail: any = document.querySelector(`#thumbnail${index}`);
         thumbnail.src = dataUrl;
+
+        // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
+        const base64 = dataUrl.split(",")[1];
+        const mime = dataUrl.split(",")[0].match(/:(.*?);/)[1];
+        const bin = atob(base64);
+        const length = bin.length;
+        const buf = new ArrayBuffer(length);
+        const arr = new Uint8Array(buf);
+        bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
+
+        const imageFileFromPdf = new File([buf], file.name, { type: mime });
+
+        //upload, and handle errors
+        if (
+          imageFileFromPdf.type !== "image/png" &&
+          imageFileFromPdf.type !== "image/jpeg"
+        ) {
+          console.log(
+            "something went wrong converting the following pdf to an image: " +
+              file.name
+          );
+          return;
+        }
+        uploadImageFile(imageFileFromPdf);
       });
     });
   };
@@ -244,7 +268,7 @@ const FileStatus = (props: any) => {
   });
 
   useEffect(() => {
-    // only upload an image file
+    // only upload image files, pdfs are handled above
     if (file.type !== "image/png" && file.type !== "image/jpeg") {
       return;
     }
