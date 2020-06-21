@@ -228,7 +228,7 @@ const FileStatus = (props: any) => {
       page.render(renderCtx).promise.then(() => {
         // after render, then convert to URL via .toDataURL()
         const dataUrl = canvas.toDataURL();
-        // need unique thumbnail ids, hence the index
+        // use URL as thumbnail img src
         const thumbnail: any = document.querySelector(`#thumbnail${index}`);
         thumbnail.src = dataUrl;
 
