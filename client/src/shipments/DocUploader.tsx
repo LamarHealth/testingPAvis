@@ -27,7 +27,7 @@ const Container = styled.div`
   border-radius: 2px;
   border-color: ${(props) => getColor(props)};
   border-style: dashed;
-  background-color: hsla(140, 16%, 96%);
+  background-color: ${colors.DROPZONE_BACKGROUND_GREY};
   color: gray;
   outline: none;
   transition: border 0.24s ease-in-out;
@@ -36,9 +36,9 @@ const Container = styled.div`
   justify-content: center;
   padding: 1em 0;
   :hover {
-    background-color: hsl(196, 100%, 88%);
-    color: rgb(1, 23, 47);
-    border-color: rgb(1, 23, 47);
+    background-color: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
+    color: ${colors.FONT_BLUE};
+    border-color: ${colors.FONT_BLUE};
   }
   margin: 2em;
 
