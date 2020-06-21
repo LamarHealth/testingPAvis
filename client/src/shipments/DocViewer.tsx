@@ -7,9 +7,10 @@ import React, {
 } from "react";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-import { Icon, Button, Popover, Menu } from "@blueprintjs/core";
+import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { act } from "@testing-library/react";
+import { colors } from "./../common/colors";
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -41,8 +42,8 @@ const Column = styled.div`
   margin: 1em 0em;
   border: ${(props: { open: boolean }) =>
     props.open
-      ? "1px solid hsla(210, 95%, 20%, 0)"
-      : "1px solid hsla(210, 95%, 20%, 1)"};
+      ? `1px solid ${colors.LAYOUT_BLUE_CLEAR}`
+      : `1px solid ${colors.LAYOUT_BLUE_SOLID}`};
   border-radius: 10px;
   display: inline-block;
   height: 100%;
@@ -64,8 +65,8 @@ const ExpandButton = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: hsl(210, 95%, 20%);
-  color: rgb(255, 248, 240);
+  background-color: ${colors.LAYOUT_BLUE_SOLID};
+  color: white;
   opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
   transition: 0.5s;
   border: none;
@@ -91,19 +92,24 @@ const Chevron = styled(Icon)`
 const Instructions = styled.div`
   text-align: center;
   padding: 2em 2em 0em 2em;
-  color: rgb(1, 23, 47);
+  color: ${colors.FONT_BLUE};
 `;
 
 const Box = styled.div`
-  margin: 1em 0em;
-  padding: 5px;
-  border: solid;
+  margin: 1em;
+  padding: 1em;
+  border: 1px solid ${colors.LAYOUT_BLUE_SOLID};
+  border-radius: 5px;
+  color: ${colors.FONT_BLUE};
   background-color: white;
   overflow: auto;
 `;
-const Name = styled.h2``;
+const Name = styled.h2`
+  margin: 0;
+`;
 const Type = styled.h4`
   display: flex;
+  margin: 1em 0;
 `;
 
 const RemoveButton = styled(Button)`
@@ -234,6 +240,7 @@ const DocCell = (props: DocumentInfo) => {
       <Popover
         isOpen={modalIsOpen}
         content={<DeleteDialog setIsOpen={setIsOpen} document={props} />}
+        position={Position.TOP}
       >
         <RemoveButton
           onClick={() => {

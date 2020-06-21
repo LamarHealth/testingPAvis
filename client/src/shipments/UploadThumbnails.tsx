@@ -101,6 +101,10 @@ const RefreshIcon = styled(ThumbnailIcon)`
   }
 `;
 
+const StyledPopover = styled(Popover)`
+  position: absolute;
+`;
+
 const updateLocalStorage = (documentInfo: any) => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let updatedList = Array.isArray(storedDocs)
@@ -289,13 +293,13 @@ const FileStatus = (props: any) => {
         ) : uploadStatus === 200 ? (
           <SuccessIcon icon={"small-tick"} iconSize={30} />
         ) : (
-          <Popover
+          <StyledPopover
             interactionKind={"hover"}
             position={Position.TOP}
             content={<div>Unable to process document</div>}
           >
             <FailureIcon icon={"cross"} iconSize={30} />
-          </Popover>
+          </StyledPopover>
         )}
         <div id="thumbnail-wrapper">
           <Canvas id={`pdf-canvas${index}`} />
