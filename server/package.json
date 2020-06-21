@@ -17,10 +17,12 @@
   "scripts": {
     "build": "babel . --ignore node_modules,build --out-dir build",
     "start": "nodemon -r babel-register server.js",
-    "start:prod": "node build/server.js"
+    "start:prod": "node build/server.js",
+    "test": "jest"
   },
   "devDependencies": {
     "babel-register": "^6.26.0",
+    "jest": "^26.0.1",
     "nodemon": "^2.0.2"
   }
 }
