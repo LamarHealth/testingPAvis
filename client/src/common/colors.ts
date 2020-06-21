@@ -9,4 +9,6 @@ export const colors = {
   LAYOUT_BLUE_SOLID: "hsla(210, 95%, 20%, 1)",
   LAYOUT_BLUE_CLEAR: "hsla(210, 95%, 20%, 0)",
   FONT_BLUE: "hsla(210, 95%, 10%, 1)",
+  DROPZONE_BACKGROUND_GREY: "hsla(140, 16%, 96%)",
+  DROPZONE_BACKGROUND_HOVER_LIGHTBLUE: "hsl(196, 100%, 88%)",
 };
