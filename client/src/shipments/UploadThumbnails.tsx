@@ -245,18 +245,9 @@ const FileStatus = (props: any) => {
           type: mime,
         });
 
-        //upload, and handle errors
-        if (
-          imageFileFromPdf.type !== "image/png" &&
-          imageFileFromPdf.type !== "image/jpeg"
-        ) {
-          console.log(
-            "something went wrong converting the following pdf to an image: " +
-              currentFile.name
-          );
-          return;
-        }
-        uploadImageFile(imageFileFromPdf);
+        //upload
+        imageFileFromPdf.type.includes("image/") &&
+          uploadImageFile(imageFileFromPdf);
       });
     });
   };
@@ -271,11 +262,7 @@ const FileStatus = (props: any) => {
 
   useEffect(() => {
     // only upload image files, pdfs are handled above
-    if (currentFile.type !== "image/png" && currentFile.type !== "image/jpeg") {
-      return;
-    }
-
-    uploadImageFile(currentFile);
+    currentFile.type.includes("image/") && uploadImageFile(currentFile);
 
     // TODO: Set default to be pre-loaded documents
   }, []);
