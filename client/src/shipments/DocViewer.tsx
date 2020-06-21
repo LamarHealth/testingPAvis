@@ -54,7 +54,7 @@ const Column = styled.div`
 
 const Container = styled.div`
   display: flex;
-  align-items: center;
+  height: 90vh;
 `;
 
 const ExpandButton = styled.button`
