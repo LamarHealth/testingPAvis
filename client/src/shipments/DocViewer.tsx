@@ -9,7 +9,6 @@ import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
 import { Icon, Button, Popover, Menu } from "@blueprintjs/core";
 import $ from "jquery";
-import { act } from "@testing-library/react";
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -51,6 +50,11 @@ const Column = styled.div`
     props.open ? "calc(-25% )" : "0.5em"};
   overflow: auto;
   transition: all 1s;
+`;
+
+const Container = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const ExpandButton = styled.button`
@@ -291,28 +295,30 @@ const DocViewer = () => {
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
-      <Column open={isOpen}>
-        {fileList.documents.length ? (
-          fileList.documents.map((doc: DocumentInfo, ndx: any) => (
-            <DocCell
-              docName={doc.docName}
-              docType={doc.docType}
-              filePath={doc.filePath}
-              docClass={doc.docClass}
-              docID={doc.docID}
-              keyValuePairs={doc.keyValuePairs}
-              key={ndx}
-            />
-          ))
-        ) : (
-          <InstructionsCell />
-        )}
+      <Container>
+        <Column open={isOpen}>
+          {fileList.documents.length ? (
+            fileList.documents.map((doc: DocumentInfo, ndx: any) => (
+              <DocCell
+                docName={doc.docName}
+                docType={doc.docType}
+                filePath={doc.filePath}
+                docClass={doc.docClass}
+                docID={doc.docID}
+                keyValuePairs={doc.keyValuePairs}
+                key={ndx}
+              />
+            ))
+          ) : (
+            <InstructionsCell />
+          )}
 
-        <StyledDropzone />
-      </Column>
-      <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-        <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
-      </ExpandButton>
+          <StyledDropzone />
+        </Column>
+        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+          <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
+        </ExpandButton>
+      </Container>
     </FileContext.Provider>
   );
 };

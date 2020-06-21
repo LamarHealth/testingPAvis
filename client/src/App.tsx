@@ -1,6 +1,7 @@
 import * as React from "react";
 import "./App.css";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
+import DocViewer from "./shipments/DocViewer";
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
     //     </a>
     //   </header>
     // </div>
-    <ShipmentsDashboard />
+    <DocViewer />
   );
 }
 
