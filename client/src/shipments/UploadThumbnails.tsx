@@ -236,8 +236,7 @@ const FileStatus = (props: any) => {
         const base64 = dataUrl.split(",")[1];
         const mime = dataUrl.split(",")[0].match(/:(.*?);/)[1];
         const bin = atob(base64);
-        const length = bin.length;
-        const buf = new ArrayBuffer(length);
+        const buf = new ArrayBuffer(bin.length);
         const arr = new Uint8Array(buf);
         bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
 
