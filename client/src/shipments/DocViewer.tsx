@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-import { Icon, Button, Popover, Menu } from "@blueprintjs/core";
+import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { act } from "@testing-library/react";
 interface IDocumentList {
@@ -95,15 +95,20 @@ const Instructions = styled.div`
 `;
 
 const Box = styled.div`
-  margin: 1em 0em;
-  padding: 5px;
-  border: solid;
+  margin: 1em;
+  padding: 1em;
+  border: 1px solid hsla(210, 95%, 20%, 1);
+  border-radius: 5px;
+  color: hsla(210, 95%, 10%, 1);
   background-color: white;
   overflow: auto;
 `;
-const Name = styled.h2``;
+const Name = styled.h2`
+  margin: 0;
+`;
 const Type = styled.h4`
   display: flex;
+  margin: 1em 0;
 `;
 
 const RemoveButton = styled(Button)`
@@ -234,6 +239,7 @@ const DocCell = (props: DocumentInfo) => {
       <Popover
         isOpen={modalIsOpen}
         content={<DeleteDialog setIsOpen={setIsOpen} document={props} />}
+        position={Position.TOP}
       >
         <RemoveButton
           onClick={() => {
