@@ -1,5 +1,6 @@
 import * as React from "react";
 import "./App.css";
+import "./index.css";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 import DocViewer from "./shipments/DocViewer";
 
