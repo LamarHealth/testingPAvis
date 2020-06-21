@@ -161,7 +161,7 @@ const FileStatus = (props: any) => {
   const countContext = useContext(CountContext);
   const fileInfoContext = useContext(FileContext);
 
-  const file = props.fileWithPreview.file;
+  const currentFile = props.fileWithPreview.file;
   const thumbnailSrc = props.fileWithPreview.preview;
   const index = props.fileWithPreview.index;
 
@@ -241,7 +241,9 @@ const FileStatus = (props: any) => {
         const arr = new Uint8Array(buf);
         bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
 
-        const imageFileFromPdf = new File([buf], file.name, { type: mime });
+        const imageFileFromPdf = new File([buf], currentFile.name, {
+          type: mime,
+        });
 
         //upload, and handle errors
         if (
@@ -250,7 +252,7 @@ const FileStatus = (props: any) => {
         ) {
           console.log(
             "something went wrong converting the following pdf to an image: " +
-              file.name
+              currentFile.name
           );
           return;
         }
@@ -269,11 +271,11 @@ const FileStatus = (props: any) => {
 
   useEffect(() => {
     // only upload image files, pdfs are handled above
-    if (file.type !== "image/png" && file.type !== "image/jpeg") {
+    if (currentFile.type !== "image/png" && currentFile.type !== "image/jpeg") {
       return;
     }
 
-    uploadImageFile(file);
+    uploadImageFile(currentFile);
 
     // TODO: Set default to be pre-loaded documents
   }, []);
