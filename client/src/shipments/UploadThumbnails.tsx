@@ -10,6 +10,7 @@ import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
+import { PAGE_SCALE } from "../common/constants";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -161,25 +162,63 @@ const FileStatus = (props: any) => {
   const countContext = useContext(CountContext);
   const fileInfoContext = useContext(FileContext);
 
-  let thumbnailSrc = props.fileWithPreview.preview;
-  let index = props.fileWithPreview.index;
+  const currentFile = props.fileWithPreview.file;
+  const thumbnailSrc = props.fileWithPreview.preview;
+  const index = props.fileWithPreview.index;
+
+  // upload file function
+  const uploadImageFile = async (file: File) => {
+    // Increment load counter
+    countContext.countDispatch("increment");
+
+    const formData = new FormData();
+    formData.append("myfile", file);
+    try {
+      const result = await fetch("/api/upload_status", {
+        method: "POST",
+        body: formData,
+      });
+      // Status code cases
+      switch (result.status) {
+        case 200:
+          // Add document info to list
+          const postSuccessResponse: any = {
+            type: "append",
+            documentInfo: await result.json(),
+          };
+          updateLocalStorage(postSuccessResponse.documentInfo);
+          fileInfoContext.fileDispatch(postSuccessResponse);
+          break;
+        case 400:
+        default:
+          setUploadStatus(400);
+      }
+
+      setUploadStatus(result.status);
+    } catch {
+      setUploadStatus(400);
+    }
+
+    // Decrement load counter
+    countContext.countDispatch("decrement");
+  };
 
   ////// PDFJS //////
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
 
-  // function assigned to onDocumentLoadSuccess, called after pdf is rendered to canvas
-  const returnUrl = (PDFDocumentProxy: any) => {
+  // function assigned to onDocumentLoadSuccess, called after pdf is loaded. Note that this will only fire if the URL passed through the props points to a pdf; if it points to an image, the usePdf hook will fail and onDocumentLoadFail will fire instead (here left undefined)
+  const convertPdfToImage = (PDFDocumentProxy: any) => {
     // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
     PDFDocumentProxy.getPage(1).then((page: any) => {
-      // set scale. in this case, affects resolution of thumbnail, and how much is cut off
-      const viewport = page.getViewport({ scale: 0.5 });
+      // set scale. in this case, affects resolution of thumbnail
+      const viewport = page.getViewport({ scale: PAGE_SCALE });
       const canvas: any = document.querySelector(`#pdf-canvas${index}`);
       const ctx = canvas.getContext("2d");
 
       // setting context for rendering
       canvas.height = viewport.height;
-      canvas.witdh = viewport.width;
+      canvas.width = viewport.width;
 
       const renderCtx = {
         canvasContext: ctx,
@@ -190,60 +229,55 @@ const FileStatus = (props: any) => {
       page.render(renderCtx).promise.then(() => {
         // after render, then convert to URL via .toDataURL()
         const dataUrl = canvas.toDataURL();
-        // need unique thumbnail ids, hence the index
+        // use URL as thumbnail img src
         const thumbnail: any = document.querySelector(`#thumbnail${index}`);
         thumbnail.src = dataUrl;
+
+        // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
+        const base64 = dataUrl.split(",")[1];
+        const mime = dataUrl.split(",")[0].match(/:(.*?);/)[1];
+        const bin = atob(base64);
+        const length = bin.length;
+        const buf = new ArrayBuffer(length);
+        const arr = new Uint8Array(buf);
+        bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
+
+        const imageFileFromPdf = new File([buf], currentFile.name, {
+          type: mime,
+        });
+
+        //upload, and handle errors
+        if (
+          imageFileFromPdf.type !== "image/png" &&
+          imageFileFromPdf.type !== "image/jpeg"
+        ) {
+          console.log(
+            "something went wrong converting the following pdf to an image: " +
+              currentFile.name
+          );
+          return;
+        }
+        uploadImageFile(imageFileFromPdf);
       });
     });
   };
 
   // the PDFJS usePdf hook
   const { pdfDocument, pdfPage } = usePdf({
-    file: thumbnailSrc,
+    file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,
-    onDocumentLoadSuccess: returnUrl,
+    onDocumentLoadSuccess: convertPdfToImage,
   });
 
   useEffect(() => {
-    // Increment load counter
-    countContext.countDispatch("increment");
+    // only upload image files, pdfs are handled above
+    if (currentFile.type !== "image/png" && currentFile.type !== "image/jpeg") {
+      return;
+    }
 
-    // Upload file to backend
-    const formData = new FormData();
-    formData.append("myfile", props.fileWithPreview.file);
-    const uploadFile = async () => {
-      try {
-        const result = await fetch("/api/upload_status", {
-          method: "POST",
-          body: formData,
-        });
-        console.log(result);
-        // Status code cases
-        switch (result.status) {
-          case 200:
-            // Add document info to list
-            const postSuccessResponse: any = {
-              type: "append",
-              documentInfo: await result.json(),
-            };
-            updateLocalStorage(postSuccessResponse.documentInfo);
-            fileInfoContext.fileDispatch(postSuccessResponse);
-            break;
-          case 400:
-          default:
-            setUploadStatus(400);
-        }
+    uploadImageFile(currentFile);
 
-        setUploadStatus(result.status);
-      } catch {
-        setUploadStatus(400);
-      }
-
-      // Decrement load counter
-      countContext.countDispatch("decrement");
-    };
-    uploadFile();
     // TODO: Set default to be pre-loaded documents
   }, []);
 
