@@ -38,6 +38,7 @@ import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import fs from "fs";
 import uuidv4 from "uuid";
 import { parseTextract } from "./textractParser";
+
 // Routes
 
 // AWS
@@ -91,9 +92,16 @@ router.post("/api/upload_status", (req, res) => {
       let docClass = "";
 
       s3.upload(s3params, function (err, data) {
-        console.log(err, data);
-
         textract.analyzeDocument(textractParams, (err, data) => {
+          fs.writeFile(
+            "./tests/textract_output/testfile1.json",
+            JSON.stringify(data),
+            (err) => {
+              if (err) throw err;
+              console.log("The file has been saved!");
+            }
+          );
+
           if (err) {
             console.log(err, err.stack);
             res.status(400).send({
@@ -117,6 +125,8 @@ router.post("/api/upload_status", (req, res) => {
               filePath: "",
               keyValuePairs: parseTextract(data),
             });
+
+            console.log(parseTextract(data));
           } // successful response
         });
       });
