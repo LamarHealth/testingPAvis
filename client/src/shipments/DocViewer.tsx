@@ -11,6 +11,7 @@ import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { act } from "@testing-library/react";
 import { colors } from "./../common/colors";
+const Popper = require("@popperjs/core"); //throws an error w import statement
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -224,6 +225,54 @@ const populateForms = () => {
       });
   });
 };
+
+// CCC input dropdowns
+$(document).ready(function () {
+  let tooltipIndex = 0;
+
+  $("input").click((event: any) => {
+    // console.log(event.target.nextElementSibling.id);
+
+    if (
+      !event.target.nextElementSibling ||
+      !event.target.nextElementSibling.id.includes("tooltip")
+    ) {
+      $(
+        `<div id='tooltip${tooltipIndex}' class='tooltip' role='tooltip'>I'm a tooltip</div>`
+      ).insertAfter(event.target);
+
+      const tooltip = document.querySelector(
+        `#tooltip${tooltipIndex}`
+      ) as HTMLElement;
+
+      let popperInstance = Popper.createPopper(event.target, tooltip, {
+        placement: "bottom",
+      });
+
+      $(tooltip).mouseleave(() => {
+        if (tooltip) {
+          tooltip.style.display = "none";
+          popperInstance.destroy();
+        }
+      });
+
+      tooltipIndex++;
+    } else {
+      if (
+        event.target.nextElementSibling &&
+        event.target.nextElementSibling.id.includes("tooltip")
+      ) {
+        const tooltip = event.target.nextElementSibling as HTMLElement;
+
+        let popperInstance = Popper.createPopper(event.target, tooltip, {
+          placement: "bottom",
+        });
+
+        tooltip.style.display = "block";
+      }
+    }
+  });
+});
 
 const DocCell = (props: DocumentInfo) => {
   return (
