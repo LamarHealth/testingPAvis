@@ -16,7 +16,7 @@
     "build": "babel . --ignore node_modules,build --out-dir build",
     "start": "nodemon server.js --exec babel-node",
     "start:prod": "node build/server.js",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.10.3",

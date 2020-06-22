@@ -93,14 +93,14 @@ router.post("/api/upload_status", (req, res) => {
 
       s3.upload(s3params, function (err, data) {
         textract.analyzeDocument(textractParams, (err, data) => {
-          fs.writeFile(
-            "./tests/textract_output/testfile1.json",
-            JSON.stringify(data),
-            (err) => {
-              if (err) throw err;
-              console.log("The file has been saved!");
-            }
-          );
+          // fs.writeFile(
+          //   "./tests/textract_output/masters5.json",
+          //   JSON.stringify(data),
+          //   (err) => {
+          //     if (err) throw err;
+          //     console.log("The file has been saved!");
+          //   }
+          // );
 
           if (err) {
             console.log(err, err.stack);
