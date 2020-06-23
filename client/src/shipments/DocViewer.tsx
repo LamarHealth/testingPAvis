@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
 } from "react";
+import { renderToString } from "react-dom/server";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
@@ -222,15 +223,8 @@ const populateForms = () => {
   });
 };
 
-// get docs from local storage
-const renderLocalStorageData = (eventObj: any, index: number) => {
+const getDocData = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-
-  if (storedDocs[0] === undefined) {
-    return `<p>there are no documents in your local storage</p>`;
-  }
-
-  // get all the docs and put key value pairs in one obj
   let docData: any = {};
   storedDocs.forEach((doc: any) => {
     const keyValuePairs = doc.keyValuePairs;
@@ -239,26 +233,45 @@ const renderLocalStorageData = (eventObj: any, index: number) => {
     });
   });
 
-  // make a table
-  const tableHead = `<tr><th>Field Name</th><th>Field Value</th></tr>`;
+  return [!(storedDocs[0] === undefined), docData];
+};
 
-  const tableRows = Object.keys(docData)
-    .map((key, i) => {
-      return `<tr><td>${key}</td><td>${docData[key]}</td><td><button id="dropdown${index}-key${i}">Fill</button></td></tr>`;
-    })
-    .join("");
+const DropdownTable = (props: { dropdownIndex: number; eventObj: any }) => {
+  const dropdownIndex = props.dropdownIndex;
+  const dropdownWidth = props.eventObj.target.offsetWidth;
 
-  // fill button handlers
-  const buttonHandlers = Object.keys(docData).map((key, i) => {
-    $(document).ready(function () {
-      $(`#dropdown${index}-key${i}`).click(() => {
-        eventObj.target.value = docData[key];
-      });
-    });
-  });
+  const [areThereDocs, docData] = getDocData();
 
-  // return the table as a string
-  return `<table class="dropdown-table">${tableHead}${tableRows}</table>`;
+  return (
+    <div
+      id={`dropdown${dropdownIndex}`}
+      style={{ width: dropdownWidth }}
+      className="dropdown"
+      role="dropdown"
+    >
+      {areThereDocs ? (
+        <table className="dropdown-table">
+          <tr>
+            <th>Field Name</th>
+            <th>Field Value</th>
+          </tr>
+          {Object.keys(docData).map((key, i) => {
+            return (
+              <tr key={i}>
+                <td>{key}</td>
+                <td>{docData[key]}</td>
+                <td>
+                  <button id={`dropdown${dropdownIndex}-key${i}`}>Fill</button>
+                </td>
+              </tr>
+            );
+          })}
+        </table>
+      ) : (
+        <p>There are no docs in local storage</p>
+      )}
+    </div>
+  );
 };
 
 // render input dropdowns
@@ -266,11 +279,14 @@ $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    // append a new div, filling with data from local storage
+    // render DropdownTable component
     $(
-      `<div id='dropdown${dropdownIndex}' class='dropdown' role='dropdown' style='width: ${
-        event.target.offsetWidth
-      }'>${renderLocalStorageData(event, dropdownIndex)}</div>`
+      renderToString(
+        <DropdownTable
+          dropdownIndex={dropdownIndex}
+          eventObj={event}
+        ></DropdownTable>
+      )
     ).insertAfter(event.target);
 
     const dropdown = document.querySelector(
@@ -280,6 +296,14 @@ $(document).ready(function () {
     // create instance of Popper.js
     let popperInstance = Popper.createPopper(event.target, dropdown, {
       placement: "bottom",
+    });
+
+    // fill button handlers -- can't do in DropdownTable component because renderToString only renders HTML, not JS
+    const docData = getDocData()[1];
+    const buttonHandlers = Object.keys(docData).map((key, i) => {
+      $(`#dropdown${dropdownIndex}-key${i}`).click(() => {
+        event.target.value = docData[key];
+      });
     });
 
     // remove on mouseleave
@@ -325,6 +349,7 @@ const DocCell = (props: DocumentInfo) => {
 const InstructionsCell = () => {
   return <Instructions>Add files to get started</Instructions>;
 };
+
 const removeDocument = (docID: String) => {
   const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
     (item: DocumentInfo) => item.docID !== docID
