@@ -14,6 +14,8 @@
     "start:prod": "cd server && yarn start:prod"
   },
   "dependencies": {
+    "@babel/cli": "^7.10.3",
+    "@babel/node": "^7.10.3",
     "@types/jest": "^24.9.0",
     "@types/node": "^13.1.8",
     "@types/react": "^16.9.19",
