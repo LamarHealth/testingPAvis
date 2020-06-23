@@ -55,7 +55,6 @@ class ShipmentsDashboard extends React.Component {
     `;
     return (
       <Container>
-        <DocViewer />
         <ChecklistColumn>
           <h1>Sample Shipping Form</h1>
           <FormGroup

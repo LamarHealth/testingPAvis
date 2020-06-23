@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { StyleSheetManager } from "styled-components";
+import styled, { StyleSheetManager } from "styled-components";
 import Frame, { FrameContextConsumer } from "react-frame-component";
 import $ from "jquery";
 import "./index.css";
@@ -11,6 +11,7 @@ import "@blueprintjs/core/lib/css/blueprint.css";
 
 // Load dotenv
 import dotenv from "dotenv";
+import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 dotenv.config();
 
 // $(
@@ -18,9 +19,22 @@ dotenv.config();
 //   //   '<iframe id="insertion-point" allowtransparency="true" style=" overflow: hidden; position: fixed; right: 0px; top: 0px; left: auto; float: none; z-index: 2147483647; background: transparent;"/>'
 // ).insertBefore(document.body);
 const initialContent = `<!DOCTYPE html><html><head>${document.head.innerHTML}</head><body><div></div></body></html>`;
+const SideBarFrame = styled(Frame)`
+  border: none;
+  display: block;
+  overflow: hidden;
+  left: auto;
+  float: none;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999999;
+  background: transparent;
+`;
+
+$('<div id="insertion-point"/>').insertBefore(document.body);
 
 ReactDOM.render(
-  <Frame initialContent={initialContent}>
+  <SideBarFrame initialContent={initialContent}>
     <FrameContextConsumer>
       {(frameContext) => (
         <StyleSheetManager target={frameContext.document.head}>
@@ -30,9 +44,10 @@ ReactDOM.render(
         </StyleSheetManager>
       )}
     </FrameContextConsumer>
-  </Frame>,
-  document.body
+  </SideBarFrame>,
+  document.getElementById("insertion-point")
 );
+// ReactDOM.render(<ShipmentsDashboard />, document.body);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
@@ -40,3 +55,5 @@ ReactDOM.render(
 // serviceWorker.unregister();
 
 // registerServiceWorker();
+
+// border: none; display: block; height: 575px; overflow: hidden; position: fixed; right: 0px; top: 0px; left: auto; float: none; width: 335px; z-index: 2147483647; background: transparent;
