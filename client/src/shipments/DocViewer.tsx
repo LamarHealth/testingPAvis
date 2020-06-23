@@ -226,19 +226,36 @@ const populateForms = () => {
   });
 };
 
+// CCC get doc from local storage
+const test = (eventObj: any) => {
+  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  const firstDoc = storedDocs[0];
+  const firstDocData = firstDoc.keyValuePairs;
+
+  const tableHead = `<tr><th>Field Name</th><th>Field Value</th></tr>`;
+
+  const tableRows = Object.keys(firstDocData).map((key) => {
+    let clickHandler = () => console.log("hello");
+    return `<tr><td>${key}</td><td>${firstDocData[key]}</td><td><button onClick={console.log('hello')}>Fill</button></td></tr>`;
+  });
+
+  return `<table>${tableHead}${tableRows}</table>`;
+};
+
 // CCC input dropdowns
+
 $(document).ready(function () {
   let tooltipIndex = 0;
 
   $("input").click((event: any) => {
-    // console.log(event.target.nextElementSibling.id);
-
     if (
       !event.target.nextElementSibling ||
       !event.target.nextElementSibling.id.includes("tooltip")
     ) {
       $(
-        `<div id='tooltip${tooltipIndex}' class='tooltip' role='tooltip'>I'm a tooltip</div>`
+        `<div id='tooltip${tooltipIndex}' class='tooltip' role='tooltip'>${test(
+          event
+        )}</div>`
       ).insertAfter(event.target);
 
       const tooltip = document.querySelector(
@@ -249,11 +266,12 @@ $(document).ready(function () {
         placement: "bottom",
       });
 
-      $(tooltip).mouseleave(() => {
-        if (tooltip) {
+      // need to fix this, bug here
+      $(tooltip).mouseover(() => {
+        $(tooltip).mouseleave(() => {
           tooltip.style.display = "none";
           popperInstance.destroy();
-        }
+        });
       });
 
       tooltipIndex++;

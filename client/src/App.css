@@ -40,7 +40,6 @@
 /* input dropdown / tooltip styling */
 .tooltip {
   width: 600px;
-  height: 300px;
   background-color: lightgrey;
   z-index: 40;
 }
