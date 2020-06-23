@@ -17,8 +17,6 @@ export const parseTextract = (results) => {
 
   const keyValueSets = keys.reduce((acc, current) => {
     let returnObj = {};
-    // console.log(current);
-
     let keyId = current.Id;
     let keyChildIds = current.Relationships.filter(
       (item) => item.Type === "CHILD"
