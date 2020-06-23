@@ -86,10 +86,6 @@ const Chevron = styled(Icon)`
   position: relative;
 `;
 
-/**
- * Cell containing doc info
- */
-
 const Instructions = styled.div`
   text-align: center;
   padding: 2em 2em 0em 2em;
@@ -226,69 +222,81 @@ const populateForms = () => {
   });
 };
 
-// CCC get doc from local storage
-const test = (eventObj: any) => {
+// get docs from local storage
+const renderLocalStorageData = (eventObj: any, index: number) => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-  const firstDoc = storedDocs[0];
-  const firstDocData = firstDoc.keyValuePairs;
 
-  const tableHead = `<tr><th>Field Name</th><th>Field Value</th></tr>`;
+  if (storedDocs[0] === undefined) {
+    return `<p>there are no documents in your local storage</p>`;
+  }
 
-  const tableRows = Object.keys(firstDocData).map((key) => {
-    let clickHandler = () => console.log("hello");
-    return `<tr><td>${key}</td><td>${firstDocData[key]}</td><td><button onClick={console.log('hello')}>Fill</button></td></tr>`;
+  // get all the docs and put key value pairs in one obj
+  let docData: any = {};
+  storedDocs.forEach((doc: any) => {
+    const keyValuePairs = doc.keyValuePairs;
+    Object.keys(keyValuePairs).forEach((key) => {
+      docData[key] = keyValuePairs[key];
+    });
   });
 
-  return `<table>${tableHead}${tableRows}</table>`;
+  // make a table
+  const tableHead = `<tr><th>Field Name</th><th>Field Value</th></tr>`;
+
+  const tableRows = Object.keys(docData)
+    .map((key, i) => {
+      return `<tr><td>${key}</td><td>${docData[key]}</td><td><button id="dropdown${index}-key${i}">Fill</button></td></tr>`;
+    })
+    .join("");
+
+  // fill button handlers
+  const buttonHandlers = Object.keys(docData).map((key, i) => {
+    $(document).ready(function () {
+      $(`#dropdown${index}-key${i}`).click(() => {
+        eventObj.target.value = docData[key];
+      });
+    });
+  });
+
+  // return the table as a string
+  return `<table class="dropdown-table">${tableHead}${tableRows}</table>`;
 };
 
-// CCC input dropdowns
-
+// render input dropdowns
 $(document).ready(function () {
-  let tooltipIndex = 0;
+  let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    if (
-      !event.target.nextElementSibling ||
-      !event.target.nextElementSibling.id.includes("tooltip")
-    ) {
-      $(
-        `<div id='tooltip${tooltipIndex}' class='tooltip' role='tooltip'>${test(
-          event
-        )}</div>`
-      ).insertAfter(event.target);
+    // append a new div, filling with data from local storage
+    $(
+      `<div id='dropdown${dropdownIndex}' class='dropdown' role='dropdown' style='width: ${
+        event.target.offsetWidth
+      }'>${renderLocalStorageData(event, dropdownIndex)}</div>`
+    ).insertAfter(event.target);
 
-      const tooltip = document.querySelector(
-        `#tooltip${tooltipIndex}`
-      ) as HTMLElement;
+    const dropdown = document.querySelector(
+      `#dropdown${dropdownIndex}`
+    ) as HTMLElement;
 
-      let popperInstance = Popper.createPopper(event.target, tooltip, {
-        placement: "bottom",
-      });
+    // create instance of Popper.js
+    let popperInstance = Popper.createPopper(event.target, dropdown, {
+      placement: "bottom",
+    });
 
-      // need to fix this, bug here
-      $(tooltip).mouseover(() => {
-        $(tooltip).mouseleave(() => {
-          tooltip.style.display = "none";
+    // remove on mouseleave
+    $(event.target).mouseleave(() => {
+      // don't remove if hovering over the dropdown
+      if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
+        $(dropdown).mouseleave(() => {
+          dropdown.remove();
           popperInstance.destroy();
         });
-      });
-
-      tooltipIndex++;
-    } else {
-      if (
-        event.target.nextElementSibling &&
-        event.target.nextElementSibling.id.includes("tooltip")
-      ) {
-        const tooltip = event.target.nextElementSibling as HTMLElement;
-
-        let popperInstance = Popper.createPopper(event.target, tooltip, {
-          placement: "bottom",
-        });
-
-        tooltip.style.display = "block";
+      } else {
+        dropdown.remove();
+        popperInstance.destroy();
       }
-    }
+    });
+
+    dropdownIndex++;
   });
 });
 

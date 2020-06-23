@@ -37,9 +37,44 @@
   }
 }
 
-/* input dropdown / tooltip styling */
-.tooltip {
-  width: 600px;
-  background-color: lightgrey;
+/* input dropdown styling */
+.dropdown {
+  background-color: #fdfff4;
   z-index: 40;
+  max-height: 12em;
+  overflow: scroll;
+}
+
+.dropdown p {
+  padding: 0.3em;
+}
+
+.dropdown-table {
+  border: 1px solid lightgrey;
+  border-collapse: collapse;
+  margin: 0 auto;
+  text-align: left;
+  width: 100%;
+}
+
+.dropdown,
+.dropdown-table tr,
+.dropdown-table th:nth-child(1),
+.dropdown-table td:nth-child(1) {
+  border: 1px solid lightgrey;
+}
+
+.dropdown-table th,
+.dropdown-table td {
+  padding: 0.3em;
+}
+
+.dropdown-table button {
+  background-color: #22c062;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 4em;
+  height: 2em;
+  font-weight: bold;
 }
