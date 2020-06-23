@@ -207,7 +207,6 @@ const FileStatus = (props: any) => {
     countContext.countDispatch("decrement");
   };
 
-  ////// PDFJS //////
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
 
@@ -217,7 +216,10 @@ const FileStatus = (props: any) => {
     PDFDocumentProxy.getPage(1).then((page: any) => {
       // set scale. in this case, affects resolution of thumbnail
       const viewport = page.getViewport({ scale: PAGE_SCALE });
+      console.log(viewport);
       const canvas: any = document.querySelector(`#pdf-canvas${index}`);
+      console.log(`#pdf-canvas${index}`);
+      console.log(canvas);
       const ctx = canvas.getContext("2d");
 
       // setting context for rendering
@@ -251,23 +253,15 @@ const FileStatus = (props: any) => {
         });
 
         //upload, and handle errors
-        if (
-          imageFileFromPdf.type !== "image/png" &&
-          imageFileFromPdf.type !== "image/jpeg"
-        ) {
-          console.log(
-            "something went wrong converting the following pdf to an image: " +
-              currentFile.name
-          );
-          return;
+        if (imageFileFromPdf.type.includes("image/")) {
+          uploadImageFile(imageFileFromPdf);
         }
-        uploadImageFile(imageFileFromPdf);
       });
     });
   };
 
   // the PDFJS usePdf hook
-  const { pdfDocument, pdfPage } = usePdf({
+  usePdf({
     file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,
@@ -276,11 +270,9 @@ const FileStatus = (props: any) => {
 
   useEffect(() => {
     // only upload image files, pdfs are handled above
-    if (currentFile.type !== "image/png" && currentFile.type !== "image/jpeg") {
-      return;
+    if (currentFile.type.includes("image/png")) {
+      uploadImageFile(currentFile);
     }
-
-    uploadImageFile(currentFile);
 
     // TODO: Set default to be pre-loaded documents
   }, []);
