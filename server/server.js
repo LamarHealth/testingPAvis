@@ -38,6 +38,7 @@ import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import fs from "fs";
 import uuidv4 from "uuid";
 import { parseTextract } from "./textractParser";
+
 // Routes
 
 // AWS
@@ -91,8 +92,6 @@ router.post("/api/upload_status", (req, res) => {
       let docClass = "";
 
       s3.upload(s3params, function (err, data) {
-        console.log(err, data);
-
         textract.analyzeDocument(textractParams, (err, data) => {
           if (err) {
             console.log(err, err.stack);

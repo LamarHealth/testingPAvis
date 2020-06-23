@@ -122,7 +122,7 @@ const RemoveButton = styled(Button)`
   left: 90%;
 `;
 
-const DeleteDialog = (props: { setIsOpen: any; document: DocumentInfo }) => {
+const DeleteDialog = (props: { document: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
 
   return (
@@ -134,7 +134,6 @@ const DeleteDialog = (props: { setIsOpen: any; document: DocumentInfo }) => {
             type: "remove",
             documentInfo: props.document,
           });
-          props.setIsOpen(false);
         }}
       >
         <Icon icon={"trash"} />
@@ -232,7 +231,6 @@ const populateForms = () => {
 };
 
 const DocCell = (props: DocumentInfo) => {
-  const [modalIsOpen, setIsOpen] = useState(false);
   return (
     <Box>
       <Name>{props.docName}</Name>
@@ -243,15 +241,10 @@ const DocCell = (props: DocumentInfo) => {
       <Type>Format: {props.docType}</Type>
       <Button onClick={populateForms}>Complete Forms on Page</Button>
       <Popover
-        isOpen={modalIsOpen}
-        content={<DeleteDialog setIsOpen={setIsOpen} document={props} />}
-        position={Position.TOP}
+        content={<DeleteDialog document={props} />}
+        interactionKind={"click"}
       >
-        <RemoveButton
-          onClick={() => {
-            setIsOpen(true);
-          }}
-        >
+        <RemoveButton>
           <Icon icon={"delete"} />
         </RemoveButton>
       </Popover>
