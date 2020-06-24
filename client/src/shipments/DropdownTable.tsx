@@ -46,32 +46,47 @@ export const DropdownTable = (props: {
     >
       {areThereDocs ? (
         <table className="dropdown-table">
-          <tr>
-            <th>Field Name</th>
-            <th>Field Value</th>
-          </tr>
-          {docKeyValuePairs.map((keyValue, i) => {
-            return (
-              <tr key={i}>
-                <td>
-                  {i === 0 ? (
-                    <span>
-                      <span className={"closest-match-bubble"}>
-                        Closest Match
+          <thead>
+            <tr>
+              <th>Field Name</th>
+              <th>Field Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {docKeyValuePairs.map((keyValue, i) => {
+              const fillButtonHandler = () => {
+                props.eventObj.target.value = keyValue["value"];
+              };
+
+              return (
+                <tr key={i}>
+                  <td>
+                    {i === 0 ? (
+                      <span>
+                        <span className={"closest-match-bubble"}>
+                          Closest Match
+                        </span>
+                        <span className={"closest-match"}>
+                          {keyValue["key"]}
+                        </span>
                       </span>
-                      <span className={"closest-match"}>{keyValue["key"]}</span>
-                    </span>
-                  ) : (
-                    keyValue["key"]
-                  )}
-                </td>
-                <td>{keyValue["value"]}</td>
-                <td>
-                  <button id={`dropdown${dropdownIndex}-key${i}`}>Fill</button>
-                </td>
-              </tr>
-            );
-          })}
+                    ) : (
+                      keyValue["key"]
+                    )}
+                  </td>
+                  <td>{keyValue["value"]}</td>
+                  <td>
+                    <button
+                      id={`dropdown${dropdownIndex}-key${i}`}
+                      onClick={fillButtonHandler}
+                    >
+                      Fill
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       ) : (
         <p>There are no docs in local storage</p>

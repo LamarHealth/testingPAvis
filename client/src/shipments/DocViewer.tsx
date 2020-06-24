@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
 } from "react";
+import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
@@ -228,32 +229,24 @@ $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    // render DropdownTable component
-    $(
-      renderToString(
-        <DropdownTable
-          dropdownIndex={dropdownIndex}
-          eventObj={event}
-        ></DropdownTable>
-      )
-    ).insertAfter(event.target);
+    // create a mounter and render dropdown table
+    $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
 
+    ReactDOM.render(
+      <DropdownTable
+        dropdownIndex={dropdownIndex}
+        eventObj={event}
+      ></DropdownTable>,
+      document.querySelector(`#mounter${dropdownIndex}`)
+    );
+
+    // turn dropdown table into instance of Popper.js
     const dropdown = document.querySelector(
       `#dropdown${dropdownIndex}`
     ) as HTMLElement;
 
-    // create instance of Popper.js
     let popperInstance = createPopper(event.target, dropdown, {
       placement: "bottom",
-    });
-
-    // fill button handlers -- can't do in DropdownTable component because renderToString only renders HTML, not JS
-    const docData = getKeyValuePairsAndSort().docData;
-    const buttonHandlers = Object.keys(docData).map((key, i) => {
-      $(`#dropdown${dropdownIndex}-key${i}`).click(() => {
-        // console.log(docData, key);
-        // event.target.value = docData[key];
-      });
     });
 
     // remove on mouseleave
