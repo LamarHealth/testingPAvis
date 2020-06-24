@@ -5,12 +5,14 @@ import React, {
   useContext,
   useEffect,
 } from "react";
+import { renderToString } from "react-dom/server";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
+import { DropdownTable, getDocData } from "./DropdownTable";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
-import { act } from "@testing-library/react";
 import { colors } from "./../common/colors";
+import { createPopper } from "@popperjs/core";
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -89,10 +91,6 @@ const ExpandButton = styled.button`
 const Chevron = styled(Icon)`
   position: relative;
 `;
-
-/**
- * Cell containing doc info
- */
 
 const Instructions = styled.div`
   text-align: center;
@@ -230,6 +228,56 @@ const populateForms = () => {
   });
 };
 
+// render input dropdowns
+$(document).ready(function () {
+  let dropdownIndex = 0;
+
+  $("input").click((event: any) => {
+    // render DropdownTable component
+    $(
+      renderToString(
+        <DropdownTable
+          dropdownIndex={dropdownIndex}
+          eventObj={event}
+        ></DropdownTable>
+      )
+    ).insertAfter(event.target);
+
+    const dropdown = document.querySelector(
+      `#dropdown${dropdownIndex}`
+    ) as HTMLElement;
+
+    // create instance of Popper.js
+    let popperInstance = createPopper(event.target, dropdown, {
+      placement: "bottom",
+    });
+
+    // fill button handlers -- can't do in DropdownTable component because renderToString only renders HTML, not JS
+    const docData = getDocData().docData;
+    const buttonHandlers = Object.keys(docData).map((key, i) => {
+      $(`#dropdown${dropdownIndex}-key${i}`).click(() => {
+        event.target.value = docData[key];
+      });
+    });
+
+    // remove on mouseleave
+    $(event.target).mouseleave(() => {
+      // don't remove if hovering over the dropdown
+      if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
+        $(dropdown).mouseleave(() => {
+          dropdown.remove();
+          popperInstance.destroy();
+        });
+      } else {
+        dropdown.remove();
+        popperInstance.destroy();
+      }
+    });
+
+    dropdownIndex++;
+  });
+});
+
 const DocCell = (props: DocumentInfo) => {
   return (
     <Box>
@@ -255,6 +303,7 @@ const DocCell = (props: DocumentInfo) => {
 const InstructionsCell = () => {
   return <Instructions>Add files to get started</Instructions>;
 };
+
 const removeDocument = (docID: String) => {
   const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
     (item: DocumentInfo) => item.docID !== docID
