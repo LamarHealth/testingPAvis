@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@blueprintjs/core";
 import "@blueprintjs/core/lib/css/blueprint.css";
+import "../Dropdown.css";
 
 export const getDocData = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
@@ -32,7 +32,7 @@ export const DropdownTable = (props: {
       role="dropdown"
     >
       {areThereDocs ? (
-        <table className="dropdown-table bp3-html-table">
+        <table className="dropdown-table">
           <tr>
             <th>Field Name</th>
             <th>Field Value</th>
@@ -43,7 +43,7 @@ export const DropdownTable = (props: {
                 <td>{key}</td>
                 <td>{docData[key]}</td>
                 <td>
-                  <Button id={`dropdown${dropdownIndex}-key${i}`}>Fill</Button>
+                  <button id={`dropdown${dropdownIndex}-key${i}`}>Fill</button>
                 </td>
               </tr>
             );

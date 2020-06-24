@@ -3,15 +3,12 @@ import ReactDOM from "react-dom";
 import styled, { StyleSheetManager } from "styled-components";
 import Frame, { FrameContextConsumer } from "react-frame-component";
 import $ from "jquery";
-import "./index.css";
-import DocViewer from "./shipments/DocViewer";
-// import App from "./App";
-// blueprintjs
 import "@blueprintjs/core/lib/css/blueprint.css";
 
 // Load dotenv
 import dotenv from "dotenv";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
+import DocViewer from "./shipments/DocViewer";
 dotenv.config();
 
 // $(
@@ -27,6 +24,7 @@ const SideBarFrame = styled(Frame)`
   float: none;
   width: 100vw;
   height: 100vh;
+  position: absolute;
   z-index: 99999999;
   background: transparent;
 `;
@@ -34,7 +32,7 @@ const SideBarFrame = styled(Frame)`
 $('<div id="insertion-point"/>').insertAfter(document.body);
 
 ReactDOM.render(
-  <body>
+  <body style={{ display: "flex" }}>
     <SideBarFrame initialContent={initialContent}>
       <FrameContextConsumer>
         {(frameContext) => (

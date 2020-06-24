@@ -48,6 +48,7 @@ const Column = styled.div`
     props.open ? "calc(-25% )" : "0.5em"};
   overflow: auto;
   transition: all 1s;
+  background-color: ${colors.WHITE};
 `;
 
 const Container = styled.div`

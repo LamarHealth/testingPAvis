@@ -4,6 +4,7 @@ export const colors = {
   OFFWHITE: "#fdfff4",
   GREEN: "#379316",
   YELLOW: "#f9e526",
+  WHITE: "#FFFFFF",
 
   // new styles
   LAYOUT_BLUE_SOLID: "hsla(210, 95%, 20%, 1)",
