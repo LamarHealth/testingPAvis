@@ -217,7 +217,10 @@ const FileStatus = (props: any) => {
       // set scale. in this case, affects resolution of thumbnail
       const viewport = page.getViewport({ scale: PAGE_SCALE });
       console.log(viewport);
-      const canvas: any = document.querySelector(`#pdf-canvas${index}`);
+      const iframe: any = document.querySelector("iframe");
+      const canvas: any = iframe.contentWindow.document.querySelector(
+        `#pdf-canvas${index}`
+      );
       console.log(`#pdf-canvas${index}`);
       console.log(canvas);
       const ctx = canvas.getContext("2d");
@@ -236,7 +239,9 @@ const FileStatus = (props: any) => {
         // after render, then convert to URL via .toDataURL()
         const dataUrl = canvas.toDataURL();
         // use URL as thumbnail img src
-        const thumbnail: any = document.querySelector(`#thumbnail${index}`);
+        const thumbnail: any = iframe.contentWindow.document.querySelector(
+          `#thumbnail${index}`
+        );
         thumbnail.src = dataUrl;
 
         // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
