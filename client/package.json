@@ -5,6 +5,7 @@
   "proxy": "http://localhost:3001/",
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.6.1",
+    "@babel/core": "^7.10.3",
     "@blueprintjs/core": "^3.23.0",
     "@mikecousins/react-pdf": "^5.5.1",
     "@popperjs/core": "^2.4.2",
@@ -69,7 +70,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "^7.7.7",
     "@types/styled-components": "^5.1.0",
     "concurrently": "^5.0.2",
     "nodemon": "^2.0.2"
