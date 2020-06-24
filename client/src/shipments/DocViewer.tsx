@@ -1,15 +1,9 @@
-import React, {
-  useReducer,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
+import React, { useReducer, useState, createContext, useContext } from "react";
 import { renderToString } from "react-dom/server";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
 import { DropdownTable, getDocData } from "./DropdownTable";
-import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
+import { Icon, Button, Popover, Menu } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";

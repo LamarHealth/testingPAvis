@@ -1,33 +1,7 @@
 import * as React from "react";
-import DocViewer from "./DocViewer";
-import { Damages } from "./InfoHeader";
 import styled from "styled-components";
-import { ChecklistViewer, IDetail } from "./ChecklistViewer";
 import { FormGroup, InputGroup } from "@blueprintjs/core";
-
-const damagesPlaceholder: Damages = {
-  type: "Inspection Penalty",
-  amount: 300,
-  description: "Your goods will face a customs fee due to mismarked goods",
-};
-
-const checklistPlaceholder: Array<IDetail> = [
-  {
-    statusIcon: "error",
-    fieldName: "7501",
-    detail: "ya done goofed",
-  },
-  {
-    statusIcon: "tick-circle",
-    fieldName: "7501",
-    detail: "ya done goofed",
-  },
-  {
-    statusIcon: "warning-sign",
-    fieldName: "7501",
-    detail: "",
-  },
-];
+import "@blueprintjs/core/lib/css/blueprint.css";
 
 class ShipmentsDashboard extends React.Component {
   state = {
@@ -83,15 +57,6 @@ class ShipmentsDashboard extends React.Component {
             <FormContainer key={12} id="text-input8" placeholder="COD Amount" />
           </FormGroup>
         </ChecklistColumn>
-        {/* <ChecklistColumn>
-          <InfoHeader
-            departurePoint="felixstow"
-            destinationPoint="kelang"
-            isGood={false}
-            damages={[damagesPlaceholder, damagesPlaceholder]}
-          />
-          <ChecklistViewer details={checklistPlaceholder} />
-        </ChecklistColumn> */}
       </Container>
     );
   }

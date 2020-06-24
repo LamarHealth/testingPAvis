@@ -1,4 +1,6 @@
 import React from "react";
+import { Button } from "@blueprintjs/core";
+import "@blueprintjs/core/lib/css/blueprint.css";
 
 export const getDocData = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
@@ -25,12 +27,12 @@ export const DropdownTable = (props: {
   return (
     <div
       id={`dropdown${dropdownIndex}`}
-      style={{ width: dropdownWidth }}
+      style={{ width: dropdownWidth, zIndex: 999999999 }}
       className="dropdown"
       role="dropdown"
     >
       {areThereDocs ? (
-        <table className="dropdown-table">
+        <table className="dropdown-table bp3-html-table">
           <tr>
             <th>Field Name</th>
             <th>Field Value</th>
@@ -41,7 +43,7 @@ export const DropdownTable = (props: {
                 <td>{key}</td>
                 <td>{docData[key]}</td>
                 <td>
-                  <button id={`dropdown${dropdownIndex}-key${i}`}>Fill</button>
+                  <Button id={`dropdown${dropdownIndex}-key${i}`}>Fill</Button>
                 </td>
               </tr>
             );

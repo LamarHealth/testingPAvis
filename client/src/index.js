@@ -31,23 +31,25 @@ const SideBarFrame = styled(Frame)`
   background: transparent;
 `;
 
-$('<div id="insertion-point"/>').insertBefore(document.body);
+$('<div id="insertion-point"/>').insertAfter(document.body);
 
 ReactDOM.render(
-  <SideBarFrame initialContent={initialContent}>
-    <FrameContextConsumer>
-      {(frameContext) => (
-        <StyleSheetManager target={frameContext.document.head}>
-          <React.Fragment>
-            <DocViewer />
-          </React.Fragment>
-        </StyleSheetManager>
-      )}
-    </FrameContextConsumer>
-  </SideBarFrame>,
+  <body>
+    <SideBarFrame initialContent={initialContent}>
+      <FrameContextConsumer>
+        {(frameContext) => (
+          <StyleSheetManager target={frameContext.document.head}>
+            <React.Fragment>
+              <DocViewer />
+            </React.Fragment>
+          </StyleSheetManager>
+        )}
+      </FrameContextConsumer>
+    </SideBarFrame>
+    {process.env.MODE || <ShipmentsDashboard />}
+  </body>,
   document.getElementById("insertion-point")
 );
-// ReactDOM.render(<ShipmentsDashboard />, document.body);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
