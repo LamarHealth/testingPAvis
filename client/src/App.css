@@ -41,7 +41,7 @@
 .dropdown {
   background-color: #fdfff4;
   z-index: 40;
-  max-height: 12em;
+  max-height: 18em;
   overflow: scroll;
 }
 
