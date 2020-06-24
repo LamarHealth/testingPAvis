@@ -1,7 +1,7 @@
 import React from "react";
 import { getEditDistance } from "./LevenshteinField";
 
-export const getKeyValuePairsAndSort = () => {
+export const getKeyValuePairs = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let docData: any = {};
   storedDocs.forEach((doc: any) => {
@@ -14,17 +14,14 @@ export const getKeyValuePairsAndSort = () => {
   return { areThereDocs: !(storedDocs[0] === undefined), docData };
 };
 
-export const DropdownTable = (props: {
-  dropdownIndex: number;
-  eventObj: any;
-}) => {
-  const dropdownIndex = props.dropdownIndex;
-  const dropdownWidth = props.eventObj.target.offsetWidth;
+export interface KeyValues {
+  [key: string]: string; //e.g. "Date": "7/5/2015"
+}
 
-  const { areThereDocs, docData } = getKeyValuePairsAndSort();
-
-  const targetString = props.eventObj.target.placeholder;
-
+export const getLevenDistanceAndSort = (
+  docData: KeyValues,
+  targetString: string
+) => {
   const docKeyValuePairs = Object.keys(docData).map((key) => {
     let entry: any = {};
     entry["key"] = key;
@@ -37,6 +34,22 @@ export const DropdownTable = (props: {
     a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
   );
 
+  return docKeyValuePairs;
+};
+
+export const DropdownTable = (props: {
+  dropdownIndex: number;
+  eventObj: any;
+}) => {
+  const dropdownIndex = props.dropdownIndex;
+  const dropdownWidth = props.eventObj.target.offsetWidth;
+
+  const { areThereDocs, docData } = getKeyValuePairs();
+
+  const targetString = props.eventObj.target.placeholder;
+
+  const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
+
   return (
     <div
       id={`dropdown${dropdownIndex}`}
@@ -48,14 +61,17 @@ export const DropdownTable = (props: {
         <table className="dropdown-table">
           <thead>
             <tr>
-              <th>Field Name</th>
+              <th>
+                Field Name: <i>{targetString}</i>
+              </th>
               <th>Field Value</th>
             </tr>
           </thead>
           <tbody>
-            {docKeyValuePairs.map((keyValue, i) => {
+            {sortedKeyValuePairs.map((keyValue, i) => {
               const fillButtonHandler = () => {
                 props.eventObj.target.value = keyValue["value"];
+                console.log(props.eventObj);
               };
 
               return (

@@ -6,10 +6,13 @@ import React, {
   useEffect,
 } from "react";
 import ReactDOM from "react-dom";
-import { renderToString } from "react-dom/server";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-import { DropdownTable, getKeyValuePairsAndSort } from "./DropdownTable";
+import {
+  DropdownTable,
+  getKeyValuePairs,
+  getLevenDistanceAndSort,
+} from "./DropdownTable";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -143,84 +146,23 @@ const useDeleteDialogContext = () => {
 };
 
 const populateForms = () => {
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input1]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "Date: 7/5/2019");
-        }
-      });
-  });
+  $(document).ready(() => {
+    const keyValuePairs = getKeyValuePairs().docData;
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input2]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "City/State/Zip San Jose, California 57293");
-        }
-      });
-  });
+    $("input").each(function () {
+      const targetString = $(this).attr("placeholder");
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input3]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "477195");
-        }
-      });
-  });
+      if (typeof targetString !== "string") {
+        return;
+      }
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input4]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "CID#: 13144-f-6885");
-        }
-      });
-  });
+      const sortedKeyValuePairs = getLevenDistanceAndSort(
+        keyValuePairs,
+        targetString
+      );
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input5]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "SID# 321312-a-2131");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input6]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "FOB x");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input7]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "COD Amount: $");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input8]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "BAR CODE SPACE");
-        }
-      });
+      $(this).attr("value", sortedKeyValuePairs[0]["value"]);
+    });
   });
 };
 

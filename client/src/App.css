@@ -82,7 +82,7 @@
 }
 
 /* "best guess" table row */
-.dropdown-table tr:nth-child(2) {
+.dropdown-table tbody tr:nth-child(1) {
   background-color: hsla(72, 69%, 74%, 0.4);
 }
 
