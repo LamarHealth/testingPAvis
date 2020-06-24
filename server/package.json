@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "babel . --ignore node_modules,build --out-dir build",
-    "start": "nodemon server.js --exec babel-node",
+    "start": "nodemon --exec babel-node server.js",
     "start:prod": "node build/server.js",
     "test": "jest --verbose"
   },
