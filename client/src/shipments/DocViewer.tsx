@@ -12,7 +12,6 @@ import { DropdownTable, getDocData } from "./DropdownTable";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
-// const Popper = require("@popperjs/core"); //throws an error w import statement
 import { createPopper } from "@popperjs/core";
 interface IDocumentList {
   documents: Array<DocumentInfo>;
