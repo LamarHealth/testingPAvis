@@ -42,19 +42,21 @@
   background-color: #fdfff4;
   z-index: 40;
   max-height: 18em;
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .dropdown p {
-  padding: 0.3em;
+  padding: 0.7em;
+  margin: 0;
 }
 
 .dropdown-table {
   border: 1px solid lightgrey;
   border-collapse: collapse;
-  margin: 0 auto;
+  margin: 0;
   text-align: left;
-  width: 100%;
+  width: inherit;
 }
 
 .dropdown,

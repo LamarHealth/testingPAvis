@@ -1,5 +1,4 @@
 import React from "react";
-const Popper = require("@popperjs/core"); //throws an error w import statement
 
 export const getDocData = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
