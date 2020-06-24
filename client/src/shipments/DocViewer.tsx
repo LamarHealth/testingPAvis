@@ -8,7 +8,7 @@ import React, {
 import { renderToString } from "react-dom/server";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-import { DropdownTable, getDocData } from "./DropdownTable";
+import { DropdownTable, getKeyValuePairsAndSort } from "./DropdownTable";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -248,10 +248,11 @@ $(document).ready(function () {
     });
 
     // fill button handlers -- can't do in DropdownTable component because renderToString only renders HTML, not JS
-    const docData = getDocData().docData;
+    const docData = getKeyValuePairsAndSort().docData;
     const buttonHandlers = Object.keys(docData).map((key, i) => {
       $(`#dropdown${dropdownIndex}-key${i}`).click(() => {
-        event.target.value = docData[key];
+        // console.log(docData, key);
+        // event.target.value = docData[key];
       });
     });
 

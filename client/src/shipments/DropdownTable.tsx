@@ -1,6 +1,7 @@
 import React from "react";
+import { getEditDistance } from "./LevenshteinField";
 
-export const getDocData = () => {
+export const getKeyValuePairsAndSort = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let docData: any = {};
   storedDocs.forEach((doc: any) => {
@@ -20,7 +21,21 @@ export const DropdownTable = (props: {
   const dropdownIndex = props.dropdownIndex;
   const dropdownWidth = props.eventObj.target.offsetWidth;
 
-  const { areThereDocs, docData } = getDocData();
+  const { areThereDocs, docData } = getKeyValuePairsAndSort();
+
+  const targetString = props.eventObj.target.placeholder;
+
+  const docKeyValuePairs = Object.keys(docData).map((key) => {
+    let entry: any = {};
+    entry["key"] = key;
+    entry["value"] = docData[key];
+    entry["distanceFromTarget"] = getEditDistance(targetString, key);
+    return entry;
+  });
+
+  docKeyValuePairs.sort((a, b) =>
+    a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
+  );
 
   return (
     <div
@@ -35,11 +50,22 @@ export const DropdownTable = (props: {
             <th>Field Name</th>
             <th>Field Value</th>
           </tr>
-          {Object.keys(docData).map((key, i) => {
+          {docKeyValuePairs.map((keyValue, i) => {
             return (
               <tr key={i}>
-                <td>{key}</td>
-                <td>{docData[key]}</td>
+                <td>
+                  {i === 0 ? (
+                    <span>
+                      <span className={"closest-match-bubble"}>
+                        Closest Match
+                      </span>
+                      <span className={"closest-match"}>{keyValue["key"]}</span>
+                    </span>
+                  ) : (
+                    keyValue["key"]
+                  )}
+                </td>
+                <td>{keyValue["value"]}</td>
                 <td>
                   <button id={`dropdown${dropdownIndex}-key${i}`}>Fill</button>
                 </td>
