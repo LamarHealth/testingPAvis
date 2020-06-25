@@ -129,8 +129,6 @@ const TableBody = (props: {
   eventObj: any;
   bestMatch: string;
 }) => {
-  const numberOfKVPairs = sortKeyValuePairs.length + 1;
-
   return (
     <tbody>
       {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
