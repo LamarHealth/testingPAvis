@@ -170,7 +170,6 @@ export const DropdownTable = (props: {
       <thead>
         <tr>
           <th>
-            Match Score{" "}
             <Icon
               icon={
                 matchArrow === "highest match"
@@ -179,9 +178,9 @@ export const DropdownTable = (props: {
               }
               onClick={matchScoreSortHandler}
             />
+            Match Score
           </th>
           <th>
-            Field Name: <i>{targetString}</i>{" "}
             <Icon
               icon={
                 alphabetArrow === "a-to-z"
@@ -190,6 +189,7 @@ export const DropdownTable = (props: {
               }
               onClick={alphabeticSortHandler}
             />
+            Field Name: <i>{targetString}</i>
           </th>
           <th>Field Value</th>
         </tr>
