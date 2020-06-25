@@ -157,64 +157,61 @@ export const DropdownTable = (props: {
   };
 
   return (
-    <DropdownWrapper
-      id={`dropdown${dropdownIndex}`}
-      style={{ width: dropdownWidth }}
-      role="dropdown"
-    >
-      <Table className="dropdown-table">
-        <thead>
-          <tr>
-            <th>
-              Match Score{" "}
-              <Icon
-                icon={
-                  matchArrow === "highest match"
-                    ? "symbol-triangle-down"
-                    : "symbol-triangle-up"
-                }
-                onClick={matchScoreSortHandler}
-              />
-            </th>
-            <th>
-              Field Name: <i>{targetString}</i>{" "}
-              <Icon
-                icon={
-                  alphabetArrow === "a-to-z"
-                    ? "symbol-triangle-down"
-                    : "symbol-triangle-up"
-                }
-                onClick={alphabeticSortHandler}
-              />
-            </th>
-            <th>Field Value</th>
-          </tr>
-        </thead>
-        <TableBody
-          sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
-          dropdownIndex={dropdownIndex}
-          eventObj={eventObj}
-          bestMatch={bestMatch}
-        />
-      </Table>
-    </DropdownWrapper>
+    <Table className="dropdown-table">
+      <thead>
+        <tr>
+          <th>
+            Match Score{" "}
+            <Icon
+              icon={
+                matchArrow === "highest match"
+                  ? "symbol-triangle-down"
+                  : "symbol-triangle-up"
+              }
+              onClick={matchScoreSortHandler}
+            />
+          </th>
+          <th>
+            Field Name: <i>{targetString}</i>{" "}
+            <Icon
+              icon={
+                alphabetArrow === "a-to-z"
+                  ? "symbol-triangle-down"
+                  : "symbol-triangle-up"
+              }
+              onClick={alphabeticSortHandler}
+            />
+          </th>
+          <th>Field Value</th>
+        </tr>
+      </thead>
+      <TableBody
+        sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
+        dropdownIndex={dropdownIndex}
+        eventObj={eventObj}
+        bestMatch={bestMatch}
+      />
+    </Table>
   );
 };
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
   const areThereDocs = getKeyValuePairs().areThereDocs;
-  return areThereDocs ? (
-    <DropdownTable
-      dropdownIndex={props.dropdownIndex}
-      eventObj={props.eventObj}
-    ></DropdownTable>
-  ) : (
+  return (
     <DropdownWrapper
       id={`dropdown${props.dropdownIndex}`}
       style={{ width: props.eventObj.target.offsetWidth }}
       role="dropdown"
     >
-      <p>There are no docs in local storage</p>
+      {areThereDocs ? (
+        <DropdownTable
+          dropdownIndex={props.dropdownIndex}
+          eventObj={props.eventObj}
+        ></DropdownTable>
+      ) : (
+        <p>There are no docs in local storage</p>
+      )}
+      ;
     </DropdownWrapper>
   );
 };
