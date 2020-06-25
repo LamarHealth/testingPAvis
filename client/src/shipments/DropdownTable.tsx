@@ -43,7 +43,7 @@ const Table = styled(HTMLTable)`
     padding: 0.3em;
   }
 
-  tbody tr:nth-child(1) {
+  .closest-match-row {
     background-color: hsla(72, 69%, 74%, 0.4);
   }
 `;
@@ -83,7 +83,14 @@ const TableBody = (props: {
         };
 
         return (
-          <tr key={i}>
+          <tr
+            key={i}
+            className={
+              keyValue["key"] === props.bestMatch
+                ? "closest-match-row"
+                : "table-row"
+            }
+          >
             <td>
               <ProgressBar
                 animate={false}
