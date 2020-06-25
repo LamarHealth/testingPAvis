@@ -69,7 +69,7 @@ const Dropdown = styled.div`
   background-color: #fdfff4;
   border: 1px solid lightgrey;
   z-index: 40;
-  max-height: 18em;
+  max-height: 24em;
   overflow-x: hidden;
   overflow-y: scroll;
 
@@ -102,8 +102,6 @@ const Table = styled(HTMLTable)`
   }
 `;
 
-const THead = styled.thead``;
-
 const FillButton = styled.button`
   background-color: #22c062;
   color: white;
@@ -125,28 +123,14 @@ const ClosestMatch = styled.span`
   margin-left: 0.5em;
 `;
 
-const TableHead = (props: { targetString: string }) => {
-  return (
-    <THead>
-      <tr>
-        <th>
-          Match Score <Icon icon={"symbol-triangle-down"} iconSize={20} />
-        </th>
-        <th>
-          Field Name: <i>{props.targetString}</i>{" "}
-          <Icon icon={"symbol-triangle-down"} iconSize={20} />
-        </th>
-        <th>Field Value</th>
-      </tr>
-    </THead>
-  );
-};
-
 const TableBody = (props: {
   sortedKeyValuePairs: any;
   dropdownIndex: number;
   eventObj: any;
+  bestMatch: string;
 }) => {
+  const numberOfKVPairs = sortKeyValuePairs.length + 1;
+
   return (
     <tbody>
       {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
@@ -165,7 +149,7 @@ const TableBody = (props: {
               />
             </td>
             <td>
-              {i === 0 ? (
+              {keyValue["key"] === props.bestMatch ? (
                 <span>
                   <ClosestMatchBubble>Closest Match</ClosestMatchBubble>
                   <ClosestMatch>{keyValue["key"]}</ClosestMatch>
@@ -201,6 +185,7 @@ export const DropdownTable = (props: {
   const targetString = props.eventObj.target.placeholder;
   const { areThereDocs, docData } = getKeyValuePairs();
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
+  const bestMatch = sortedKeyValuePairs[0].key;
 
   const [sort, setSort] = useState("highest match");
 
@@ -236,7 +221,7 @@ export const DropdownTable = (props: {
     >
       {areThereDocs ? (
         <Table className="dropdown-table">
-          <THead>
+          <thead>
             <tr>
               <th>
                 Match Score{" "}
@@ -262,11 +247,12 @@ export const DropdownTable = (props: {
               </th>
               <th>Field Value</th>
             </tr>
-          </THead>
+          </thead>
           <TableBody
             sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
             dropdownIndex={dropdownIndex}
             eventObj={eventObj}
+            bestMatch={bestMatch}
           />
         </Table>
       ) : (
