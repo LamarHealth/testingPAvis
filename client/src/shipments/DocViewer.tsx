@@ -149,7 +149,9 @@ const populateForms = () => {
     $("input").each(function () {
       const targetString = $(this).attr("placeholder");
 
-      if (typeof targetString !== "string") {
+      console.log(targetString);
+
+      if (typeof targetString === "undefined") {
         return;
       }
 
