@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { useState } from "react";
 import { getEditDistance } from "./LevenshteinField";
 import styled from "styled-components";
 import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
@@ -194,8 +194,6 @@ export const DropdownTable = (props: {
   dropdownIndex: number;
   eventObj: any;
 }) => {
-  const;
-
   const eventObj = props.eventObj;
   const dropdownIndex = props.dropdownIndex;
   const dropdownWidth = eventObj.target.offsetWidth;
@@ -203,6 +201,32 @@ export const DropdownTable = (props: {
   const targetString = props.eventObj.target.placeholder;
   const { areThereDocs, docData } = getKeyValuePairs();
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
+
+  const [sort, setSort] = useState("highest match");
+
+  // match score sort
+  const [matchArrow, setMatchArrow] = useState("highest match");
+  const matchScoreSortHandler = () => {
+    if (matchArrow === "lowest match") {
+      setSort("highest match");
+      setMatchArrow("highest match");
+    } else {
+      setSort("lowest match");
+      setMatchArrow("lowest match");
+    }
+  };
+
+  // alphabetical sort
+  const [alphabetArrow, setAlphabetArrow] = useState("a-to-z");
+  const alphabeticSortHandler = () => {
+    if (alphabetArrow === "z-to-a") {
+      setSort("a-to-z");
+      setAlphabetArrow("a-to-z");
+    } else {
+      setSort("z-to-a");
+      setAlphabetArrow("z-to-a");
+    }
+  };
 
   return (
     <Dropdown
@@ -212,9 +236,35 @@ export const DropdownTable = (props: {
     >
       {areThereDocs ? (
         <Table className="dropdown-table">
-          <TableHead targetString={targetString} />
+          <THead>
+            <tr>
+              <th>
+                Match Score{" "}
+                <Icon
+                  icon={
+                    matchArrow === "highest match"
+                      ? "symbol-triangle-down"
+                      : "symbol-triangle-up"
+                  }
+                  onClick={matchScoreSortHandler}
+                />
+              </th>
+              <th>
+                Field Name: <i>{targetString}</i>{" "}
+                <Icon
+                  icon={
+                    alphabetArrow === "a-to-z"
+                      ? "symbol-triangle-down"
+                      : "symbol-triangle-up"
+                  }
+                  onClick={alphabeticSortHandler}
+                />
+              </th>
+              <th>Field Value</th>
+            </tr>
+          </THead>
           <TableBody
-            sortedKeyValuePairs={sortedKeyValuePairs}
+            sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
             dropdownIndex={dropdownIndex}
             eventObj={eventObj}
           />
