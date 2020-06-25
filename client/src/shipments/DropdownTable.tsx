@@ -24,16 +24,18 @@ const DropdownWrapper = styled.div`
 `;
 
 const Table = styled(HTMLTable)`
-  border: 1px solid lightgrey;
   border-collapse: collapse;
   margin: 0;
   text-align: left;
   width: inherit;
 
-  tr,
-  th:nth-child(n + 1):nth-child(-n + 2),
-  td:nth-child(n + 1):nth-child(-n + 2) {
-    border: 1px solid lightgrey;
+  td:nth-child(n + 1):nth-child(-n + 2) + td,
+  th:nth-child(n + 1):nth-child(-n + 2) + th {
+    border-left: 1px solid lightgrey;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid lightgrey;
   }
 
   th,
@@ -211,7 +213,6 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       ) : (
         <p>There are no docs in local storage</p>
       )}
-      ;
     </DropdownWrapper>
   );
 };
