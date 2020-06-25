@@ -1,7 +1,7 @@
 import React from "react";
 import { getEditDistance } from "./LevenshteinField";
 import styled from "styled-components";
-import { HTMLTable } from "@blueprintjs/core";
+import { HTMLTable, ProgressBar } from "@blueprintjs/core";
 
 // getting data from local storage
 export const getKeyValuePairs = () => {
@@ -26,16 +26,22 @@ export const getLevenDistanceAndSort = (
   docData: KeyValues,
   targetString: string
 ) => {
+  const longestKeyLength = Object.keys(docData).reduce((acc, cv) =>
+    acc.length > cv.length ? acc : cv
+  ).length;
+
   const docKeyValuePairs = Object.keys(docData).map((key) => {
     let entry: any = {};
     entry["key"] = key;
     entry["value"] = docData[key];
-    entry["distanceFromTarget"] = getEditDistance(targetString, key);
+    entry["distanceFromTarget"] =
+      (longestKeyLength - getEditDistance(targetString, key)) /
+      longestKeyLength;
     return entry;
   });
 
   docKeyValuePairs.sort((a, b) =>
-    a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
+    a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
   );
 
   return docKeyValuePairs;
@@ -104,6 +110,7 @@ const TableHead = (props: { targetString: string }) => {
   return (
     <thead>
       <tr>
+        <th>Match Score</th>
         <th>
           Field Name: <i>{props.targetString}</i>
         </th>
@@ -123,11 +130,18 @@ const TableBody = (props: {
       {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
         const fillButtonHandler = () => {
           props.eventObj.target.value = keyValue["value"];
-          console.log(props.eventObj);
         };
 
         return (
           <tr key={i}>
+            <td>
+              <ProgressBar
+                animate={false}
+                stripes={false}
+                intent={"success"}
+                value={keyValue["distanceFromTarget"]}
+              />
+            </td>
             <td>
               {i === 0 ? (
                 <span>
