@@ -1,10 +1,4 @@
-import React, {
-  useReducer,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
+import React, { useReducer, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";

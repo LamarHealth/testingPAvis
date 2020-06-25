@@ -1,6 +1,19 @@
 import { getEditDistance } from "./LevenshteinField";
 
-// getting data from local storage
+///// INTERFACES /////
+// interface passed between getKeyValuePairs()
+export interface KeyValues {
+  [key: string]: string; //e.g. "Date": "7/5/2015"
+}
+
+// interface returned from getLevenDistanceAndSort()
+export interface KeyValuesWithDistance {
+  "key": string;
+  "value": string;
+  "distanceFromTarget": string;
+}
+
+///// FUNCTIONS /////
 export const getKeyValuePairs = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let docData: any = {};
@@ -14,15 +27,10 @@ export const getKeyValuePairs = () => {
   return { areThereDocs: !(storedDocs[0] === undefined), docData };
 };
 
-// interface passed between getKeyValuePairs() and getLevenDistanceAndSort()
-export interface KeyValues {
-  [key: string]: string; //e.g. "Date": "7/5/2015"
-}
-
 export const getLevenDistanceAndSort = (
   docData: KeyValues,
   targetString: string
-) => {
+): KeyValuesWithDistance[] => {
   const longestKeyLength = Object.keys(docData).reduce((acc, cv) =>
     acc.length > cv.length ? acc : cv
   ).length;
@@ -45,21 +53,32 @@ export const getLevenDistanceAndSort = (
 };
 
 export const sortKeyValuePairs = (
-  keyValuePairs: any,
+  keyValuePairs: KeyValuesWithDistance[],
   sortingMethod: string
-) => {
+): KeyValuesWithDistance[] => {
   switch (sortingMethod) {
     case "highest match":
-      return keyValuePairs.sort((a: any, b: any) =>
-        a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
+      return keyValuePairs.sort(
+        (a: KeyValuesWithDistance, b: KeyValuesWithDistance) =>
+          a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
       );
     case "lowest match":
-      return keyValuePairs.sort((a: any, b: any) =>
-        a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
+      return keyValuePairs.sort(
+        (a: KeyValuesWithDistance, b: KeyValuesWithDistance) =>
+          a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
       );
     case "a-to-z":
-      return keyValuePairs.sort((a: any, b: any) => (a.key > b.key ? 1 : -1));
+      return keyValuePairs.sort(
+        (a: KeyValuesWithDistance, b: KeyValuesWithDistance) =>
+          a.key > b.key ? 1 : -1
+      );
     case "z-to-a":
-      return keyValuePairs.sort((a: any, b: any) => (a.key > b.key ? -1 : 1));
+      return keyValuePairs.sort(
+        (a: KeyValuesWithDistance, b: KeyValuesWithDistance) =>
+          a.key > b.key ? -1 : 1
+      );
   }
+  // if the sorting fails (it won't), but to satisfy typescript putting this here:
+  console.log("sorting failed");
+  return keyValuePairs;
 };

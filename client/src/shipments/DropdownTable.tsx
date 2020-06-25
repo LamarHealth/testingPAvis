@@ -6,6 +6,7 @@ import {
   getKeyValuePairs,
   getLevenDistanceAndSort,
   sortKeyValuePairs,
+  KeyValuesWithDistance,
 } from "./KeyValuePairs";
 
 // dropdown table components
@@ -70,7 +71,7 @@ const ClosestMatch = styled.span`
 `;
 
 const TableBody = (props: {
-  sortedKeyValuePairs: any;
+  sortedKeyValuePairs: KeyValuesWithDistance[];
   dropdownIndex: number;
   eventObj: any;
   bestMatch: string;
