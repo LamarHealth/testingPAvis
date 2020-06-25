@@ -1,71 +1,15 @@
 import React, { useState } from "react";
-import { getEditDistance } from "./LevenshteinField";
 import styled from "styled-components";
 import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
 
-// getting data from local storage
-export const getKeyValuePairs = () => {
-  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-  let docData: any = {};
-  storedDocs.forEach((doc: any) => {
-    const keyValuePairs = doc.keyValuePairs;
-    Object.keys(keyValuePairs).forEach((key) => {
-      docData[key] = keyValuePairs[key];
-    });
-  });
-
-  return { areThereDocs: !(storedDocs[0] === undefined), docData };
-};
-
-// interface passed between getKeyValuePairs() and getLevenDistanceAndSort()
-export interface KeyValues {
-  [key: string]: string; //e.g. "Date": "7/5/2015"
-}
-
-export const getLevenDistanceAndSort = (
-  docData: KeyValues,
-  targetString: string
-) => {
-  const longestKeyLength = Object.keys(docData).reduce((acc, cv) =>
-    acc.length > cv.length ? acc : cv
-  ).length;
-
-  const docKeyValuePairs = Object.keys(docData).map((key) => {
-    let entry: any = {};
-    entry["key"] = key;
-    entry["value"] = docData[key];
-    entry["distanceFromTarget"] =
-      (longestKeyLength - getEditDistance(targetString, key)) /
-      longestKeyLength;
-    return entry;
-  });
-
-  docKeyValuePairs.sort((a, b) =>
-    a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
-  );
-
-  return docKeyValuePairs;
-};
-
-const sortKeyValuePairs = (keyValuePairs: any, sortingMethod: string) => {
-  switch (sortingMethod) {
-    case "highest match":
-      return keyValuePairs.sort((a: any, b: any) =>
-        a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
-      );
-    case "lowest match":
-      return keyValuePairs.sort((a: any, b: any) =>
-        a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
-      );
-    case "a-to-z":
-      return keyValuePairs.sort((a: any, b: any) => (a.key > b.key ? 1 : -1));
-    case "z-to-a":
-      return keyValuePairs.sort((a: any, b: any) => (a.key > b.key ? -1 : 1));
-  }
-};
+import {
+  getKeyValuePairs,
+  getLevenDistanceAndSort,
+  sortKeyValuePairs,
+} from "./KeyValuePairs";
 
 // dropdown table components
-const Dropdown = styled.div`
+const DropdownWrapper = styled.div`
   background-color: #fdfff4;
   border: 1px solid lightgrey;
   z-index: 40;
@@ -182,6 +126,7 @@ export const DropdownTable = (props: {
 
   const targetString = props.eventObj.target.placeholder;
   const { areThereDocs, docData } = getKeyValuePairs();
+
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
   const bestMatch = sortedKeyValuePairs[0].key;
 
@@ -212,50 +157,64 @@ export const DropdownTable = (props: {
   };
 
   return (
-    <Dropdown
+    <DropdownWrapper
       id={`dropdown${dropdownIndex}`}
       style={{ width: dropdownWidth }}
       role="dropdown"
     >
-      {areThereDocs ? (
-        <Table className="dropdown-table">
-          <thead>
-            <tr>
-              <th>
-                Match Score{" "}
-                <Icon
-                  icon={
-                    matchArrow === "highest match"
-                      ? "symbol-triangle-down"
-                      : "symbol-triangle-up"
-                  }
-                  onClick={matchScoreSortHandler}
-                />
-              </th>
-              <th>
-                Field Name: <i>{targetString}</i>{" "}
-                <Icon
-                  icon={
-                    alphabetArrow === "a-to-z"
-                      ? "symbol-triangle-down"
-                      : "symbol-triangle-up"
-                  }
-                  onClick={alphabeticSortHandler}
-                />
-              </th>
-              <th>Field Value</th>
-            </tr>
-          </thead>
-          <TableBody
-            sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
-            dropdownIndex={dropdownIndex}
-            eventObj={eventObj}
-            bestMatch={bestMatch}
-          />
-        </Table>
-      ) : (
-        <p>There are no docs in local storage</p>
-      )}
-    </Dropdown>
+      <Table className="dropdown-table">
+        <thead>
+          <tr>
+            <th>
+              Match Score{" "}
+              <Icon
+                icon={
+                  matchArrow === "highest match"
+                    ? "symbol-triangle-down"
+                    : "symbol-triangle-up"
+                }
+                onClick={matchScoreSortHandler}
+              />
+            </th>
+            <th>
+              Field Name: <i>{targetString}</i>{" "}
+              <Icon
+                icon={
+                  alphabetArrow === "a-to-z"
+                    ? "symbol-triangle-down"
+                    : "symbol-triangle-up"
+                }
+                onClick={alphabeticSortHandler}
+              />
+            </th>
+            <th>Field Value</th>
+          </tr>
+        </thead>
+        <TableBody
+          sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
+          dropdownIndex={dropdownIndex}
+          eventObj={eventObj}
+          bestMatch={bestMatch}
+        />
+      </Table>
+    </DropdownWrapper>
+  );
+};
+
+export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
+  const areThereDocs = getKeyValuePairs().areThereDocs;
+  return areThereDocs ? (
+    <DropdownTable
+      dropdownIndex={props.dropdownIndex}
+      eventObj={props.eventObj}
+    ></DropdownTable>
+  ) : (
+    <DropdownWrapper
+      id={`dropdown${props.dropdownIndex}`}
+      style={{ width: props.eventObj.target.offsetWidth }}
+      role="dropdown"
+    >
+      <p>There are no docs in local storage</p>
+    </DropdownWrapper>
   );
 };
