@@ -1,7 +1,7 @@
-import React from "react";
+import React, { createContext, useContext } from "react";
 import { getEditDistance } from "./LevenshteinField";
 import styled from "styled-components";
-import { HTMLTable, ProgressBar } from "@blueprintjs/core";
+import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
 
 // getting data from local storage
 export const getKeyValuePairs = () => {
@@ -47,6 +47,23 @@ export const getLevenDistanceAndSort = (
   return docKeyValuePairs;
 };
 
+const sortKeyValuePairs = (keyValuePairs: any, sortingMethod: string) => {
+  switch (sortingMethod) {
+    case "highest match":
+      return keyValuePairs.sort((a: any, b: any) =>
+        a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
+      );
+    case "lowest match":
+      return keyValuePairs.sort((a: any, b: any) =>
+        a.distanceFromTarget > b.distanceFromTarget ? 1 : -1
+      );
+    case "a-to-z":
+      return keyValuePairs.sort((a: any, b: any) => (a.key > b.key ? 1 : -1));
+    case "z-to-a":
+      return keyValuePairs.sort((a: any, b: any) => (a.key > b.key ? -1 : 1));
+  }
+};
+
 // dropdown table components
 const Dropdown = styled.div`
   background-color: #fdfff4;
@@ -70,8 +87,8 @@ const Table = styled(HTMLTable)`
   width: inherit;
 
   tr,
-  th:nth-child(1),
-  td:nth-child(1) {
+  th:nth-child(n + 1):nth-child(-n + 2),
+  td:nth-child(n + 1):nth-child(-n + 2) {
     border: 1px solid lightgrey;
   }
 
@@ -84,6 +101,8 @@ const Table = styled(HTMLTable)`
     background-color: hsla(72, 69%, 74%, 0.4);
   }
 `;
+
+const THead = styled.thead``;
 
 const FillButton = styled.button`
   background-color: #22c062;
@@ -108,15 +127,18 @@ const ClosestMatch = styled.span`
 
 const TableHead = (props: { targetString: string }) => {
   return (
-    <thead>
+    <THead>
       <tr>
-        <th>Match Score</th>
         <th>
-          Field Name: <i>{props.targetString}</i>
+          Match Score <Icon icon={"symbol-triangle-down"} iconSize={20} />
+        </th>
+        <th>
+          Field Name: <i>{props.targetString}</i>{" "}
+          <Icon icon={"symbol-triangle-down"} iconSize={20} />
         </th>
         <th>Field Value</th>
       </tr>
-    </thead>
+    </THead>
   );
 };
 
@@ -138,7 +160,7 @@ const TableBody = (props: {
               <ProgressBar
                 animate={false}
                 stripes={false}
-                intent={"success"}
+                intent={"primary"}
                 value={keyValue["distanceFromTarget"]}
               />
             </td>
@@ -172,14 +194,14 @@ export const DropdownTable = (props: {
   dropdownIndex: number;
   eventObj: any;
 }) => {
+  const;
+
   const eventObj = props.eventObj;
   const dropdownIndex = props.dropdownIndex;
   const dropdownWidth = eventObj.target.offsetWidth;
 
-  const { areThereDocs, docData } = getKeyValuePairs();
-
   const targetString = props.eventObj.target.placeholder;
-
+  const { areThereDocs, docData } = getKeyValuePairs();
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
 
   return (
