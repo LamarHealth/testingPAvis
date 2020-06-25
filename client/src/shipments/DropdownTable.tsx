@@ -1,6 +1,7 @@
 import React from "react";
 import { getEditDistance } from "./LevenshteinField";
 import styled from "styled-components";
+import { HTMLTable } from "@blueprintjs/core";
 
 // getting data from local storage
 export const getKeyValuePairs = () => {
@@ -55,7 +56,7 @@ const Dropdown = styled.div`
   }
 `;
 
-const Table = styled.table`
+const Table = styled(HTMLTable)`
   border: 1px solid lightgrey;
   border-collapse: collapse;
   margin: 0;
