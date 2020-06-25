@@ -1,5 +1,6 @@
 import React from "react";
 import { getEditDistance } from "./LevenshteinField";
+import styled from "styled-components";
 
 // getting data from local storage
 export const getKeyValuePairs = () => {
@@ -40,6 +41,64 @@ export const getLevenDistanceAndSort = (
 };
 
 // dropdown table components
+const Dropdown = styled.div`
+  background-color: #fdfff4;
+  border: 1px solid lightgrey;
+  z-index: 40;
+  max-height: 18em;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  p {
+    padding: 0.7em;
+    margin: 0;
+  }
+`;
+
+const Table = styled.table`
+  border: 1px solid lightgrey;
+  border-collapse: collapse;
+  margin: 0;
+  text-align: left;
+  width: inherit;
+
+  tr,
+  th:nth-child(1),
+  td:nth-child(1) {
+    border: 1px solid lightgrey;
+  }
+
+  th,
+  td {
+    padding: 0.3em;
+  }
+
+  tbody tr:nth-child(1) {
+    background-color: hsla(72, 69%, 74%, 0.4);
+  }
+`;
+
+const FillButton = styled.button`
+  background-color: #22c062;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 4em;
+  height: 2em;
+  font-weight: bold;
+`;
+
+const ClosestMatchBubble = styled.span`
+  background-color: #9ae95c;
+  border: 1px solid white;
+  border-radius: 0.5em;
+  padding: 0.2em 0.5em;
+`;
+
+const ClosestMatch = styled.span`
+  margin-left: 0.5em;
+`;
+
 const TableHead = (props: { targetString: string }) => {
   return (
     <thead>
@@ -71,8 +130,8 @@ const TableBody = (props: {
             <td>
               {i === 0 ? (
                 <span>
-                  <span className={"closest-match-bubble"}>Closest Match</span>
-                  <span className={"closest-match"}>{keyValue["key"]}</span>
+                  <ClosestMatchBubble>Closest Match</ClosestMatchBubble>
+                  <ClosestMatch>{keyValue["key"]}</ClosestMatch>
                 </span>
               ) : (
                 keyValue["key"]
@@ -80,12 +139,12 @@ const TableBody = (props: {
             </td>
             <td>{keyValue["value"]}</td>
             <td>
-              <button
+              <FillButton
                 id={`dropdown${props.dropdownIndex}-key${i}`}
                 onClick={fillButtonHandler}
               >
                 Fill
-              </button>
+              </FillButton>
             </td>
           </tr>
         );
@@ -108,27 +167,24 @@ export const DropdownTable = (props: {
 
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
 
-  console.log(sortedKeyValuePairs);
-
   return (
-    <div
+    <Dropdown
       id={`dropdown${dropdownIndex}`}
       style={{ width: dropdownWidth }}
-      className="dropdown"
       role="dropdown"
     >
       {areThereDocs ? (
-        <table className="dropdown-table">
+        <Table className="dropdown-table">
           <TableHead targetString={targetString} />
           <TableBody
             sortedKeyValuePairs={sortedKeyValuePairs}
             dropdownIndex={dropdownIndex}
             eventObj={eventObj}
           />
-        </table>
+        </Table>
       ) : (
         <p>There are no docs in local storage</p>
       )}
-    </div>
+    </Dropdown>
   );
 };
