@@ -1,6 +1,7 @@
 import React from "react";
 import { getEditDistance } from "./LevenshteinField";
 
+// getting data from local storage
 export const getKeyValuePairs = () => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let docData: any = {};
@@ -37,6 +38,20 @@ export const getLevenDistanceAndSort = (
   return docKeyValuePairs;
 };
 
+// dropdown table components
+const TableHead = (props: { targetString: string }) => {
+  return (
+    <thead>
+      <tr>
+        <th>
+          Field Name: <i>{props.targetString}</i>
+        </th>
+        <th>Field Value</th>
+      </tr>
+    </thead>
+  );
+};
+
 export const DropdownTable = (props: {
   dropdownIndex: number;
   eventObj: any;
@@ -59,14 +74,7 @@ export const DropdownTable = (props: {
     >
       {areThereDocs ? (
         <table className="dropdown-table">
-          <thead>
-            <tr>
-              <th>
-                Field Name: <i>{targetString}</i>
-              </th>
-              <th>Field Value</th>
-            </tr>
-          </thead>
+          <TableHead targetString={targetString} />
           <tbody>
             {sortedKeyValuePairs.map((keyValue, i) => {
               const fillButtonHandler = () => {
