@@ -3,8 +3,8 @@ import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
-import { Dropdown } from "./DropdownTable";
-import { getKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
+import { Dropdown } from "./Dropdown";
+import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -160,7 +160,7 @@ const useDeleteDialogContext = () => {
 
 const populateForms = () => {
   $(document).ready(() => {
-    const keyValuePairs = getKeyValuePairs().docData;
+    const keyValuePairs = getAllKeyValuePairs().docData;
 
     $("input").each(function () {
       const targetString = $(this).attr("placeholder");

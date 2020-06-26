@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
 
 import {
-  getKeyValuePairs,
+  getKeyValuePairsByDoc,
+  getAllKeyValuePairs,
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
@@ -49,6 +50,18 @@ const Table = styled(HTMLTable)`
   }
 `;
 
+const ManualSelectButton = styled.button`
+  border: 1px solid white;
+  border-radius: 5px;
+  font-weight: bold;
+  background-color: #f9e526;
+  padding: 0.3em 0.7em;
+
+  :hover {
+    opacity: 0.5;
+  }
+`;
+
 const FillButton = styled.button`
   background-color: #22c062;
   color: white;
@@ -57,6 +70,10 @@ const FillButton = styled.button`
   width: 4em;
   height: 2em;
   font-weight: bold;
+
+  :hover {
+    opacity: 0.5;
+  }
 `;
 
 const ClosestMatchBubble = styled.span`
@@ -69,6 +86,31 @@ const ClosestMatchBubble = styled.span`
 const ClosestMatch = styled.span`
   margin-left: 0.5em;
 `;
+
+const ManualSelect = () => {
+  const docDataByDoc = getKeyValuePairsByDoc();
+
+  return (
+    <HTMLTable>
+      <tbody>
+        <tr>
+          <td>
+            <i>
+              <strong>manual select</strong>
+            </i>
+          </td>
+          <td>
+            {docDataByDoc.map((doc: any) => (
+              <div>
+                <ManualSelectButton>{doc.docName}</ManualSelectButton>
+              </div>
+            ))}
+          </td>
+        </tr>
+      </tbody>
+    </HTMLTable>
+  );
+};
 
 const TableBody = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];
@@ -135,7 +177,7 @@ export const DropdownTable = (props: {
   const dropdownWidth = eventObj.target.offsetWidth;
 
   const targetString = props.eventObj.target.placeholder;
-  const { areThereDocs, docData } = getKeyValuePairs();
+  const { areThereDocs, docData } = getAllKeyValuePairs();
 
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
   const bestMatch = sortedKeyValuePairs[0].key;
@@ -206,7 +248,7 @@ export const DropdownTable = (props: {
 };
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
-  const areThereDocs = getKeyValuePairs().areThereDocs;
+  const areThereDocs = getAllKeyValuePairs().areThereDocs;
   return (
     <DropdownWrapper
       id={`dropdown${props.dropdownIndex}`}
@@ -214,10 +256,13 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       role="dropdown"
     >
       {areThereDocs ? (
-        <DropdownTable
-          dropdownIndex={props.dropdownIndex}
-          eventObj={props.eventObj}
-        ></DropdownTable>
+        <div>
+          <ManualSelect></ManualSelect>
+          <DropdownTable
+            dropdownIndex={props.dropdownIndex}
+            eventObj={props.eventObj}
+          ></DropdownTable>
+        </div>
       ) : (
         <p>There are no docs in local storage</p>
       )}
