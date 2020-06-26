@@ -1,6 +1,7 @@
 import React, { useReducer, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./DropdownTable";
 import { getKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
@@ -8,6 +9,7 @@ import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
+
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -80,6 +82,26 @@ const ExpandButton = styled.button`
 
 const Chevron = styled(Icon)`
   position: relative;
+`;
+
+const DocCellTransitionGroup = styled.div`
+  .doccell-enter {
+    opacity: 0.01;
+  }
+
+  .doccell-enter.doccell-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+  }
+
+  .doccell-exit {
+    opacity: 1;
+  }
+
+  .doccell-exit.doccell-exit-active {
+    opacity: 0.01;
+    transition: opacity 300ms ease-in;
+  }
 `;
 
 const Instructions = styled.div`
@@ -260,28 +282,40 @@ export const fileReducer = (
 const initialState = {
   documents: JSON.parse(localStorage.getItem("docList") || "[]"),
 } as IDocumentList;
+
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [isOpen, setOpen] = useState(true);
+  const [numDocs, setNumDocs] = useState(fileList.documents.length);
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
       <Column open={isOpen}>
-        {fileList.documents.length ? (
-          fileList.documents.map((doc: DocumentInfo, ndx: any) => (
-            <DocCell
-              docName={doc.docName}
-              docType={doc.docType}
-              filePath={doc.filePath}
-              docClass={doc.docClass}
-              docID={doc.docID}
-              keyValuePairs={doc.keyValuePairs}
-              key={ndx}
-            />
-          ))
-        ) : (
-          <InstructionsCell />
-        )}
+        {numDocs === 0 && <InstructionsCell />}
+        <TransitionGroup component={DocCellTransitionGroup}>
+          {fileList.documents.map((doc: DocumentInfo, ndx: any) => {
+            return (
+              <CSSTransition
+                // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
+                key={`${doc.docID}`}
+                classNames="doccell"
+                timeout={{ enter: 500, exit: 300 }}
+                onEnter={() => setNumDocs(numDocs + 1)}
+                onExited={() => setNumDocs(numDocs - 1)}
+              >
+                <DocCell
+                  docName={doc.docName}
+                  docType={doc.docType}
+                  filePath={doc.filePath}
+                  docClass={doc.docClass}
+                  docID={doc.docID}
+                  keyValuePairs={doc.keyValuePairs}
+                  key={`${doc.docID}`}
+                />
+              </CSSTransition>
+            );
+          })}
+        </TransitionGroup>
 
         <StyledDropzone />
       </Column>
