@@ -1,14 +1,9 @@
-import React, {
-  useReducer,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
-import { renderToString } from "react-dom/server";
+import React, { useReducer, useState, createContext, useContext } from "react";
+import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { StyledDropzone } from "./DocUploader";
-import { DropdownTable, getDocData } from "./DropdownTable";
+import { Dropdown } from "./DropdownTable";
+import { getKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -142,84 +137,25 @@ const useDeleteDialogContext = () => {
 };
 
 const populateForms = () => {
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input1]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "Date: 7/5/2019");
-        }
-      });
-  });
+  $(document).ready(() => {
+    const keyValuePairs = getKeyValuePairs().docData;
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input2]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "City/State/Zip San Jose, California 57293");
-        }
-      });
-  });
+    $("input").each(function () {
+      const targetString = $(this).attr("placeholder");
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input3]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "477195");
-        }
-      });
-  });
+      console.log(targetString);
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input4]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "CID#: 13144-f-6885");
-        }
-      });
-  });
+      if (typeof targetString === "undefined") {
+        return;
+      }
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input5]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "SID# 321312-a-2131");
-        }
-      });
-  });
+      const sortedKeyValuePairs = getLevenDistanceAndSort(
+        keyValuePairs,
+        targetString
+      );
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input6]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "FOB x");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input7]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "COD Amount: $");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input8]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "BAR CODE SPACE");
-        }
-      });
+      $(this).attr("value", sortedKeyValuePairs[0]["value"]);
+    });
   });
 };
 
@@ -228,43 +164,33 @@ $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    // render DropdownTable component
-    $(
-      renderToString(
-        <DropdownTable
-          dropdownIndex={dropdownIndex}
-          eventObj={event}
-        ></DropdownTable>
-      )
-    ).insertAfter(event.target);
+    // create a mounter and render dropdownElement table
+    $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
 
-    const dropdown = document.querySelector(
+    ReactDOM.render(
+      <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
+      document.querySelector(`#mounter${dropdownIndex}`)
+    );
+
+    // turn dropdownElement table into instance of Popper.js
+    const dropdownElement = document.querySelector(
       `#dropdown${dropdownIndex}`
     ) as HTMLElement;
 
-    // create instance of Popper.js
-    let popperInstance = createPopper(event.target, dropdown, {
+    let popperInstance = createPopper(event.target, dropdownElement, {
       placement: "bottom",
-    });
-
-    // fill button handlers -- can't do in DropdownTable component because renderToString only renders HTML, not JS
-    const docData = getDocData().docData;
-    const buttonHandlers = Object.keys(docData).map((key, i) => {
-      $(`#dropdown${dropdownIndex}-key${i}`).click(() => {
-        event.target.value = docData[key];
-      });
     });
 
     // remove on mouseleave
     $(event.target).mouseleave(() => {
-      // don't remove if hovering over the dropdown
+      // don't remove if hovering over the dropdownElement
       if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
-        $(dropdown).mouseleave(() => {
-          dropdown.remove();
+        $(dropdownElement).mouseleave(() => {
+          dropdownElement.remove();
           popperInstance.destroy();
         });
       } else {
-        dropdown.remove();
+        dropdownElement.remove();
         popperInstance.destroy();
       }
     });
