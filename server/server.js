@@ -4,7 +4,7 @@
 // const app = express();
 // const port = process.env.PORT || 5000;
 
-// // Load dotenv
+// Load dotenv
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -13,7 +13,6 @@ import express from "express";
 import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
-import fs from "fs";
 import uuidv4 from "uuid";
 import { parseTextract } from "./textractParser";
 
@@ -61,11 +60,21 @@ router.post("/api/upload_status", (req, res) => {
         ],
       };
 
+      // CCC regex to convert the filename to an appropriate folder name
+      // from AWS: Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).
+      let folderifiedDocName = req.files[0].originalname
+        .toLowerCase()
+        .replace(/[  !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gi, "-")
+        .replace(/(-)+/gi, "-");
+
       var s3params = {
-        Bucket: "doc-classifier-bucket",
+        Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
         Key: req.files[0].originalname,
         Body: req.files[0].buffer,
       };
+
+      console.log("req.files[0], ", req.files[0]);
+      console.log("s3params, ", s3params);
 
       let docClass = "";
       // All docs are uploaded just in case
@@ -85,6 +94,8 @@ router.post("/api/upload_status", (req, res) => {
           }
           // an error occurred
           else {
+            const parsedTextract = parseTextract(data);
+
             res.json({
               status: "complete",
               docID: uuidv4(),
@@ -92,11 +103,44 @@ router.post("/api/upload_status", (req, res) => {
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
               filePath: "",
-              keyValuePairs: parseTextract(data),
+              keyValuePairs: parsedTextract,
+            });
+            // successful response
+
+            console.log(parsedTextract);
+
+            // upload the JSON
+            const jsonifiedDocName = req.files[0].originalname.replace(
+              /(.(\w)+)$/gi,
+              ".json"
+            );
+
+            // rawJSON
+            s3params = {
+              Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
+              Key: `rawJSON-${jsonifiedDocName}`,
+              Body: Buffer.from(JSON.stringify(data)),
+            };
+
+            s3.upload(s3params, (err, data) => {
+              if (err) {
+                console.log("rawJSON s3 upload error: ", err);
+              }
             });
 
-            console.log(parseTextract(data));
-          } // successful response
+            // parsedJSON
+            s3params = {
+              Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
+              Key: `parsedJSON-${jsonifiedDocName}`,
+              Body: Buffer.from(JSON.stringify(parsedTextract)),
+            };
+
+            s3.upload(s3params, (err, data) => {
+              if (err) {
+                console.log("parsedJSON s3 upload error: ", err);
+              }
+            });
+          }
         });
       });
     } else {
