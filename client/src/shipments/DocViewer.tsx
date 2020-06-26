@@ -1,19 +1,10 @@
-import React, {
-  useReducer,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
+import React, { useReducer, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
-import {
-  DropdownTable,
-  getKeyValuePairs,
-  getLevenDistanceAndSort,
-} from "./DropdownTable";
+import { Dropdown } from "./DropdownTable";
+import { getKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -174,7 +165,9 @@ const populateForms = () => {
     $("input").each(function () {
       const targetString = $(this).attr("placeholder");
 
-      if (typeof targetString !== "string") {
+      console.log(targetString);
+
+      if (typeof targetString === "undefined") {
         return;
       }
 
@@ -193,36 +186,33 @@ $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    // create a mounter and render dropdown table
+    // create a mounter and render dropdownElement table
     $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
 
     ReactDOM.render(
-      <DropdownTable
-        dropdownIndex={dropdownIndex}
-        eventObj={event}
-      ></DropdownTable>,
+      <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
       document.querySelector(`#mounter${dropdownIndex}`)
     );
 
-    // turn dropdown table into instance of Popper.js
-    const dropdown = document.querySelector(
+    // turn dropdownElement table into instance of Popper.js
+    const dropdownElement = document.querySelector(
       `#dropdown${dropdownIndex}`
     ) as HTMLElement;
 
-    let popperInstance = createPopper(event.target, dropdown, {
+    let popperInstance = createPopper(event.target, dropdownElement, {
       placement: "bottom",
     });
 
     // remove on mouseleave
     $(event.target).mouseleave(() => {
-      // don't remove if hovering over the dropdown
+      // don't remove if hovering over the dropdownElement
       if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
-        $(dropdown).mouseleave(() => {
-          dropdown.remove();
+        $(dropdownElement).mouseleave(() => {
+          dropdownElement.remove();
           popperInstance.destroy();
         });
       } else {
-        dropdown.remove();
+        dropdownElement.remove();
         popperInstance.destroy();
       }
     });

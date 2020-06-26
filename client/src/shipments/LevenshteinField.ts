@@ -1,4 +1,4 @@
-export const getEditDistance = function (a: any, b: any) {
+export const getEditDistance = function (a: string, b: string): number {
   // from https://gist.github.com/andrei-m/982927, MIT license
   if (a.length == 0) return b.length;
   if (b.length == 0) return a.length;
