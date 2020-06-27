@@ -15,6 +15,7 @@ import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
 import { parseTextract } from "./textractParser";
+import fs from "fs";
 
 // Routes
 
@@ -72,9 +73,6 @@ router.post("/api/upload_status", (req, res) => {
         Key: req.files[0].originalname,
         Body: req.files[0].buffer,
       };
-
-      console.log("req.files[0], ", req.files[0]);
-      console.log("s3params, ", s3params);
 
       let docClass = "";
       // All docs are uploaded just in case
@@ -147,6 +145,29 @@ router.post("/api/upload_status", (req, res) => {
       setTimeout(() => {
         res.console.error("Could not process document");
       }, 2000);
+    }
+  });
+});
+
+router.get("/api/docs/:docName", (req, res) => {
+  const queryParams = req.params.docName;
+
+  const s3 = new S3();
+
+  const s3GetParams = {
+    Bucket: "doc-classifier-bucket",
+    Key: queryParams,
+  };
+
+  // const file = fs.createWriteStream(`./${queryParams}`);
+  // s3.getObject(s3GetParams).createReadStream().pipe(file);
+
+  s3.getObject(s3GetParams, (error, data) => {
+    if (error) console.log("error: ", error);
+    else {
+      const justTheData = data.Body;
+
+      res.send(justTheData);
     }
   });
 });

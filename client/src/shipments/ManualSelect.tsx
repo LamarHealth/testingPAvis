@@ -61,7 +61,10 @@ export const ManualSelect = () => {
       .then((rs) => new Response(rs))
       // Create an object URL for the response
       .then((response) => response.blob())
-      .then((blob) => URL.createObjectURL(blob));
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        console.log(url);
+      });
 
     // .then((data) => data.body)
     // .then((body: any) => {
