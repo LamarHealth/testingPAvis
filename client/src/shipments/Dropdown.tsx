@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
+import { HTMLTable, ProgressBar, Icon, Dialog } from "@blueprintjs/core";
 
+import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
   getAllKeyValuePairs,
@@ -14,7 +15,7 @@ import {
 const DropdownWrapper = styled.div`
   background-color: #fdfff4;
   border: 1px solid lightgrey;
-  z-index: 40;
+  z-index: 2;
   max-height: 24em;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -50,18 +51,6 @@ const Table = styled(HTMLTable)`
   }
 `;
 
-const ManualSelectButton = styled.button`
-  border: 1px solid white;
-  border-radius: 5px;
-  font-weight: bold;
-  background-color: #f9e526;
-  padding: 0.3em 0.7em;
-
-  :hover {
-    opacity: 0.5;
-  }
-`;
-
 const FillButton = styled.button`
   background-color: #22c062;
   color: white;
@@ -86,31 +75,6 @@ const ClosestMatchBubble = styled.span`
 const ClosestMatch = styled.span`
   margin-left: 0.5em;
 `;
-
-const ManualSelect = () => {
-  const docDataByDoc = getKeyValuePairsByDoc();
-
-  return (
-    <HTMLTable>
-      <tbody>
-        <tr>
-          <td>
-            <i>
-              <strong>manual select</strong>
-            </i>
-          </td>
-          <td>
-            {docDataByDoc.map((doc: any) => (
-              <div>
-                <ManualSelectButton>{doc.docName}</ManualSelectButton>
-              </div>
-            ))}
-          </td>
-        </tr>
-      </tbody>
-    </HTMLTable>
-  );
-};
 
 const TableBody = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];

@@ -2,9 +2,12 @@ import React, { useReducer, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
+
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
+import { ManualSelect } from "./ManualSelect";
+
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -184,7 +187,7 @@ $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    // create a mounter and render dropdownElement table
+    // create a mounter and render Dropdown
     $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
 
     ReactDOM.render(
