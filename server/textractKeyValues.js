@@ -1,3 +1,6 @@
+/**
+ * Helper function used to parse textract tree
+ */
 export const getKvMap = (response) => {
   // get the text blocks
   const blocks = response["Blocks"];
@@ -19,6 +22,9 @@ export const getKvMap = (response) => {
   return [keyMap, valueMap, blockMap];
 };
 
+/**
+ * Helper function used to link keys with values
+ */
 export const getKvRelationship = (keyMap, valueMap, blockMap) => {
   let kvs = {};
   Object.entries(keyMap).forEach((keyValueBlock) => {
@@ -86,4 +92,13 @@ export const getText = (result, blocksMap) => {
     });
   }
   return text;
+};
+
+/**
+ * Returns key-value pairs as an Object
+ */
+export const getKeyValues = (response) => {
+  const [kvmap, valueMap, blockMap] = getKvMap(response);
+  const kvRelationship = getKvRelationship(kvmap, valueMap, blockMap);
+  return kvRelationship;
 };
