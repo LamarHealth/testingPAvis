@@ -1,41 +1,38 @@
-/* input dropdown styling */
-.dropdown {
-  background-color: #fdfff4;
-  z-index: 40;
-  max-height: 18em;
-  overflow: scroll;
+.App {
+  text-align: center;
 }
 
-.dropdown p {
-  padding: 0.3em;
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
 }
 
-.dropdown-table {
-  border: 1px solid lightgrey;
-  border-collapse: collapse;
-  margin: 0 auto;
-  text-align: left;
-  width: 100%;
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
 }
 
-.dropdown,
-.dropdown-table tr,
-.dropdown-table th:nth-child(1),
-.dropdown-table td:nth-child(1) {
-  border: 1px solid lightgrey;
-}
-
-.dropdown-table th,
-.dropdown-table td {
-  padding: 0.3em;
-}
-
-.dropdown-table button {
-  background-color: #22c062;
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
   color: white;
-  border: none;
-  border-radius: 5px;
-  width: 4em;
-  height: 2em;
-  font-weight: bold;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

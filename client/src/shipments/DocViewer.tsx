@@ -1,12 +1,15 @@
 import React, { useReducer, useState, createContext, useContext } from "react";
-import { renderToString } from "react-dom/server";
+import ReactDOM from "react-dom";
 import styled from "styled-components";
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
-import { DropdownTable, getDocData } from "./DropdownTable";
-import { Icon, Button, Popover, Menu } from "@blueprintjs/core";
+import { Dropdown } from "./DropdownTable";
+import { getKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
+import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
+
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -87,6 +90,26 @@ const Chevron = styled(Icon)`
   position: relative;
 `;
 
+const DocCellTransitionGroup = styled.div`
+  .doccell-enter {
+    opacity: 0.01;
+  }
+
+  .doccell-enter.doccell-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+  }
+
+  .doccell-exit {
+    opacity: 1;
+  }
+
+  .doccell-exit.doccell-exit-active {
+    opacity: 0.01;
+    transition: opacity 300ms ease-in;
+  }
+`;
+
 const Instructions = styled.div`
   text-align: center;
   padding: 2em 2em 0em 2em;
@@ -142,84 +165,25 @@ const useDeleteDialogContext = () => {
 };
 
 const populateForms = () => {
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input1]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "Date: 7/5/2019");
-        }
-      });
-  });
+  $(document).ready(() => {
+    const keyValuePairs = getKeyValuePairs().docData;
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input2]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "City/State/Zip San Jose, California 57293");
-        }
-      });
-  });
+    $("input").each(function () {
+      const targetString = $(this).attr("placeholder");
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input3]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "477195");
-        }
-      });
-  });
+      console.log(targetString);
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input4]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "CID#: 13144-f-6885");
-        }
-      });
-  });
+      if (typeof targetString === "undefined") {
+        return;
+      }
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input5]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "SID# 321312-a-2131");
-        }
-      });
-  });
+      const sortedKeyValuePairs = getLevenDistanceAndSort(
+        keyValuePairs,
+        targetString
+      );
 
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input6]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "FOB x");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input7]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "COD Amount: $");
-        }
-      });
-  });
-
-  $(document).ready(function () {
-    $("div")
-      .find("input[id=text-input8]")
-      .each(function (ev) {
-        if (!$(this).val()) {
-          $(this).attr("value", "BAR CODE SPACE");
-        }
-      });
+      $(this).attr("value", sortedKeyValuePairs[0]["value"]);
+    });
   });
 };
 
@@ -228,43 +192,33 @@ $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
-    // render DropdownTable component
-    $(
-      renderToString(
-        <DropdownTable
-          dropdownIndex={dropdownIndex}
-          eventObj={event}
-        ></DropdownTable>
-      )
-    ).insertAfter(event.target);
+    // create a mounter and render dropdownElement table
+    $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
 
-    const dropdown = document.querySelector(
+    ReactDOM.render(
+      <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
+      document.querySelector(`#mounter${dropdownIndex}`)
+    );
+
+    // turn dropdownElement table into instance of Popper.js
+    const dropdownElement = document.querySelector(
       `#dropdown${dropdownIndex}`
     ) as HTMLElement;
 
-    // create instance of Popper.js
-    let popperInstance = createPopper(event.target, dropdown, {
+    let popperInstance = createPopper(event.target, dropdownElement, {
       placement: "bottom",
-    });
-
-    // fill button handlers -- can't do in DropdownTable component because renderToString only renders HTML, not JS
-    const docData = getDocData().docData;
-    const buttonHandlers = Object.keys(docData).map((key, i) => {
-      $(`#dropdown${dropdownIndex}-key${i}`).click(() => {
-        event.target.value = docData[key];
-      });
     });
 
     // remove on mouseleave
     $(event.target).mouseleave(() => {
-      // don't remove if hovering over the dropdown
+      // don't remove if hovering over the dropdownElement
       if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
-        $(dropdown).mouseleave(() => {
-          dropdown.remove();
+        $(dropdownElement).mouseleave(() => {
+          dropdownElement.remove();
           popperInstance.destroy();
         });
       } else {
-        dropdown.remove();
+        dropdownElement.remove();
         popperInstance.destroy();
       }
     });
@@ -334,36 +288,46 @@ export const fileReducer = (
 const initialState = {
   documents: JSON.parse(localStorage.getItem("docList") || "[]"),
 } as IDocumentList;
+
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [isOpen, setOpen] = useState(true);
+  const [numDocs, setNumDocs] = useState(fileList.documents.length);
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
-      <Container>
-        <Column open={isOpen}>
-          {fileList.documents.length ? (
-            fileList.documents.map((doc: DocumentInfo, ndx: any) => (
-              <DocCell
-                docName={doc.docName}
-                docType={doc.docType}
-                filePath={doc.filePath}
-                docClass={doc.docClass}
-                docID={doc.docID}
-                keyValuePairs={doc.keyValuePairs}
-                key={ndx}
-              />
-            ))
-          ) : (
-            <InstructionsCell />
-          )}
+      <Column open={isOpen}>
+        {numDocs === 0 && <InstructionsCell />}
+        <TransitionGroup component={DocCellTransitionGroup}>
+          {fileList.documents.map((doc: DocumentInfo, ndx: any) => {
+            return (
+              <CSSTransition
+                // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
+                key={`${doc.docID}`}
+                classNames="doccell"
+                timeout={{ enter: 500, exit: 300 }}
+                onEnter={() => setNumDocs(numDocs + 1)}
+                onExited={() => setNumDocs(numDocs - 1)}
+              >
+                <DocCell
+                  docName={doc.docName}
+                  docType={doc.docType}
+                  filePath={doc.filePath}
+                  docClass={doc.docClass}
+                  docID={doc.docID}
+                  keyValuePairs={doc.keyValuePairs}
+                  key={`${doc.docID}`}
+                />
+              </CSSTransition>
+            );
+          })}
+        </TransitionGroup>
 
-          <StyledDropzone />
-        </Column>
-        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-          <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
-        </ExpandButton>
-      </Container>
+        <StyledDropzone />
+      </Column>
+      <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+        <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
+      </ExpandButton>
     </FileContext.Provider>
   );
 };
