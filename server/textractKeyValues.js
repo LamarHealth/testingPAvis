@@ -1,9 +1,3 @@
-const fs = require("fs");
-let masters3TextractJSON = fs.readFileSync(
-  "./tests/textract_output/masters3.json"
-);
-let masters3 = JSON.parse(masters3TextractJSON);
-
 export const getKvMap = (response) => {
   // get the text blocks
   const blocks = response["Blocks"];
@@ -38,8 +32,6 @@ export const getKvRelationship = (keyMap, valueMap, blockMap) => {
 };
 
 export const findValueBlock = (keyBlock, valueMap) => {
-  // console.log(keyBlock);
-  // if (keyBlock["Relationships"]) {
   let valueBlock;
   keyBlock["Relationships"].forEach((relationship) => {
     if (relationship["Type"] === "VALUE") {
