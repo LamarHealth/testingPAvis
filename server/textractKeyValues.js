@@ -95,7 +95,8 @@ export const getText = (result, blocksMap) => {
 };
 
 /**
- * Returns key-value pairs as an Object
+ * Given a raw textract JSON response,
+ * returns key-value pairs as an Object
  */
 export const getKeyValues = (response) => {
   const [kvmap, valueMap, blockMap] = getKvMap(response);

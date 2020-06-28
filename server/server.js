@@ -15,7 +15,7 @@ import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import fs from "fs";
 import uuidv4 from "uuid";
-import { parseTextract } from "./textractParser";
+import { getKeyValues } from "./textractKeyValues";
 
 // Routes
 
@@ -92,10 +92,10 @@ router.post("/api/upload_status", (req, res) => {
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
               filePath: "",
-              keyValuePairs: parseTextract(data),
+              keyValuePairs: getKeyValues(data),
             });
 
-            console.log(parseTextract(data));
+            console.log(getKeyValues(data));
           } // successful response
         });
       });
