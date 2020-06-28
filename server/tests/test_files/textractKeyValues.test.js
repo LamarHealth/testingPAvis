@@ -1,25 +1,45 @@
-import { getKvMap, getKvRelationship } from "../../textractKeyValues";
+import {
+  getKvMap,
+  getKvRelationship,
+  getLinesGeometry,
+} from "../../textractKeyValues";
 import masters3TextractJSON from "../textract_output/masters3.json";
 import masters4TextractJSON from "../textract_output/masters4.json";
 import masters5TextractJSON from "../textract_output/masters5.json";
+
 import masters3kvmap from "./kv_response_output/masters3.json";
+import masters4kvmap from "./kv_response_output/masters4.json";
+import masters5kvmap from "./kv_response_output/masters5.json";
+
 import masters3kvs from "./kv_relationships_output/masters3.json";
+import masters4kvs from "./kv_relationships_output/masters4.json";
+import masters5kvs from "./kv_relationships_output/masters5.json";
 
-describe("Masters 3 Tests", () => {
-  const [kvmap, valueMap, blockMap] = getKvMap(masters3TextractJSON);
+import masters3LineCoords from "./line_coordinates/masters3.js";
+import masters4LineCoords from "./line_coordinates/masters4.js";
+import masters5LineCoords from "./line_coordinates/masters5.js";
 
-  test("test kvMap", () => {
-    expect([kvmap, valueMap, blockMap]).toEqual(masters3kvmap);
-  });
+describe.each([
+  [masters3TextractJSON, masters3kvmap, masters3kvs, masters3LineCoords],
+  [masters4TextractJSON, masters4kvmap, masters4kvs, masters4LineCoords],
+  [masters5TextractJSON, masters5kvmap, masters5kvs, masters5LineCoords],
+])(
+  "Test Key-Value Maps",
+  (response, expectedKvMap, expectedKvs, expectedLineCoords) => {
+    const [kvmap, valueMap, blockMap] = getKvMap(response);
 
-  const kvRelationship = getKvRelationship(kvmap, valueMap, blockMap);
+    test("test kvMap", () => {
+      expect([kvmap, valueMap, blockMap]).toEqual(expectedKvMap);
+    });
 
-  test("test getKvRelationship", () => {
-    expect(kvRelationship).toEqual(masters3kvs);
-  });
-});
+    const kvRelationship = getKvRelationship(kvmap, valueMap, blockMap);
+    test("test getKvRelationship", () => {
+      expect(kvRelationship).toEqual(expectedKvs);
+    });
 
-describe("Masters 5 Tests", () => {
-  //   testForKeys("Mast5", masters5Fields, masters5ParsedTextract);
-  //   testForValues("Mast5", masters5Fields, masters5ParsedTextract);
-});
+    const linesGeometry = getLinesGeometry(response);
+    test("Key Value Data", () => {
+      expect(linesGeometry.sort()).toEqual(expectedLineCoords.sort());
+    });
+  }
+);

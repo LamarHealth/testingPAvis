@@ -31,6 +31,29 @@ export const getKvRelationship = (keyMap, valueMap, blockMap) => {
   return kvs;
 };
 
+/**
+ * For each line in the document, return its text and geometry.
+ * To display the bounding box with the correct location and size,
+ * you have to multiply the BoundingBox values by the document
+ * page width or height (depending on the value you want)
+ * to get the pixel values. You use the pixel values to
+ * display the bounding box.
+ */
+export const getLinesGeometry = (response) => {
+  // get the text blocks
+  const blocks = response["Blocks"];
+  const lines = blocks.filter((block) => block["BlockType"] === "LINE");
+  const kvs = lines.reduce((acc, lineBlock) => {
+    let obj = {};
+    obj["Coordinates"] = lineBlock["Geometry"]["Polygon"];
+    obj["Text"] = lineBlock["Text"];
+    // acc[lineBlock["Text"]] = lineBlock["Geometry"]["Polygon"];
+    acc.push(obj);
+    return acc;
+  }, []);
+  return kvs;
+};
+
 export const findValueBlock = (keyBlock, valueMap) => {
   let valueBlock;
   keyBlock["Relationships"].forEach((relationship) => {
@@ -63,10 +86,4 @@ export const getText = (result, blocksMap) => {
     });
   }
   return text;
-};
-
-export const printKvs = (kvs) => {
-  Object.entries(kvs).forEach((key, value) => {
-    console.log(key, ":", value);
-  });
 };
