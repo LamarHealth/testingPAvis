@@ -221,7 +221,7 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
     >
       {areThereDocs ? (
         <div>
-          <ManualSelect></ManualSelect>
+          <ManualSelect eventObj={props.eventObj}></ManualSelect>
           <DropdownTable
             dropdownIndex={props.dropdownIndex}
             eventObj={props.eventObj}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Dialog, HTMLTable } from "@blueprintjs/core";
 
-import { getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 
 const ManualSelectButton = styled.button`
   border: 1px solid white;
@@ -24,15 +24,21 @@ const ManualSelectOverlay = styled(Dialog)`
 const ManualSelectCanvas = styled.canvas`
   height: 100%;
   width: 100%;
+  box-sizing: border-box;
 `;
 
-export const ManualSelect = () => {
-  const docDataByDoc = getKeyValuePairsByDoc();
+export const ManualSelect = (props: { eventObj: any }) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [canvasSrc, setCanvasSrc] = useState("");
+  const [currentlyOpenDoc, setCurrentlyOpenDoc] = useState("");
 
-  const getDocsFromServer = async (docName: string, docType: string) => {
+  const docDataByDoc = getKeyValuePairsByDoc();
+
+  const getDocsFromServer = async (doc: KeyValuesByDoc) => {
     // folders can only contain lowercase letters and dashes. this regex is exact copy of the one on the server
+    const docName = doc.docName;
+    const docType = doc.docType;
+
     let folderifiedDocName = (docName + "." + docType)
       .toLowerCase()
       .replace(/(.pdf)$/i, ".png")
@@ -51,11 +57,14 @@ export const ManualSelect = () => {
     const objectURL = await URL.createObjectURL(blob);
 
     setCanvasSrc(objectURL);
+    setCurrentlyOpenDoc(docName);
   };
 
   useEffect(() => {
+    // render image
     // method: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     const canvas: any = document.querySelector("#overlay-canvas");
+
     if (canvas === null) {
       return;
     }
@@ -65,11 +74,48 @@ export const ManualSelect = () => {
     img.onload = drawImageActualSize;
     img.src = canvasSrc;
 
+    const recCoords = {
+      xDist: 50,
+      yDist: 50,
+      height: 50,
+      width: 50,
+    };
+
     function drawImageActualSize(this: any) {
       canvas.width = this.naturalWidth;
       canvas.height = this.naturalHeight;
       ctx.drawImage(this, 0, 0);
+
+      // render rectangles
+
+      ctx.strokeStyle = "red";
+      ctx.strokeRect(
+        recCoords.xDist,
+        recCoords.yDist,
+        recCoords.width,
+        recCoords.height
+      );
     }
+
+    canvas.addEventListener(
+      "click",
+      (e: any) => {
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left; //x position within the element.
+        const y = e.clientY - rect.top; //y position within the element.
+
+        if (
+          x > recCoords.xDist &&
+          x < recCoords.xDist + recCoords.width &&
+          y > recCoords.yDist &&
+          y < recCoords.yDist + recCoords.height
+        ) {
+          setOverlayOpen(false);
+          props.eventObj.target.value = currentlyOpenDoc;
+        }
+      },
+      false
+    );
   });
 
   return (
@@ -85,7 +131,7 @@ export const ManualSelect = () => {
             {docDataByDoc.map((doc: any) => {
               const clickHandler = () => {
                 setOverlayOpen(true);
-                getDocsFromServer(doc.docName, doc.docType);
+                getDocsFromServer(doc);
               };
 
               return (
