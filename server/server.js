@@ -65,12 +65,19 @@ router.post("/api/upload_status", (req, res) => {
       // from AWS: Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).
       let folderifiedDocName = req.files[0].originalname
         .toLowerCase()
+        .replace(/(.pdf)$/i, ".png")
         .replace(/[  !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gi, "-")
         .replace(/(-)+/gi, "-");
 
+      // convert .pdf file extension to .png cause that is what the client is doing to it
+      let pngifiedDocName = req.files[0].originalname.replace(
+        /(.pdf)$/i,
+        ".png"
+      );
+
       var s3params = {
         Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
-        Key: req.files[0].originalname,
+        Key: pngifiedDocName,
         Body: req.files[0].buffer,
       };
 
@@ -149,8 +156,10 @@ router.post("/api/upload_status", (req, res) => {
   });
 });
 
-router.get("/api/docs/:docName", (req, res) => {
-  const queryParams = req.params.docName;
+router.get("/api/docs/:docFolder/:docName", (req, res) => {
+  const docFolder = req.params.docFolder.trim();
+  const docName = req.params.docName.trim();
+  let queryParams = `${docFolder}/${docName}`;
 
   const s3 = new S3();
 
@@ -158,9 +167,6 @@ router.get("/api/docs/:docName", (req, res) => {
     Bucket: "doc-classifier-bucket",
     Key: queryParams,
   };
-
-  // const file = fs.createWriteStream(`./${queryParams}`);
-  // s3.getObject(s3GetParams).createReadStream().pipe(file);
 
   s3.getObject(s3GetParams, (error, data) => {
     if (error) console.log("error: ", error);

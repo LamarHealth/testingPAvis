@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Dialog, HTMLTable } from "@blueprintjs/core";
 
@@ -16,96 +16,61 @@ const ManualSelectButton = styled.button`
   }
 `;
 
+const ManualSelectOverlay = styled(Dialog)`
+  width: auto;
+  height: auto;
+`;
+
+const ManualSelectCanvas = styled.canvas`
+  height: 100%;
+  width: 100%;
+`;
+
 export const ManualSelect = () => {
   const docDataByDoc = getKeyValuePairsByDoc();
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [canvasSrc, setCanvasSrc] = useState("");
 
-  const getDocsFromServer = async () => {
-    const response: any = fetch(
-      `/api/docs/${encodeURIComponent(
-        "MASTERS EXAMPLE #3 - LINE BREAK (SAMPLE DATA)-3.png"
-      )}`,
+  const getDocsFromServer = async (docName: string, docType: string) => {
+    // folders can only contain lowercase letters and dashes. this regex is exact copy of the one on the server
+    let folderifiedDocName = (docName + "." + docType)
+      .toLowerCase()
+      .replace(/(.pdf)$/i, ".png")
+      .replace(/[  !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gi, "-")
+      .replace(/(-)+/gi, "-");
+
+    const response: any = await fetch(
+      `/api/docs/${folderifiedDocName}/${encodeURIComponent(`
+        ${docName}.${docType}`)}`,
       {
         method: "GET",
       }
-    )
-      .then((data: any) => {
-        console.log(data);
+    );
 
-        return data.body;
-      })
-      .then((rs) => {
-        const reader = rs.getReader();
+    const blob = await response.blob();
+    const objectURL = await URL.createObjectURL(blob);
 
-        return new ReadableStream({
-          async start(controller) {
-            while (true) {
-              const { done, value } = await reader.read();
-
-              // When no more data needs to be consumed, break the reading
-              if (done) {
-                break;
-              }
-
-              // Enqueue the next data chunk into our target stream
-              controller.enqueue(value);
-            }
-
-            // Close the stream
-            controller.close();
-            reader.releaseLock();
-          },
-        });
-      })
-      // Create a new response out of the stream
-      .then((rs) => new Response(rs))
-      // Create an object URL for the response
-      .then((response) => response.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        console.log(url);
-      });
-
-    // .then((data) => data.body)
-    // .then((body: any) => {
-    //   console.log(body);
-
-    //   var str = body.reduce(function (a: any, b: any) {
-    //     return a + String.fromCharCode(b);
-    //   }, "");
-    //   const ascII: any = btoa(str).replace(/.{76}(?=.)/g, "$&\n");
-    //   const url = "data:image/jpeg;base64," + ascII;
-    //   console.log(url);
-    // });
-
-    // const bodyStream: any = (await response.json()).Body.data;
-
-    // const blob = new Blob(bodyStream);
-
-    // const url = URL.createObjectURL(blob);
-
-    // response.blob().then((blob: any) => {
-    //   // let binary = "";
-    //   // const bytes = new Uint8Array(buffer);
-    //   // const len = bytes.byteLength;
-    //   // for (let i = 0; i < len; i++) {
-    //   //   binary += String.fromCharCode(bytes[i]);
-    //   // }
-    //   // const base64 = window.btoa(binary);
-    //   // console.log(base64);
-    //   const url = URL.createObjectURL(blob);
-
-    //   console.log(url);
-    // });
-
-    // .then((moreData: any) => {
-    //   var blob = new Blob([moreData], { type: "image/jpeg" });
-    //   const url = URL.createObjectURL(blob);
-    //   console.log("data:image/jpeg;base64," + url);
-    // });
+    setCanvasSrc(objectURL);
   };
 
-  getDocsFromServer();
+  useEffect(() => {
+    // method: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+    const canvas: any = document.querySelector("#overlay-canvas");
+    if (canvas === null) {
+      return;
+    }
+    const ctx: any = canvas.getContext("2d");
+
+    var img = new Image();
+    img.onload = drawImageActualSize;
+    img.src = canvasSrc;
+
+    function drawImageActualSize(this: any) {
+      canvas.width = this.naturalWidth;
+      canvas.height = this.naturalHeight;
+      ctx.drawImage(this, 0, 0);
+    }
+  });
 
   return (
     <HTMLTable>
@@ -117,19 +82,29 @@ export const ManualSelect = () => {
             </i>
           </td>
           <td>
-            {docDataByDoc.map((doc: any) => (
-              <div>
-                <ManualSelectButton onClick={() => setOverlayOpen(true)}>
-                  {doc.docName}
-                </ManualSelectButton>
-              </div>
-            ))}
+            {docDataByDoc.map((doc: any) => {
+              const clickHandler = () => {
+                setOverlayOpen(true);
+                getDocsFromServer(doc.docName, doc.docType);
+              };
+
+              return (
+                <div>
+                  <ManualSelectButton onClick={clickHandler}>
+                    {doc.docName}
+                  </ManualSelectButton>
+                </div>
+              );
+            })}
           </td>
         </tr>
       </tbody>
-      <Dialog isOpen={overlayOpen} onClose={() => setOverlayOpen(false)}>
-        hello world!
-      </Dialog>
+      <ManualSelectOverlay
+        isOpen={overlayOpen}
+        onClose={() => setOverlayOpen(false)}
+      >
+        <ManualSelectCanvas id="overlay-canvas"></ManualSelectCanvas>
+      </ManualSelectOverlay>
     </HTMLTable>
   );
 };

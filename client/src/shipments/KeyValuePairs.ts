@@ -9,6 +9,7 @@ export interface KeyValues {
 // interface returned from getKeyValuePairsByDoc()
 export interface KeyValuesByDoc {
   docName: string;
+  docType: string;
   keyValuePairs: KeyValues;
 }
 
@@ -25,8 +26,13 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
   const docDataByDoc: any = [];
   storedDocs.forEach((doc: any) => {
     const docName = doc.docName;
+    const docType = doc.docType;
     const keyValuePairs = doc.keyValuePairs;
-    const docObj = { docName: docName, keyValuePairs: keyValuePairs };
+    const docObj = {
+      docName,
+      docType,
+      keyValuePairs,
+    };
     docDataByDoc.push(docObj);
   });
   return docDataByDoc;
