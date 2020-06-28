@@ -9,12 +9,12 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 import bodyParser from "body-parser";
-import express from "express";
+import express, { query } from "express";
 import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
-import { getKeyValues } from "./textractKeyValues";
+import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
 
 // Routes
 
@@ -155,16 +155,16 @@ router.post("/api/upload_status", (req, res) => {
   });
 });
 
-router.get("/api/docs/:docFolder/:docName", (req, res) => {
+// GET doc images from S3, send to client
+router.get("/api/doc-image/:docFolder/:docName", (req, res) => {
   const docFolder = req.params.docFolder.trim();
   const docName = req.params.docName.trim();
-  let queryParams = `${docFolder}/${docName}`;
 
   const s3 = new S3();
 
   const s3GetParams = {
     Bucket: "doc-classifier-bucket",
-    Key: queryParams,
+    Key: `${docFolder}/${docName}`,
   };
 
   s3.getObject(s3GetParams, (error, data) => {
@@ -173,6 +173,33 @@ router.get("/api/docs/:docFolder/:docName", (req, res) => {
       const justTheData = data.Body;
 
       res.send(justTheData);
+    }
+  });
+});
+
+// GET rawJSON from S3, send parsed lines and geometry to client
+router.get("/api/lines-geometry/:docFolder/:docName", (req, res) => {
+  const docFolder = req.params.docFolder.trim();
+  const rawJSONDocName = `rawJSON-${req.params.docName.trim()}.json`;
+
+  const s3 = new S3();
+
+  const s3rawJSONParams = {
+    Bucket: "doc-classifier-bucket",
+    Key: `${docFolder}/${rawJSONDocName}`,
+  };
+
+  s3.getObject(s3rawJSONParams, (error, data) => {
+    if (error) console.log("error: ", error);
+    else {
+      const rawJSON = JSON.parse(data.Body);
+      const parsedLinesGeometry = getLinesGeometry(rawJSON);
+
+      res.json({
+        docName: req.params.docName,
+        rawJSONDocName: rawJSONDocName,
+        linesGeometry: parsedLinesGeometry,
+      });
     }
   });
 });
