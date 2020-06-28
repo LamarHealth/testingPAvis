@@ -14,8 +14,7 @@ import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
-import { parseTextract } from "./textractParser";
-import fs from "fs";
+import { getKeyValues } from "./textractKeyValues";
 
 // Routes
 
@@ -99,7 +98,7 @@ router.post("/api/upload_status", (req, res) => {
           }
           // an error occurred
           else {
-            const parsedTextract = parseTextract(data);
+            const parsedTextract = getKeyValues(data);
 
             res.json({
               status: "complete",
