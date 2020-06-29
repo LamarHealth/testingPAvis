@@ -116,51 +116,6 @@ const updateLocalStorage = (documentInfo: any) => {
   localStorage.setItem("docList", JSON.stringify(updatedList));
 };
 
-export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
-  const progressInitialState = props.files.length;
-  const reducer = (state: number, action: string) => {
-    switch (action) {
-      case "decrement":
-        return state - 1;
-      case "increment":
-        return state + 1;
-      case "reset":
-        return progressInitialState;
-      default:
-        return state;
-    }
-  };
-
-  const [count, dispatch] = useReducer(reducer, 0);
-
-  return (
-    <CountContext.Provider
-      value={{ countState: count, countDispatch: dispatch }}
-    >
-      <UploadBufferContainer>
-        <ThumbnailList>
-          <h3>
-            {count === 0 ? (
-              "Files Uploaded"
-            ) : (
-              <ProgressBar intent={"primary"} />
-            )}
-          </h3>
-          {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
-            return (
-              <FileStatus
-                key={ndx}
-                fileWithPreview={fileWithPreview}
-                onComplete={dispatch}
-              />
-            );
-          })}
-        </ThumbnailList>
-      </UploadBufferContainer>
-    </CountContext.Provider>
-  );
-};
-
 const FileStatus = (props: any) => {
   const [uploadStatus, setUploadStatus] = useState(Number);
   const countContext = useContext(CountContext);
@@ -308,5 +263,50 @@ const FileStatus = (props: any) => {
         </div>
       </ThumbInner>
     </ThumbnailContainer>
+  );
+};
+
+export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
+  const progressInitialState = props.files.length;
+  const reducer = (state: number, action: string) => {
+    switch (action) {
+      case "decrement":
+        return state - 1;
+      case "increment":
+        return state + 1;
+      case "reset":
+        return progressInitialState;
+      default:
+        return state;
+    }
+  };
+
+  const [count, dispatch] = useReducer(reducer, 0);
+
+  return (
+    <CountContext.Provider
+      value={{ countState: count, countDispatch: dispatch }}
+    >
+      <UploadBufferContainer>
+        <ThumbnailList>
+          <h3>
+            {count === 0 ? (
+              "Files Uploaded"
+            ) : (
+              <ProgressBar intent={"primary"} />
+            )}
+          </h3>
+          {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
+            return (
+              <FileStatus
+                key={ndx}
+                fileWithPreview={fileWithPreview}
+                onComplete={dispatch}
+              />
+            );
+          })}
+        </ThumbnailList>
+      </UploadBufferContainer>
+    </CountContext.Provider>
   );
 };
