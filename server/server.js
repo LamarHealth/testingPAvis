@@ -168,8 +168,14 @@ router.get("/api/doc-image/:docFolder/:docName", (req, res) => {
   };
 
   s3.getObject(s3GetParams, (error, data) => {
-    if (error) console.log("error: ", error);
-    else {
+    if (error) {
+      console.log("error getting doc image from S3: ", error);
+      res.status(400).send({
+        status: "error",
+        docName: req.params.docName,
+        rawJSONDocName: rawJSONDocName,
+      });
+    } else {
       const justTheData = data.Body;
 
       res.send(justTheData);
@@ -190,8 +196,14 @@ router.get("/api/lines-geometry/:docFolder/:docName", (req, res) => {
   };
 
   s3.getObject(s3rawJSONParams, (error, data) => {
-    if (error) console.log("error: ", error);
-    else {
+    if (error) {
+      console.log("error getting raw JSON file from S3: ", error);
+      res.status(400).send({
+        status: "error",
+        docName: req.params.docName,
+        rawJSONDocName: rawJSONDocName,
+      });
+    } else {
       const rawJSON = JSON.parse(data.Body);
       const parsedLinesGeometry = getLinesGeometry(rawJSON);
 
