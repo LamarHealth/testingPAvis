@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Dialog, HTMLTable } from "@blueprintjs/core";
+import { colors } from "./../common/colors";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 
@@ -91,10 +92,9 @@ export const ManualSelect = (props: { eventObj: any }) => {
       // render image
       canvas.width = this.naturalWidth;
       canvas.height = this.naturalHeight;
-      ctx.drawImage(this, 0, 0);
+      canvas.style.backgroundImage = `url(${docImageURL})`;
 
       // render rectangles
-
       if (currentLinesGeometry.length > 0) {
         currentLinesGeometry.forEach((lineGeometry: any) => {
           const rectangleCoords: any = {
@@ -108,17 +108,16 @@ export const ManualSelect = (props: { eventObj: any }) => {
               (lineGeometry.Coordinates[1].X - lineGeometry.Coordinates[0].X),
           };
 
-          ctx.strokeStyle = "green";
+          ctx.strokeStyle = colors.MANUAL_SELECT_RECT_STROKE;
 
-          if (rectangleCoords) {
-            ctx.strokeRect(
-              rectangleCoords.xDist,
-              rectangleCoords.yDist,
-              rectangleCoords.width,
-              rectangleCoords.height
-            );
-          }
+          ctx.strokeRect(
+            rectangleCoords.xDist,
+            rectangleCoords.yDist,
+            rectangleCoords.width,
+            rectangleCoords.height
+          );
 
+          // fill in the selected line
           canvas.addEventListener(
             "click",
             (e: any) => {
@@ -126,14 +125,54 @@ export const ManualSelect = (props: { eventObj: any }) => {
               const x = e.clientX - rect.left; //x position within the element.
               const y = e.clientY - rect.top; //y position within the element.
 
-              if (
+              const mouseInTheRectangle =
                 x > rectangleCoords.xDist &&
                 x < rectangleCoords.xDist + rectangleCoords.width &&
                 y > rectangleCoords.yDist &&
-                y < rectangleCoords.yDist + rectangleCoords.height
-              ) {
+                y < rectangleCoords.yDist + rectangleCoords.height;
+
+              if (mouseInTheRectangle) {
                 setOverlayOpen(false);
                 props.eventObj.target.value = lineGeometry.Text;
+              }
+            },
+            false
+          );
+
+          // backgroun green fill for boxes when mouseover
+          let filled = false;
+          canvas.addEventListener(
+            "mousemove",
+            (e: any) => {
+              const rect = e.target.getBoundingClientRect();
+              const x = e.clientX - rect.left; //x position within the element.
+              const y = e.clientY - rect.top; //y position within the element.
+
+              const mouseInTheRectangle =
+                x > rectangleCoords.xDist &&
+                x < rectangleCoords.xDist + rectangleCoords.width &&
+                y > rectangleCoords.yDist &&
+                y < rectangleCoords.yDist + rectangleCoords.height;
+
+              if (mouseInTheRectangle && !filled) {
+                ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
+
+                ctx.fillRect(
+                  rectangleCoords.xDist,
+                  rectangleCoords.yDist,
+                  rectangleCoords.width,
+                  rectangleCoords.height
+                );
+                filled = true;
+              }
+              if (!(mouseInTheRectangle && filled)) {
+                ctx.clearRect(
+                  rectangleCoords.xDist + 1,
+                  rectangleCoords.yDist + 1,
+                  rectangleCoords.width - 1.5,
+                  rectangleCoords.height - 1.5
+                );
+                filled = false;
               }
             },
             false
@@ -155,7 +194,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
             </i>
           </td>
           <td>
-            {docDataByDoc.map((doc: any) => {
+            {docDataByDoc.map((doc: any, i: number) => {
               const clickHandler = () => {
                 setOverlayOpen(true);
                 getImageAndGeometryFromServer(doc);
@@ -163,7 +202,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
               return (
                 <div>
-                  <ManualSelectButton onClick={clickHandler}>
+                  <ManualSelectButton key={i} onClick={clickHandler}>
                     {doc.docName}
                   </ManualSelectButton>
                 </div>
