@@ -26,7 +26,7 @@ const Chevron = styled(Icon)`
 `;
 
 const Container = styled.div`
-  position: absolute;
+  position: fixed;
   z-index: 99999999;
   display: flex;
   align-items: stretch;

@@ -12,11 +12,7 @@ import DocViewer from "./shipments/DocViewer";
 import { Sidebar } from "./shipments/Sidebar";
 dotenv.config();
 
-// $(
-//   '<div id="insertion-point" style="width:100%;height:100%;z-index:99999;position:fixed;" />'
-//   //   '<iframe id="insertion-point" allowtransparency="true" style=" overflow: hidden; position: fixed; right: 0px; top: 0px; left: auto; float: none; z-index: 2147483647; background: transparent;"/>'
-// ).insertBefore(document.body);
-const initialContent = `<!DOCTYPE html><html><head>${document.head.innerHTML}</head><body><div></div></body></html>`;
+const initialContent = `<!DOCTYPE html><html><head>${document.head.innerHTML}</head><div></div></html>`;
 const SideBarFrame = styled(Frame)`
   border: none;
   display: block;
@@ -45,7 +41,7 @@ ReactDOM.render(
         </FrameContextConsumer>
       </SideBarFrame>
     </Sidebar>
-    {process.env.MODE || (
+    {process.env.LOCAL && (
       <body>
         <ShipmentsDashboard />
       </body>

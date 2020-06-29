@@ -50,7 +50,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:local": "env MODE=local react-scripts start",
+    "start:local": "env LOCAL=local react-scripts start",
     "build": "node ./scripts/build-non-split.js && yarn build:clean",
     "build:clean": "cd build && mv static/js/*.js main.js && mv static/css/*.css main.css && rm -r static",
     "test": "react-scripts test --env=jsdom",
