@@ -6,7 +6,6 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
-import { ManualSelect } from "./ManualSelect";
 
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 import $ from "jquery";
@@ -149,7 +148,7 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
           });
         }}
       >
-        <Icon icon={"trash"} />
+        {/* <Icon icon={"trash"} /> */}
         Confirm Delete
       </a>
     </Menu>
@@ -159,6 +158,14 @@ const DeleteDialogContext = createContext({} as any);
 const useDeleteDialogContext = () => {
   const context = useContext(DeleteDialogContext);
   return context;
+};
+
+const DownloadJSONDialog = () => {
+  return (
+    <Menu>
+      <a className="bp3-menu-item">Download as JSON</a>
+    </Menu>
+  );
 };
 
 const populateForms = () => {
@@ -238,6 +245,11 @@ const DocCell = (props: DocumentInfo) => {
       >
         <RemoveButton>
           <Icon icon={"delete"} />
+        </RemoveButton>
+      </Popover>
+      <Popover content={<DownloadJSONDialog />}>
+        <RemoveButton>
+          <Icon icon={"download"} />
         </RemoveButton>
       </Popover>
     </Box>
