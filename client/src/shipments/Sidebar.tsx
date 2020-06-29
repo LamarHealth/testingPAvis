@@ -10,8 +10,8 @@ const Column = styled.div`
   margin: 1em 0em;
   border: ${(props: { open: boolean }) =>
     props.open
-      ? `1px solid ${colors.LAYOUT_BLUE_CLEAR}`
-      : `1px solid ${colors.LAYOUT_BLUE_SOLID}`};
+      ? `1px solid ${colors.LAYOUT_BLUE_SOLID}`
+      : `1px solid ${colors.LAYOUT_BLUE_CLEAR}`};
   border-radius: 10px;
   display: flex;
   height: 100%;
@@ -19,6 +19,8 @@ const Column = styled.div`
   overflow: auto;
   transition: all 1s;
   background-color: ${colors.WHITE};
+  margin-left: ${(props: { open: boolean }) =>
+    props.open ? "0" : "calc(1.5em - 100%)"};
 `;
 
 const Chevron = styled(Icon)`
@@ -31,10 +33,8 @@ const Container = styled.div`
   display: flex;
   align-items: stretch;
   height: 90%;
-  margin: 1em;
+  margin: 1em 0em 1em 1em;
   transition: 0.5s;
-  margin-left: ${(props: { open: boolean }) =>
-    props.open ? "calc(-20% + 2em)" : "0.0em"};
 `;
 
 const ExpandButton = styled.button`
@@ -50,7 +50,7 @@ const ExpandButton = styled.button`
   align-items: center;
   background-color: ${colors.LAYOUT_BLUE_SOLID};
   color: ${colors.WHITE};
-  opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
+  opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0.4)};
   border: none;
   border-radius: 0% 25% 25% 0%;
 
@@ -64,12 +64,12 @@ const ExpandButton = styled.button`
 `;
 
 export const Sidebar = ({ children }: any) => {
-  const [isOpen, setOpen] = useState(true);
+  const [isOpen, setOpen] = useState(false);
   return (
-    <Container open={isOpen}>
+    <Container>
       <Column open={isOpen}>{children}</Column>
       <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-        <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
+        <Chevron icon={isOpen ? "chevron-left" : "chevron-right"} />
       </ExpandButton>
     </Container>
   );
