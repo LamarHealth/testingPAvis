@@ -4,6 +4,7 @@ import { Dialog, HTMLTable } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
+import useCustom from "../hooks/GlobalSelectedFileHook";
 
 const ManualSelectButton = styled.button`
   border: 1px solid white;
@@ -31,10 +32,14 @@ const ManualSelectCanvas = styled.canvas`
 export const ManualSelect = (props: { eventObj: any }) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [docImageURL, setDocImageURL] = useState("");
-  const [currentlyOpenDoc, setCurrentlyOpenDoc] = useState("");
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
 
-  const docDataByDoc = getKeyValuePairsByDoc();
+  const docData = getKeyValuePairsByDoc();
+  const globalSelectedFile = useCustom()[0];
+
+  const selectedDocData = docData.filter(
+    (doc) => doc.docName === globalSelectedFile.selectedFile
+  )[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
@@ -184,6 +189,11 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
   useEffect(drawOnCanvasAndHandleClicks);
 
+  const clickHandler = () => {
+    setOverlayOpen(true);
+    getImageAndGeometryFromServer(selectedDocData);
+  };
+
   return (
     <HTMLTable>
       <tbody>
@@ -194,20 +204,11 @@ export const ManualSelect = (props: { eventObj: any }) => {
             </i>
           </td>
           <td>
-            {docDataByDoc.map((doc: any, i: number) => {
-              const clickHandler = () => {
-                setOverlayOpen(true);
-                getImageAndGeometryFromServer(doc);
-              };
-
-              return (
-                <div>
-                  <ManualSelectButton key={i} onClick={clickHandler}>
-                    {doc.docName}
-                  </ManualSelectButton>
-                </div>
-              );
-            })}
+            <div>
+              <ManualSelectButton onClick={clickHandler}>
+                {selectedDocData.docName}
+              </ManualSelectButton>
+            </div>
           </td>
         </tr>
       </tbody>

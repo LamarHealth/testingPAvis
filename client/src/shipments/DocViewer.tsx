@@ -12,6 +12,7 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
+import useCustom from "../hooks/GlobalSelectedFileHook";
 
 import {
   Icon,
@@ -149,18 +150,20 @@ const RemoveButton = styled(Button)`
 
 const DeleteDialog = (props: { document: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
+  const setGlobalSelectedFile = useCustom()[1];
+
+  const handleDelete = (e: any) => {
+    e.stopPropagation();
+    setGlobalSelectedFile({ selectedFile: "" });
+    fileInfoContext.fileDispatch({
+      type: "remove",
+      documentInfo: props.document,
+    });
+  };
 
   return (
     <Menu>
-      <a
-        className="bp3-menu-item"
-        onClick={() => {
-          fileInfoContext.fileDispatch({
-            type: "remove",
-            documentInfo: props.document,
-          });
-        }}
-      >
+      <a className="bp3-menu-item" onClick={handleDelete}>
         <Icon icon={"trash"} />
         Confirm Delete
       </a>
@@ -291,8 +294,17 @@ $(document).ready(function () {
 });
 
 const DocCell = (props: DocumentInfo) => {
+  const [globalSelectedFile, setGlobalSelectedFile] = useCustom();
+
   return (
-    <Box>
+    <Box
+      onClick={() => setGlobalSelectedFile({ selectedFile: props.docName })}
+      style={
+        globalSelectedFile.selectedFile === props.docName
+          ? { backgroundColor: colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE }
+          : { backgroundColor: "" }
+      }
+    >
       <Name>{props.docName}</Name>
       <Type>
         <Icon icon={"rotate-document"} />

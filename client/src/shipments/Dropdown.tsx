@@ -10,6 +10,7 @@ import {
   sortKeyValuePairs,
   KeyValuesWithDistance,
 } from "./KeyValuePairs";
+import useCustom from "./../hooks/GlobalSelectedFileHook";
 
 // dropdown table components
 const DropdownWrapper = styled.div`
@@ -136,14 +137,22 @@ export const DropdownTable = (props: {
   dropdownIndex: number;
   eventObj: any;
 }) => {
+  const globalSelectedFile = useCustom()[0];
+
   const eventObj = props.eventObj;
   const dropdownIndex = props.dropdownIndex;
   const dropdownWidth = eventObj.target.offsetWidth;
 
   const targetString = props.eventObj.target.placeholder;
-  const { areThereDocs, docData } = getAllKeyValuePairs();
+  const docData = getKeyValuePairsByDoc();
+  const selectedDocData = docData.filter(
+    (doc) => doc.docName === globalSelectedFile.selectedFile
+  )[0];
 
-  const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
+  const sortedKeyValuePairs = getLevenDistanceAndSort(
+    selectedDocData,
+    targetString
+  );
   const bestMatch = sortedKeyValuePairs[0].key;
 
   const [sort, setSort] = useState("highest match");
@@ -212,7 +221,9 @@ export const DropdownTable = (props: {
 };
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
-  const areThereDocs = getAllKeyValuePairs().areThereDocs;
+  const areThereDocs = getKeyValuePairsByDoc().length > 0;
+  const isADocSelected = useCustom()[0].selectedFile !== "";
+
   return (
     <DropdownWrapper
       id={`dropdown${props.dropdownIndex}`}
@@ -220,13 +231,17 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       role="dropdown"
     >
       {areThereDocs ? (
-        <div>
-          <ManualSelect eventObj={props.eventObj}></ManualSelect>
-          <DropdownTable
-            dropdownIndex={props.dropdownIndex}
-            eventObj={props.eventObj}
-          ></DropdownTable>
-        </div>
+        isADocSelected ? (
+          <div>
+            <ManualSelect eventObj={props.eventObj}></ManualSelect>
+            <DropdownTable
+              dropdownIndex={props.dropdownIndex}
+              eventObj={props.eventObj}
+            ></DropdownTable>
+          </div>
+        ) : (
+          <p>Select a doc to see fill options</p>
+        )
       ) : (
         <p>Upload documents on the sidebar to load results.</p>
       )}
