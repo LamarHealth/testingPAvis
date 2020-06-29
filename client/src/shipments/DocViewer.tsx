@@ -1,4 +1,10 @@
-import React, { useReducer, useState, createContext, useContext } from "react";
+import React, {
+  useReducer,
+  useState,
+  createContext,
+  useContext,
+  useEffect,
+} from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
@@ -6,9 +12,15 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
-import { ManualSelect } from "./ManualSelect";
 
-import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
+import {
+  Icon,
+  Button,
+  Popover,
+  Menu,
+  MenuItem,
+  Position,
+} from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
@@ -161,6 +173,62 @@ const useDeleteDialogContext = () => {
   return context;
 };
 
+const DownloadDocData = (props: { document: DocumentInfo }) => {
+  const keyValuePairs: any = props.document.keyValuePairs;
+
+  useEffect(() => {
+    makeJSONDownloadable();
+    makeCSVDownloadable();
+  });
+
+  const makeJSONDownloadable = () => {
+    const jsonDownloadString =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(keyValuePairs));
+    const jsonDownloadLink = document.querySelector(
+      `#json-download-${props.document.docID}`
+    );
+    jsonDownloadLink?.setAttribute("href", jsonDownloadString);
+    jsonDownloadLink?.setAttribute(
+      "download",
+      `${props.document.docName}-key-value-pairs.json`
+    );
+  };
+
+  const makeCSVDownloadable = () => {
+    let csv = "Key:,Value:\n";
+    Object.keys(keyValuePairs).forEach((key: string) => {
+      const value = keyValuePairs[key].includes(",")
+        ? `"${keyValuePairs[key]}"`
+        : keyValuePairs[key];
+      csv += key + "," + value + "\n";
+    });
+    const csvDownloadString =
+      "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    const csvDownloadLink = document.querySelector(
+      `#csv-download-${props.document.docID}`
+    );
+    csvDownloadLink?.setAttribute("href", csvDownloadString);
+    csvDownloadLink?.setAttribute(
+      "download",
+      `${props.document.docName}-key-value-pairs.csv`
+    );
+  };
+
+  return (
+    <Menu>
+      <MenuItem
+        id={`json-download-${props.document.docID}`}
+        text={"Download as JSON"}
+      />
+      <MenuItem
+        id={`csv-download-${props.document.docID}`}
+        text={"Download as CSV"}
+      />
+    </Menu>
+  );
+};
+
 const populateForms = () => {
   $(document).ready(() => {
     const keyValuePairs = getAllKeyValuePairs().docData;
@@ -238,6 +306,11 @@ const DocCell = (props: DocumentInfo) => {
       >
         <RemoveButton>
           <Icon icon={"delete"} />
+        </RemoveButton>
+      </Popover>
+      <Popover content={<DownloadDocData document={props} />}>
+        <RemoveButton>
+          <Icon icon={"download"} />
         </RemoveButton>
       </Popover>
     </Box>
