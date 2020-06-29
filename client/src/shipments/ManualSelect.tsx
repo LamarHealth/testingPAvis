@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Dialog, HTMLTable } from "@blueprintjs/core";
+import { Dialog } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import useCustom from "../hooks/GlobalSelectedFileHook";
+
+const ManualSelectWrapper = styled.div`
+  text-align: center;
+  width: 100%;
+
+  h4 {
+    margin: 0.4em;
+  }
+`;
 
 const ManualSelectButton = styled.button`
   border: 1px solid white;
   border-radius: 5px;
   font-weight: bold;
   background-color: #f9e526;
-  padding: 0.3em 0.7em;
+  padding: 0.3em 1.3em;
+  margin: 0 0.4em 0.4em 0.4em;
 
   :hover {
     opacity: 0.5;
@@ -195,29 +205,19 @@ export const ManualSelect = (props: { eventObj: any }) => {
   };
 
   return (
-    <HTMLTable>
-      <tbody>
-        <tr>
-          <td>
-            <i>
-              <strong>manual select</strong>
-            </i>
-          </td>
-          <td>
-            <div>
-              <ManualSelectButton onClick={clickHandler}>
-                {selectedDocData.docName}
-              </ManualSelectButton>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+    <ManualSelectWrapper>
+      <div>
+        <h4>{selectedDocData.docName}</h4>
+        <ManualSelectButton onClick={clickHandler}>
+          Manual Select
+        </ManualSelectButton>
+      </div>
       <ManualSelectOverlay
         isOpen={overlayOpen}
         onClose={() => setOverlayOpen(false)}
       >
         <ManualSelectCanvas id="overlay-canvas"></ManualSelectCanvas>
       </ManualSelectOverlay>
-    </HTMLTable>
+    </ManualSelectWrapper>
   );
 };

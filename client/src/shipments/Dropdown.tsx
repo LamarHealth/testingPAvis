@@ -31,7 +31,7 @@ const Table = styled(HTMLTable)`
   border-collapse: collapse;
   margin: 0;
   text-align: left;
-  width: inherit;
+  width: 100%;
 
   td:nth-child(n + 1):nth-child(-n + 2) + td,
   th:nth-child(n + 1):nth-child(-n + 2) + th {
@@ -40,6 +40,10 @@ const Table = styled(HTMLTable)`
 
   tbody tr {
     border-bottom: 1px solid lightgrey;
+
+    td:nth-child(4) {
+      text-align: right;
+    }
   }
 
   th,
