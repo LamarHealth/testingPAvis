@@ -1,4 +1,10 @@
-import React, { useReducer, useState, createContext, useContext } from "react";
+import React, {
+  useReducer,
+  useState,
+  createContext,
+  useContext,
+  useEffect,
+} from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
@@ -160,10 +166,29 @@ const useDeleteDialogContext = () => {
   return context;
 };
 
-const DownloadJSONDialog = () => {
+const DownloadJSONDialog = (props: { document: DocumentInfo }) => {
+  console.log(props.document);
+
+  useEffect(() => {
+    const dataString =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(props.document.keyValuePairs));
+
+    const aElement = document.querySelector(
+      `#json-download-${props.document.docID}`
+    );
+    aElement?.setAttribute("href", dataString);
+    aElement?.setAttribute(
+      "download",
+      `${props.document.docName}-key-value-pairs.json`
+    );
+  });
+
   return (
     <Menu>
-      <a className="bp3-menu-item">Download as JSON</a>
+      <a id={`json-download-${props.document.docID}`} className="bp3-menu-item">
+        Download as JSON
+      </a>
     </Menu>
   );
 };
@@ -247,7 +272,7 @@ const DocCell = (props: DocumentInfo) => {
           <Icon icon={"delete"} />
         </RemoveButton>
       </Popover>
-      <Popover content={<DownloadJSONDialog />}>
+      <Popover content={<DownloadJSONDialog document={props} />}>
         <RemoveButton>
           <Icon icon={"download"} />
         </RemoveButton>
