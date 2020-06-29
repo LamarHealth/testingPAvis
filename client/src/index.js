@@ -9,6 +9,7 @@ import "@blueprintjs/core/lib/css/blueprint.css";
 import dotenv from "dotenv";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 import DocViewer from "./shipments/DocViewer";
+import { Sidebar } from "./shipments/Sidebar";
 dotenv.config();
 
 // $(
@@ -22,30 +23,34 @@ const SideBarFrame = styled(Frame)`
   overflow: hidden;
   left: auto;
   float: none;
-  width: 100vw;
   height: 100vh;
-  position: absolute;
-  z-index: 99999999;
+  width: auto;
   background: transparent;
 `;
 
-$('<div id="insertion-point"/>').insertAfter(document.body);
+$('<div id="insertion-point"/>').insertBefore(document.body);
 
 ReactDOM.render(
-  <body style={{ display: "flex" }}>
-    <SideBarFrame initialContent={initialContent}>
-      <FrameContextConsumer>
-        {(frameContext) => (
-          <StyleSheetManager target={frameContext.document.head}>
-            <React.Fragment>
-              <DocViewer />
-            </React.Fragment>
-          </StyleSheetManager>
-        )}
-      </FrameContextConsumer>
-    </SideBarFrame>
-    {process.env.MODE || <ShipmentsDashboard />}
-  </body>,
+  <>
+    <Sidebar>
+      <SideBarFrame initialContent={initialContent}>
+        <FrameContextConsumer>
+          {(frameContext) => (
+            <StyleSheetManager target={frameContext.document.head}>
+              <React.Fragment>
+                <DocViewer />
+              </React.Fragment>
+            </StyleSheetManager>
+          )}
+        </FrameContextConsumer>
+      </SideBarFrame>
+    </Sidebar>
+    {process.env.MODE || (
+      <body>
+        <ShipmentsDashboard />
+      </body>
+    )}
+  </>,
   document.getElementById("insertion-point")
 );
 
@@ -55,5 +60,3 @@ ReactDOM.render(
 // serviceWorker.unregister();
 
 // registerServiceWorker();
-
-// border: none; display: block; height: 575px; overflow: hidden; position: fixed; right: 0px; top: 0px; left: auto; float: none; width: 335px; z-index: 2147483647; background: transparent;

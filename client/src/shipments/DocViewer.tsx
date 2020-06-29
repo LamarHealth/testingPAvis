@@ -31,65 +31,6 @@ export interface IFileDispatch {
 export const CountContext = createContext({} as any);
 export const FileContext = createContext({} as any);
 
-/**
- * Sidebar column container
- */
-const Column = styled.div`
-  justify-content: flex-start;
-  flex-direction: column;
-  align-items: stretch;
-  margin: 1em 0em;
-  border: ${(props: { open: boolean }) =>
-    props.open
-      ? `1px solid ${colors.LAYOUT_BLUE_CLEAR}`
-      : `1px solid ${colors.LAYOUT_BLUE_SOLID}`};
-  border-radius: 10px;
-  display: inline-block;
-  height: 100%;
-  width: 25%;
-  margin-left: ${(props: { open: boolean }) =>
-    props.open ? "calc(-25% )" : "0.5em"};
-  overflow: auto;
-  transition: all 1s;
-  background-color: ${colors.WHITE};
-`;
-
-const Container = styled.div`
-  display: flex;
-  height: 90vh;
-`;
-
-const ExpandButton = styled.button`
-  position: relative;
-  width: 2em;
-  height: 3em;
-  top: 50%;
-  right: 1em;
-  margin: 1em 1em 1em 1em;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: ${colors.LAYOUT_BLUE_SOLID};
-  color: white;
-  opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
-  transition: 0.5s;
-  border: none;
-  border-radius: 0% 25% 25% 0%;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const Chevron = styled(Icon)`
-  position: relative;
-`;
-
 const DocCellTransitionGroup = styled.div`
   .doccell-enter {
     opacity: 0.01;
@@ -291,43 +232,36 @@ const initialState = {
 
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
-  const [isOpen, setOpen] = useState(true);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
-      <Column open={isOpen}>
-        {numDocs === 0 && <InstructionsCell />}
-        <TransitionGroup component={DocCellTransitionGroup}>
-          {fileList.documents.map((doc: DocumentInfo, ndx: any) => {
-            return (
-              <CSSTransition
-                // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
+      {numDocs === 0 && <InstructionsCell />}
+      <TransitionGroup component={DocCellTransitionGroup}>
+        {fileList.documents.map((doc: DocumentInfo, ndx: any) => {
+          return (
+            <CSSTransition
+              // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
+              key={`${doc.docID}`}
+              classNames="doccell"
+              timeout={{ enter: 500, exit: 300 }}
+              onEnter={() => setNumDocs(numDocs + 1)}
+              onExited={() => setNumDocs(numDocs - 1)}
+            >
+              <DocCell
+                docName={doc.docName}
+                docType={doc.docType}
+                filePath={doc.filePath}
+                docClass={doc.docClass}
+                docID={doc.docID}
+                keyValuePairs={doc.keyValuePairs}
                 key={`${doc.docID}`}
-                classNames="doccell"
-                timeout={{ enter: 500, exit: 300 }}
-                onEnter={() => setNumDocs(numDocs + 1)}
-                onExited={() => setNumDocs(numDocs - 1)}
-              >
-                <DocCell
-                  docName={doc.docName}
-                  docType={doc.docType}
-                  filePath={doc.filePath}
-                  docClass={doc.docClass}
-                  docID={doc.docID}
-                  keyValuePairs={doc.keyValuePairs}
-                  key={`${doc.docID}`}
-                />
-              </CSSTransition>
-            );
-          })}
-        </TransitionGroup>
-
-        <StyledDropzone />
-      </Column>
-      <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-        <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
-      </ExpandButton>
+              />
+            </CSSTransition>
+          );
+        })}
+      </TransitionGroup>
+      <StyledDropzone />
     </FileContext.Provider>
   );
 };
