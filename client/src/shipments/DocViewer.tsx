@@ -167,20 +167,39 @@ const useDeleteDialogContext = () => {
 };
 
 const DownloadJSONDialog = (props: { document: DocumentInfo }) => {
-  console.log(props.document);
+  const keyValuePairs: any = props.document.keyValuePairs;
 
   useEffect(() => {
-    const dataString =
+    // json
+    const jsonDownloadString =
       "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(props.document.keyValuePairs));
-
-    const aElement = document.querySelector(
+      encodeURIComponent(JSON.stringify(keyValuePairs));
+    const jsonDownloadLink = document.querySelector(
       `#json-download-${props.document.docID}`
     );
-    aElement?.setAttribute("href", dataString);
-    aElement?.setAttribute(
+    jsonDownloadLink?.setAttribute("href", jsonDownloadString);
+    jsonDownloadLink?.setAttribute(
       "download",
       `${props.document.docName}-key-value-pairs.json`
+    );
+
+    // csv
+    let csv = "Key:,Value:\n";
+    Object.keys(keyValuePairs).forEach((key: string) => {
+      const value = keyValuePairs[key].includes(",")
+        ? `"${keyValuePairs[key]}"`
+        : keyValuePairs[key];
+      csv += key + "," + value + "\n";
+    });
+    const csvDownloadString =
+      "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    const csvDownloadLink = document.querySelector(
+      `#csv-download-${props.document.docID}`
+    );
+    csvDownloadLink?.setAttribute("href", csvDownloadString);
+    csvDownloadLink?.setAttribute(
+      "download",
+      `${props.document.docName}-key-value-pairs.csv`
     );
   });
 
@@ -188,6 +207,9 @@ const DownloadJSONDialog = (props: { document: DocumentInfo }) => {
     <Menu>
       <a id={`json-download-${props.document.docID}`} className="bp3-menu-item">
         Download as JSON
+      </a>
+      <a id={`csv-download-${props.document.docID}`} className="bp3-menu-item">
+        Download as CSV
       </a>
     </Menu>
   );
