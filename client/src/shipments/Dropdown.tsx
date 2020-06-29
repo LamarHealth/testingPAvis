@@ -228,7 +228,7 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
           ></DropdownTable>
         </div>
       ) : (
-        <p>There are no docs in local storage</p>
+        <p>Upload documents on the sidebar to load results.</p>
       )}
     </DropdownWrapper>
   );
