@@ -13,7 +13,14 @@ import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
 
-import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
+import {
+  Icon,
+  Button,
+  Popover,
+  Menu,
+  MenuItem,
+  Position,
+} from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
@@ -154,7 +161,7 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
           });
         }}
       >
-        {/* <Icon icon={"trash"} /> */}
+        <Icon icon={"trash"} />
         Confirm Delete
       </a>
     </Menu>
@@ -166,11 +173,15 @@ const useDeleteDialogContext = () => {
   return context;
 };
 
-const DownloadJSONDialog = (props: { document: DocumentInfo }) => {
+const DownloadDocData = (props: { document: DocumentInfo }) => {
   const keyValuePairs: any = props.document.keyValuePairs;
 
   useEffect(() => {
-    // json
+    makeJSONDownloadable();
+    makeCSVDownloadable();
+  });
+
+  const makeJSONDownloadable = () => {
     const jsonDownloadString =
       "data:text/json;charset=utf-8," +
       encodeURIComponent(JSON.stringify(keyValuePairs));
@@ -182,8 +193,9 @@ const DownloadJSONDialog = (props: { document: DocumentInfo }) => {
       "download",
       `${props.document.docName}-key-value-pairs.json`
     );
+  };
 
-    // csv
+  const makeCSVDownloadable = () => {
     let csv = "Key:,Value:\n";
     Object.keys(keyValuePairs).forEach((key: string) => {
       const value = keyValuePairs[key].includes(",")
@@ -201,16 +213,18 @@ const DownloadJSONDialog = (props: { document: DocumentInfo }) => {
       "download",
       `${props.document.docName}-key-value-pairs.csv`
     );
-  });
+  };
 
   return (
     <Menu>
-      <a id={`json-download-${props.document.docID}`} className="bp3-menu-item">
-        Download as JSON
-      </a>
-      <a id={`csv-download-${props.document.docID}`} className="bp3-menu-item">
-        Download as CSV
-      </a>
+      <MenuItem
+        id={`json-download-${props.document.docID}`}
+        text={"Download as JSON"}
+      />
+      <MenuItem
+        id={`csv-download-${props.document.docID}`}
+        text={"Download as CSV"}
+      />
     </Menu>
   );
 };
@@ -294,7 +308,7 @@ const DocCell = (props: DocumentInfo) => {
           <Icon icon={"delete"} />
         </RemoveButton>
       </Popover>
-      <Popover content={<DownloadJSONDialog document={props} />}>
+      <Popover content={<DownloadDocData document={props} />}>
         <RemoveButton>
           <Icon icon={"download"} />
         </RemoveButton>
