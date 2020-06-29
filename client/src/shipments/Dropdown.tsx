@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
+import { HTMLTable, ProgressBar, Icon, Dialog } from "@blueprintjs/core";
 
+import { ManualSelect } from "./ManualSelect";
 import {
-  getKeyValuePairs,
+  getKeyValuePairsByDoc,
+  getAllKeyValuePairs,
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
@@ -13,7 +15,7 @@ import {
 const DropdownWrapper = styled.div`
   background-color: #fdfff4;
   border: 1px solid lightgrey;
-  z-index: 40;
+  z-index: 2;
   max-height: 24em;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -57,6 +59,10 @@ const FillButton = styled.button`
   width: 4em;
   height: 2em;
   font-weight: bold;
+
+  :hover {
+    opacity: 0.5;
+  }
 `;
 
 const ClosestMatchBubble = styled.span`
@@ -135,7 +141,7 @@ export const DropdownTable = (props: {
   const dropdownWidth = eventObj.target.offsetWidth;
 
   const targetString = props.eventObj.target.placeholder;
-  const { areThereDocs, docData } = getKeyValuePairs();
+  const { areThereDocs, docData } = getAllKeyValuePairs();
 
   const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
   const bestMatch = sortedKeyValuePairs[0].key;
@@ -206,7 +212,7 @@ export const DropdownTable = (props: {
 };
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
-  const areThereDocs = getKeyValuePairs().areThereDocs;
+  const areThereDocs = getAllKeyValuePairs().areThereDocs;
   return (
     <DropdownWrapper
       id={`dropdown${props.dropdownIndex}`}
@@ -214,12 +220,15 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       role="dropdown"
     >
       {areThereDocs ? (
-        <DropdownTable
-          dropdownIndex={props.dropdownIndex}
-          eventObj={props.eventObj}
-        ></DropdownTable>
+        <div>
+          <ManualSelect eventObj={props.eventObj}></ManualSelect>
+          <DropdownTable
+            dropdownIndex={props.dropdownIndex}
+            eventObj={props.eventObj}
+          ></DropdownTable>
+        </div>
       ) : (
-        <p>There are no docs in local storage</p>
+        <p>Upload documents on the sidebar to load results.</p>
       )}
     </DropdownWrapper>
   );
