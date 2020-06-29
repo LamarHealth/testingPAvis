@@ -31,7 +31,7 @@ const SideBarFrame = styled(Frame)`
 $('<div id="insertion-point"/>').insertBefore(document.body);
 
 ReactDOM.render(
-  <>
+  <div>
     <Sidebar>
       <SideBarFrame initialContent={initialContent}>
         <FrameContextConsumer>
@@ -50,7 +50,7 @@ ReactDOM.render(
         <ShipmentsDashboard />
       </body>
     )}
-  </>,
+  </div>,
   document.getElementById("insertion-point")
 );
 

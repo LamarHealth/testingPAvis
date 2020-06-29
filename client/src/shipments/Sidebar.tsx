@@ -32,6 +32,9 @@ const Container = styled.div`
   align-items: stretch;
   height: 90%;
   margin: 1em;
+  transition: 0.5s;
+  margin-left: ${(props: { open: boolean }) =>
+    props.open ? "calc(-20% + 2em)" : "0.0em"};
 `;
 
 const ExpandButton = styled.button`
@@ -48,7 +51,6 @@ const ExpandButton = styled.button`
   background-color: ${colors.LAYOUT_BLUE_SOLID};
   color: ${colors.WHITE};
   opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
-  transition: 0.5s;
   border: none;
   border-radius: 0% 25% 25% 0%;
 
@@ -64,7 +66,7 @@ const ExpandButton = styled.button`
 export const Sidebar = ({ children }: any) => {
   const [isOpen, setOpen] = useState(true);
   return (
-    <Container>
+    <Container open={isOpen}>
       <Column open={isOpen}>{children}</Column>
       <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
         <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
