@@ -64,24 +64,29 @@ class ShipmentsDashboard extends React.Component {
             labelFor="text-input"
             labelInfo="(required)"
           >
-            <FormContainer key={1} id="text-input1" placeholder="Date" />
-            <FormContainer key={166} id="text-input2" placeholder="Location" />
-
-            <FormContainer key={11} id="text-input3" placeholder="SCAC" />
-
-            <FormContainer key={16} id="text-input4" placeholder="CID" />
+            <h3>Date</h3>
+            <FormContainer key={1} id="text-input1" placeholder="Day" />
+            <FormContainer placeholder="Month" />
+            <FormContainer placeholder="Year" />
+            <FormContainer placeholder="Date" />
+            <h3>Shipment</h3>
+            <FormContainer placeholder="Description" />
+            <FormContainer placeholder="Consigned To" />
+            <FormContainer placeholder="B/L Number" />
+            <FormContainer placeholder="Carrier Booking" />
+            <FormContainer placeholder="Consignor" />
+            <FormContainer placeholder="Email" />
+            <FormContainer placeholder="Telephone" />
+            <FormContainer placeholder="SCAC" />
+            <FormContainer placeholder="CID" />
           </FormGroup>
-          <FormGroup key={123} label="Additional info">
-            <FormContainer key={15} id="text-input5" placeholder="SID" />
-            <FormContainer
-              key={41}
-              id="text-input6"
-              placeholder="Bill of Lading Number"
-            />
+          <FormGroup label="Additional info">
+            <FormContainer placeholder="SID" />
 
-            <FormContainer key={31} id="text-input7" placeholder="FOB" />
+            <FormContainer placeholder="FOB" />
 
-            <FormContainer key={12} id="text-input8" placeholder="COD Amount" />
+            <FormContainer placeholder="Amount" />
+            <FormContainer placeholder="Additional Info" />
           </FormGroup>
         </ChecklistColumn>
         {/* <ChecklistColumn>
