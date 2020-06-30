@@ -11,7 +11,10 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
-import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
+import {
+  getLevenDistanceAndSort,
+  getKeyValuePairsByDoc,
+} from "./KeyValuePairs";
 import useGlobalSelectedFile from "../hooks/GlobalSelectedFileHook";
 
 import {
@@ -232,27 +235,6 @@ const DownloadDocData = (props: { document: DocumentInfo }) => {
   );
 };
 
-const populateForms = () => {
-  $(document).ready(() => {
-    const keyValuePairs = getAllKeyValuePairs().docData;
-
-    $("input").each(function () {
-      const targetString = $(this).attr("placeholder");
-
-      if (typeof targetString === "undefined") {
-        return;
-      }
-
-      const sortedKeyValuePairs = getLevenDistanceAndSort(
-        keyValuePairs,
-        targetString
-      );
-
-      $(this).attr("value", sortedKeyValuePairs[0]["value"]);
-    });
-  });
-};
-
 // render input dropdowns
 $(document).ready(function () {
   let dropdownIndex = 0;
@@ -299,6 +281,29 @@ $(document).ready(function () {
 
 const DocCell = (props: DocumentInfo) => {
   const [globalSelectedFile, setGlobalSelectedFile] = useGlobalSelectedFile();
+
+  const populateForms = () => {
+    $(document).ready(() => {
+      const keyValuePairs = getKeyValuePairsByDoc().filter(
+        (doc) => doc.docName === props.docName
+      )[0];
+
+      $("input").each(function () {
+        const targetString = $(this).attr("placeholder");
+
+        if (typeof targetString === "undefined") {
+          return;
+        }
+
+        const sortedKeyValuePairs = getLevenDistanceAndSort(
+          keyValuePairs,
+          targetString
+        );
+
+        $(this).attr("value", sortedKeyValuePairs[0]["value"]);
+      });
+    });
+  };
 
   return (
     <Box
