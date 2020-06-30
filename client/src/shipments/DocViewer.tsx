@@ -259,7 +259,9 @@ $(document).ready(function () {
 
   $("input").click((event: any) => {
     // create a mounter and render Dropdown
-    $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
+    const mounter = $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(
+      event.target
+    );
 
     ReactDOM.render(
       <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
@@ -281,10 +283,12 @@ $(document).ready(function () {
       if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
         $(dropdownElement).mouseleave(() => {
           dropdownElement.remove();
+          mounter.remove();
           popperInstance.destroy();
         });
       } else {
         dropdownElement.remove();
+        mounter.remove();
         popperInstance.destroy();
       }
     });

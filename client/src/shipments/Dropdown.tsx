@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { HTMLTable, ProgressBar, Icon, Dialog } from "@blueprintjs/core";
 
+import { colors } from "./../common/colors";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -14,7 +15,7 @@ import useGlobalSelectedFile from "./../hooks/GlobalSelectedFileHook";
 
 // dropdown table components
 const DropdownWrapper = styled.div`
-  background-color: #fdfff4;
+  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   border: 1px solid lightgrey;
   z-index: 2;
   max-height: 24em;
@@ -52,14 +53,14 @@ const Table = styled(HTMLTable)`
   }
 
   .closest-match-row {
-    background-color: hsla(72, 69%, 74%, 0.4);
+    background-color: ${colors.CLOSEST_MATCH_ROW};
   }
 `;
 
 const FillButton = styled.button`
   background-color: #22c062;
   color: white;
-  border: none;
+  border: 1px solid white;
   border-radius: 5px;
   width: 4em;
   height: 2em;
@@ -70,15 +71,12 @@ const FillButton = styled.button`
   }
 `;
 
-const ClosestMatchBubble = styled.span`
-  background-color: #9ae95c;
-  border: 1px solid white;
-  border-radius: 0.5em;
-  padding: 0.2em 0.5em;
-`;
-
-const ClosestMatch = styled.span`
-  margin-left: 0.5em;
+const ClosestMatch = styled.button`
+  padding: 0;
+  width: 6.5em;
+  border: none;
+  background-color: ${colors.TRANSPARENT};
+  text-align: left;
 `;
 
 const TableBody = (props: {
@@ -110,25 +108,16 @@ const TableBody = (props: {
                 intent={"primary"}
                 value={keyValue["distanceFromTarget"]}
               />
-            </td>
-            <td>
-              {keyValue["key"] === props.bestMatch ? (
-                <span>
-                  <ClosestMatchBubble>Closest Match</ClosestMatchBubble>
-                  <ClosestMatch>{keyValue["key"]}</ClosestMatch>
-                </span>
-              ) : (
-                keyValue["key"]
+              {keyValue["key"] === props.bestMatch && (
+                <ClosestMatch>
+                  <i>closest match</i>
+                </ClosestMatch>
               )}
             </td>
+            <td>{keyValue["key"]}</td>
             <td>{keyValue["value"]}</td>
-            <td>
-              <FillButton
-                id={`dropdown${props.dropdownIndex}-key${i}`}
-                onClick={fillButtonHandler}
-              >
-                Fill
-              </FillButton>
+            <td onClick={fillButtonHandler}>
+              <FillButton>Fill</FillButton>
             </td>
           </tr>
         );

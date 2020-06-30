@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Dialog } from "@blueprintjs/core";
+import { Dialog, Popover } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import useGlobalSelectedFile from "../hooks/GlobalSelectedFileHook";
 
 const ManualSelectWrapper = styled.div`
-  text-align: center;
   width: 100%;
 
   h4 {
     margin: 0.4em;
+    margin-left: 1em;
   }
 `;
 
@@ -21,7 +21,7 @@ const ManualSelectButton = styled.button`
   font-weight: bold;
   background-color: #f9e526;
   padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 0.4em;
+  margin: 0 0.4em 0.4em 1em;
 
   :hover {
     opacity: 0.5;
@@ -208,10 +208,10 @@ export const ManualSelect = (props: { eventObj: any }) => {
     <ManualSelectWrapper>
       <div>
         <h4>{selectedDocData.docName}</h4>
-        <ManualSelectButton onClick={clickHandler}>
-          Manual Select
-        </ManualSelectButton>
       </div>
+      <ManualSelectButton onClick={clickHandler}>
+        ManualSelect
+      </ManualSelectButton>
       <ManualSelectOverlay
         isOpen={overlayOpen}
         onClose={() => setOverlayOpen(false)}
