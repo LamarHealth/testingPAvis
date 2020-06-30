@@ -20,22 +20,19 @@ const SideBarFrame = styled(Frame)`
   left: auto;
   float: none;
   height: 100vh;
-  width: auto;
   background: transparent;
 `;
 
-$('<div id="insertion-point"/>').insertBefore(document.body);
+$('<span id="insertion-point"/>').insertBefore(document.body);
 
 ReactDOM.render(
-  <div>
+  <>
     <Sidebar>
       <SideBarFrame initialContent={initialContent}>
         <FrameContextConsumer>
           {(frameContext) => (
             <StyleSheetManager target={frameContext.document.head}>
-              <React.Fragment>
-                <DocViewer />
-              </React.Fragment>
+              <DocViewer />
             </StyleSheetManager>
           )}
         </FrameContextConsumer>
@@ -46,7 +43,7 @@ ReactDOM.render(
         <ShipmentsDashboard />
       </body>
     )}
-  </div>,
+  </>,
   document.getElementById("insertion-point")
 );
 

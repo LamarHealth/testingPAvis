@@ -73,13 +73,12 @@ const Instructions = styled.div`
 `;
 
 const Box = styled.div`
-  margin: 1em;
+  margin: 1em 0em;
   padding: 1em;
   border: 1px solid ${colors.LAYOUT_BLUE_SOLID};
   border-radius: 5px;
   color: ${colors.FONT_BLUE};
   background-color: white;
-  overflow: auto;
 `;
 const Name = styled.h2`
   margin: 0;

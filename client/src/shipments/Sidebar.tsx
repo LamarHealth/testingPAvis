@@ -16,8 +16,7 @@ const Column = styled.div`
   display: flex;
   height: 100%;
   transition: all 1s;
-  width: ${(props: { open: boolean }) => (props.open ? "100%" : "0%")};
-
+  margin-left: ${(props: { open: boolean }) => (props.open ? "0" : "-90%")};
   background-color: ${colors.WHITE};
 `;
 
@@ -29,10 +28,8 @@ const Container = styled.div`
   position: fixed;
   z-index: 99999999;
   display: flex;
-  align-items: stretch;
   height: 90%;
   transition: 1s;
-  width: ${(props: { open: boolean }) => (props.open ? "25%" : "0%")};
 `;
 
 const ExpandButton = styled.button`
@@ -64,7 +61,7 @@ const ExpandButton = styled.button`
 export const Sidebar = ({ children }: any) => {
   const [isOpen, setOpen] = useState(false);
   return (
-    <Container open={isOpen}>
+    <Container>
       <Column open={isOpen}>{children}</Column>
       <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
         <Chevron icon={isOpen ? "chevron-left" : "chevron-right"} />
