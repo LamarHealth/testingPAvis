@@ -138,6 +138,15 @@ const Box = styled.div`
   background-color: white;
   overflow: auto;
 `;
+
+const TickCircle = styled(Icon)`
+  position: relative;
+  width: 0;
+  height: 0;
+  right: 0.5em;
+  top: -1.67em;
+`;
+
 const Name = styled.h2`
   margin: 0;
 `;
@@ -306,15 +315,20 @@ const DocCell = (props: DocumentInfo) => {
   };
 
   return (
-    <Box
-      onClick={() => setGlobalSelectedFile({ selectedFile: props.docName })}
-      style={
-        globalSelectedFile.selectedFile === props.docName
-          ? { backgroundColor: colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE }
-          : { backgroundColor: "" }
-      }
-    >
-      <Name>{props.docName}</Name>
+    <Box onClick={() => setGlobalSelectedFile({ selectedFile: props.docName })}>
+      {globalSelectedFile.selectedFile === props.docName ? (
+        <Name
+          style={{
+            backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+          }}
+        >
+          <TickCircle icon={"tick-circle"} intent={"success"} />
+          {props.docName}
+        </Name>
+      ) : (
+        <Name>{props.docName}</Name>
+      )}
+
       <Type>
         <Icon icon={"rotate-document"} />
         Document Type: {props.docClass}
