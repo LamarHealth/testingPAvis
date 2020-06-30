@@ -210,7 +210,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
         <h4>{selectedDocData.docName}</h4>
       </div>
       <ManualSelectButton onClick={clickHandler}>
-        ManualSelect
+        Manual Select
       </ManualSelectButton>
       <ManualSelectOverlay
         isOpen={overlayOpen}
