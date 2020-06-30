@@ -11,7 +11,7 @@ const setState = (newState: any) => {
   });
 };
 
-const useCustom = () => {
+const useGlobalSelectedFile = () => {
   const newListener = useState()[1];
   useEffect(() => {
     listeners.push(newListener);
@@ -19,4 +19,4 @@ const useCustom = () => {
   return [state, setState];
 };
 
-export default useCustom;
+export default useGlobalSelectedFile;

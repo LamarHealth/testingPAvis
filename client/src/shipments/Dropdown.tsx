@@ -10,7 +10,7 @@ import {
   sortKeyValuePairs,
   KeyValuesWithDistance,
 } from "./KeyValuePairs";
-import useCustom from "./../hooks/GlobalSelectedFileHook";
+import useGlobalSelectedFile from "./../hooks/GlobalSelectedFileHook";
 
 // dropdown table components
 const DropdownWrapper = styled.div`
@@ -141,7 +141,7 @@ export const DropdownTable = (props: {
   dropdownIndex: number;
   eventObj: any;
 }) => {
-  const globalSelectedFile = useCustom()[0];
+  const globalSelectedFile = useGlobalSelectedFile()[0];
 
   const eventObj = props.eventObj;
   const dropdownIndex = props.dropdownIndex;
@@ -226,7 +226,7 @@ export const DropdownTable = (props: {
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
-  const isADocSelected = useCustom()[0].selectedFile !== "";
+  const isADocSelected = useGlobalSelectedFile()[0].selectedFile !== "";
 
   return (
     <DropdownWrapper

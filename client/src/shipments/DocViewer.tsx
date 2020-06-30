@@ -12,7 +12,7 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
-import useCustom from "../hooks/GlobalSelectedFileHook";
+import useGlobalSelectedFile from "../hooks/GlobalSelectedFileHook";
 
 import {
   Icon,
@@ -150,7 +150,7 @@ const RemoveButton = styled(Button)`
 
 const DeleteDialog = (props: { document: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
-  const setGlobalSelectedFile = useCustom()[1];
+  const setGlobalSelectedFile = useGlobalSelectedFile()[1];
 
   const handleDelete = (e: any) => {
     e.stopPropagation();
@@ -294,7 +294,7 @@ $(document).ready(function () {
 });
 
 const DocCell = (props: DocumentInfo) => {
-  const [globalSelectedFile, setGlobalSelectedFile] = useCustom();
+  const [globalSelectedFile, setGlobalSelectedFile] = useGlobalSelectedFile();
 
   return (
     <Box

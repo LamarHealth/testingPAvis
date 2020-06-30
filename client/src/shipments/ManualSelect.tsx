@@ -4,7 +4,7 @@ import { Dialog } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
-import useCustom from "../hooks/GlobalSelectedFileHook";
+import useGlobalSelectedFile from "../hooks/GlobalSelectedFileHook";
 
 const ManualSelectWrapper = styled.div`
   text-align: center;
@@ -45,7 +45,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
 
   const docData = getKeyValuePairsByDoc();
-  const globalSelectedFile = useCustom()[0];
+  const globalSelectedFile = useGlobalSelectedFile()[0];
 
   const selectedDocData = docData.filter(
     (doc) => doc.docName === globalSelectedFile.selectedFile
