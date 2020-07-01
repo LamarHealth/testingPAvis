@@ -9,7 +9,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 import bodyParser from "body-parser";
-import express, { query } from "express";
+import express from "express";
 import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
@@ -74,8 +74,6 @@ router.post("/api/upload_status", (req, res) => {
         Body: req.files[0].buffer,
       };
 
-      console.log(s3params);
-
       let docClass = "";
       // All docs are uploaded just in case
       s3.upload(s3params, function (err, data) {
@@ -106,8 +104,6 @@ router.post("/api/upload_status", (req, res) => {
               keyValuePairs: parsedTextract,
             });
             // successful response
-
-            console.log(parsedTextract);
 
             // upload the JSON
             const jsonifiedDocName = req.files[0].originalname.replace(
@@ -156,8 +152,8 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const docName = req.params.docName.trim();
 
-  console.log("docID, ", docID);
-  console.log("docName, ", docName);
+  console.log("docID:", docID);
+  console.log("docName:", docName);
 
   const s3 = new S3();
 
@@ -168,7 +164,7 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 
   s3.getObject(s3GetParams, (error, data) => {
     if (error) {
-      console.log("error getting doc image from S3: ", error);
+      console.error("error getting doc image from S3: ", error);
       res.status(400).send({
         status: "error",
         docID: req.params.docID,

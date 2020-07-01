@@ -222,7 +222,7 @@ const FileStatus = (props: any) => {
   };
 
   // the PDFJS usePdf hook
-  const { pdfDocument, pdfPage } = usePdf({
+  usePdf({
     file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,

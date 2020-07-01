@@ -175,10 +175,14 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
 
   return (
     <Menu>
-      <a className="bp3-menu-item" onClick={handleDelete}>
-        <Icon icon={"trash"} />
-        Confirm Delete
-      </a>
+      <MenuItem
+        text={
+          <>
+            <Icon icon={"trash"} /> Confirm Delete
+          </>
+        }
+        onClick={handleDelete}
+      />
     </Menu>
   );
 };
@@ -290,8 +294,6 @@ $(document).ready(function () {
 
 const DocCell = (props: DocumentInfo) => {
   const [globalSelectedFile, setGlobalSelectedFile] = useGlobalSelectedFile();
-
-  console.log(props);
 
   const populateForms = () => {
     $(document).ready(() => {
