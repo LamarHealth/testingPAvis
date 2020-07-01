@@ -182,11 +182,6 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
     </Menu>
   );
 };
-const DeleteDialogContext = createContext({} as any);
-const useDeleteDialogContext = () => {
-  const context = useContext(DeleteDialogContext);
-  return context;
-};
 
 const DownloadDocData = (props: { document: DocumentInfo }) => {
   const keyValuePairs: any = props.document.keyValuePairs;
