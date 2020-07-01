@@ -15,19 +15,15 @@ import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
-import useGlobalSelectedFile from "../hooks/GlobalSelectedFileHook";
 
-import {
-  Icon,
-  Button,
-  Popover,
-  Menu,
-  MenuItem,
-  Position,
-} from "@blueprintjs/core";
+import { Icon, Button, Popover, Menu, MenuItem } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
+import {
+  createState as createSpecialHookState,
+  useState as useSpecialHookState,
+} from "@hookstate/core";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -162,11 +158,11 @@ const RemoveButton = styled(Button)`
 
 const DeleteDialog = (props: { document: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
-  const setGlobalSelectedFile = useGlobalSelectedFile()[1];
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
 
   const handleDelete = (e: any) => {
     e.stopPropagation();
-    setGlobalSelectedFile({ selectedFile: "" });
+    globalSelectedFile.set("");
     fileInfoContext.fileDispatch({
       type: "remove",
       documentInfo: props.document,
@@ -292,8 +288,10 @@ $(document).ready(function () {
   });
 });
 
+export const globalSelectedFileState = createSpecialHookState("");
+
 const DocCell = (props: DocumentInfo) => {
-  const [globalSelectedFile, setGlobalSelectedFile] = useGlobalSelectedFile();
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
 
   const populateForms = () => {
     $(document).ready(() => {
@@ -319,8 +317,8 @@ const DocCell = (props: DocumentInfo) => {
   };
 
   return (
-    <Box onClick={() => setGlobalSelectedFile({ selectedFile: props.docID })}>
-      {globalSelectedFile.selectedFile === props.docID ? (
+    <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
+      {globalSelectedFile.get() === props.docID ? (
         <Name
           style={{
             backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,

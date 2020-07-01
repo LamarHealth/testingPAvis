@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Dialog, Popover } from "@blueprintjs/core";
+import { Dialog } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
-import useGlobalSelectedFile from "../hooks/GlobalSelectedFileHook";
+import { globalSelectedFileState } from "./DocViewer";
 
 const ManualSelectWrapper = styled.div`
   width: 100%;
@@ -44,11 +45,12 @@ export const ManualSelect = (props: { eventObj: any }) => {
   const [docImageURL, setDocImageURL] = useState("");
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
 
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+
   const docData = getKeyValuePairsByDoc();
-  const globalSelectedFile = useGlobalSelectedFile()[0];
 
   const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.selectedFile
+    (doc) => doc.docID === globalSelectedFile.get()
   )[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {

@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { HTMLTable, ProgressBar, Icon, Dialog } from "@blueprintjs/core";
+import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { colors } from "./../common/colors";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
-  getAllKeyValuePairs,
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
 } from "./KeyValuePairs";
-import useGlobalSelectedFile from "./../hooks/GlobalSelectedFileHook";
+import { globalSelectedFileState } from "./DocViewer";
 
 // dropdown table components
 const DropdownWrapper = styled.div`
@@ -130,16 +130,14 @@ export const DropdownTable = (props: {
   dropdownIndex: number;
   eventObj: any;
 }) => {
-  const globalSelectedFile = useGlobalSelectedFile()[0];
-
   const eventObj = props.eventObj;
   const dropdownIndex = props.dropdownIndex;
-  const dropdownWidth = eventObj.target.offsetWidth;
-
   const targetString = props.eventObj.target.placeholder;
+
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const docData = getKeyValuePairsByDoc();
   const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.selectedFile
+    (doc) => doc.docID === globalSelectedFile.get()
   )[0];
 
   const sortedKeyValuePairs = getLevenDistanceAndSort(
@@ -215,7 +213,8 @@ export const DropdownTable = (props: {
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
-  const isADocSelected = useGlobalSelectedFile()[0].selectedFile !== "";
+  const isADocSelected =
+    useSpecialHookState(globalSelectedFileState).get() !== "";
 
   return (
     <DropdownWrapper
