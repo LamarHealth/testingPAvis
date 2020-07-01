@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { HTMLTable, ProgressBar, Icon, Dialog } from "@blueprintjs/core";
+import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
+import { colors } from "./../common/colors";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
-  getAllKeyValuePairs,
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
 } from "./KeyValuePairs";
+import { globalSelectedFileState } from "./DocViewer";
 
 // dropdown table components
 const DropdownWrapper = styled.div`
-  background-color: #fdfff4;
+  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   border: 1px solid lightgrey;
   z-index: 2;
   max-height: 24em;
@@ -30,7 +32,7 @@ const Table = styled(HTMLTable)`
   border-collapse: collapse;
   margin: 0;
   text-align: left;
-  width: inherit;
+  width: 100%;
 
   td:nth-child(n + 1):nth-child(-n + 2) + td,
   th:nth-child(n + 1):nth-child(-n + 2) + th {
@@ -39,6 +41,10 @@ const Table = styled(HTMLTable)`
 
   tbody tr {
     border-bottom: 1px solid lightgrey;
+
+    td:nth-child(4) {
+      text-align: right;
+    }
   }
 
   th,
@@ -47,14 +53,14 @@ const Table = styled(HTMLTable)`
   }
 
   .closest-match-row {
-    background-color: hsla(72, 69%, 74%, 0.4);
+    background-color: ${colors.CLOSEST_MATCH_ROW};
   }
 `;
 
 const FillButton = styled.button`
   background-color: #22c062;
   color: white;
-  border: none;
+  border: 1px solid white;
   border-radius: 5px;
   width: 4em;
   height: 2em;
@@ -65,15 +71,12 @@ const FillButton = styled.button`
   }
 `;
 
-const ClosestMatchBubble = styled.span`
-  background-color: #9ae95c;
-  border: 1px solid white;
-  border-radius: 0.5em;
-  padding: 0.2em 0.5em;
-`;
-
-const ClosestMatch = styled.span`
-  margin-left: 0.5em;
+const ClosestMatch = styled.button`
+  padding: 0;
+  width: 6.5em;
+  border: none;
+  background-color: ${colors.TRANSPARENT};
+  text-align: left;
 `;
 
 const TableBody = (props: {
@@ -105,25 +108,16 @@ const TableBody = (props: {
                 intent={"primary"}
                 value={keyValue["distanceFromTarget"]}
               />
-            </td>
-            <td>
-              {keyValue["key"] === props.bestMatch ? (
-                <span>
-                  <ClosestMatchBubble>Closest Match</ClosestMatchBubble>
-                  <ClosestMatch>{keyValue["key"]}</ClosestMatch>
-                </span>
-              ) : (
-                keyValue["key"]
+              {keyValue["key"] === props.bestMatch && (
+                <ClosestMatch>
+                  <i>closest match</i>
+                </ClosestMatch>
               )}
             </td>
+            <td>{keyValue["key"]}</td>
             <td>{keyValue["value"]}</td>
-            <td>
-              <FillButton
-                id={`dropdown${props.dropdownIndex}-key${i}`}
-                onClick={fillButtonHandler}
-              >
-                Fill
-              </FillButton>
+            <td onClick={fillButtonHandler}>
+              <FillButton>Fill</FillButton>
             </td>
           </tr>
         );
@@ -138,12 +132,18 @@ export const DropdownTable = (props: {
 }) => {
   const eventObj = props.eventObj;
   const dropdownIndex = props.dropdownIndex;
-  const dropdownWidth = eventObj.target.offsetWidth;
-
   const targetString = props.eventObj.target.placeholder;
-  const { areThereDocs, docData } = getAllKeyValuePairs();
 
-  const sortedKeyValuePairs = getLevenDistanceAndSort(docData, targetString);
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const docData = getKeyValuePairsByDoc();
+  const selectedDocData = docData.filter(
+    (doc) => doc.docID === globalSelectedFile.get()
+  )[0];
+
+  const sortedKeyValuePairs = getLevenDistanceAndSort(
+    selectedDocData,
+    targetString
+  );
   const bestMatch = sortedKeyValuePairs[0].key;
 
   const [sort, setSort] = useState("highest match");
@@ -212,7 +212,10 @@ export const DropdownTable = (props: {
 };
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
-  const areThereDocs = getAllKeyValuePairs().areThereDocs;
+  const areThereDocs = getKeyValuePairsByDoc().length > 0;
+  const isDocSelected =
+    useSpecialHookState(globalSelectedFileState).get() !== "";
+
   return (
     <DropdownWrapper
       id={`dropdown${props.dropdownIndex}`}
@@ -220,13 +223,17 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       role="dropdown"
     >
       {areThereDocs ? (
-        <div>
-          <ManualSelect eventObj={props.eventObj}></ManualSelect>
-          <DropdownTable
-            dropdownIndex={props.dropdownIndex}
-            eventObj={props.eventObj}
-          ></DropdownTable>
-        </div>
+        isDocSelected ? (
+          <div>
+            <ManualSelect eventObj={props.eventObj}></ManualSelect>
+            <DropdownTable
+              dropdownIndex={props.dropdownIndex}
+              eventObj={props.eventObj}
+            ></DropdownTable>
+          </div>
+        ) : (
+          <p>Select a doc to see fill options</p>
+        )
       ) : (
         <p>Upload documents on the sidebar to load results.</p>
       )}

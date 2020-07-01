@@ -9,7 +9,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 import bodyParser from "body-parser";
-import express, { query } from "express";
+import express from "express";
 import path from "path";
 import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
@@ -60,13 +60,7 @@ router.post("/api/upload_status", (req, res) => {
         ],
       };
 
-      // CCC regex to convert the filename to an appropriate folder name
-      // from AWS: Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).
-      let folderifiedDocName = req.files[0].originalname
-        .toLowerCase()
-        .replace(/(.pdf)$/i, ".png")
-        .replace(/[  !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gi, "-")
-        .replace(/(-)+/gi, "-");
+      const docID = uuidv4();
 
       // convert .pdf file extension to .png cause that is what the client is doing to it
       let pngifiedDocName = req.files[0].originalname.replace(
@@ -75,7 +69,7 @@ router.post("/api/upload_status", (req, res) => {
       );
 
       var s3params = {
-        Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
+        Bucket: `doc-classifier-bucket/${docID}`,
         Key: pngifiedDocName,
         Body: req.files[0].buffer,
       };
@@ -88,7 +82,7 @@ router.post("/api/upload_status", (req, res) => {
             console.log(err, err.stack);
             res.status(400).send({
               status: "error",
-              docID: uuidv4(),
+              docID: docID,
               docType: req.files[0].mimetype.split("/")[1],
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
@@ -102,7 +96,7 @@ router.post("/api/upload_status", (req, res) => {
 
             res.json({
               status: "complete",
-              docID: uuidv4(),
+              docID: docID,
               docType: req.files[0].mimetype.split("/")[1],
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
@@ -110,8 +104,6 @@ router.post("/api/upload_status", (req, res) => {
               keyValuePairs: parsedTextract,
             });
             // successful response
-
-            console.log(parsedTextract);
 
             // upload the JSON
             const jsonifiedDocName = req.files[0].originalname.replace(
@@ -121,7 +113,7 @@ router.post("/api/upload_status", (req, res) => {
 
             // rawJSON
             s3params = {
-              Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
+              Bucket: `doc-classifier-bucket/${docID}`,
               Key: `rawJSON-${jsonifiedDocName}`,
               Body: Buffer.from(JSON.stringify(data)),
             };
@@ -134,7 +126,7 @@ router.post("/api/upload_status", (req, res) => {
 
             // parsedJSON
             s3params = {
-              Bucket: `doc-classifier-bucket/${folderifiedDocName}`,
+              Bucket: `doc-classifier-bucket/${docID}`,
               Key: `parsedJSON-${jsonifiedDocName}`,
               Body: Buffer.from(JSON.stringify(parsedTextract)),
             };
@@ -156,22 +148,26 @@ router.post("/api/upload_status", (req, res) => {
 });
 
 // GET doc images from S3, send to client
-router.get("/api/doc-image/:docFolder/:docName", (req, res) => {
-  const docFolder = req.params.docFolder.trim();
+router.get("/api/doc-image/:docID/:docName", (req, res) => {
+  const docID = req.params.docID.trim();
   const docName = req.params.docName.trim();
+
+  console.log("docID:", docID);
+  console.log("docName:", docName);
 
   const s3 = new S3();
 
   const s3GetParams = {
     Bucket: "doc-classifier-bucket",
-    Key: `${docFolder}/${docName}`,
+    Key: `${docID}/${docName}`,
   };
 
   s3.getObject(s3GetParams, (error, data) => {
     if (error) {
-      console.log("error getting doc image from S3: ", error);
+      console.error("error getting doc image from S3: ", error);
       res.status(400).send({
         status: "error",
+        docID: req.params.docID,
         docName: req.params.docName,
         rawJSONDocName: rawJSONDocName,
       });
@@ -184,15 +180,15 @@ router.get("/api/doc-image/:docFolder/:docName", (req, res) => {
 });
 
 // GET rawJSON from S3, send parsed lines and geometry to client
-router.get("/api/lines-geometry/:docFolder/:docName", (req, res) => {
-  const docFolder = req.params.docFolder.trim();
+router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
+  const docID = req.params.docID.trim();
   const rawJSONDocName = `rawJSON-${req.params.docName.trim()}.json`;
 
   const s3 = new S3();
 
   const s3rawJSONParams = {
     Bucket: "doc-classifier-bucket",
-    Key: `${docFolder}/${rawJSONDocName}`,
+    Key: `${docID}/${rawJSONDocName}`,
   };
 
   s3.getObject(s3rawJSONParams, (error, data) => {
@@ -200,6 +196,7 @@ router.get("/api/lines-geometry/:docFolder/:docName", (req, res) => {
       console.log("error getting raw JSON file from S3: ", error);
       res.status(400).send({
         status: "error",
+        docID: req.params.docID,
         docName: req.params.docName,
         rawJSONDocName: rawJSONDocName,
       });
@@ -209,6 +206,7 @@ router.get("/api/lines-geometry/:docFolder/:docName", (req, res) => {
 
       res.json({
         docName: req.params.docName,
+        docID: req.params.docID,
         rawJSONDocName: rawJSONDocName,
         linesGeometry: parsedLinesGeometry,
       });

@@ -11,19 +11,19 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
-import { getAllKeyValuePairs, getLevenDistanceAndSort } from "./KeyValuePairs";
-
 import {
-  Icon,
-  Button,
-  Popover,
-  Menu,
-  MenuItem,
-  Position,
-} from "@blueprintjs/core";
+  getLevenDistanceAndSort,
+  getKeyValuePairsByDoc,
+} from "./KeyValuePairs";
+
+import { Icon, Button, Popover, Menu, MenuItem } from "@blueprintjs/core";
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
+import {
+  createState as createSpecialHookState,
+  useState as useSpecialHookState,
+} from "@hookstate/core";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -134,6 +134,15 @@ const Box = styled.div`
   background-color: white;
   overflow: auto;
 `;
+
+const TickCircle = styled(Icon)`
+  position: relative;
+  width: 0;
+  height: 0;
+  right: 0.5em;
+  top: -1.67em;
+`;
+
 const Name = styled.h2`
   margin: 0;
 `;
@@ -149,28 +158,29 @@ const RemoveButton = styled(Button)`
 
 const DeleteDialog = (props: { document: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+
+  const handleDelete = (e: any) => {
+    e.stopPropagation();
+    globalSelectedFile.set("");
+    fileInfoContext.fileDispatch({
+      type: "remove",
+      documentInfo: props.document,
+    });
+  };
 
   return (
     <Menu>
-      <a
-        className="bp3-menu-item"
-        onClick={() => {
-          fileInfoContext.fileDispatch({
-            type: "remove",
-            documentInfo: props.document,
-          });
-        }}
-      >
-        <Icon icon={"trash"} />
-        Confirm Delete
-      </a>
+      <MenuItem
+        text={
+          <>
+            <Icon icon={"trash"} /> Confirm Delete
+          </>
+        }
+        onClick={handleDelete}
+      />
     </Menu>
   );
-};
-const DeleteDialogContext = createContext({} as any);
-const useDeleteDialogContext = () => {
-  const context = useContext(DeleteDialogContext);
-  return context;
 };
 
 const DownloadDocData = (props: { document: DocumentInfo }) => {
@@ -229,34 +239,15 @@ const DownloadDocData = (props: { document: DocumentInfo }) => {
   );
 };
 
-const populateForms = () => {
-  $(document).ready(() => {
-    const keyValuePairs = getAllKeyValuePairs().docData;
-
-    $("input").each(function () {
-      const targetString = $(this).attr("placeholder");
-
-      if (typeof targetString === "undefined") {
-        return;
-      }
-
-      const sortedKeyValuePairs = getLevenDistanceAndSort(
-        keyValuePairs,
-        targetString
-      );
-
-      $(this).attr("value", sortedKeyValuePairs[0]["value"]);
-    });
-  });
-};
-
 // render input dropdowns
 $(document).ready(function () {
   let dropdownIndex = 0;
 
   $("input").click((event: any) => {
     // create a mounter and render Dropdown
-    $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(event.target);
+    const mounter = $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(
+      event.target
+    );
 
     ReactDOM.render(
       <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
@@ -278,10 +269,12 @@ $(document).ready(function () {
       if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
         $(dropdownElement).mouseleave(() => {
           dropdownElement.remove();
+          mounter.remove();
           popperInstance.destroy();
         });
       } else {
         dropdownElement.remove();
+        mounter.remove();
         popperInstance.destroy();
       }
     });
@@ -290,10 +283,49 @@ $(document).ready(function () {
   });
 });
 
+export const globalSelectedFileState = createSpecialHookState("");
+
 const DocCell = (props: DocumentInfo) => {
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+
+  const populateForms = () => {
+    $(document).ready(() => {
+      const keyValuePairs = getKeyValuePairsByDoc().filter(
+        (doc) => doc.docID === props.docID
+      )[0];
+
+      $("input").each(function () {
+        const targetString = $(this).attr("placeholder");
+
+        if (typeof targetString === "undefined") {
+          return;
+        }
+
+        const sortedKeyValuePairs = getLevenDistanceAndSort(
+          keyValuePairs,
+          targetString
+        );
+
+        $(this).attr("value", sortedKeyValuePairs[0]["value"]);
+      });
+    });
+  };
+
   return (
-    <Box>
-      <Name>{props.docName}</Name>
+    <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
+      {globalSelectedFile.get() === props.docID ? (
+        <Name
+          style={{
+            backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+          }}
+        >
+          <TickCircle icon={"tick-circle"} intent={"success"} />
+          {props.docName}
+        </Name>
+      ) : (
+        <Name>{props.docName}</Name>
+      )}
+
       <Type>
         <Icon icon={"rotate-document"} />
         Document Type: {props.docClass}
