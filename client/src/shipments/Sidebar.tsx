@@ -3,6 +3,8 @@ import { colors } from "./../common/colors";
 import styled from "styled-components";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 
+const SIDEBAR_WIDTH: string = "25em";
+
 const Column = styled.div`
   justify-content: flex-start;
   flex-direction: column;
@@ -16,6 +18,7 @@ const Column = styled.div`
   display: flex;
   height: 100%;
   transition: all 1s;
+  width: ${SIDEBAR_WIDTH};
   background-color: ${colors.WHITE};
 `;
 
@@ -25,12 +28,11 @@ const Chevron = styled(Icon)`
 
 const Container = styled.div`
   position: absolute;
-  z-index: 99999999;
   display: flex;
   height: 90%;
   transition: 1s;
   margin-left: ${(props: { open: boolean }) =>
-    props.open ? "0" : "calc(1em - 20%)"};
+    props.open ? "0" : "-" + SIDEBAR_WIDTH};
 `;
 
 const ExpandButton = styled.button`
