@@ -139,7 +139,7 @@ export const DropdownTable = (props: {
   const targetString = props.eventObj.target.placeholder;
   const docData = getKeyValuePairsByDoc();
   const selectedDocData = docData.filter(
-    (doc) => doc.docName === globalSelectedFile.selectedFile
+    (doc) => doc.docID === globalSelectedFile.selectedFile
   )[0];
 
   const sortedKeyValuePairs = getLevenDistanceAndSort(

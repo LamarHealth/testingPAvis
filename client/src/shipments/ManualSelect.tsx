@@ -48,23 +48,17 @@ export const ManualSelect = (props: { eventObj: any }) => {
   const globalSelectedFile = useGlobalSelectedFile()[0];
 
   const selectedDocData = docData.filter(
-    (doc) => doc.docName === globalSelectedFile.selectedFile
+    (doc) => doc.docID === globalSelectedFile.selectedFile
   )[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
     const docType = doc.docType;
+    const docID = doc.docID;
 
     // get doc image
-    // folders can only contain lowercase letters and dashes. this regex is exact copy of the one on the server
-    let folderifiedDocName = (docName + "." + docType)
-      .toLowerCase()
-      .replace(/(.pdf)$/i, ".png")
-      .replace(/[  !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gi, "-")
-      .replace(/(-)+/gi, "-");
-
     const docImageResponse: any = await fetch(
-      `/api/doc-image/${folderifiedDocName}/${encodeURIComponent(`
+      `/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         method: "GET",
@@ -78,7 +72,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
     // get doc field data
     const linesGeometryResponse: any = await fetch(
-      `/api/lines-geometry/${folderifiedDocName}/${encodeURIComponent(`
+      `/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
         method: "GET",

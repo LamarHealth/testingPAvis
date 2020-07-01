@@ -291,10 +291,12 @@ $(document).ready(function () {
 const DocCell = (props: DocumentInfo) => {
   const [globalSelectedFile, setGlobalSelectedFile] = useGlobalSelectedFile();
 
+  console.log(props);
+
   const populateForms = () => {
     $(document).ready(() => {
       const keyValuePairs = getKeyValuePairsByDoc().filter(
-        (doc) => doc.docName === props.docName
+        (doc) => doc.docID === props.docID
       )[0];
 
       $("input").each(function () {
@@ -315,8 +317,8 @@ const DocCell = (props: DocumentInfo) => {
   };
 
   return (
-    <Box onClick={() => setGlobalSelectedFile({ selectedFile: props.docName })}>
-      {globalSelectedFile.selectedFile === props.docName ? (
+    <Box onClick={() => setGlobalSelectedFile({ selectedFile: props.docID })}>
+      {globalSelectedFile.selectedFile === props.docID ? (
         <Name
           style={{
             backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
