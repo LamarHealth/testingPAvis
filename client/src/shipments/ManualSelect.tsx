@@ -152,8 +152,6 @@ export const ManualSelect = (props: { eventObj: any }) => {
               if (mouseInTheRectangle) {
                 fillStringObject[rectangleID] = lineGeometry.Text;
 
-                console.log(fillStringObject);
-
                 if (!shiftFilled && e.shiftKey) {
                   ctx.clearRect(
                     rectangleCoords.xDist + 1,
@@ -173,7 +171,6 @@ export const ManualSelect = (props: { eventObj: any }) => {
                   shiftFilled = true;
                 } else if (shiftFilled && e.shiftKey) {
                   delete fillStringObject[rectangleID];
-                  console.log(fillStringObject);
 
                   ctx.clearRect(
                     rectangleCoords.xDist + 1,
