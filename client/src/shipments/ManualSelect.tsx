@@ -47,10 +47,10 @@ const CurrentSelectionWrapper = styled.div`
 
 const CurrentSelection = styled.p`
   margin: 0;
-  background-color: ${colors.CURRENT_SELECTION_GREY};
+  background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
   padding: 1em;
   border-radius: 5px;
-  border: 0.5px solid white;
+  border: 0.5px solid ${colors.FONT_BLUE};
 `;
 
 const ManualSelectCanvas = styled.canvas`
@@ -301,7 +301,9 @@ export const ManualSelect = (props: { eventObj: any }) => {
           </p>
           {Object.keys(currentSelection).length > 0 && (
             <div>
-              <h3>Current Selection:</h3>
+              <p>
+                <strong>Current Selection:</strong>
+              </p>
               <CurrentSelection>
                 {Object.keys(currentSelection).map(
                   (key, i) => currentSelection[key] + " "
