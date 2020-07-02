@@ -3,6 +3,8 @@ import { colors } from "./../common/colors";
 import styled from "styled-components";
 import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
 
+import { MyShadowComponent } from "./ShadowComponent";
+
 const SIDEBAR_WIDTH: string = "25em";
 
 const Column = styled.div`
@@ -64,11 +66,13 @@ const ExpandButton = styled.button`
 export const Sidebar = ({ children }: any) => {
   const [isOpen, setOpen] = useState(false);
   return (
-    <Container open={isOpen}>
-      <Column open={isOpen}>{children}</Column>
-      <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-        <Chevron icon={isOpen ? "chevron-left" : "chevron-right"} />
-      </ExpandButton>
-    </Container>
+    <MyShadowComponent>
+      <Container open={isOpen}>
+        <Column open={isOpen}>{children}</Column>
+        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+          <Chevron icon={isOpen ? "chevron-left" : "chevron-right"} />
+        </ExpandButton>
+      </Container>
+    </MyShadowComponent>
   );
 };

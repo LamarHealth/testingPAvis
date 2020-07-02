@@ -38,7 +38,7 @@ ReactDOM.render(
         </FrameContextConsumer>
       </SideBarFrame>
     </Sidebar>
-    {process.env.LOCAL && (
+    {!process.env.LOCAL && (
       <body>
         <ShipmentsDashboard />
       </body>
