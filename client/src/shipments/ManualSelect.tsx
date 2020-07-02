@@ -294,8 +294,8 @@ export const ManualSelect = (props: { eventObj: any }) => {
         >
           <p>
             <i>
-              <strong>Shift + click</strong> to select multiple lines at once;{" "}
-              <strong>Shift + click</strong> to unselect; <strong>click</strong>{" "}
+              <strong>Shift + Click</strong> to select multiple lines at once;{" "}
+              <strong>Shift + Click</strong> to unselect; <strong>Click</strong>{" "}
               to fill.
             </i>
           </p>
