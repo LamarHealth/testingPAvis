@@ -7,6 +7,8 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
+import uuidv4 from "uuid";
+
 const ManualSelectWrapper = styled.div`
   width: 100%;
 
@@ -106,6 +108,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
       canvas.style.backgroundImage = `url(${docImageURL})`;
 
       // render rectangles
+      let fillStringObject: any = {};
       if (currentLinesGeometry.length > 0) {
         currentLinesGeometry.forEach((lineGeometry: any) => {
           const rectangleCoords: any = {
@@ -128,7 +131,11 @@ export const ManualSelect = (props: { eventObj: any }) => {
             rectangleCoords.height
           );
 
-          // fill in the selected line
+          // fill in the selected lines
+          //@ts-ignore
+          const rectangleID = uuidv4();
+          let filled = false;
+          let shiftFilled = false;
           canvas.addEventListener(
             "click",
             (e: any) => {
@@ -143,15 +150,52 @@ export const ManualSelect = (props: { eventObj: any }) => {
                 y < rectangleCoords.yDist + rectangleCoords.height;
 
               if (mouseInTheRectangle) {
-                setOverlayOpen(false);
-                props.eventObj.target.value = lineGeometry.Text;
+                fillStringObject[rectangleID] = lineGeometry.Text;
+
+                console.log(fillStringObject);
+
+                if (!shiftFilled && e.shiftKey) {
+                  ctx.clearRect(
+                    rectangleCoords.xDist + 1,
+                    rectangleCoords.yDist + 1,
+                    rectangleCoords.width - 1.5,
+                    rectangleCoords.height - 1.5
+                  );
+
+                  ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
+
+                  ctx.fillRect(
+                    rectangleCoords.xDist,
+                    rectangleCoords.yDist,
+                    rectangleCoords.width,
+                    rectangleCoords.height
+                  );
+                  shiftFilled = true;
+                } else if (shiftFilled && e.shiftKey) {
+                  delete fillStringObject[rectangleID];
+                  console.log(fillStringObject);
+
+                  ctx.clearRect(
+                    rectangleCoords.xDist + 1,
+                    rectangleCoords.yDist + 1,
+                    rectangleCoords.width - 1.5,
+                    rectangleCoords.height - 1.5
+                  );
+                  shiftFilled = false;
+                }
+
+                if (!e.shiftKey) {
+                  setOverlayOpen(false);
+                  props.eventObj.target.value = Object.keys(fillStringObject)
+                    .map((key) => fillStringObject[key])
+                    .join(" ");
+                }
               }
             },
             false
           );
 
           // backgroun green fill for boxes when mouseover
-          let filled = false;
           canvas.addEventListener(
             "mousemove",
             (e: any) => {
@@ -176,7 +220,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
                 );
                 filled = true;
               }
-              if (!(mouseInTheRectangle && filled)) {
+              if (!(mouseInTheRectangle && filled) && !shiftFilled) {
                 ctx.clearRect(
                   rectangleCoords.xDist + 1,
                   rectangleCoords.yDist + 1,
