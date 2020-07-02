@@ -18,7 +18,19 @@ import {
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
 
-import { Icon, Button, Popover, Menu, MenuItem } from "@blueprintjs/core";
+import Popover from "@material-ui/core/Popover";
+
+import { Menu, MenuItem } from "@blueprintjs/core";
+import Chip from "@material-ui/core/Chip";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
+import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import { green } from "@material-ui/core/colors";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
@@ -74,34 +86,13 @@ const Instructions = styled.div`
   color: ${colors.FONT_BLUE};
 `;
 
-const Box = styled.div`
+const Box = styled(Card)`
   margin: 1em;
-  padding: 1em;
-  border: 1px solid ${colors.LAYOUT_BLUE_SOLID};
-  border-radius: 5px;
-  color: ${colors.FONT_BLUE};
-  background-color: white;
 `;
 
-const TickCircle = styled(Icon)`
-  position: relative;
-  width: 0;
-  height: 0;
-  right: 0.5em;
-  top: -1.67em;
-`;
-
-const Name = styled.h2`
-  margin: 0;
-`;
 const Type = styled(Typography)`
   display: flex;
   margin: 1em 0;
-`;
-
-const RemoveButton = styled(Button)`
-  top: 90%;
-  left: 90%;
 `;
 
 const DeleteDialog = (props: { document: DocumentInfo }) => {
@@ -122,7 +113,7 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
       <MenuItem
         text={
           <>
-            <Icon icon={"trash"} /> Confirm Delete
+            <DeleteIcon /> Confirm Delete
           </>
         }
         onClick={handleDelete}
@@ -259,41 +250,56 @@ const DocCell = (props: DocumentInfo) => {
     });
   };
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (event: any) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
   return (
     <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
-      {globalSelectedFile.get() === props.docID ? (
-        <Type
-          variant="subtitle1"
-          style={{
-            backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
-          }}
-        >
-          <TickCircle icon={"tick-circle"} intent={"success"} />
-          {props.docName}
-        </Type>
-      ) : (
-        <Type variant="subtitle1">{props.docName}</Type>
-      )}
+      <CardContent>
+        {globalSelectedFile.get() === props.docID ? (
+          <Type
+            variant="subtitle1"
+            style={{
+              backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+            }}
+          >
+            <CheckCircleIcon style={{ color: green[500] }} />
+            {props.docName}
+          </Type>
+        ) : (
+          <Type variant="subtitle1">{props.docName}</Type>
+        )}
 
-      <Type>
-        <Icon icon={"rotate-document"} />
-        Document Type: {props.docClass}
-      </Type>
-      <Type>Format: {props.docType}</Type>
-      <Button onClick={populateForms}>Complete Forms on Page</Button>
-      <Popover
-        content={<DeleteDialog document={props} />}
-        interactionKind={"click"}
-      >
-        <RemoveButton>
-          <Icon icon={"delete"} />
-        </RemoveButton>
-      </Popover>
-      <Popover content={<DownloadDocData document={props} />}>
-        <RemoveButton>
-          <Icon icon={"download"} />
-        </RemoveButton>
-      </Popover>
+        <Type>
+          <FileCopyOutlinedIcon />
+          Document Type: {props.docClass}
+        </Type>
+        <Type>Format: {props.docType}</Type>
+        <Chip
+          label="Complete Forms on Page"
+          onClick={populateForms}
+          variant="outlined"
+          style={{ marginRight: "0.5em" }}
+        />
+        <Popover id={id} open={open} anchorEl={anchorEl} onClose={handleClose}>
+          <Typography>REEE</Typography>
+        </Popover>
+        <IconButton onClick={handleClick}>
+          <DeleteIcon />
+        </IconButton>
+        <IconButton>
+          <GetAppIcon />
+        </IconButton>
+      </CardContent>
     </Box>
   );
 };

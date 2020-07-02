@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
-import { Icon } from "@blueprintjs/core";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { colors } from "../common/colors";
 import { UploadingList } from "./UploadThumbnails";
+import Typography from "@material-ui/core/Typography";
 
 const getColor = (props: any) => {
   if (props.isDragAccept) {
@@ -27,7 +28,7 @@ const Container = styled.div`
   border-radius: 2px;
   border-color: ${(props) => getColor(props)};
   border-style: dashed;
-  background-color: ${colors.DROPZONE_BACKGROUND_GREY};
+  background-color: ${colors.WHITE};
   color: gray;
   outline: none;
   transition: border 0.24s ease-in-out;
@@ -114,8 +115,10 @@ export const StyledDropzone = () => {
         {...getRootProps({ isDragActive, isDragAccept, isDragReject })}
       >
         <input {...getInputProps()} />
-        <p>Drag and drop or click to select files</p>
-        <Icon icon={"cloud-upload"} iconSize={25} />
+        <Typography variant="body1">
+          Drag and drop or click to select files
+        </Typography>
+        <CloudUploadIcon />
       </Container>
       {!newFiles.length || <UploadingList files={newFiles} />}
     </>

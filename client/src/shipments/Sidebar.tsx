@@ -21,7 +21,8 @@ const Column = styled.div`
   height: 100%;
   transition: all 1s;
   width: ${SIDEBAR_WIDTH};
-  background-color: ${colors.WHITE};
+  background-color: ${colors.OFFWHITE};
+  overflow: auto;
 `;
 
 const Container = styled.div`
