@@ -1,32 +1,54 @@
-import React from "react";
 import root from "react-shadow";
-// We need to use StyleSheetManager to catch and styled components and target them a node inside
-// of the shadow DOM. Otherwise they will be on the document, therefore excluded.
+import { jssPreset, StylesProvider } from "@material-ui/styles";
+import { create } from "jss";
 import { StyleSheetManager } from "styled-components";
 
-// This component is used to determine if the shadow root children have been mounted,
-// we can't assume they are mounted with the parent and using a timer is risky.
+import React, { useState } from "react";
+
 const DidMount = ({ onMount }: any) => {
   React.useEffect(onMount, []);
 
   return null;
 };
-
-export const MyShadowComponent = ({ children }: any) => {
+// @ts-ignore
+const WrappedJssComponent = ({ children }) => {
   const node = React.useRef(null);
   const [mounted, setMounted] = React.useState(false);
+  const [jss, setJss] = useState(null);
+  // @ts-ignore
+
+  function setRefAndCreateJss(headRef) {
+    if (headRef && !jss) {
+      const createdJssWithRef = create({
+        ...jssPreset(),
+        insertionPoint: headRef,
+      });
+      // @ts-ignore
+
+      setJss(createdJssWithRef);
+    }
+  }
+  // @ts-ignore
   return (
     <root.div>
+      <head>
+        <style ref={setRefAndCreateJss}></style>
+      </head>
       <div ref={node}>
         <DidMount onMount={() => setMounted(true)} />
         {mounted && node.current && (
           <StyleSheetManager // @ts-ignore
             target={node.current}
           >
-            {children}
+            {
+              // @ts-ignore
+              jss && <StylesProvider jss={jss}>{children}</StylesProvider>
+            }
           </StyleSheetManager>
         )}
       </div>
     </root.div>
   );
 };
+
+export default WrappedJssComponent;

@@ -13,13 +13,14 @@ import { Sidebar } from "./shipments/Sidebar";
 dotenv.config();
 
 const initialContent = `<!DOCTYPE html><html><head>${document.head.innerHTML}</head><div></div></html>`;
-const SideBarFrame = styled(Frame)`
+const SideBarFrame = styled.span`
   border: none;
   display: block;
   overflow: hidden;
   left: auto;
   float: none;
   height: 100vh;
+  z-inded: 9999;
   background: transparent;
 `;
 
@@ -28,15 +29,7 @@ $('<span id="insertion-point"/>').insertBefore(document.body);
 ReactDOM.render(
   <>
     <Sidebar>
-      <SideBarFrame initialContent={initialContent}>
-        <FrameContextConsumer>
-          {(frameContext) => (
-            <StyleSheetManager target={frameContext.document.head}>
-              <DocViewer />
-            </StyleSheetManager>
-          )}
-        </FrameContextConsumer>
-      </SideBarFrame>
+      <DocViewer />
     </Sidebar>
     {!process.env.LOCAL && (
       <body>

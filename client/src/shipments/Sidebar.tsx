@@ -1,9 +1,9 @@
 import React, { useReducer, useState, createContext, useContext } from "react";
 import { colors } from "./../common/colors";
 import styled from "styled-components";
-import { Icon, Button, Popover, Menu, Position } from "@blueprintjs/core";
-
-import { MyShadowComponent } from "./ShadowComponent";
+import { Button, Popover, Menu, Position } from "@blueprintjs/core";
+import { ChevronRight, ChevronLeft } from "@material-ui/icons";
+import WrappedJssComponent from "./ShadowComponent";
 
 const SIDEBAR_WIDTH: string = "25em";
 
@@ -24,14 +24,11 @@ const Column = styled.div`
   background-color: ${colors.WHITE};
 `;
 
-const Chevron = styled(Icon)`
-  position: relative;
-`;
-
 const Container = styled.div`
   position: absolute;
   display: flex;
   height: 90%;
+  z-index: 9999;
   transition: 1s;
   margin-left: ${(props: { open: boolean }) =>
     props.open ? "0" : "-" + SIDEBAR_WIDTH};
@@ -66,13 +63,13 @@ const ExpandButton = styled.button`
 export const Sidebar = ({ children }: any) => {
   const [isOpen, setOpen] = useState(false);
   return (
-    <MyShadowComponent>
+    <WrappedJssComponent>
       <Container open={isOpen}>
         <Column open={isOpen}>{children}</Column>
         <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-          <Chevron icon={isOpen ? "chevron-left" : "chevron-right"} />
+          {isOpen ? <ChevronLeft /> : <ChevronRight />}
         </ExpandButton>
       </Container>
-    </MyShadowComponent>
+    </WrappedJssComponent>
   );
 };

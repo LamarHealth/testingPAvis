@@ -9,6 +9,8 @@ import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
+import Typography from "@material-ui/core/Typography";
+
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import {
@@ -73,7 +75,7 @@ const Instructions = styled.div`
 `;
 
 const Box = styled.div`
-  margin: 1em 0em;
+  margin: 1em;
   padding: 1em;
   border: 1px solid ${colors.LAYOUT_BLUE_SOLID};
   border-radius: 5px;
@@ -92,7 +94,7 @@ const TickCircle = styled(Icon)`
 const Name = styled.h2`
   margin: 0;
 `;
-const Type = styled.h4`
+const Type = styled(Typography)`
   display: flex;
   margin: 1em 0;
 `;
@@ -260,16 +262,17 @@ const DocCell = (props: DocumentInfo) => {
   return (
     <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
       {globalSelectedFile.get() === props.docID ? (
-        <Name
+        <Type
+          variant="subtitle1"
           style={{
             backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
           }}
         >
           <TickCircle icon={"tick-circle"} intent={"success"} />
           {props.docName}
-        </Name>
+        </Type>
       ) : (
-        <Name>{props.docName}</Name>
+        <Type variant="subtitle1">{props.docName}</Type>
       )}
 
       <Type>
