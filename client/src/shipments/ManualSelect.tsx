@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Dialog, HTMLTable } from "@blueprintjs/core";
+import { Dialog } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
+import { globalSelectedFileState } from "./DocViewer";
+
+const ManualSelectWrapper = styled.div`
+  width: 100%;
+
+  h4 {
+    margin: 0.4em;
+    margin-left: 1em;
+  }
+`;
 
 const ManualSelectButton = styled.button`
   border: 1px solid white;
   border-radius: 5px;
   font-weight: bold;
   background-color: #f9e526;
-  padding: 0.3em 0.7em;
+  padding: 0.3em 1.3em;
+  margin: 0 0.4em 0.4em 1em;
 
   :hover {
     opacity: 0.5;
@@ -31,25 +43,24 @@ const ManualSelectCanvas = styled.canvas`
 export const ManualSelect = (props: { eventObj: any }) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [docImageURL, setDocImageURL] = useState("");
-  const [currentlyOpenDoc, setCurrentlyOpenDoc] = useState("");
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
 
-  const docDataByDoc = getKeyValuePairsByDoc();
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+
+  const docData = getKeyValuePairsByDoc();
+
+  const selectedDocData = docData.filter(
+    (doc) => doc.docID === globalSelectedFile.get()
+  )[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
     const docType = doc.docType;
+    const docID = doc.docID;
 
     // get doc image
-    // folders can only contain lowercase letters and dashes. this regex is exact copy of the one on the server
-    let folderifiedDocName = (docName + "." + docType)
-      .toLowerCase()
-      .replace(/(.pdf)$/i, ".png")
-      .replace(/[  !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gi, "-")
-      .replace(/(-)+/gi, "-");
-
     const docImageResponse: any = await fetch(
-      `/api/doc-image/${folderifiedDocName}/${encodeURIComponent(`
+      `/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         method: "GET",
@@ -63,7 +74,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
     // get doc field data
     const linesGeometryResponse: any = await fetch(
-      `/api/lines-geometry/${folderifiedDocName}/${encodeURIComponent(`
+      `/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
         method: "GET",
@@ -184,39 +195,25 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
   useEffect(drawOnCanvasAndHandleClicks);
 
-  return (
-    <HTMLTable>
-      <tbody>
-        <tr>
-          <td>
-            <i>
-              <strong>manual select</strong>
-            </i>
-          </td>
-          <td>
-            {docDataByDoc.map((doc: any, i: number) => {
-              const clickHandler = () => {
-                setOverlayOpen(true);
-                getImageAndGeometryFromServer(doc);
-              };
+  const clickHandler = () => {
+    setOverlayOpen(true);
+    getImageAndGeometryFromServer(selectedDocData);
+  };
 
-              return (
-                <div>
-                  <ManualSelectButton key={i} onClick={clickHandler}>
-                    {doc.docName}
-                  </ManualSelectButton>
-                </div>
-              );
-            })}
-          </td>
-        </tr>
-      </tbody>
+  return (
+    <ManualSelectWrapper>
+      <div>
+        <h4>{selectedDocData.docName}</h4>
+      </div>
+      <ManualSelectButton onClick={clickHandler}>
+        Manual Select
+      </ManualSelectButton>
       <ManualSelectOverlay
         isOpen={overlayOpen}
         onClose={() => setOverlayOpen(false)}
       >
         <ManualSelectCanvas id="overlay-canvas"></ManualSelectCanvas>
       </ManualSelectOverlay>
-    </HTMLTable>
+    </ManualSelectWrapper>
   );
 };

@@ -10,6 +10,7 @@ export interface KeyValues {
 export interface KeyValuesByDoc {
   docName: string;
   docType: string;
+  docID: string;
   keyValuePairs: KeyValues;
 }
 
@@ -27,10 +28,12 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
   storedDocs.forEach((doc: any) => {
     const docName = doc.docName;
     const docType = doc.docType;
+    const docID = doc.docID;
     const keyValuePairs = doc.keyValuePairs;
     const docObj = {
       docName,
       docType,
+      docID,
       keyValuePairs,
     };
     docDataByDoc.push(docObj);
@@ -52,17 +55,17 @@ export const getAllKeyValuePairs = () => {
 };
 
 export const getLevenDistanceAndSort = (
-  docData: KeyValues,
+  docData: KeyValuesByDoc,
   targetString: string
 ): KeyValuesWithDistance[] => {
-  const longestKeyLength = Object.keys(docData).reduce((acc, cv) =>
-    acc.length > cv.length ? acc : cv
-  ).length;
+  const longestKeyLength = Object.keys(
+    docData.keyValuePairs
+  ).reduce((acc, cv) => (acc.length > cv.length ? acc : cv)).length;
 
-  const docKeyValuePairs = Object.keys(docData).map((key) => {
+  const docKeyValuePairs = Object.keys(docData.keyValuePairs).map((key) => {
     let entry: any = {};
     entry["key"] = key;
-    entry["value"] = docData[key];
+    entry["value"] = docData.keyValuePairs[key];
     entry["distanceFromTarget"] =
       (longestKeyLength -
         getEditDistance(targetString.toLowerCase(), key.toLowerCase())) /
