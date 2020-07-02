@@ -36,6 +36,23 @@ const ManualSelectOverlay = styled(Dialog)`
   height: auto;
 `;
 
+const CurrentSelectionWrapper = styled.div`
+  padding: 1em 2em;
+  background-color: ${colors.CLOSEST_MATCH_ROW};
+
+  h3 {
+    margin: 0.8em 0 0.5em 0;
+  }
+`;
+
+const CurrentSelection = styled.p`
+  margin: 0;
+  background-color: ${colors.CURRENT_SELECTION_GREY};
+  padding: 1em;
+  border-radius: 5px;
+  border: 0.5px solid white;
+`;
+
 const ManualSelectCanvas = styled.canvas`
   height: 100%;
   width: 100%;
@@ -46,6 +63,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [docImageURL, setDocImageURL] = useState("");
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
+  const [currentSelection, setCurrentSelection] = useState({} as any);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
 
@@ -108,7 +126,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
       canvas.style.backgroundImage = `url(${docImageURL})`;
 
       // render rectangles
-      let fillStringObject: any = {};
+      let scopedCurrentSelection = {} as any;
       if (currentLinesGeometry.length > 0) {
         currentLinesGeometry.forEach((lineGeometry: any) => {
           const rectangleCoords: any = {
@@ -150,7 +168,14 @@ export const ManualSelect = (props: { eventObj: any }) => {
                 y < rectangleCoords.yDist + rectangleCoords.height;
 
               if (mouseInTheRectangle) {
-                fillStringObject[rectangleID] = lineGeometry.Text;
+                setCurrentSelection((prevCurrentSelection: any) => {
+                  return {
+                    ...prevCurrentSelection,
+                    [rectangleID]: lineGeometry.Text,
+                  };
+                });
+                // need locally-scoped version because these functions are not rendering a second time; see useEffect dependency list below
+                scopedCurrentSelection[rectangleID] = lineGeometry.Text;
 
                 if (!shiftFilled && e.shiftKey) {
                   ctx.clearRect(
@@ -170,7 +195,11 @@ export const ManualSelect = (props: { eventObj: any }) => {
                   );
                   shiftFilled = true;
                 } else if (shiftFilled && e.shiftKey) {
-                  delete fillStringObject[rectangleID];
+                  setCurrentSelection((prevCurrentSelection: any) => {
+                    delete prevCurrentSelection[rectangleID];
+                    return { ...prevCurrentSelection };
+                  });
+                  delete scopedCurrentSelection[rectangleID];
 
                   ctx.clearRect(
                     rectangleCoords.xDist + 1,
@@ -183,8 +212,11 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
                 if (!e.shiftKey) {
                   setOverlayOpen(false);
-                  props.eventObj.target.value = Object.keys(fillStringObject)
-                    .map((key) => fillStringObject[key])
+
+                  props.eventObj.target.value = Object.keys(
+                    scopedCurrentSelection
+                  )
+                    .map((key) => scopedCurrentSelection[key])
                     .join(" ");
                 }
               }
@@ -234,7 +266,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
     }
   };
 
-  useEffect(drawOnCanvasAndHandleClicks);
+  useEffect(drawOnCanvasAndHandleClicks, [docImageURL, currentLinesGeometry]);
 
   const clickHandler = () => {
     setOverlayOpen(true);
@@ -253,6 +285,31 @@ export const ManualSelect = (props: { eventObj: any }) => {
         isOpen={overlayOpen}
         onClose={() => setOverlayOpen(false)}
       >
+        <CurrentSelectionWrapper
+          style={{
+            width: `${
+              document.getElementById("overlay-canvas")?.offsetWidth
+            }px`,
+          }}
+        >
+          <p>
+            <i>
+              <strong>Shift + click</strong> to select multiple lines at once;{" "}
+              <strong>Shift + click</strong> to unselect; <strong>click</strong>{" "}
+              to fill.
+            </i>
+          </p>
+          {Object.keys(currentSelection).length > 0 && (
+            <div>
+              <h3>Current Selection:</h3>
+              <CurrentSelection>
+                {Object.keys(currentSelection).map(
+                  (key, i) => currentSelection[key] + " "
+                )}
+              </CurrentSelection>
+            </div>
+          )}
+        </CurrentSelectionWrapper>
         <ManualSelectCanvas id="overlay-canvas"></ManualSelectCanvas>
       </ManualSelectOverlay>
     </ManualSelectWrapper>
