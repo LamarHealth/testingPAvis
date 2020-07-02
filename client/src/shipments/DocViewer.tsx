@@ -80,7 +80,7 @@ const DocCellTransitionGroup = styled.div`
   }
 `;
 
-const Instructions = styled.div`
+const Instructions = styled(Typography)`
   text-align: center;
   padding: 2em 2em 0em 2em;
   color: ${colors.FONT_BLUE};

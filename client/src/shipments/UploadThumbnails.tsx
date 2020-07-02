@@ -7,6 +7,14 @@ import React, {
 } from "react";
 import styled from "styled-components";
 import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
+import Clear from "@material-ui/icons/Clear";
+import CheckIcon from "@material-ui/icons/Check";
+import LoopIcon from "@material-ui/icons/Loop";
+
+import LinearProgress from "@material-ui/core/LinearProgress";
+
+import Typography from "@material-ui/core/Typography";
+
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
@@ -70,24 +78,15 @@ const Thumbnail = styled.img`
   filter: ${(props: { blur: boolean }) => (props.blur ? "blur(8px)" : 0)};
 `;
 
-const ThumbnailIcon = styled(Icon)`
-  position: absolute;
-  height: 16px;
-  width: 16px;
-  margin: 2px;
-  display: inline-block;
-  z-index: 3;
-`;
-
-const SuccessIcon = styled(ThumbnailIcon)`
+const SuccessIcon = styled(CheckIcon)`
   color: green;
 `;
 
-const FailureIcon = styled(ThumbnailIcon)`
+const FailureIcon = styled(Clear)`
   color: red;
 `;
 
-const RefreshIcon = styled(ThumbnailIcon)`
+const RefreshIcon = styled(LoopIcon)`
   animation: spin 3s linear infinite;
   @keyframes spin {
     from {
@@ -239,16 +238,16 @@ const FileStatus = (props: any) => {
     <ThumbnailContainer key={index}>
       <ThumbInner>
         {!uploadStatus ? (
-          <RefreshIcon icon={"refresh"} />
+          <RefreshIcon />
         ) : uploadStatus === 200 ? (
-          <SuccessIcon icon={"small-tick"} iconSize={30} />
+          <SuccessIcon />
         ) : (
           <StyledPopover
             interactionKind={"hover"}
             position={Position.TOP}
             content={<div>Unable to process document</div>}
           >
-            <FailureIcon icon={"cross"} iconSize={30} />
+            <FailureIcon />
           </StyledPopover>
         )}
         <div id="thumbnail-wrapper">
@@ -287,13 +286,9 @@ export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
     >
       <UploadBufferContainer>
         <ThumbnailList>
-          <h3>
-            {count === 0 ? (
-              "Files Uploaded"
-            ) : (
-              <ProgressBar intent={"primary"} />
-            )}
-          </h3>
+          <Typography>
+            {count === 0 ? "Files Uploaded" : <LinearProgress />}
+          </Typography>
           {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
             return (
               <FileStatus

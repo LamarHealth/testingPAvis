@@ -36,6 +36,7 @@ const Container = styled.div`
   text-align: center;
   justify-content: center;
   padding: 1em 0;
+  max-height: 11em;
   :hover {
     background-color: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
     color: ${colors.FONT_BLUE};
