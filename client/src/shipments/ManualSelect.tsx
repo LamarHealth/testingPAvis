@@ -73,6 +73,25 @@ export const ManualSelect = (props: { eventObj: any }) => {
     (doc) => doc.docID === globalSelectedFile.get()
   )[0];
 
+  const getSlopeIntercept = (
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number
+  ) => {
+    let slope = (y0 - y1) / (x0 - x1);
+    let findYGivenX = (X: number) => {
+      const Y = slope * (X - x1) + y1;
+      return Y;
+    };
+
+    let findXGivenY = (Y: number) => {
+      const X = (Y - y1 + slope * x1) / slope;
+      return X;
+    };
+    return { findYGivenX, findXGivenY, slope };
+  };
+
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
     const docType = doc.docType;
@@ -125,25 +144,6 @@ export const ManualSelect = (props: { eventObj: any }) => {
       canvas.height = this.naturalHeight;
       canvas.style.backgroundImage = `url(${docImageURL})`;
 
-      const getSlopeIntercept = (
-        x0: number,
-        y0: number,
-        x1: number,
-        y1: number
-      ) => {
-        let slope = (y0 - y1) / (x0 - x1);
-        let findYGivenX = (X: number) => {
-          const Y = slope * (X - x1) + y1;
-          return Y;
-        };
-
-        let findXGivenY = (Y: number) => {
-          const X = (Y - y1 + slope * x1) / slope;
-          return X;
-        };
-        return { findYGivenX, findXGivenY, slope };
-      };
-
       // render polygons
       let scopedCurrentSelection = {} as any;
       if (currentLinesGeometry.length > 0) {
@@ -167,7 +167,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
             },
           ];
 
-          // are there any polygons with sides of infinite slope (rectangles)? if so...
+          // is this polygon actually a rectangle? If so...
           if (
             getSlopeIntercept(
               polygonCoords[1].x,
@@ -290,7 +290,19 @@ export const ManualSelect = (props: { eventObj: any }) => {
               false
             );
 
-            // mousever listener
+            // enter key listener
+            document.addEventListener("keydown", (e: any) => {
+              if (e.keyCode === 13) {
+                setOverlayOpen(false);
+                props.eventObj.target.value = Object.keys(
+                  scopedCurrentSelection
+                )
+                  .map((key) => scopedCurrentSelection[key])
+                  .join(" ");
+              }
+            });
+
+            // mouseover listener
             canvas.addEventListener(
               "mousemove",
               (e: any) => {
@@ -459,7 +471,19 @@ export const ManualSelect = (props: { eventObj: any }) => {
               false
             );
 
-            // backgroun green fill for boxes when mouseover
+            // enter key listener
+            document.addEventListener("keydown", (e: any) => {
+              if (e.keyCode === 13) {
+                setOverlayOpen(false);
+                props.eventObj.target.value = Object.keys(
+                  scopedCurrentSelection
+                )
+                  .map((key) => scopedCurrentSelection[key])
+                  .join(" ");
+              }
+            });
+
+            // mouseover listener
             canvas.addEventListener(
               "mousemove",
               (e: any) => {
@@ -515,7 +539,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
             <i>
               <strong>Shift + Click</strong> to select multiple lines at once;{" "}
               <strong>Shift + Click</strong> to unselect; <strong>Click</strong>{" "}
-              to fill.
+              or press <strong>Return</strong> key to fill.
             </i>
           </p>
           {Object.keys(currentSelection).length > 0 && (
