@@ -267,13 +267,16 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
                     // shift click --unfill
                   } else if (shiftFilled && e.shiftKey) {
-                    setCurrentSelection((prevCurrentSelection: any) => {
-                      delete prevCurrentSelection[rectangleID];
-                      return { ...prevCurrentSelection };
-                    });
-                    delete scopedCurrentSelection[rectangleID];
-                    clearInnerRectangle();
-                    shiftFilled = false;
+                    // necessary because a bug will appear otherwise... will simultaneously shift click --fill some rectangle below sometimes
+                    setTimeout(() => {
+                      setCurrentSelection((prevCurrentSelection: any) => {
+                        delete prevCurrentSelection[rectangleID];
+                        return { ...prevCurrentSelection };
+                      });
+                      delete scopedCurrentSelection[rectangleID];
+                      clearInnerRectangle();
+                      shiftFilled = false;
+                    }, 1);
                   }
 
                   // normal click
@@ -448,13 +451,16 @@ export const ManualSelect = (props: { eventObj: any }) => {
 
                     // shift click --unfill
                   } else if (shiftFilled && e.shiftKey) {
-                    setCurrentSelection((prevCurrentSelection: any) => {
-                      delete prevCurrentSelection[rectangleID];
-                      return { ...prevCurrentSelection };
-                    });
-                    delete scopedCurrentSelection[rectangleID];
-                    clearPolygonAndDrawANewOne();
-                    shiftFilled = false;
+                    // necessary because a bug will appear otherwise... will simultaneously shift click --fill some rectangle below sometimes
+                    setTimeout(() => {
+                      setCurrentSelection((prevCurrentSelection: any) => {
+                        delete prevCurrentSelection[rectangleID];
+                        return { ...prevCurrentSelection };
+                      });
+                      delete scopedCurrentSelection[rectangleID];
+                      clearPolygonAndDrawANewOne();
+                      shiftFilled = false;
+                    }, 1);
                   }
 
                   // normal click
