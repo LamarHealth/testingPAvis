@@ -18,14 +18,10 @@ import {
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
 
-import Popover from "@material-ui/core/Popover";
-
 import { Menu, MenuItem } from "@blueprintjs/core";
 import Chip from "@material-ui/core/Chip";
-import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
-import GetAppIcon from "@material-ui/icons/GetApp";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";

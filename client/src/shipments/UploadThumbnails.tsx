@@ -6,7 +6,6 @@ import React, {
   useRef,
 } from "react";
 import styled from "styled-components";
-import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
 import Clear from "@material-ui/icons/Clear";
 import CheckIcon from "@material-ui/icons/Check";
 import LoopIcon from "@material-ui/icons/Loop";
@@ -98,10 +97,6 @@ const RefreshIcon = styled(LoopIcon)`
       transform-origin: center center;
     }
   }
-`;
-
-const StyledPopover = styled(Popover)`
-  position: absolute;
 `;
 
 const updateLocalStorage = (documentInfo: any) => {
@@ -242,13 +237,7 @@ const FileStatus = (props: any) => {
         ) : uploadStatus === 200 ? (
           <SuccessIcon />
         ) : (
-          <StyledPopover
-            interactionKind={"hover"}
-            position={Position.TOP}
-            content={<div>Unable to process document</div>}
-          >
-            <FailureIcon />
-          </StyledPopover>
+          <FailureIcon />
         )}
         <div id="thumbnail-wrapper">
           <Canvas id={`pdf-canvas${index}`} />
