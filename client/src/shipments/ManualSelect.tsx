@@ -7,7 +7,7 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
-import uuidv4 from "uuid";
+import uuidv from "uuid";
 
 const ManualSelectWrapper = styled.div`
   width: 100%;
@@ -125,142 +125,309 @@ export const ManualSelect = (props: { eventObj: any }) => {
       canvas.height = this.naturalHeight;
       canvas.style.backgroundImage = `url(${docImageURL})`;
 
+      const getSlopeIntercept = (
+        x0: number,
+        y0: number,
+        x1: number,
+        y1: number
+      ) => {
+        let slope = (y0 - y1) / (x0 - x1);
+        let findYGivenX = (X: number) => {
+          const Y = slope * (X - x1) + y1;
+          return Y;
+        };
+
+        let findXGivenY = (Y: number) => {
+          const X = (Y - y1 + slope * x1) / slope;
+          return X;
+        };
+        return { findYGivenX, findXGivenY, slope };
+      };
+
       // render rectangles
       let scopedCurrentSelection = {} as any;
       if (currentLinesGeometry.length > 0) {
         currentLinesGeometry.forEach((lineGeometry: any) => {
-          const rectangleCoords: any = {
-            xDist: canvas.width * lineGeometry.Coordinates[0].X,
-            yDist: canvas.height * lineGeometry.Coordinates[0].Y,
-            height:
-              canvas.height *
-              (lineGeometry.Coordinates[2].Y - lineGeometry.Coordinates[1].Y),
-            width:
-              canvas.width *
-              (lineGeometry.Coordinates[1].X - lineGeometry.Coordinates[0].X),
-          };
-
           ctx.strokeStyle = colors.MANUAL_SELECT_RECT_STROKE;
 
-          ctx.strokeRect(
-            rectangleCoords.xDist,
-            rectangleCoords.yDist,
-            rectangleCoords.width,
-            rectangleCoords.height
-          );
+          const polygonCoords: any = [
+            {
+              x: canvas.width * lineGeometry.Coordinates[0].X,
+              y: canvas.height * lineGeometry.Coordinates[0].Y,
+            },
+            {
+              x: canvas.width * lineGeometry.Coordinates[1].X,
+              y: canvas.height * lineGeometry.Coordinates[1].Y,
+            },
+            {
+              x: canvas.width * lineGeometry.Coordinates[2].X,
+              y: canvas.height * lineGeometry.Coordinates[2].Y,
+            },
+            {
+              x: canvas.width * lineGeometry.Coordinates[3].X,
+              y: canvas.height * lineGeometry.Coordinates[3].Y,
+            },
+          ];
 
-          // fill in the selected lines
-          //@ts-ignore
-          const rectangleID = uuidv4();
-          let filled = false;
-          let shiftFilled = false;
-          canvas.addEventListener(
-            "click",
-            (e: any) => {
-              const rect = e.target.getBoundingClientRect();
-              const x = e.clientX - rect.left; //x position within the element.
-              const y = e.clientY - rect.top; //y position within the element.
+          if (
+            getSlopeIntercept(
+              polygonCoords[1].x,
+              polygonCoords[1].y,
+              polygonCoords[2].x,
+              polygonCoords[2].y
+            ).slope === (Infinity || -Infinity) ||
+            getSlopeIntercept(
+              polygonCoords[3].x,
+              polygonCoords[3].y,
+              polygonCoords[0].x,
+              polygonCoords[0].y
+            ).slope === (Infinity || -Infinity)
+          ) {
+            ////// RECTANGLES //////
+            const rectangleCoords: any = {
+              xDist: canvas.width * lineGeometry.Coordinates[0].X,
+              yDist: canvas.height * lineGeometry.Coordinates[0].Y,
+              height:
+                canvas.height *
+                (lineGeometry.Coordinates[2].Y - lineGeometry.Coordinates[1].Y),
+              width:
+                canvas.width *
+                (lineGeometry.Coordinates[1].X - lineGeometry.Coordinates[0].X),
+            };
 
-              const mouseInTheRectangle =
-                x > rectangleCoords.xDist &&
-                x < rectangleCoords.xDist + rectangleCoords.width &&
-                y > rectangleCoords.yDist &&
-                y < rectangleCoords.yDist + rectangleCoords.height;
+            ctx.strokeRect(
+              rectangleCoords.xDist,
+              rectangleCoords.yDist,
+              rectangleCoords.width,
+              rectangleCoords.height
+            );
 
-              if (mouseInTheRectangle) {
-                setCurrentSelection((prevCurrentSelection: any) => {
-                  return {
-                    ...prevCurrentSelection,
-                    [rectangleID]: lineGeometry.Text,
-                  };
-                });
-                // need locally-scoped version because these functions are not rendering a second time; see useEffect dependency list below
-                scopedCurrentSelection[rectangleID] = lineGeometry.Text;
+            // fill in the selected lines
+            //@ts-ignore
+            const rectangleID = uuidv();
+            let filled = false;
+            let shiftFilled = false;
+          } else {
+            ////// POLYGONS //////
+            ctx.beginPath();
+            ctx.moveTo(polygonCoords[0].x, polygonCoords[0].y);
+            ctx.lineTo(polygonCoords[1].x, polygonCoords[1].y);
+            ctx.lineTo(polygonCoords[2].x, polygonCoords[2].y);
+            ctx.lineTo(polygonCoords[3].x, polygonCoords[3].y);
+            ctx.lineTo(polygonCoords[0].x, polygonCoords[0].y);
+            ctx.stroke();
 
-                if (!shiftFilled && e.shiftKey) {
-                  ctx.clearRect(
-                    rectangleCoords.xDist + 1,
-                    rectangleCoords.yDist + 1,
-                    rectangleCoords.width - 1.5,
-                    rectangleCoords.height - 1.5
-                  );
+            // fill in the selected lines
+            //@ts-ignore
+            const rectangleID = uuidv();
+            let filled = false;
+            let shiftFilled = false;
 
+            canvas.addEventListener(
+              "click",
+              (e: any) => {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left; //x position within the element.
+                const y = e.clientY - rect.top; //y position within the element.
+
+                const lowerThanLine0 =
+                  getSlopeIntercept(
+                    polygonCoords[0].x,
+                    polygonCoords[0].y,
+                    polygonCoords[1].x,
+                    polygonCoords[1].y
+                  ).findYGivenX(x) < y;
+
+                const leftOfLine1 =
+                  getSlopeIntercept(
+                    polygonCoords[1].x,
+                    polygonCoords[1].y,
+                    polygonCoords[2].x,
+                    polygonCoords[2].y
+                  ).findXGivenY(y) > x;
+
+                const aboveLine2 =
+                  getSlopeIntercept(
+                    polygonCoords[2].x,
+                    polygonCoords[2].y,
+                    polygonCoords[3].x,
+                    polygonCoords[3].y
+                  ).findYGivenX(x) > y;
+
+                const rightOfLine3 =
+                  getSlopeIntercept(
+                    polygonCoords[3].x,
+                    polygonCoords[3].y,
+                    polygonCoords[0].x,
+                    polygonCoords[0].y
+                  ).findXGivenY(y) < x;
+
+                const mouseInThePolygon =
+                  lowerThanLine0 && leftOfLine1 && aboveLine2 && rightOfLine3;
+
+                if (mouseInThePolygon) console.log(lineGeometry.Text);
+
+                console.log("lowerThanLine0, ", lowerThanLine0);
+                console.log("leftOfLine1, ", leftOfLine1);
+
+                console.log(
+                  getSlopeIntercept(
+                    polygonCoords[3].x,
+                    polygonCoords[3].y,
+                    polygonCoords[0].x,
+                    polygonCoords[0].y
+                  ).slope
+                );
+
+                // if (mouseInThePolygon) {
+                //   setCurrentSelection((prevCurrentSelection: any) => {
+                //     return {
+                //       ...prevCurrentSelection,
+                //       [rectangleID]: lineGeometry.Text,
+                //     };
+                //   });
+                //   // need locally-scoped version because these functions are not rendering a second time; see useEffect dependency list below
+                //   scopedCurrentSelection[rectangleID] = lineGeometry.Text;
+
+                //   if (!shiftFilled && e.shiftKey) {
+                //     ctx.clearRect(
+                //       rectangleCoords.xDist + 1,
+                //       rectangleCoords.yDist + 1,
+                //       rectangleCoords.width - 1.5,
+                //       rectangleCoords.height - 1.5
+                //     );
+
+                //     ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
+
+                //     ctx.fillRect(
+                //       rectangleCoords.xDist,
+                //       rectangleCoords.yDist,
+                //       rectangleCoords.width,
+                //       rectangleCoords.height
+                //     );
+                //     shiftFilled = true;
+                //   } else if (shiftFilled && e.shiftKey) {
+                //     setCurrentSelection((prevCurrentSelection: any) => {
+                //       delete prevCurrentSelection[rectangleID];
+                //       return { ...prevCurrentSelection };
+                //     });
+                //     delete scopedCurrentSelection[rectangleID];
+
+                //     ctx.clearRect(
+                //       rectangleCoords.xDist + 1,
+                //       rectangleCoords.yDist + 1,
+                //       rectangleCoords.width - 1.5,
+                //       rectangleCoords.height - 1.5
+                //     );
+                //     shiftFilled = false;
+                //   }
+
+                //   if (!e.shiftKey) {
+                //     setOverlayOpen(false);
+
+                //     props.eventObj.target.value = Object.keys(
+                //       scopedCurrentSelection
+                //     )
+                //       .map((key) => scopedCurrentSelection[key])
+                //       .join(" ");
+                //   }
+                // }
+              },
+              false
+            );
+
+            // backgroun green fill for boxes when mouseover
+            canvas.addEventListener(
+              "mousemove",
+              (e: any) => {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left; //x position within the element.
+                const y = e.clientY - rect.top; //y position within the element.
+
+                const lowerThanLine0 =
+                  getSlopeIntercept(
+                    polygonCoords[0].x,
+                    polygonCoords[0].y,
+                    polygonCoords[1].x,
+                    polygonCoords[1].y
+                  ).findYGivenX(x) < y;
+
+                const leftOfLine1 =
+                  getSlopeIntercept(
+                    polygonCoords[1].x,
+                    polygonCoords[1].y,
+                    polygonCoords[2].x,
+                    polygonCoords[2].y
+                  ).findXGivenY(y) > x;
+
+                const aboveLine2 =
+                  getSlopeIntercept(
+                    polygonCoords[2].x,
+                    polygonCoords[2].y,
+                    polygonCoords[3].x,
+                    polygonCoords[3].y
+                  ).findYGivenX(x) > y;
+
+                const rightOfLine3 =
+                  getSlopeIntercept(
+                    polygonCoords[3].x,
+                    polygonCoords[3].y,
+                    polygonCoords[0].x,
+                    polygonCoords[0].y
+                  ).findXGivenY(y) < x;
+
+                const mouseInThePolygon =
+                  lowerThanLine0 && leftOfLine1 && aboveLine2 && rightOfLine3;
+
+                if (mouseInThePolygon && !filled) {
                   ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
 
-                  ctx.fillRect(
-                    rectangleCoords.xDist,
-                    rectangleCoords.yDist,
-                    rectangleCoords.width,
-                    rectangleCoords.height
-                  );
-                  shiftFilled = true;
-                } else if (shiftFilled && e.shiftKey) {
-                  setCurrentSelection((prevCurrentSelection: any) => {
-                    delete prevCurrentSelection[rectangleID];
-                    return { ...prevCurrentSelection };
-                  });
-                  delete scopedCurrentSelection[rectangleID];
+                  ctx.beginPath();
+                  ctx.moveTo(polygonCoords[0].x, polygonCoords[0].y);
+                  ctx.lineTo(polygonCoords[1].x, polygonCoords[1].y);
+                  ctx.lineTo(polygonCoords[2].x, polygonCoords[2].y);
+                  ctx.lineTo(polygonCoords[3].x, polygonCoords[3].y);
+                  ctx.lineTo(polygonCoords[0].x, polygonCoords[0].y);
+                  ctx.fill();
 
-                  ctx.clearRect(
-                    rectangleCoords.xDist + 1,
-                    rectangleCoords.yDist + 1,
-                    rectangleCoords.width - 1.5,
-                    rectangleCoords.height - 1.5
-                  );
-                  shiftFilled = false;
+                  // need to set this back to black or will get weird buggy stuff
+                  ctx.fillStyle = "#000000";
+
+                  filled = true;
                 }
 
-                if (!e.shiftKey) {
-                  setOverlayOpen(false);
+                if (!(mouseInThePolygon && filled) && !shiftFilled) {
+                  ctx.globalCompositeOperation = "destination-out";
 
-                  props.eventObj.target.value = Object.keys(
-                    scopedCurrentSelection
-                  )
-                    .map((key) => scopedCurrentSelection[key])
-                    .join(" ");
+                  // blank out the entire polygon
+                  ctx.beginPath();
+                  ctx.moveTo(polygonCoords[0].x - 1, polygonCoords[0].y - 1);
+                  ctx.lineTo(polygonCoords[1].x + 1, polygonCoords[1].y - 1);
+                  ctx.lineTo(polygonCoords[2].x + 1, polygonCoords[2].y + 1);
+                  ctx.lineTo(polygonCoords[3].x - 1, polygonCoords[3].y + 1);
+                  ctx.lineTo(polygonCoords[0].x - 1, polygonCoords[0].y - 1);
+                  ctx.closePath();
+                  ctx.fill();
+
+                  // draw a new one
+                  ctx.globalCompositeOperation = "source-over";
+
+                  ctx.strokeStyle = colors.MANUAL_SELECT_RECT_STROKE;
+
+                  ctx.beginPath();
+                  ctx.moveTo(polygonCoords[0].x, polygonCoords[0].y);
+                  ctx.lineTo(polygonCoords[1].x, polygonCoords[1].y);
+                  ctx.lineTo(polygonCoords[2].x, polygonCoords[2].y);
+                  ctx.lineTo(polygonCoords[3].x, polygonCoords[3].y);
+                  ctx.lineTo(polygonCoords[0].x, polygonCoords[0].y);
+                  ctx.stroke();
+
+                  filled = false;
                 }
-              }
-            },
-            false
-          );
-
-          // backgroun green fill for boxes when mouseover
-          canvas.addEventListener(
-            "mousemove",
-            (e: any) => {
-              const rect = e.target.getBoundingClientRect();
-              const x = e.clientX - rect.left; //x position within the element.
-              const y = e.clientY - rect.top; //y position within the element.
-
-              const mouseInTheRectangle =
-                x > rectangleCoords.xDist &&
-                x < rectangleCoords.xDist + rectangleCoords.width &&
-                y > rectangleCoords.yDist &&
-                y < rectangleCoords.yDist + rectangleCoords.height;
-
-              if (mouseInTheRectangle && !filled) {
-                ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
-
-                ctx.fillRect(
-                  rectangleCoords.xDist,
-                  rectangleCoords.yDist,
-                  rectangleCoords.width,
-                  rectangleCoords.height
-                );
-                filled = true;
-              }
-              if (!(mouseInTheRectangle && filled) && !shiftFilled) {
-                ctx.clearRect(
-                  rectangleCoords.xDist + 1,
-                  rectangleCoords.yDist + 1,
-                  rectangleCoords.width - 1.5,
-                  rectangleCoords.height - 1.5
-                );
-                filled = false;
-              }
-            },
-            false
-          );
+              },
+              false
+            );
+          }
         });
       }
     }
