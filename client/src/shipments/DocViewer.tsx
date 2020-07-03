@@ -39,6 +39,8 @@ import {
   useState as useSpecialHookState,
 } from "@hookstate/core";
 
+import ButtonsBox from "./ButtonsBox";
+
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
@@ -290,15 +292,7 @@ const DocCell = (props: DocumentInfo) => {
           variant="outlined"
           style={{ marginRight: "0.5em" }}
         />
-        <Popover id={id} open={open} anchorEl={anchorEl} onClose={handleClose}>
-          <Typography>REEE</Typography>
-        </Popover>
-        <IconButton onClick={handleClick}>
-          <DeleteIcon />
-        </IconButton>
-        <IconButton>
-          <GetAppIcon />
-        </IconButton>
+        <ButtonsBox />
       </CardContent>
     </Box>
   );

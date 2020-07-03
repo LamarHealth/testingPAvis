@@ -1,9 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import styled, { StyleSheetManager } from "styled-components";
-import Frame, { FrameContextConsumer } from "react-frame-component";
+import styled from "styled-components";
 import $ from "jquery";
-import "@blueprintjs/core/lib/css/blueprint.css";
 
 // Load dotenv
 import dotenv from "dotenv";
@@ -11,18 +9,6 @@ import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 import DocViewer from "./shipments/DocViewer";
 import { Sidebar } from "./shipments/Sidebar";
 dotenv.config();
-
-const initialContent = `<!DOCTYPE html><html><head>${document.head.innerHTML}</head><div></div></html>`;
-const SideBarFrame = styled.span`
-  border: none;
-  display: block;
-  overflow: hidden;
-  left: auto;
-  float: none;
-  height: 100vh;
-  z-inded: 9999;
-  background: transparent;
-`;
 
 $('<span id="insertion-point"/>').insertBefore(document.body);
 

@@ -1,9 +1,8 @@
 import React, { useReducer, useState, createContext, useContext } from "react";
 import { colors } from "./../common/colors";
 import styled from "styled-components";
-import { Button, Popover, Menu, Position } from "@blueprintjs/core";
-import ChevronRight from "@material-ui/icons/ChevronLeft";
-import ChevronLeft from "@material-ui/icons/ChevronRight";
+import ChevronLeft from "@material-ui/icons/ChevronLeft";
+import ChevronRight from "@material-ui/icons/ChevronRight";
 import WrappedJssComponent from "./ShadowComponent";
 
 const SIDEBAR_WIDTH: string = "25em";
