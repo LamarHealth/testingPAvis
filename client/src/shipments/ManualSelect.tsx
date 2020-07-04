@@ -57,7 +57,6 @@ const CurrentSelection = styled.p`
 
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const [color, setColor] = useState("transparent");
-  const [points, setPoints] = useState([]);
   const [filled, setFilled] = useState(false);
 
   const { setCurrentSelection } = useContext(CurrentSelectionContext);
@@ -107,6 +106,35 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
 };
 
 const CurrentSelectionContext = createContext({} as any);
+
+const Header = ({ docImageURL, currentSelection }: any) => {
+  return (
+    <CurrentSelectionWrapper
+      style={{
+        width: `${docImageURL.width}px`,
+      }}
+    >
+      <p>
+        <i>
+          <strong>Click</strong> to select a line; <strong>Click</strong> again
+          to unselect; press <strong>Return</strong> key to fill.
+        </i>
+      </p>
+      {Object.keys(currentSelection).length > 0 && (
+        <div>
+          <p>
+            <strong>Current Selection:</strong>
+          </p>
+          <CurrentSelection>
+            {Object.keys(currentSelection).map(
+              (key, i) => currentSelection[key] + " "
+            )}
+          </CurrentSelection>
+        </div>
+      )}
+    </CurrentSelectionWrapper>
+  );
+};
 
 export const ManualSelect = ({ eventObj }: any) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
@@ -207,31 +235,7 @@ export const ManualSelect = ({ eventObj }: any) => {
         isOpen={overlayOpen}
         onClose={() => setOverlayOpen(false)}
       >
-        <CurrentSelectionWrapper
-          style={{
-            width: `${docImageURL.width}px`,
-          }}
-        >
-          <p>
-            <i>
-              <strong>Click</strong> to select a line; <strong>Click</strong>{" "}
-              again to unselect; press <strong>Return</strong> key to fill.
-            </i>
-          </p>
-          {Object.keys(currentSelection).length > 0 && (
-            <div>
-              <p>
-                <strong>Current Selection:</strong>
-              </p>
-              <CurrentSelection>
-                {Object.keys(currentSelection).map(
-                  (key, i) => currentSelection[key] + " "
-                )}
-              </CurrentSelection>
-            </div>
-          )}
-        </CurrentSelectionWrapper>
-
+        <Header docImageURL={docImageURL} currentSelection={currentSelection} />
         <Stage width={docImageURL.width} height={docImageURL.height}>
           <Layer>
             <KonvaImage image={image} />
