@@ -16,7 +16,7 @@ ReactDOM.render(
     <Sidebar>
       <DocViewer />
     </Sidebar>
-    {!process.env.LOCAL && (
+    {process.env.LOCAL && (
       <body>
         <ShipmentsDashboard />
       </body>
