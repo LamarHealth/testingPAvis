@@ -8,10 +8,7 @@ import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
 import uuidv from "uuid";
-
 import Konva from "konva";
-
-import { AsyncResource } from "async_hooks";
 
 const ManualSelectWrapper = styled.div`
   width: 100%;
@@ -55,12 +52,6 @@ const CurrentSelection = styled.p`
   padding: 1em;
   border-radius: 5px;
   border: 0.5px solid ${colors.FONT_BLUE};
-`;
-
-const ManualSelectCanvas = styled.canvas`
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
 `;
 
 export const ManualSelect = (props: { eventObj: any }) => {
