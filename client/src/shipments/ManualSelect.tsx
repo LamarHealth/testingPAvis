@@ -63,7 +63,7 @@ const CurrentSelection = styled.p`
   border: 0.5px solid ${colors.FONT_BLUE};
 `;
 
-const Polygon = (props: { lineGeometry: any; docImageURL: any }) => {
+const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const [color, setColor] = useState("transparent");
   const [points, setPoints] = useState([]);
   const [filled, setFilled] = useState(false);
@@ -72,9 +72,9 @@ const Polygon = (props: { lineGeometry: any; docImageURL: any }) => {
 
   const getPoints = () => {
     let points = [] as any;
-    props.lineGeometry.Coordinates.forEach((coordinatePair: any) => {
-      points.push(props.docImageURL.width * coordinatePair.X);
-      points.push(props.docImageURL.height * coordinatePair.Y);
+    lineGeometry.Coordinates.forEach((coordinatePair: any) => {
+      points.push(docImageURL.width * coordinatePair.X);
+      points.push(docImageURL.height * coordinatePair.Y);
     });
     setPoints(points);
   };
@@ -86,14 +86,14 @@ const Polygon = (props: { lineGeometry: any; docImageURL: any }) => {
       setCurrentSelection((prevCurrentSelection: any) => {
         return {
           ...prevCurrentSelection,
-          [props.lineGeometry.ID]: props.lineGeometry.Text,
+          [lineGeometry.ID]: lineGeometry.Text,
         };
       });
       setFilled(true);
     }
     if (filled) {
       setCurrentSelection((prevCurrentSelection: any) => {
-        delete prevCurrentSelection[props.lineGeometry.ID];
+        delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
       });
       setFilled(false);
@@ -121,7 +121,7 @@ const Polygon = (props: { lineGeometry: any; docImageURL: any }) => {
 
 const CurrentSelectionContext = createContext({} as any);
 
-export const ManualSelect = (props: { eventObj: any }) => {
+export const ManualSelect = ({ eventObj }: any) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
@@ -192,7 +192,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
         setOverlayOpen(false);
-        props.eventObj.target.value = Object.keys(currentSelection)
+        eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
       }
