@@ -242,10 +242,10 @@ export const ManualSelect = ({ eventObj }: any) => {
             <CurrentSelectionContext.Provider
               value={{ currentSelection, setCurrentSelection }}
             >
-              {currentLinesGeometry.map((lineGeometry: any, i: any) => {
+              {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
                 return (
                   <Polygon
-                    key={i}
+                    key={ndx}
                     lineGeometry={lineGeometry}
                     docImageURL={docImageURL}
                   />
