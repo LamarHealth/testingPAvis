@@ -213,7 +213,7 @@ export const DropdownTable = (props: {
 
 export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
-  const isADocSelected =
+  const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
 
   return (
@@ -223,7 +223,7 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       role="dropdown"
     >
       {areThereDocs ? (
-        isADocSelected ? (
+        isDocSelected ? (
           <div>
             <ManualSelect eventObj={props.eventObj}></ManualSelect>
             <DropdownTable

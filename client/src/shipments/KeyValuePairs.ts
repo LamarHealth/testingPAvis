@@ -16,9 +16,9 @@ export interface KeyValuesByDoc {
 
 // interface returned from getLevenDistanceAndSort()
 export interface KeyValuesWithDistance {
-  "key": string;
-  "value": string;
-  "distanceFromTarget": string;
+  key: string;
+  value: string;
+  distanceFromTarget: string;
 }
 
 ///// FUNCTIONS /////
@@ -67,7 +67,8 @@ export const getLevenDistanceAndSort = (
     entry["key"] = key;
     entry["value"] = docData.keyValuePairs[key];
     entry["distanceFromTarget"] =
-      (longestKeyLength - getEditDistance(targetString, key)) /
+      (longestKeyLength -
+        getEditDistance(targetString.toLowerCase(), key.toLowerCase())) /
       longestKeyLength;
     return entry;
   });
