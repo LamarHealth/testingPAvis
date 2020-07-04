@@ -73,6 +73,27 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
 
   useEffect(getPoints, []);
 
+  const reduceIt = () => {
+    const theReduced = lineGeometry.Coordinates.reduce((acc: any, cv: any) => {
+      console.log("acc, ", acc);
+      console.log("cv, ", cv);
+
+      const xCoord = cv.X;
+      const yCoord = cv.Y;
+      const arr = [cv.X, cv.Y];
+
+      return arr;
+
+      // return [...acc, docImageURL.width * acc.X, docImageURL.height * acc.Y];
+    });
+
+    console.log("coordinates, ", lineGeometry.Coordinates);
+
+    // console.log(theReduced);
+  };
+
+  reduceIt();
+
   const fillAndSetCurrentSelection = () => {
     if (!filled) {
       setCurrentSelection((prevCurrentSelection: any) => {
@@ -214,9 +235,7 @@ export const ManualSelect = ({ eventObj }: any) => {
       >
         <CurrentSelectionWrapper
           style={{
-            width: `${
-              document.getElementById("konva-container")?.offsetWidth
-            }px`,
+            width: `${docImageURL.width}px`,
           }}
         >
           <p>
