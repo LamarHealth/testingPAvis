@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import styled from "styled-components";
 import { Dialog } from "@blueprintjs/core";
 import { colors } from "./../common/colors";
@@ -8,7 +8,16 @@ import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
 import uuidv from "uuid";
-import Konva from "konva";
+
+import {
+  Stage,
+  Layer,
+  Rect,
+  Text,
+  Line,
+  Image as KonvaImage,
+} from "react-konva";
+import useImage from "use-image";
 
 const ManualSelectWrapper = styled.div`
   width: 100%;
@@ -54,14 +63,73 @@ const CurrentSelection = styled.p`
   border: 0.5px solid ${colors.FONT_BLUE};
 `;
 
+const Polygon = (props: { lineGeometry: any; docImageURL: any }) => {
+  const [color, setColor] = useState("transparent");
+  const [points, setPoints] = useState([]);
+  const [filled, setFilled] = useState(false);
+
+  const { setCurrentSelection } = useContext(CurrentSelectionContext);
+
+  const getPoints = () => {
+    let points = [] as any;
+    props.lineGeometry.Coordinates.forEach((coordinatePair: any) => {
+      points.push(props.docImageURL.width * coordinatePair.X);
+      points.push(props.docImageURL.height * coordinatePair.Y);
+    });
+    setPoints(points);
+  };
+
+  useEffect(getPoints, []);
+
+  const fillAndSetCurrentSelection = () => {
+    if (!filled) {
+      setCurrentSelection((prevCurrentSelection: any) => {
+        return {
+          ...prevCurrentSelection,
+          [props.lineGeometry.ID]: props.lineGeometry.Text,
+        };
+      });
+      setFilled(true);
+    }
+    if (filled) {
+      setCurrentSelection((prevCurrentSelection: any) => {
+        delete prevCurrentSelection[props.lineGeometry.ID];
+        return { ...prevCurrentSelection };
+      });
+      setFilled(false);
+    }
+  };
+
+  return (
+    <Line
+      onClick={fillAndSetCurrentSelection}
+      onMouseEnter={() => {
+        if (filled) return;
+        setColor(colors.MANUAL_SELECT_RECT_FILL);
+      }}
+      onMouseLeave={() => {
+        if (filled) return;
+        setColor("transparent");
+      }}
+      points={points}
+      closed
+      fill={color}
+      stroke={colors.MANUAL_SELECT_RECT_STROKE}
+    />
+  );
+};
+
+const CurrentSelectionContext = createContext({} as any);
+
 export const ManualSelect = (props: { eventObj: any }) => {
   const [overlayOpen, setOverlayOpen] = useState(false);
-  const [docImageURL, setDocImageURL] = useState("");
+  const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
-  const [imageIsRendered, setImageIsRendered] = useState(false);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+
+  const [image] = useImage(docImageURL.url);
 
   const docData = getKeyValuePairsByDoc();
 
@@ -86,7 +154,18 @@ export const ManualSelect = (props: { eventObj: any }) => {
     const blob = await docImageResponse.blob();
     const objectURL = await URL.createObjectURL(blob);
 
-    setDocImageURL(objectURL);
+    // get image dimensions
+    const img = new Image();
+    img.src = objectURL;
+    let urlObj: any = {
+      url: objectURL,
+    };
+    img.onload = function (this: any) {
+      urlObj["width"] = this.naturalWidth;
+      urlObj["height"] = this.naturalHeight;
+    };
+
+    setDocImageURL(urlObj);
 
     // get doc field data
     const linesGeometryResponse: any = await fetch(
@@ -107,109 +186,22 @@ export const ManualSelect = (props: { eventObj: any }) => {
     setCurrentLinesGeometry(linesGeometry);
   };
 
-  const renderBackgroundImage = () => {
-    const img = new Image();
-    img.src = docImageURL;
-    img.onload = onLoadDraw;
-
-    function onLoadDraw(this: any) {
-      const konvaContainer: any = document.querySelector("#konva-container");
-      if (konvaContainer === null) return;
-
-      konvaContainer.style.width = `${this.naturalWidth}px`;
-      konvaContainer.style.height = `${this.naturalHeight}px`;
-
-      konvaContainer.style.backgroundImage = `url(${docImageURL})`;
-
-      setImageIsRendered(true);
-    }
-  };
-
-  useEffect(renderBackgroundImage, [docImageURL]);
-
-  const drawKonvaAndListen = () => {
-    const konvaContainer: any = document.querySelector("#konva-container");
-
-    if (konvaContainer === null) return;
-    if (currentLinesGeometry.length === 0) return;
-
-    const containerHeight = konvaContainer.style.height.replace("px", "");
-    const containerWidth = konvaContainer.style.width.replace("px", "");
-
-    const stage = new Konva.Stage({
-      container: "konva-container",
-      width: containerWidth,
-      height: containerHeight,
-    });
-
-    const layer = new Konva.Layer();
-
-    let scopedCurrentSelection = {} as any;
-
-    currentLinesGeometry.forEach((lineGeometry: any) => {
-      let points = [] as any;
-      lineGeometry.Coordinates.forEach((coordinatePair: any) => {
-        points.push(containerWidth * coordinatePair.X);
-        points.push(containerHeight * coordinatePair.Y);
-      });
-      const poly = new Konva.Line({
-        points: points,
-        fill: "transparent",
-        stroke: colors.MANUAL_SELECT_RECT_STROKE,
-        strokeWidth: 1,
-        closed: true,
-      });
-
-      let filled = false;
-
-      poly.on("mouseover touchstart", function () {
-        if (filled) return;
-        this.fill(colors.MANUAL_SELECT_RECT_FILL);
-        layer.draw();
-      });
-      poly.on("mouseout touchend", function () {
-        if (filled) return;
-        this.fill("transparent");
-        layer.draw();
-      });
-      poly.on("click", function () {
-        if (!filled) {
-          setCurrentSelection((prevCurrentSelection: any) => {
-            return {
-              ...prevCurrentSelection,
-              [lineGeometry.ID]: lineGeometry.Text,
-            };
-          });
-          scopedCurrentSelection[lineGeometry.ID] = lineGeometry.Text;
-          this.fill(colors.MANUAL_SELECT_RECT_FILL);
-          filled = true;
-        } else {
-          setCurrentSelection((prevCurrentSelection: any) => {
-            delete prevCurrentSelection[lineGeometry.ID];
-            return { ...prevCurrentSelection };
-          });
-          delete scopedCurrentSelection[lineGeometry.ID];
-          filled = false;
-        }
-      });
-
-      layer.add(poly);
-    });
-
-    document.addEventListener("keydown", (e: any) => {
-      // return key
+  // return key listener
+  useEffect(() => {
+    // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
+    function keydownListener(e: any) {
       if (e.keyCode === 13) {
         setOverlayOpen(false);
-        props.eventObj.target.value = Object.keys(scopedCurrentSelection)
-          .map((key) => scopedCurrentSelection[key])
+        props.eventObj.target.value = Object.keys(currentSelection)
+          .map((key) => currentSelection[key])
           .join(" ");
       }
-    });
-
-    stage.add(layer);
-  };
-
-  useEffect(drawKonvaAndListen, [imageIsRendered, currentLinesGeometry]);
+    }
+    document.addEventListener("keydown", keydownListener);
+    return () => {
+      document.removeEventListener("keydown", keydownListener);
+    };
+  }, [currentSelection]);
 
   const clickHandler = () => {
     setOverlayOpen(true);
@@ -254,7 +246,25 @@ export const ManualSelect = (props: { eventObj: any }) => {
             </div>
           )}
         </CurrentSelectionWrapper>
-        <div id="konva-container"></div>
+
+        <Stage width={docImageURL.width} height={docImageURL.height}>
+          <Layer>
+            <KonvaImage image={image} />
+            <CurrentSelectionContext.Provider
+              value={{ currentSelection, setCurrentSelection }}
+            >
+              {currentLinesGeometry.map((lineGeometry: any, i: any) => {
+                return (
+                  <Polygon
+                    key={i}
+                    lineGeometry={lineGeometry}
+                    docImageURL={docImageURL}
+                  />
+                );
+              })}
+            </CurrentSelectionContext.Provider>
+          </Layer>
+        </Stage>
       </ManualSelectOverlay>
     </ManualSelectWrapper>
   );
