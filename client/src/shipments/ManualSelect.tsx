@@ -1,23 +1,15 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import styled from "styled-components";
 import { Dialog } from "@blueprintjs/core";
-import { colors } from "./../common/colors";
 import { useState as useSpecialHookState } from "@hookstate/core";
+import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
+import useImage from "use-image";
 
+import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
 import uuidv from "uuid";
-
-import {
-  Stage,
-  Layer,
-  Rect,
-  Text,
-  Line,
-  Image as KonvaImage,
-} from "react-konva";
-import useImage from "use-image";
 
 const ManualSelectWrapper = styled.div`
   width: 100%;
