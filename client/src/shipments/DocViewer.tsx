@@ -1,10 +1,4 @@
-import React, {
-  useReducer,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
+import React, { useReducer, useState, createContext } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
@@ -18,9 +12,7 @@ import {
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
 
-import { Menu, MenuItem } from "@blueprintjs/core";
 import Chip from "@material-ui/core/Chip";
-import DeleteIcon from "@material-ui/icons/Delete";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import { green } from "@material-ui/core/colors";
@@ -93,89 +85,6 @@ const Type = styled(Typography)`
   margin: 1em 0;
 `;
 
-const DeleteDialog = (props: { documentInfo: DocumentInfo }) => {
-  const fileInfoContext = useContext(FileContext);
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-
-  const handleDelete = (e: any) => {
-    e.stopPropagation();
-    globalSelectedFile.set("");
-    fileInfoContext.fileDispatch({
-      type: "remove",
-      documentInfo: props.documentInfo,
-    });
-  };
-
-  return (
-    <Menu>
-      <MenuItem
-        text={
-          <>
-            <DeleteIcon /> Confirm Delete
-          </>
-        }
-        onClick={handleDelete}
-      />
-    </Menu>
-  );
-};
-
-const DownloadDocData = (props: { documentInfo: DocumentInfo }) => {
-  const keyValuePairs: any = props.documentInfo.keyValuePairs;
-
-  useEffect(() => {
-    makeJSONDownloadable();
-    makeCSVDownloadable();
-  });
-
-  const makeJSONDownloadable = () => {
-    const jsonDownloadString =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(keyValuePairs));
-    const jsonDownloadLink = document.querySelector(
-      `#json-download-${props.documentInfo.docID}`
-    );
-    jsonDownloadLink?.setAttribute("href", jsonDownloadString);
-    jsonDownloadLink?.setAttribute(
-      "download",
-      `${props.documentInfo.docName}-key-value-pairs.json`
-    );
-  };
-
-  const makeCSVDownloadable = () => {
-    let csv = "Key:,Value:\n";
-    Object.keys(keyValuePairs).forEach((key: string) => {
-      const value = keyValuePairs[key].includes(",")
-        ? `"${keyValuePairs[key]}"`
-        : keyValuePairs[key];
-      csv += key + "," + value + "\n";
-    });
-    const csvDownloadString =
-      "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    const csvDownloadLink = document.querySelector(
-      `#csv-download-${props.documentInfo.docID}`
-    );
-    csvDownloadLink?.setAttribute("href", csvDownloadString);
-    csvDownloadLink?.setAttribute(
-      "download",
-      `${props.documentInfo.docName}-key-value-pairs.csv`
-    );
-  };
-
-  return (
-    <Menu>
-      <MenuItem
-        id={`json-download-${props.documentInfo.docID}`}
-        text={"Download as JSON"}
-      />
-      <MenuItem
-        id={`csv-download-${props.documentInfo.docID}`}
-        text={"Download as CSV"}
-      />
-    </Menu>
-  );
-};
-
 // render input dropdowns
 $(document).ready(function () {
   let dropdownIndex = 0;
@@ -247,18 +156,6 @@ const DocCell = (props: DocumentInfo) => {
       });
     });
   };
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
 
   return (
     <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>

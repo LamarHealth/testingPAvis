@@ -1,4 +1,4 @@
-import React, { useReducer, useState, createContext, useContext } from "react";
+import React, { useState } from "react";
 import { colors } from "./../common/colors";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";

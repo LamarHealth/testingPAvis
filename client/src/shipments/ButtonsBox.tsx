@@ -1,9 +1,6 @@
 import React, { useState, useContext } from "react";
 
-import {
-  createState as createSpecialHookState,
-  useState as useSpecialHookState,
-} from "@hookstate/core";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
