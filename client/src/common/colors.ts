@@ -16,4 +16,5 @@ export const colors = {
   CLOSEST_MATCH_ROW: "hsla(72, 69%, 74%, 0.4)",
   MANUAL_SELECT_RECT_STROKE: "hsla(104, 74%, 33%, 1)",
   MANUAL_SELECT_RECT_FILL: "hsla(104, 74%, 33%, 0.3)",
+  CURRENT_SELECTION_LIGHTBLUE: "hsla(204, 33%, 94%, 1)",
 };
