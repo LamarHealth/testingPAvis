@@ -93,7 +93,7 @@ const Type = styled(Typography)`
   margin: 1em 0;
 `;
 
-const DeleteDialog = (props: { document: DocumentInfo }) => {
+const DeleteDialog = (props: { documentInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
 
@@ -102,7 +102,7 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
     globalSelectedFile.set("");
     fileInfoContext.fileDispatch({
       type: "remove",
-      documentInfo: props.document,
+      documentInfo: props.documentInfo,
     });
   };
 
@@ -120,8 +120,8 @@ const DeleteDialog = (props: { document: DocumentInfo }) => {
   );
 };
 
-const DownloadDocData = (props: { document: DocumentInfo }) => {
-  const keyValuePairs: any = props.document.keyValuePairs;
+const DownloadDocData = (props: { documentInfo: DocumentInfo }) => {
+  const keyValuePairs: any = props.documentInfo.keyValuePairs;
 
   useEffect(() => {
     makeJSONDownloadable();
@@ -133,12 +133,12 @@ const DownloadDocData = (props: { document: DocumentInfo }) => {
       "data:text/json;charset=utf-8," +
       encodeURIComponent(JSON.stringify(keyValuePairs));
     const jsonDownloadLink = document.querySelector(
-      `#json-download-${props.document.docID}`
+      `#json-download-${props.documentInfo.docID}`
     );
     jsonDownloadLink?.setAttribute("href", jsonDownloadString);
     jsonDownloadLink?.setAttribute(
       "download",
-      `${props.document.docName}-key-value-pairs.json`
+      `${props.documentInfo.docName}-key-value-pairs.json`
     );
   };
 
@@ -153,23 +153,23 @@ const DownloadDocData = (props: { document: DocumentInfo }) => {
     const csvDownloadString =
       "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
     const csvDownloadLink = document.querySelector(
-      `#csv-download-${props.document.docID}`
+      `#csv-download-${props.documentInfo.docID}`
     );
     csvDownloadLink?.setAttribute("href", csvDownloadString);
     csvDownloadLink?.setAttribute(
       "download",
-      `${props.document.docName}-key-value-pairs.csv`
+      `${props.documentInfo.docName}-key-value-pairs.csv`
     );
   };
 
   return (
     <Menu>
       <MenuItem
-        id={`json-download-${props.document.docID}`}
+        id={`json-download-${props.documentInfo.docID}`}
         text={"Download as JSON"}
       />
       <MenuItem
-        id={`csv-download-${props.document.docID}`}
+        id={`csv-download-${props.documentInfo.docID}`}
         text={"Download as CSV"}
       />
     </Menu>
@@ -279,16 +279,15 @@ const DocCell = (props: DocumentInfo) => {
 
         <Type>
           <FileCopyOutlinedIcon />
-          Document Type: {props.docClass}
+          Format: {props.docType}
         </Type>
-        <Type>Format: {props.docType}</Type>
         <Chip
           label="Complete Forms on Page"
           onClick={populateForms}
           variant="outlined"
           style={{ marginRight: "0.5em" }}
         />
-        <ButtonsBox />
+        <ButtonsBox docInfo={props} />
       </CardContent>
     </Box>
   );
@@ -342,7 +341,7 @@ const DocViewer = () => {
     <FileContext.Provider value={{ fileList, fileDispatch }}>
       {numDocs === 0 && <InstructionsCell />}
       <TransitionGroup component={DocCellTransitionGroup}>
-        {fileList.documents.map((doc: DocumentInfo, ndx: any) => {
+        {fileList.documents.map((doc: DocumentInfo) => {
           return (
             <CSSTransition
               // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
