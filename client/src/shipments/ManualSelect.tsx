@@ -9,6 +9,10 @@ import { globalSelectedFileState } from "./DocViewer";
 
 import uuidv from "uuid";
 
+import Konva from "konva";
+
+import { AsyncResource } from "async_hooks";
+
 const ManualSelectWrapper = styled.div`
   width: 100%;
 
@@ -64,6 +68,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
   const [docImageURL, setDocImageURL] = useState("");
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
+  const [imageIsRendered, setImageIsRendered] = useState(false);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
 
@@ -72,25 +77,6 @@ export const ManualSelect = (props: { eventObj: any }) => {
   const selectedDocData = docData.filter(
     (doc) => doc.docID === globalSelectedFile.get()
   )[0];
-
-  const getSlopeIntercept = (
-    x0: number,
-    y0: number,
-    x1: number,
-    y1: number
-  ) => {
-    let slope = (y0 - y1) / (x0 - x1);
-    let findYGivenX = (X: number) => {
-      const Y = slope * (X - x1) + y1;
-      return Y;
-    };
-
-    let findXGivenY = (Y: number) => {
-      const X = (Y - y1 + slope * x1) / slope;
-      return X;
-    };
-    return { findYGivenX, findXGivenY, slope };
-  };
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
@@ -120,402 +106,119 @@ export const ManualSelect = (props: { eventObj: any }) => {
       }
     );
 
-    const linesGeometry = (await linesGeometryResponse.json()).linesGeometry;
+    const linesGeometry = (
+      await linesGeometryResponse.json()
+    ).linesGeometry.map((lineGeometry: any) => {
+      //@ts-ignore
+      return { ...lineGeometry, ID: uuidv() };
+    });
 
     setCurrentLinesGeometry(linesGeometry);
   };
 
-  const drawOnCanvasAndHandleClicks = () => {
-    // image render method: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-    const canvas: any = document.querySelector("#overlay-canvas");
-
-    if (canvas === null) {
-      return;
-    }
-    const ctx: any = canvas.getContext("2d");
-
-    var img = new Image();
-    img.onload = drawImageAndRectangles;
+  const renderBackgroundImage = () => {
+    const img = new Image();
     img.src = docImageURL;
+    img.onload = onLoadDraw;
 
-    function drawImageAndRectangles(this: any) {
-      // render image
-      canvas.width = this.naturalWidth;
-      canvas.height = this.naturalHeight;
-      canvas.style.backgroundImage = `url(${docImageURL})`;
+    function onLoadDraw(this: any) {
+      const konvaContainer: any = document.querySelector("#konva-container");
+      if (konvaContainer === null) return;
 
-      // render polygons
-      let scopedCurrentSelection = {} as any;
-      if (currentLinesGeometry.length > 0) {
-        currentLinesGeometry.forEach((lineGeometry: any) => {
-          const polygonCoords: any = [
-            {
-              x: canvas.width * lineGeometry.Coordinates[0].X,
-              y: canvas.height * lineGeometry.Coordinates[0].Y,
-            },
-            {
-              x: canvas.width * lineGeometry.Coordinates[1].X,
-              y: canvas.height * lineGeometry.Coordinates[1].Y,
-            },
-            {
-              x: canvas.width * lineGeometry.Coordinates[2].X,
-              y: canvas.height * lineGeometry.Coordinates[2].Y,
-            },
-            {
-              x: canvas.width * lineGeometry.Coordinates[3].X,
-              y: canvas.height * lineGeometry.Coordinates[3].Y,
-            },
-          ];
+      konvaContainer.style.width = `${this.naturalWidth}px`;
+      konvaContainer.style.height = `${this.naturalHeight}px`;
 
-          // is this polygon actually a rectangle? If so...
-          if (
-            getSlopeIntercept(
-              polygonCoords[1].x,
-              polygonCoords[1].y,
-              polygonCoords[2].x,
-              polygonCoords[2].y
-            ).slope === (Infinity || -Infinity) ||
-            getSlopeIntercept(
-              polygonCoords[3].x,
-              polygonCoords[3].y,
-              polygonCoords[0].x,
-              polygonCoords[0].y
-            ).slope === (Infinity || -Infinity)
-          ) {
-            ////// RECTANGLES //////
-            const rectangleCoords: any = {
-              xDist: canvas.width * lineGeometry.Coordinates[0].X,
-              yDist: canvas.height * lineGeometry.Coordinates[0].Y,
-              height:
-                canvas.height *
-                (lineGeometry.Coordinates[2].Y - lineGeometry.Coordinates[1].Y),
-              width:
-                canvas.width *
-                (lineGeometry.Coordinates[1].X - lineGeometry.Coordinates[0].X),
-            };
+      konvaContainer.style.backgroundImage = `url(${docImageURL})`;
 
-            // helper functions
-            const strokeRectangle = () => {
-              ctx.strokeStyle = colors.MANUAL_SELECT_RECT_STROKE;
-              ctx.strokeRect(
-                rectangleCoords.xDist,
-                rectangleCoords.yDist,
-                rectangleCoords.width,
-                rectangleCoords.height
-              );
-            };
-
-            const clearInnerRectangle = () => {
-              ctx.clearRect(
-                rectangleCoords.xDist + 1,
-                rectangleCoords.yDist + 1,
-                rectangleCoords.width - 1.5,
-                rectangleCoords.height - 1.5
-              );
-            };
-
-            const fillRectangle = () => {
-              ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
-              ctx.fillRect(
-                rectangleCoords.xDist,
-                rectangleCoords.yDist,
-                rectangleCoords.width,
-                rectangleCoords.height
-              );
-            };
-
-            const mouseInTheRectangle = (x: any, y: any) => {
-              return (
-                x > rectangleCoords.xDist &&
-                x < rectangleCoords.xDist + rectangleCoords.width &&
-                y > rectangleCoords.yDist &&
-                y < rectangleCoords.yDist + rectangleCoords.height
-              );
-            };
-
-            //@ts-ignore
-            const rectangleID = uuidv();
-            let filled = false;
-            let shiftFilled = false;
-
-            // stroke the rectangle
-            strokeRectangle();
-
-            // click listener
-            canvas.addEventListener(
-              "click",
-              (e: any) => {
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left; //x position within the element.
-                const y = e.clientY - rect.top; //y position within the element.
-
-                if (mouseInTheRectangle(x, y)) {
-                  setCurrentSelection((prevCurrentSelection: any) => {
-                    return {
-                      ...prevCurrentSelection,
-                      [rectangleID]: lineGeometry.Text,
-                    };
-                  });
-                  // need locally-scoped version because these functions are not rendering a second time; see useEffect dependency list below
-                  scopedCurrentSelection[rectangleID] = lineGeometry.Text;
-
-                  // shift click --fill
-                  if (!shiftFilled && e.shiftKey) {
-                    clearInnerRectangle();
-                    fillRectangle();
-                    shiftFilled = true;
-
-                    // shift click --unfill
-                  } else if (shiftFilled && e.shiftKey) {
-                    // necessary because a bug will appear otherwise... will simultaneously shift click --fill some rectangle below sometimes
-                    setTimeout(() => {
-                      setCurrentSelection((prevCurrentSelection: any) => {
-                        delete prevCurrentSelection[rectangleID];
-                        return { ...prevCurrentSelection };
-                      });
-                      delete scopedCurrentSelection[rectangleID];
-                      clearInnerRectangle();
-                      shiftFilled = false;
-                    }, 1);
-                  }
-
-                  // normal click
-                  if (!e.shiftKey) {
-                    setOverlayOpen(false);
-                    props.eventObj.target.value = Object.keys(
-                      scopedCurrentSelection
-                    )
-                      .map((key) => scopedCurrentSelection[key])
-                      .join(" ");
-                  }
-                }
-              },
-              false
-            );
-
-            // enter key listener
-            document.addEventListener("keydown", (e: any) => {
-              if (e.keyCode === 13) {
-                setOverlayOpen(false);
-                props.eventObj.target.value = Object.keys(
-                  scopedCurrentSelection
-                )
-                  .map((key) => scopedCurrentSelection[key])
-                  .join(" ");
-              }
-            });
-
-            // mouseover listener
-            canvas.addEventListener(
-              "mousemove",
-              (e: any) => {
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left; //x position within the element.
-                const y = e.clientY - rect.top; //y position within the element.
-
-                // --fill
-                if (mouseInTheRectangle(x, y) && !filled) {
-                  fillRectangle();
-                  filled = true;
-                }
-                // --unfill
-                if (!(mouseInTheRectangle(x, y) && filled) && !shiftFilled) {
-                  clearInnerRectangle();
-                  filled = false;
-                }
-              },
-              false
-            );
-          } else {
-            ////// POLYGONS //////
-            // helper functions
-            const strokePolygon = () => {
-              ctx.beginPath();
-              ctx.moveTo(polygonCoords[0].x, polygonCoords[0].y);
-              ctx.lineTo(polygonCoords[1].x, polygonCoords[1].y);
-              ctx.lineTo(polygonCoords[2].x, polygonCoords[2].y);
-              ctx.lineTo(polygonCoords[3].x, polygonCoords[3].y);
-              ctx.lineTo(polygonCoords[0].x, polygonCoords[0].y);
-              ctx.stroke();
-            };
-
-            const clearPolygonAndDrawANewOne = () => {
-              // blank out the entire polygon
-              ctx.globalCompositeOperation = "destination-out";
-              ctx.beginPath();
-              ctx.moveTo(polygonCoords[0].x - 1, polygonCoords[0].y - 1);
-              ctx.lineTo(polygonCoords[1].x + 1, polygonCoords[1].y - 1);
-              ctx.lineTo(polygonCoords[2].x + 1, polygonCoords[2].y + 1);
-              ctx.lineTo(polygonCoords[3].x - 1, polygonCoords[3].y + 1);
-              ctx.lineTo(polygonCoords[0].x - 1, polygonCoords[0].y - 1);
-              ctx.closePath();
-              ctx.fill();
-
-              // draw a new one
-              ctx.globalCompositeOperation = "source-over";
-              ctx.strokeStyle = colors.MANUAL_SELECT_RECT_STROKE;
-              ctx.beginPath();
-              ctx.moveTo(polygonCoords[0].x, polygonCoords[0].y);
-              ctx.lineTo(polygonCoords[1].x, polygonCoords[1].y);
-              ctx.lineTo(polygonCoords[2].x, polygonCoords[2].y);
-              ctx.lineTo(polygonCoords[3].x, polygonCoords[3].y);
-              ctx.lineTo(polygonCoords[0].x, polygonCoords[0].y);
-              ctx.stroke();
-            };
-
-            const fillPolygon = () => {
-              // fill it
-              ctx.fillStyle = colors.MANUAL_SELECT_RECT_FILL;
-
-              ctx.beginPath();
-              ctx.moveTo(polygonCoords[0].x, polygonCoords[0].y);
-              ctx.lineTo(polygonCoords[1].x, polygonCoords[1].y);
-              ctx.lineTo(polygonCoords[2].x, polygonCoords[2].y);
-              ctx.lineTo(polygonCoords[3].x, polygonCoords[3].y);
-              ctx.lineTo(polygonCoords[0].x, polygonCoords[0].y);
-              ctx.fill();
-
-              // need to set this back to black or will get weird buggy stuff
-              ctx.fillStyle = "#000000";
-            };
-
-            const mouseInThePolygon = (x: number, y: number) => {
-              const lowerThanLine0 =
-                getSlopeIntercept(
-                  polygonCoords[0].x,
-                  polygonCoords[0].y,
-                  polygonCoords[1].x,
-                  polygonCoords[1].y
-                ).findYGivenX(x) < y;
-
-              const leftOfLine1 =
-                getSlopeIntercept(
-                  polygonCoords[1].x,
-                  polygonCoords[1].y,
-                  polygonCoords[2].x,
-                  polygonCoords[2].y
-                ).findXGivenY(y) > x;
-
-              const aboveLine2 =
-                getSlopeIntercept(
-                  polygonCoords[2].x,
-                  polygonCoords[2].y,
-                  polygonCoords[3].x,
-                  polygonCoords[3].y
-                ).findYGivenX(x) > y;
-
-              const rightOfLine3 =
-                getSlopeIntercept(
-                  polygonCoords[3].x,
-                  polygonCoords[3].y,
-                  polygonCoords[0].x,
-                  polygonCoords[0].y
-                ).findXGivenY(y) < x;
-
-              return (
-                lowerThanLine0 && leftOfLine1 && aboveLine2 && rightOfLine3
-              );
-            };
-
-            //@ts-ignore
-            const rectangleID = uuidv();
-            let filled = false;
-            let shiftFilled = false;
-
-            ctx.strokeStyle = colors.MANUAL_SELECT_RECT_STROKE;
-            strokePolygon();
-
-            // click listener
-            canvas.addEventListener(
-              "click",
-              (e: any) => {
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left; //x position within the element.
-                const y = e.clientY - rect.top; //y position within the element.
-
-                if (mouseInThePolygon(x, y)) {
-                  setCurrentSelection((prevCurrentSelection: any) => {
-                    return {
-                      ...prevCurrentSelection,
-                      [rectangleID]: lineGeometry.Text,
-                    };
-                  });
-                  // need locally-scoped version because these functions are not rendering a second time; see useEffect dependency list below
-                  scopedCurrentSelection[rectangleID] = lineGeometry.Text;
-
-                  // shift click --fill
-                  if (!shiftFilled && e.shiftKey) {
-                    clearPolygonAndDrawANewOne();
-                    fillPolygon();
-                    shiftFilled = true;
-
-                    // shift click --unfill
-                  } else if (shiftFilled && e.shiftKey) {
-                    // necessary because a bug will appear otherwise... will simultaneously shift click --fill some rectangle below sometimes
-                    setTimeout(() => {
-                      setCurrentSelection((prevCurrentSelection: any) => {
-                        delete prevCurrentSelection[rectangleID];
-                        return { ...prevCurrentSelection };
-                      });
-                      delete scopedCurrentSelection[rectangleID];
-                      clearPolygonAndDrawANewOne();
-                      shiftFilled = false;
-                    }, 1);
-                  }
-
-                  // normal click
-                  if (!e.shiftKey) {
-                    setOverlayOpen(false);
-                    props.eventObj.target.value = Object.keys(
-                      scopedCurrentSelection
-                    )
-                      .map((key) => scopedCurrentSelection[key])
-                      .join(" ");
-                  }
-                }
-              },
-              false
-            );
-
-            // enter key listener
-            document.addEventListener("keydown", (e: any) => {
-              if (e.keyCode === 13) {
-                setOverlayOpen(false);
-                props.eventObj.target.value = Object.keys(
-                  scopedCurrentSelection
-                )
-                  .map((key) => scopedCurrentSelection[key])
-                  .join(" ");
-              }
-            });
-
-            // mouseover listener
-            canvas.addEventListener(
-              "mousemove",
-              (e: any) => {
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left; //x position within the element.
-                const y = e.clientY - rect.top; //y position within the element.
-
-                if (mouseInThePolygon(x, y) && !filled) {
-                  fillPolygon();
-                  filled = true;
-                }
-
-                if (!(mouseInThePolygon(x, y) && filled) && !shiftFilled) {
-                  clearPolygonAndDrawANewOne();
-                  filled = false;
-                }
-              },
-              false
-            );
-          }
-        });
-      }
+      setImageIsRendered(true);
     }
   };
 
-  useEffect(drawOnCanvasAndHandleClicks, [docImageURL, currentLinesGeometry]);
+  useEffect(renderBackgroundImage, [docImageURL]);
+
+  const drawKonvaAndListen = () => {
+    const konvaContainer: any = document.querySelector("#konva-container");
+
+    if (konvaContainer === null) return;
+    if (currentLinesGeometry.length === 0) return;
+
+    const containerHeight = konvaContainer.style.height.replace("px", "");
+    const containerWidth = konvaContainer.style.width.replace("px", "");
+
+    const stage = new Konva.Stage({
+      container: "konva-container",
+      width: containerWidth,
+      height: containerHeight,
+    });
+
+    const layer = new Konva.Layer();
+
+    let scopedCurrentSelection = {} as any;
+
+    currentLinesGeometry.forEach((lineGeometry: any) => {
+      let points = [] as any;
+      lineGeometry.Coordinates.forEach((coordinatePair: any) => {
+        points.push(containerWidth * coordinatePair.X);
+        points.push(containerHeight * coordinatePair.Y);
+      });
+      const poly = new Konva.Line({
+        points: points,
+        fill: "transparent",
+        stroke: colors.MANUAL_SELECT_RECT_STROKE,
+        strokeWidth: 1,
+        closed: true,
+      });
+
+      let filled = false;
+
+      poly.on("mouseover touchstart", function () {
+        if (filled) return;
+        this.fill(colors.MANUAL_SELECT_RECT_FILL);
+        layer.draw();
+      });
+      poly.on("mouseout touchend", function () {
+        if (filled) return;
+        this.fill("transparent");
+        layer.draw();
+      });
+      poly.on("click", function () {
+        if (!filled) {
+          setCurrentSelection((prevCurrentSelection: any) => {
+            return {
+              ...prevCurrentSelection,
+              [lineGeometry.ID]: lineGeometry.Text,
+            };
+          });
+          scopedCurrentSelection[lineGeometry.ID] = lineGeometry.Text;
+          this.fill(colors.MANUAL_SELECT_RECT_FILL);
+          filled = true;
+        } else {
+          setCurrentSelection((prevCurrentSelection: any) => {
+            delete prevCurrentSelection[lineGeometry.ID];
+            return { ...prevCurrentSelection };
+          });
+          delete scopedCurrentSelection[lineGeometry.ID];
+          filled = false;
+        }
+      });
+
+      layer.add(poly);
+    });
+
+    document.addEventListener("keydown", (e: any) => {
+      // return key
+      if (e.keyCode === 13) {
+        setOverlayOpen(false);
+        props.eventObj.target.value = Object.keys(scopedCurrentSelection)
+          .map((key) => scopedCurrentSelection[key])
+          .join(" ");
+      }
+    });
+
+    stage.add(layer);
+  };
+
+  useEffect(drawKonvaAndListen, [imageIsRendered, currentLinesGeometry]);
 
   const clickHandler = () => {
     setOverlayOpen(true);
@@ -537,15 +240,14 @@ export const ManualSelect = (props: { eventObj: any }) => {
         <CurrentSelectionWrapper
           style={{
             width: `${
-              document.getElementById("overlay-canvas")?.offsetWidth
+              document.getElementById("konva-container")?.offsetWidth
             }px`,
           }}
         >
           <p>
             <i>
-              <strong>Shift + Click</strong> to select multiple lines at once;{" "}
-              <strong>Shift + Click</strong> to unselect; <strong>Click</strong>{" "}
-              or press <strong>Return</strong> key to fill.
+              <strong>Click</strong> to select a line; <strong>Click</strong>{" "}
+              again to unselect; press <strong>Return</strong> key to fill.
             </i>
           </p>
           {Object.keys(currentSelection).length > 0 && (
@@ -561,7 +263,7 @@ export const ManualSelect = (props: { eventObj: any }) => {
             </div>
           )}
         </CurrentSelectionWrapper>
-        <ManualSelectCanvas id="overlay-canvas"></ManualSelectCanvas>
+        <div id="konva-container"></div>
       </ManualSelectOverlay>
     </ManualSelectWrapper>
   );
