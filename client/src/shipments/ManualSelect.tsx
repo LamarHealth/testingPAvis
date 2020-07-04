@@ -62,38 +62,6 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
 
   const { setCurrentSelection } = useContext(CurrentSelectionContext);
 
-  const getPoints = () => {
-    let points = [] as any;
-    lineGeometry.Coordinates.forEach((coordinatePair: any) => {
-      points.push(docImageURL.width * coordinatePair.X);
-      points.push(docImageURL.height * coordinatePair.Y);
-    });
-    setPoints(points);
-  };
-
-  useEffect(getPoints, []);
-
-  const reduceIt = () => {
-    const theReduced = lineGeometry.Coordinates.reduce((acc: any, cv: any) => {
-      console.log("acc, ", acc);
-      console.log("cv, ", cv);
-
-      const xCoord = cv.X;
-      const yCoord = cv.Y;
-      const arr = [cv.X, cv.Y];
-
-      return arr;
-
-      // return [...acc, docImageURL.width * acc.X, docImageURL.height * acc.Y];
-    });
-
-    console.log("coordinates, ", lineGeometry.Coordinates);
-
-    // console.log(theReduced);
-  };
-
-  reduceIt();
-
   const fillAndSetCurrentSelection = () => {
     if (!filled) {
       setCurrentSelection((prevCurrentSelection: any) => {
@@ -124,7 +92,13 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         if (filled) return;
         setColor("transparent");
       }}
-      points={points}
+      points={Array.prototype.concat.apply(
+        [],
+        lineGeometry.Coordinates.map((geometry: any) => [
+          docImageURL.width * geometry.X,
+          docImageURL.height * geometry.Y,
+        ])
+      )}
       closed
       fill={color}
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
