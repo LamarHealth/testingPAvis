@@ -15,6 +15,7 @@ import multer from "multer";
 import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
 import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
+import cors from "cors";
 
 // Routes
 
@@ -31,6 +32,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 const router = express.Router();
 
