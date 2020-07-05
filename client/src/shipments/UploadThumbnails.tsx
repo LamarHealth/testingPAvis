@@ -128,7 +128,7 @@ const FileStatus = (props: any) => {
     formData.append("myfile", file);
     try {
       const result = await fetch(
-        "https://docit-web.herokuapp.com/api/upload_status",
+        `${process.env.REACT_APP_API_PATH}/api/upload_status`,
         {
           method: "POST",
           body: formData,
