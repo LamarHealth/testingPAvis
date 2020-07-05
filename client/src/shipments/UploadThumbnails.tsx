@@ -165,13 +165,9 @@ const FileStatus = (props: any) => {
     PDFDocumentProxy.getPage(1).then((page: any) => {
       // set scale. in this case, affects resolution of thumbnail
       const viewport = page.getViewport({ scale: PAGE_SCALE });
-      console.log(viewport);
       const insertionElement: any = document.querySelector("#insertion-point");
-      console.log(insertionElement);
       const shadowRoot: any = insertionElement.children[0].shadowRoot;
       const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
-      console.log(`#pdf-canvas${index}`);
-      console.log(canvas);
       const ctx = canvas.getContext("2d");
 
       // setting context for rendering
