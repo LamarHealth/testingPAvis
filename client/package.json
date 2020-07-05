@@ -20,8 +20,8 @@
     "@types/react": "^16.9.19",
     "@types/react-dom": "^16.9.5",
     "@types/react-transition-group": "^4.4.0",
-    "@types/uuid": "^8.0.0",
     "@types/styled-components": "^5.1.0",
+    "@types/uuid": "^8.0.0",
     "auth0-js": "^9.12.1",
     "awesome-typescript-loader": "^5.2.1",
     "bcryptjs": "^2.4.3",
@@ -47,6 +47,7 @@
     "react-scripts": "^3.4.1",
     "react-transition-group": "^4.4.1",
     "source-map-loader": "^0.2.4",
+    "styled-components": "^5.1.1",
     "typescript": "^3.7.5",
     "use-image": "^1.0.6",
     "validator": "^12.1.0"
