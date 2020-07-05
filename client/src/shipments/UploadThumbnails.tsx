@@ -127,10 +127,13 @@ const FileStatus = (props: any) => {
     const formData = new FormData();
     formData.append("myfile", file);
     try {
-      const result = await fetch("/api/upload_status", {
-        method: "POST",
-        body: formData,
-      });
+      const result = await fetch(
+        "https://docit-web.herokuapp.com/api/upload_status",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       // Status code cases
       switch (result.status) {
         case 200:

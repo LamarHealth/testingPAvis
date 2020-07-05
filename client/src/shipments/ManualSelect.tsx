@@ -159,7 +159,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // get doc image
     const docImageResponse: any = await fetch(
-      `/api/doc-image/${docID}/${encodeURIComponent(`
+      `https://docit-web.herokuapp.com/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         method: "GET",
@@ -184,7 +184,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // get doc field data
     const linesGeometryResponse: any = await fetch(
-      `/api/lines-geometry/${docID}/${encodeURIComponent(`
+      `https://docit-web.herokuapp.com/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
         method: "GET",
