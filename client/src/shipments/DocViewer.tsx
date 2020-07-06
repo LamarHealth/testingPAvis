@@ -1,13 +1,9 @@
-import React, {
-  useReducer,
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-} from "react";
+import React, { useReducer, useState, createContext } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
+
+import Typography from "@material-ui/core/Typography";
 
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
@@ -16,7 +12,13 @@ import {
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
 
-import { Icon, Button, Popover, Menu, MenuItem } from "@blueprintjs/core";
+import Chip from "@material-ui/core/Chip";
+import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import { green } from "@material-ui/core/colors";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+
 import $ from "jquery";
 import { colors } from "./../common/colors";
 import { createPopper } from "@popperjs/core";
@@ -24,6 +26,8 @@ import {
   createState as createSpecialHookState,
   useState as useSpecialHookState,
 } from "@hookstate/core";
+
+import ButtonsBox from "./ButtonsBox";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -46,59 +50,6 @@ export interface IFileDispatch {
 export const CountContext = createContext({} as any);
 export const FileContext = createContext({} as any);
 
-/**
- * Sidebar column container
- */
-const Column = styled.div`
-  justify-content: flex-start;
-  flex-direction: column;
-  align-items: stretch;
-  margin: 1em 0em;
-  border: ${(props: { open: boolean }) =>
-    props.open
-      ? `1px solid ${colors.LAYOUT_BLUE_CLEAR}`
-      : `1px solid ${colors.LAYOUT_BLUE_SOLID}`};
-  border-radius: 10px;
-  display: inline-block;
-  height: 100%;
-  width: 25%;
-  margin-left: ${(props: { open: boolean }) =>
-    props.open ? "calc(-25% )" : "0.5em"};
-  overflow: auto;
-  transition: all 1s;
-`;
-
-const ExpandButton = styled.button`
-  position: relative;
-  width: 2em;
-  height: 3em;
-  top: 50%;
-  right: 1em;
-  margin: 1em 1em 1em 1em;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: ${colors.LAYOUT_BLUE_SOLID};
-  color: white;
-  opacity: ${(props: { open: boolean }) => (props.open ? 0.4 : 1)};
-  transition: 0.5s;
-  border: none;
-  border-radius: 0% 25% 25% 0%;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const Chevron = styled(Icon)`
-  position: relative;
-`;
-
 const DocCellTransitionGroup = styled.div`
   .doccell-enter {
     opacity: 0.01;
@@ -119,125 +70,20 @@ const DocCellTransitionGroup = styled.div`
   }
 `;
 
-const Instructions = styled.div`
+const Instructions = styled(Typography)`
   text-align: center;
   padding: 2em 2em 0em 2em;
   color: ${colors.FONT_BLUE};
 `;
 
-const Box = styled.div`
+const Box = styled(Card)`
   margin: 1em;
-  padding: 1em;
-  border: 1px solid ${colors.LAYOUT_BLUE_SOLID};
-  border-radius: 5px;
-  color: ${colors.FONT_BLUE};
-  background-color: white;
-  overflow: auto;
 `;
 
-const TickCircle = styled(Icon)`
-  position: relative;
-  width: 0;
-  height: 0;
-  right: 0.5em;
-  top: -1.67em;
-`;
-
-const Name = styled.h2`
-  margin: 0;
-`;
-const Type = styled.h4`
+const Type = styled(Typography)`
   display: flex;
   margin: 1em 0;
 `;
-
-const RemoveButton = styled(Button)`
-  top: 90%;
-  left: 90%;
-`;
-
-const DeleteDialog = (props: { document: DocumentInfo }) => {
-  const fileInfoContext = useContext(FileContext);
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-
-  const handleDelete = (e: any) => {
-    e.stopPropagation();
-    globalSelectedFile.set("");
-    fileInfoContext.fileDispatch({
-      type: "remove",
-      documentInfo: props.document,
-    });
-  };
-
-  return (
-    <Menu>
-      <MenuItem
-        text={
-          <>
-            <Icon icon={"trash"} /> Confirm Delete
-          </>
-        }
-        onClick={handleDelete}
-      />
-    </Menu>
-  );
-};
-
-const DownloadDocData = (props: { document: DocumentInfo }) => {
-  const keyValuePairs: any = props.document.keyValuePairs;
-
-  useEffect(() => {
-    makeJSONDownloadable();
-    makeCSVDownloadable();
-  });
-
-  const makeJSONDownloadable = () => {
-    const jsonDownloadString =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(keyValuePairs));
-    const jsonDownloadLink = document.querySelector(
-      `#json-download-${props.document.docID}`
-    );
-    jsonDownloadLink?.setAttribute("href", jsonDownloadString);
-    jsonDownloadLink?.setAttribute(
-      "download",
-      `${props.document.docName}-key-value-pairs.json`
-    );
-  };
-
-  const makeCSVDownloadable = () => {
-    let csv = "Key:,Value:\n";
-    Object.keys(keyValuePairs).forEach((key: string) => {
-      const value = keyValuePairs[key].includes(",")
-        ? `"${keyValuePairs[key]}"`
-        : keyValuePairs[key];
-      csv += key + "," + value + "\n";
-    });
-    const csvDownloadString =
-      "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-    const csvDownloadLink = document.querySelector(
-      `#csv-download-${props.document.docID}`
-    );
-    csvDownloadLink?.setAttribute("href", csvDownloadString);
-    csvDownloadLink?.setAttribute(
-      "download",
-      `${props.document.docName}-key-value-pairs.csv`
-    );
-  };
-
-  return (
-    <Menu>
-      <MenuItem
-        id={`json-download-${props.document.docID}`}
-        text={"Download as JSON"}
-      />
-      <MenuItem
-        id={`csv-download-${props.document.docID}`}
-        text={"Download as CSV"}
-      />
-    </Menu>
-  );
-};
 
 // render input dropdowns
 $(document).ready(function () {
@@ -313,38 +159,33 @@ const DocCell = (props: DocumentInfo) => {
 
   return (
     <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
-      {globalSelectedFile.get() === props.docID ? (
-        <Name
-          style={{
-            backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
-          }}
-        >
-          <TickCircle icon={"tick-circle"} intent={"success"} />
-          {props.docName}
-        </Name>
-      ) : (
-        <Name>{props.docName}</Name>
-      )}
+      <CardContent>
+        {globalSelectedFile.get() === props.docID ? (
+          <Type
+            variant="subtitle1"
+            style={{
+              backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+            }}
+          >
+            <CheckCircleIcon style={{ color: green[500] }} />
+            {props.docName}
+          </Type>
+        ) : (
+          <Type variant="subtitle1">{props.docName}</Type>
+        )}
 
-      <Type>
-        <Icon icon={"rotate-document"} />
-        Document Type: {props.docClass}
-      </Type>
-      <Type>Format: {props.docType}</Type>
-      <Button onClick={populateForms}>Complete Forms on Page</Button>
-      <Popover
-        content={<DeleteDialog document={props} />}
-        interactionKind={"click"}
-      >
-        <RemoveButton>
-          <Icon icon={"delete"} />
-        </RemoveButton>
-      </Popover>
-      <Popover content={<DownloadDocData document={props} />}>
-        <RemoveButton>
-          <Icon icon={"download"} />
-        </RemoveButton>
-      </Popover>
+        <Type>
+          <FileCopyOutlinedIcon />
+          Format: {props.docType}
+        </Type>
+        <Chip
+          label="Complete Forms on Page"
+          onClick={populateForms}
+          variant="outlined"
+          style={{ marginRight: "0.5em" }}
+        />
+        <ButtonsBox docInfo={props} />
+      </CardContent>
     </Box>
   );
 };
@@ -391,43 +232,36 @@ const initialState = {
 
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
-  const [isOpen, setOpen] = useState(true);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
-      <Column open={isOpen}>
-        {numDocs === 0 && <InstructionsCell />}
-        <TransitionGroup component={DocCellTransitionGroup}>
-          {fileList.documents.map((doc: DocumentInfo, ndx: any) => {
-            return (
-              <CSSTransition
-                // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
+      {numDocs === 0 && <InstructionsCell />}
+      <TransitionGroup component={DocCellTransitionGroup}>
+        {fileList.documents.map((doc: DocumentInfo) => {
+          return (
+            <CSSTransition
+              // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
+              key={`${doc.docID}`}
+              classNames="doccell"
+              timeout={{ enter: 500, exit: 300 }}
+              onEnter={() => setNumDocs(numDocs + 1)}
+              onExited={() => setNumDocs(numDocs - 1)}
+            >
+              <DocCell
+                docName={doc.docName}
+                docType={doc.docType}
+                filePath={doc.filePath}
+                docClass={doc.docClass}
+                docID={doc.docID}
+                keyValuePairs={doc.keyValuePairs}
                 key={`${doc.docID}`}
-                classNames="doccell"
-                timeout={{ enter: 500, exit: 300 }}
-                onEnter={() => setNumDocs(numDocs + 1)}
-                onExited={() => setNumDocs(numDocs - 1)}
-              >
-                <DocCell
-                  docName={doc.docName}
-                  docType={doc.docType}
-                  filePath={doc.filePath}
-                  docClass={doc.docClass}
-                  docID={doc.docID}
-                  keyValuePairs={doc.keyValuePairs}
-                  key={`${doc.docID}`}
-                />
-              </CSSTransition>
-            );
-          })}
-        </TransitionGroup>
-
-        <StyledDropzone />
-      </Column>
-      <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-        <Chevron icon={isOpen ? "chevron-right" : "chevron-left"} />
-      </ExpandButton>
+              />
+            </CSSTransition>
+          );
+        })}
+      </TransitionGroup>
+      <StyledDropzone />
     </FileContext.Provider>
   );
 };
