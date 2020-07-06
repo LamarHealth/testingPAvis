@@ -159,7 +159,9 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // get doc image
     const docImageResponse: any = await fetch(
-      `/api/doc-image/${docID}/${encodeURIComponent(`
+      `${
+        process.env.REACT_APP_API_PATH
+      }/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         method: "GET",
@@ -184,7 +186,9 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // get doc field data
     const linesGeometryResponse: any = await fetch(
-      `/api/lines-geometry/${docID}/${encodeURIComponent(`
+      `${
+        process.env.REACT_APP_API_PATH
+      }/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
         method: "GET",

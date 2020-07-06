@@ -6,7 +6,14 @@ import React, {
   useRef,
 } from "react";
 import styled from "styled-components";
-import { Icon, ProgressBar, Popover, Position } from "@blueprintjs/core";
+import Clear from "@material-ui/icons/Clear";
+import CheckIcon from "@material-ui/icons/Check";
+import LoopIcon from "@material-ui/icons/Loop";
+
+import LinearProgress from "@material-ui/core/LinearProgress";
+
+import Typography from "@material-ui/core/Typography";
+
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
@@ -70,24 +77,15 @@ const Thumbnail = styled.img`
   filter: ${(props: { blur: boolean }) => (props.blur ? "blur(8px)" : 0)};
 `;
 
-const ThumbnailIcon = styled(Icon)`
-  position: absolute;
-  height: 16px;
-  width: 16px;
-  margin: 2px;
-  display: inline-block;
-  z-index: 3;
-`;
-
-const SuccessIcon = styled(ThumbnailIcon)`
+const SuccessIcon = styled(CheckIcon)`
   color: green;
 `;
 
-const FailureIcon = styled(ThumbnailIcon)`
+const FailureIcon = styled(Clear)`
   color: red;
 `;
 
-const RefreshIcon = styled(ThumbnailIcon)`
+const RefreshIcon = styled(LoopIcon)`
   animation: spin 3s linear infinite;
   @keyframes spin {
     from {
@@ -99,10 +97,6 @@ const RefreshIcon = styled(ThumbnailIcon)`
       transform-origin: center center;
     }
   }
-`;
-
-const StyledPopover = styled(Popover)`
-  position: absolute;
 `;
 
 const updateLocalStorage = (documentInfo: any) => {
@@ -133,10 +127,13 @@ const FileStatus = (props: any) => {
     const formData = new FormData();
     formData.append("myfile", file);
     try {
-      const result = await fetch("/api/upload_status", {
-        method: "POST",
-        body: formData,
-      });
+      const result = await fetch(
+        `${process.env.REACT_APP_API_PATH}/api/upload_status`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       // Status code cases
       switch (result.status) {
         case 200:
@@ -162,7 +159,6 @@ const FileStatus = (props: any) => {
     countContext.countDispatch("decrement");
   };
 
-  ////// PDFJS //////
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
 
@@ -172,7 +168,9 @@ const FileStatus = (props: any) => {
     PDFDocumentProxy.getPage(1).then((page: any) => {
       // set scale. in this case, affects resolution of thumbnail
       const viewport = page.getViewport({ scale: PAGE_SCALE });
-      const canvas: any = document.querySelector(`#pdf-canvas${index}`);
+      const insertionElement: any = document.querySelector("#insertion-point");
+      const shadowRoot: any = insertionElement.children[0].shadowRoot;
+      const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
       const ctx = canvas.getContext("2d");
 
       // setting context for rendering
@@ -189,7 +187,7 @@ const FileStatus = (props: any) => {
         // after render, then convert to URL via .toDataURL()
         const dataUrl = canvas.toDataURL();
         // use URL as thumbnail img src
-        const thumbnail: any = document.querySelector(`#thumbnail${index}`);
+        const thumbnail: any = shadowRoot.querySelector(`#thumbnail${index}`);
         thumbnail.src = dataUrl;
 
         // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
@@ -206,17 +204,9 @@ const FileStatus = (props: any) => {
         });
 
         //upload, and handle errors
-        if (
-          imageFileFromPdf.type !== "image/png" &&
-          imageFileFromPdf.type !== "image/jpeg"
-        ) {
-          console.log(
-            "something went wrong converting the following pdf to an image: " +
-              currentFile.name
-          );
-          return;
+        if (imageFileFromPdf.type.includes("image/")) {
+          uploadImageFile(imageFileFromPdf);
         }
-        uploadImageFile(imageFileFromPdf);
       });
     });
   };
@@ -231,11 +221,9 @@ const FileStatus = (props: any) => {
 
   useEffect(() => {
     // only upload image files, pdfs are handled above
-    if (currentFile.type !== "image/png" && currentFile.type !== "image/jpeg") {
-      return;
+    if (currentFile.type.includes("image/png")) {
+      uploadImageFile(currentFile);
     }
-
-    uploadImageFile(currentFile);
 
     // TODO: Set default to be pre-loaded documents
   }, []);
@@ -244,17 +232,11 @@ const FileStatus = (props: any) => {
     <ThumbnailContainer key={index}>
       <ThumbInner>
         {!uploadStatus ? (
-          <RefreshIcon icon={"refresh"} />
+          <RefreshIcon />
         ) : uploadStatus === 200 ? (
-          <SuccessIcon icon={"small-tick"} iconSize={30} />
+          <SuccessIcon />
         ) : (
-          <StyledPopover
-            interactionKind={"hover"}
-            position={Position.TOP}
-            content={<div>Unable to process document</div>}
-          >
-            <FailureIcon icon={"cross"} iconSize={30} />
-          </StyledPopover>
+          <FailureIcon />
         )}
         <div id="thumbnail-wrapper">
           <Canvas id={`pdf-canvas${index}`} />
@@ -292,13 +274,9 @@ export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
     >
       <UploadBufferContainer>
         <ThumbnailList>
-          <h3>
-            {count === 0 ? (
-              "Files Uploaded"
-            ) : (
-              <ProgressBar intent={"primary"} />
-            )}
-          </h3>
+          <Typography>
+            {count === 0 ? "Files Uploaded" : <LinearProgress />}
+          </Typography>
           {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
             return (
               <FileStatus

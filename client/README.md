@@ -4,6 +4,8 @@ COPYRIGHT ALEX REIBMAN, ALL RIGHTS RESERVED
 
 ## Running locally
 
+Copy the contents of `client/.env.sample` into `client/.env`. Any personalized keys should be added accordingly.
+
 To run both client and server `yarn start`
 
 To run client and server, run client and server in individual shells.
