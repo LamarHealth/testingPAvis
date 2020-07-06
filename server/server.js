@@ -48,7 +48,6 @@ router.post("/api/upload_status", (req, res) => {
   upload(req, res, () => {
     if (req) {
       const textract = new Textract();
-      const sagemakerruntime = new SageMakerRuntime();
       const s3 = new S3();
       var textractParams = {
         Document: {
