@@ -13,10 +13,9 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import multer from "multer";
-import AWS, { Textract, SageMakerRuntime, S3 } from "aws-sdk";
+import AWS, { Textract, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
 import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
-import cors from "cors";
 
 // Routes
 
