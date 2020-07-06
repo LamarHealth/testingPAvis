@@ -10,7 +10,7 @@ dotenv.config();
 
 import bodyParser from "body-parser";
 import express from "express";
-// import cors from "cors";
+import cors from "cors";
 import path from "path";
 import multer from "multer";
 import AWS, { Textract, S3 } from "aws-sdk";
@@ -32,7 +32,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(cors());
+app.use(cors());
 
 const router = express.Router();
 
