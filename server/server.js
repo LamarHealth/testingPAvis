@@ -81,90 +81,9 @@ router.post("/api/upload_status", (req, res) => {
           if (err) {
             console.log("s3.upload error: ", err);
             if (err.code === "ThrottlingException") {
-              console.log(
-                "s3 throttling exception detected, trying request again"
-              );
-              setTimeout(
-                s3.upload(s3params, function (err, data) {
-                  if (err) {
-                    console.log("x2 s3.upload error: ", err);
-                    if (err.code === "ThrottlingException") {
-                      console.log(
-                        "x2 s3 throttling exception detected, not trying again"
-                      );
-                      res.status(400).send({
-                        status: "error--s3 throttling exception x2",
-                        docID: docID,
-                        docType: req.files[0].mimetype.split("/")[1],
-                        docClass: docClass,
-                        docName: req.files[0].originalname.split(".")[0],
-                        filePath: "",
-                        keyValuePairs: "NA",
-                      });
-                    } else {
-                      res.status(400).send({
-                        status:
-                          "error--s3 throttling exception x1, and some other error",
-                        docID: docID,
-                        docType: req.files[0].mimetype.split("/")[1],
-                        docClass: docClass,
-                        docName: req.files[0].originalname.split(".")[0],
-                        filePath: "",
-                        keyValuePairs: "NA",
-                      });
-                    }
-                  } else {
-                    const parsedTextract = getKeyValues(data);
-
-                    res.json({
-                      status: "complete",
-                      docID: docID,
-                      docType: req.files[0].mimetype.split("/")[1],
-                      docClass: docClass,
-                      docName: req.files[0].originalname.split(".")[0],
-                      filePath: "",
-                      keyValuePairs: parsedTextract,
-                    });
-                    // successful response
-
-                    // upload the JSON
-                    const jsonifiedDocName = req.files[0].originalname.replace(
-                      /(.(\w)+)$/gi,
-                      ".json"
-                    );
-
-                    // rawJSON
-                    s3params = {
-                      Bucket: `doc-classifier-bucket/${docID}`,
-                      Key: `rawJSON-${jsonifiedDocName}`,
-                      Body: Buffer.from(JSON.stringify(data)),
-                    };
-
-                    s3.upload(s3params, (err, data) => {
-                      if (err) {
-                        console.log("rawJSON s3 upload error: ", err);
-                      }
-                    });
-
-                    // parsedJSON
-                    s3params = {
-                      Bucket: `doc-classifier-bucket/${docID}`,
-                      Key: `parsedJSON-${jsonifiedDocName}`,
-                      Body: Buffer.from(JSON.stringify(parsedTextract)),
-                    };
-
-                    s3.upload(s3params, (err, data) => {
-                      if (err) {
-                        console.log("parsedJSON s3 upload error: ", err);
-                      }
-                    });
-                  }
-                }),
-                15000 + Math.floor(Math.random() * 15000)
-              );
-            } else {
-              res.status(400).send({
-                status: "error",
+              console.log("s3 throttling exception detected.");
+              res.status(500).send({
+                status: "s3 throttling exception",
                 docID: docID,
                 docType: req.files[0].mimetype.split("/")[1],
                 docClass: docClass,
@@ -173,6 +92,15 @@ router.post("/api/upload_status", (req, res) => {
                 keyValuePairs: "NA",
               });
             }
+            res.status(400).send({
+              status: "error",
+              docID: docID,
+              docType: req.files[0].mimetype.split("/")[1],
+              docClass: docClass,
+              docName: req.files[0].originalname.split(".")[0],
+              filePath: "",
+              keyValuePairs: "NA",
+            });
           }
           // an error occurred
           else {
