@@ -144,13 +144,23 @@ const FileStatus = (props: any) => {
           };
           updateLocalStorage(postSuccessResponse.documentInfo);
           fileInfoContext.fileDispatch(postSuccessResponse);
+          setUploadStatus(200);
           break;
-        case 400:
+        case 500:
+          const s3ErrStatus = (await result.json()).status;
+          if (s3ErrStatus === "s3 throttling exception") {
+            console.log(
+              "AWS s3 throttling exception at the server. trying fetch again"
+            );
+            uploadImageFile(file);
+            break;
+          } else {
+            setUploadStatus(500);
+            break;
+          }
         default:
-          setUploadStatus(400);
+          setUploadStatus(result.status);
       }
-
-      setUploadStatus(result.status);
     } catch {
       setUploadStatus(400);
     }
