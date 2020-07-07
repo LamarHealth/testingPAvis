@@ -79,7 +79,7 @@ router.post("/api/upload_status", (req, res) => {
       s3.upload(s3params, function (err, data) {
         textract.analyzeDocument(textractParams, (err, data) => {
           if (err) {
-            console.log(err, err.stack);
+            console.log("s3.upload error: ", err, "err.stack: ", err.stack);
             res.status(400).send({
               status: "error",
               docID: docID,
@@ -151,9 +151,6 @@ router.post("/api/upload_status", (req, res) => {
 router.get("/api/doc-image/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const docName = req.params.docName.trim();
-
-  console.log("docID:", docID);
-  console.log("docName:", docName);
 
   const s3 = new S3();
 
