@@ -32,13 +32,12 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
 
 const router = express.Router();
 
 const staticFiles = express.static(path.join(__dirname, "../../client/build"));
-
 app.use(staticFiles);
+app.use(cors());
 
 // TODO: Run this through Textract
 // var upload = multer({ storage: multer.memoryStorage() }).any();
