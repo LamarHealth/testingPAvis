@@ -91,16 +91,17 @@ router.post("/api/upload_status", (req, res) => {
                 filePath: "",
                 keyValuePairs: "NA",
               });
+            } else {
+              res.status(400).send({
+                status: "error",
+                docID: docID,
+                docType: req.files[0].mimetype.split("/")[1],
+                docClass: docClass,
+                docName: req.files[0].originalname.split(".")[0],
+                filePath: "",
+                keyValuePairs: "NA",
+              });
             }
-            res.status(400).send({
-              status: "error",
-              docID: docID,
-              docType: req.files[0].mimetype.split("/")[1],
-              docClass: docClass,
-              docName: req.files[0].originalname.split(".")[0],
-              filePath: "",
-              keyValuePairs: "NA",
-            });
           }
           // an error occurred
           else {
