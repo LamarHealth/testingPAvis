@@ -55,7 +55,7 @@
     "validator": "^12.1.0"
   },
   "scripts": {
-    "start": "LOCAL=local && react-scripts start",
+    "start": "react-scripts start",
     "start:extension": "react-scripts start",
     "build": "react-scripts build",
     "build:extension": "node ./scripts/build-non-split.js && yarn build:clean",
