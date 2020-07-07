@@ -127,6 +127,10 @@ const FileStatus = (props: any) => {
     const formData = new FormData();
     formData.append("myfile", file);
     try {
+      console.log(`${process.env.REACT_APP_API_PATH}/api/upload_status`, {
+        method: "POST",
+        body: formData,
+      });
       const result = await fetch(
         `${process.env.REACT_APP_API_PATH}/api/upload_status`,
         {
