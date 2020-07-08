@@ -148,18 +148,11 @@ const FileStatus = (props: any) => {
           fileInfoContext.fileDispatch(postSuccessResponse);
           setUploadStatus(200);
           break;
-        case 500:
-          const s3ErrStatus = (await result.json()).status;
-          if (s3ErrStatus === "s3 throttling exception") {
-            console.log(
-              "AWS s3 throttling exception at the server. trying fetch again"
-            );
-            uploadImageFile(file);
-            break;
-          } else {
-            setUploadStatus(500);
-            break;
-          }
+        case 429:
+          console.log(
+            "throttling exception, too many requests, request denied"
+          );
+          break;
         default:
           setUploadStatus(result.status);
       }

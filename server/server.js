@@ -39,6 +39,119 @@ const staticFiles = express.static(path.join(__dirname, "../../client/build"));
 app.use(staticFiles);
 app.use(cors());
 
+////// HELPER FUNCTIONS //////
+const sendSuccessfulResponse = (req, res, data, docID, docClass, s3) => {
+  const parsedTextract = getKeyValues(data);
+
+  res.json({
+    status: "complete",
+    docID: docID,
+    docType: req.files[0].mimetype.split("/")[1],
+    docClass: docClass,
+    docName: req.files[0].originalname.split(".")[0],
+    filePath: "",
+    keyValuePairs: parsedTextract,
+  });
+
+  const jsonifiedDocName = req.files[0].originalname.replace(
+    /(.(\w)+)$/gi,
+    ".json"
+  );
+
+  // upload rawJSON
+  let s3params = {
+    Bucket: `doc-classifier-bucket/${docID}`,
+    Key: `rawJSON-${jsonifiedDocName}`,
+    Body: Buffer.from(JSON.stringify(data)),
+  };
+
+  s3.upload(s3params, (err, data) => {
+    if (err) {
+      console.log("rawJSON s3 upload error: ", err);
+    }
+  });
+
+  // upload parsedJSON
+  s3params = {
+    Bucket: `doc-classifier-bucket/${docID}`,
+    Key: `parsedJSON-${jsonifiedDocName}`,
+    Body: Buffer.from(JSON.stringify(parsedTextract)),
+  };
+
+  s3.upload(s3params, (err, data) => {
+    if (err) {
+      console.log("parsedJSON s3 upload error: ", err);
+    }
+  });
+};
+
+const sendError = (req, res, docID, docClass, errorCat, statusMessage) => {
+  res.status(errorCat).send({
+    status: statusMessage,
+    docID: docID,
+    docType: req.files[0].mimetype.split("/")[1],
+    docClass: docClass,
+    docName: req.files[0].originalname.split(".")[0],
+    filePath: "",
+    keyValuePairs: "NA",
+  });
+};
+
+const delayedUpload = (
+  n,
+  maxN,
+  req,
+  res,
+  docID,
+  docClass,
+  textract,
+  textractParams,
+  s3
+) => {
+  if (Math.pow(2, n) > maxN) {
+    console.log(
+      `throttling exception max timeout exceeded after ${n} tries. request failed.`
+    );
+    sendError(
+      req,
+      res,
+      docID,
+      docClass,
+      429,
+      "throttling exception, max timeout exceeded. request failed."
+    );
+  } else {
+    textract.analyzeDocument(textractParams, (err, data) => {
+      if (err) {
+        if (err.code === "ThrottlingException") {
+          console.log(`throttling exception detected. trying again x${n + 1}.`);
+          return setTimeout(
+            () =>
+              delayedUpload(
+                n + 1,
+                maxN,
+                req,
+                res,
+                docID,
+                docClass,
+                textract,
+                textractParams,
+                s3
+              ),
+            Math.pow(2, n)
+          );
+        } else {
+          sendError(req, res, docID, docClass, 500, "internal server error");
+        }
+      } else {
+        console.log(`throttling exception resolved after ${n} tries`);
+        sendSuccessfulResponse(req, res, data, docID, docClass, s3);
+      }
+    });
+  }
+};
+
+////// ROUTES //////
 // TODO: Run this through Textract
 // var upload = multer({ storage: multer.memoryStorage() }).any();
 router.post("/api/upload_status", (req, res) => {
@@ -81,74 +194,26 @@ router.post("/api/upload_status", (req, res) => {
           if (err) {
             console.log("s3.upload error: ", err);
             if (err.code === "ThrottlingException") {
-              console.log("s3 throttling exception detected.");
-              res.status(500).send({
-                status: "s3 throttling exception",
-                docID: docID,
-                docType: req.files[0].mimetype.split("/")[1],
-                docClass: docClass,
-                docName: req.files[0].originalname.split(".")[0],
-                filePath: "",
-                keyValuePairs: "NA",
-              });
+              console.log("s3 throttling exception detected. trying again.");
+
+              delayedUpload(
+                1,
+                1000,
+                req,
+                res,
+                docID,
+                docClass,
+                textract,
+                textractParams,
+                s3
+              );
             } else {
-              res.status(400).send({
-                status: "error",
-                docID: docID,
-                docType: req.files[0].mimetype.split("/")[1],
-                docClass: docClass,
-                docName: req.files[0].originalname.split(".")[0],
-                filePath: "",
-                keyValuePairs: "NA",
-              });
+              sendError(req, res, docID, docClass, 400, "error");
             }
           }
           // an error occurred
           else {
-            const parsedTextract = getKeyValues(data);
-
-            res.json({
-              status: "complete",
-              docID: docID,
-              docType: req.files[0].mimetype.split("/")[1],
-              docClass: docClass,
-              docName: req.files[0].originalname.split(".")[0],
-              filePath: "",
-              keyValuePairs: parsedTextract,
-            });
-            // successful response
-
-            // upload the JSON
-            const jsonifiedDocName = req.files[0].originalname.replace(
-              /(.(\w)+)$/gi,
-              ".json"
-            );
-
-            // rawJSON
-            s3params = {
-              Bucket: `doc-classifier-bucket/${docID}`,
-              Key: `rawJSON-${jsonifiedDocName}`,
-              Body: Buffer.from(JSON.stringify(data)),
-            };
-
-            s3.upload(s3params, (err, data) => {
-              if (err) {
-                console.log("rawJSON s3 upload error: ", err);
-              }
-            });
-
-            // parsedJSON
-            s3params = {
-              Bucket: `doc-classifier-bucket/${docID}`,
-              Key: `parsedJSON-${jsonifiedDocName}`,
-              Body: Buffer.from(JSON.stringify(parsedTextract)),
-            };
-
-            s3.upload(s3params, (err, data) => {
-              if (err) {
-                console.log("parsedJSON s3 upload error: ", err);
-              }
-            });
+            sendSuccessfulResponse(req, res, data, docID, docClass, s3);
           }
         });
       });
