@@ -116,9 +116,7 @@ const FileStatus = (props: any) => {
   const fileInfoContext = useContext(FileContext);
 
   const currentFile = props.fileWithPreview.file;
-  const [thumbnailSrc, setThumbnailSrc] = useState(
-    props.fileWithPreview.preview
-  );
+  const thumbnailSrc = useState(props.fileWithPreview.preview)[0];
   const index = props.fileWithPreview.index;
 
   // upload file function
@@ -174,8 +172,8 @@ const FileStatus = (props: any) => {
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
 
-  // // function assigned to onDocumentLoadSuccess, called after pdf is loaded. Note that this will only fire if the URL passed through the props points to a pdf; if it points to an image, the usePdf hook will fail and onDocumentLoadFail will fire instead (here left undefined)
-  const convertToImage = (PDFDocumentProxy: any) => {
+  // function assigned to onDocumentLoadSuccess, called after pdf is loaded. Note that this will only fire if the URL passed through the props points to a pdf; if it points to an image, the usePdf hook will fail and onDocumentLoadFail will fire instead (here left undefined)
+  const convertToImage = () => {
     URL.revokeObjectURL(thumbnailSrc); // revoke URL to avoid memory leak
     const insertionElement: any = document.querySelector("#insertion-point");
     const shadowRoot: any = insertionElement.children[0].shadowRoot;
