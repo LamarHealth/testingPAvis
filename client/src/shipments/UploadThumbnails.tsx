@@ -176,6 +176,7 @@ const FileStatus = (props: any) => {
 
   // // function assigned to onDocumentLoadSuccess, called after pdf is loaded. Note that this will only fire if the URL passed through the props points to a pdf; if it points to an image, the usePdf hook will fail and onDocumentLoadFail will fire instead (here left undefined)
   const convertToImage = (PDFDocumentProxy: any) => {
+    URL.revokeObjectURL(thumbnailSrc); // revoke URL to avoid memory leak
     const insertionElement: any = document.querySelector("#insertion-point");
     const shadowRoot: any = insertionElement.children[0].shadowRoot;
     const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
