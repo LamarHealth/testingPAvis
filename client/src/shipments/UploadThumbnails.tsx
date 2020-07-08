@@ -116,7 +116,9 @@ const FileStatus = (props: any) => {
   const fileInfoContext = useContext(FileContext);
 
   const currentFile = props.fileWithPreview.file;
-  const thumbnailSrc = useState(props.fileWithPreview.preview)[0];
+  const [thumbnailSrc, setThumbnailSrc] = useState(
+    props.fileWithPreview.preview
+  );
   const index = props.fileWithPreview.index;
 
   // upload file function
@@ -179,8 +181,7 @@ const FileStatus = (props: any) => {
     const shadowRoot: any = insertionElement.children[0].shadowRoot;
     const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
     const dataUrl = canvas.toDataURL();
-    const thumbnail: any = shadowRoot.querySelector(`#thumbnail${index}`);
-    thumbnail.src = dataUrl;
+    setThumbnailSrc(dataUrl);
 
     // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
     const base64 = dataUrl.split(",")[1];
