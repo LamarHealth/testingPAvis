@@ -18,7 +18,6 @@ import uuidv4 from "uuid";
 import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
 
 // Routes
-
 // AWS
 const config = require("./config");
 
@@ -39,107 +38,6 @@ const staticFiles = express.static(path.join(__dirname, "../../client/build"));
 app.use(staticFiles);
 app.use(cors());
 
-////// HELPER FUNCTIONS //////
-const sendSuccessfulResponse = (responsePayload, s3, data) => {
-  const { req, res, docID, docClass } = responsePayload;
-  const parsedTextract = getKeyValues(data);
-
-  res.json({
-    status: "complete",
-    docID: docID,
-    docType: req.files[0].mimetype.split("/")[1],
-    docClass: docClass,
-    docName: req.files[0].originalname.split(".")[0],
-    filePath: "",
-    keyValuePairs: parsedTextract,
-  });
-
-  const jsonifiedDocName = req.files[0].originalname.replace(
-    /(.(\w)+)$/gi,
-    ".json"
-  );
-
-  // upload rawJSON
-  let s3params = {
-    Bucket: `doc-classifier-bucket/${docID}`,
-    Key: `rawJSON-${jsonifiedDocName}`,
-    Body: Buffer.from(JSON.stringify(data)),
-  };
-
-  s3.upload(s3params, (err, data) => {
-    if (err) {
-      console.log("rawJSON s3 upload error: ", err);
-    }
-  });
-
-  // upload parsedJSON
-  s3params = {
-    Bucket: `doc-classifier-bucket/${docID}`,
-    Key: `parsedJSON-${jsonifiedDocName}`,
-    Body: Buffer.from(JSON.stringify(parsedTextract)),
-  };
-
-  s3.upload(s3params, (err, data) => {
-    if (err) {
-      console.log("parsedJSON s3 upload error: ", err);
-    }
-  });
-};
-
-const sendError = (responsePayload, errorCode, statusMessage) => {
-  const { req, res, docID, docClass } = responsePayload;
-  res.status(errorCode).send({
-    status: statusMessage,
-    docID: docID,
-    docType: req.files[0].mimetype.split("/")[1],
-    docClass: docClass,
-    docName: req.files[0].originalname.split(".")[0],
-    filePath: "",
-    keyValuePairs: "NA",
-  });
-};
-
-const delayedUpload = (n, maxN, uploadPayload) => {
-  const {
-    req,
-    res,
-    docID,
-    docClass,
-    textract,
-    textractParams,
-    s3,
-  } = uploadPayload;
-  const responsePayload = { req, res, docID, docClass };
-  if (Math.pow(2, n) > maxN) {
-    console.log(
-      `throttling exception max timeout exceeded after ${n} tries. request failed.`
-    );
-    sendError(
-      responsePayload,
-      429,
-      "throttling exception, max timeout exceeded. request failed."
-    );
-  } else {
-    textract.analyzeDocument(textractParams, (err, data) => {
-      if (err) {
-        if (err.code === "ThrottlingException") {
-          console.log(`throttling exception detected. trying again x${n + 1}.`);
-          return setTimeout(
-            () => delayedUpload(n + 1, maxN, uploadPayload),
-            Math.pow(2, n)
-          );
-        } else {
-          sendError(responsePayload, 500, "internal server error");
-        }
-      } else {
-        console.log(`throttling exception resolved after ${n} tries`);
-        sendSuccessfulResponse(responsePayload, s3, data);
-      }
-    });
-  }
-};
-
-////// ROUTES //////
 // TODO: Run this through Textract
 // var upload = multer({ storage: multer.memoryStorage() }).any();
 router.post("/api/upload_status", (req, res) => {
@@ -163,7 +61,7 @@ router.post("/api/upload_status", (req, res) => {
 
       const docID = uuidv4();
 
-      // convert .pdf file extension to .png cause that is what the client is doing to it
+      // convert .pdf file extension to .png it's no longer a pdf
       let pngifiedDocName = req.files[0].originalname.replace(
         /(.pdf)$/i,
         ".png"
@@ -176,32 +74,110 @@ router.post("/api/upload_status", (req, res) => {
       };
 
       let docClass = "";
+
       // All docs are uploaded just in case
       s3.upload(s3params, function (err, data) {
         textract.analyzeDocument(textractParams, (err, data) => {
+          const parsedTextract = getKeyValues(data);
+
+          // helper functions
+          const sendSuccessfulResponse = () => {
+            res.json({
+              status: "complete",
+              docID: docID,
+              docType: req.files[0].mimetype.split("/")[1],
+              docClass: docClass,
+              docName: req.files[0].originalname.split(".")[0],
+              filePath: "",
+              keyValuePairs: parsedTextract,
+            });
+
+            const jsonifiedDocName = req.files[0].originalname.replace(
+              /(.(\w)+)$/gi,
+              ".json"
+            );
+
+            let s3params = {
+              Bucket: `doc-classifier-bucket/${docID}`,
+              Key: `rawJSON-${jsonifiedDocName}`,
+              Body: Buffer.from(JSON.stringify(data)),
+            };
+
+            s3.upload(s3params, (err, data) => {
+              if (err) {
+                console.log("rawJSON s3 upload error: ", err);
+              }
+            });
+
+            s3params = {
+              Bucket: `doc-classifier-bucket/${docID}`,
+              Key: `parsedJSON-${jsonifiedDocName}`,
+              Body: Buffer.from(JSON.stringify(parsedTextract)),
+            };
+
+            s3.upload(s3params, (err, data) => {
+              if (err) {
+                console.log("parsedJSON s3 upload error: ", err);
+              }
+            });
+          };
+
+          const sendError = (errorCode, statusMessage) => {
+            res.status(errorCode).send({
+              status: statusMessage,
+              docID: docID,
+              docType: req.files[0].mimetype.split("/")[1],
+              docClass: docClass,
+              docName: req.files[0].originalname.split(".")[0],
+              filePath: "",
+              keyValuePairs: "NA",
+            });
+          };
+
+          const delayedUpload = (n, maxN) => {
+            if (n > maxN) {
+              console.log(
+                `throttling exception max timeout exceeded after ${n} tries. request failed.`
+              );
+              sendError(
+                429,
+                "throttling exception, max timeout exceeded. request failed."
+              );
+            } else {
+              textract.analyzeDocument(textractParams, (err, data) => {
+                if (err) {
+                  if (err.code === "ThrottlingException") {
+                    console.log(
+                      `throttling exception detected. trying again x${n + 1}.`
+                    );
+                    return setTimeout(
+                      () => delayedUpload(n + 1, maxN),
+                      Math.pow(2, n)
+                    );
+                  } else {
+                    sendError(500, "internal server error");
+                  }
+                } else {
+                  console.log(`throttling exception resolved after ${n} tries`);
+                  sendSuccessfulResponse();
+                }
+              });
+            }
+          };
+
+          // handle errors
           if (err) {
             console.log("s3.upload error: ", err);
+            // throttling exception
             if (err.code === "ThrottlingException") {
               console.log("s3 throttling exception detected. trying again.");
-              const uploadPayload = {
-                req,
-                res,
-                docID,
-                docClass,
-                textract,
-                textractParams,
-                s3,
-              };
-              delayedUpload(1, 1000, uploadPayload);
+              delayedUpload(1, 15);
             } else {
-              const responsePayload = { req, res, docID, docClass };
-              sendError(responsePayload, 400, "error");
+              sendError(400, "error");
             }
-          }
-          // an error occurred
-          else {
-            const responsePayload = { req, res, docID, docClass };
-            sendSuccessfulResponse(responsePayload, s3, data);
+          } else {
+            // success
+            sendSuccessfulResponse();
           }
         });
       });
