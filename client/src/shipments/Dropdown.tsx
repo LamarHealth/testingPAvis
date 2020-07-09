@@ -3,9 +3,6 @@ import styled from "styled-components";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
-// OLD
-import { HTMLTable, ProgressBar, Icon } from "@blueprintjs/core";
-
 // NEW
 import IconButton from "@material-ui/core/IconButton";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
@@ -47,7 +44,7 @@ const DropdownWrapper = styled.div`
   }
 `;
 
-const BlueprintTable = styled(HTMLTable)`
+const BlueprintTable = styled.table`
   border-collapse: collapse;
   margin: 0;
   text-align: left;
