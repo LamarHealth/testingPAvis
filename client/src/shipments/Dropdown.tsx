@@ -223,25 +223,25 @@ export const DropdownTable = (props: {
   );
 };
 
-export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
+export const Dropdown = ({ dropdownIndex, eventObj }: any) => {
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
+  const targetWidth = eventObj.target.offsetWidth;
 
   return (
-    <DropdownWrapper
-      id={`dropdown${props.dropdownIndex}`}
-      style={{ width: props.eventObj.target.offsetWidth }}
-      role="dropdown"
-    >
-      {/* <WrappedJssComponent> */}
+    <DropdownWrapper id={`dropdown${dropdownIndex}`} role="dropdown">
       {areThereDocs ? (
         isDocSelected ? (
-          <div>
-            <ManualSelect eventObj={props.eventObj}></ManualSelect>
+          <div
+            style={
+              targetWidth > 700 ? { width: targetWidth } : { width: "700px" }
+            }
+          >
+            <ManualSelect eventObj={eventObj}></ManualSelect>
             <DropdownTable
-              dropdownIndex={props.dropdownIndex}
-              eventObj={props.eventObj}
+              dropdownIndex={dropdownIndex}
+              eventObj={eventObj}
             ></DropdownTable>
           </div>
         ) : (
@@ -250,7 +250,6 @@ export const Dropdown = (props: { dropdownIndex: number; eventObj: any }) => {
       ) : (
         <p>Upload documents on the sidebar to load results.</p>
       )}
-      {/* </WrappedJssComponent> */}
     </DropdownWrapper>
   );
 };

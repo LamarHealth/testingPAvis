@@ -106,7 +106,7 @@ $(document).ready(function () {
     ) as HTMLElement;
 
     let popperInstance = createPopper(event.target, dropdownElement, {
-      placement: "bottom",
+      placement: "bottom-start",
     });
 
     // remove on mouseleave

@@ -87,16 +87,6 @@ export const StyledDropzone = () => {
     console.log("dragging");
   }, []);
 
-  useEffect(
-    () => () => {
-      // Make sure to revoke the data uris to avoid memory leaks
-      newFiles.forEach((fileWithPreview: IFileWithPreview) =>
-        URL.revokeObjectURL(fileWithPreview.preview)
-      );
-    },
-    [newFiles]
-  );
-
   // Dropzone Hook
   const {
     getRootProps,

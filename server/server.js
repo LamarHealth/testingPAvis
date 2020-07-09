@@ -18,7 +18,6 @@ import uuidv4 from "uuid";
 import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
 
 // Routes
-
 // AWS
 const config = require("./config");
 
@@ -62,7 +61,7 @@ router.post("/api/upload_status", (req, res) => {
 
       const docID = uuidv4();
 
-      // convert .pdf file extension to .png cause that is what the client is doing to it
+      // convert .pdf file extension to .png it's no longer a pdf
       let pngifiedDocName = req.files[0].originalname.replace(
         /(.pdf)$/i,
         ".png"
@@ -75,25 +74,14 @@ router.post("/api/upload_status", (req, res) => {
       };
 
       let docClass = "";
+
       // All docs are uploaded just in case
       s3.upload(s3params, function (err, data) {
         textract.analyzeDocument(textractParams, (err, data) => {
-          if (err) {
-            console.log(err, err.stack);
-            res.status(400).send({
-              status: "error",
-              docID: docID,
-              docType: req.files[0].mimetype.split("/")[1],
-              docClass: docClass,
-              docName: req.files[0].originalname.split(".")[0],
-              filePath: "",
-              keyValuePairs: "NA",
-            });
-          }
-          // an error occurred
-          else {
-            const parsedTextract = getKeyValues(data);
+          const parsedTextract = getKeyValues(data);
 
+          // helper functions
+          const sendSuccessfulResponse = () => {
             res.json({
               status: "complete",
               docID: docID,
@@ -103,16 +91,13 @@ router.post("/api/upload_status", (req, res) => {
               filePath: "",
               keyValuePairs: parsedTextract,
             });
-            // successful response
 
-            // upload the JSON
             const jsonifiedDocName = req.files[0].originalname.replace(
               /(.(\w)+)$/gi,
               ".json"
             );
 
-            // rawJSON
-            s3params = {
+            let s3params = {
               Bucket: `doc-classifier-bucket/${docID}`,
               Key: `rawJSON-${jsonifiedDocName}`,
               Body: Buffer.from(JSON.stringify(data)),
@@ -124,7 +109,6 @@ router.post("/api/upload_status", (req, res) => {
               }
             });
 
-            // parsedJSON
             s3params = {
               Bucket: `doc-classifier-bucket/${docID}`,
               Key: `parsedJSON-${jsonifiedDocName}`,
@@ -136,6 +120,64 @@ router.post("/api/upload_status", (req, res) => {
                 console.log("parsedJSON s3 upload error: ", err);
               }
             });
+          };
+
+          const sendError = (errorCode, statusMessage) => {
+            res.status(errorCode).send({
+              status: statusMessage,
+              docID: docID,
+              docType: req.files[0].mimetype.split("/")[1],
+              docClass: docClass,
+              docName: req.files[0].originalname.split(".")[0],
+              filePath: "",
+              keyValuePairs: "NA",
+            });
+          };
+
+          const delayedUpload = (n, maxN) => {
+            if (n > maxN) {
+              console.log(
+                `throttling exception max timeout exceeded after ${n} tries. request failed.`
+              );
+              sendError(
+                429,
+                "throttling exception, max timeout exceeded. request failed."
+              );
+            } else {
+              textract.analyzeDocument(textractParams, (err, data) => {
+                if (err) {
+                  if (err.code === "ThrottlingException") {
+                    console.log(
+                      `throttling exception detected. trying again x${n + 1}.`
+                    );
+                    return setTimeout(
+                      () => delayedUpload(n + 1, maxN),
+                      Math.pow(2, n)
+                    );
+                  } else {
+                    sendError(500, "internal server error");
+                  }
+                } else {
+                  console.log(`throttling exception resolved after ${n} tries`);
+                  sendSuccessfulResponse();
+                }
+              });
+            }
+          };
+
+          // handle errors
+          if (err) {
+            console.log("s3.upload error: ", err);
+            // throttling exception
+            if (err.code === "ThrottlingException") {
+              console.log("s3 throttling exception detected. trying again.");
+              delayedUpload(1, 15);
+            } else {
+              sendError(400, "error");
+            }
+          } else {
+            // success
+            sendSuccessfulResponse();
           }
         });
       });
@@ -151,9 +193,6 @@ router.post("/api/upload_status", (req, res) => {
 router.get("/api/doc-image/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const docName = req.params.docName.trim();
-
-  console.log("docID:", docID);
-  console.log("docName:", docName);
 
   const s3 = new S3();
 

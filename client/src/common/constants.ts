@@ -1,1 +1,1 @@
-export const PAGE_SCALE = 1.5;
+export const PAGE_SCALE = 0.7;

@@ -1,9 +1,18 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import styled from "styled-components";
-import { Dialog } from "@blueprintjs/core";
+
 import { useState as useSpecialHookState } from "@hookstate/core";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
+
+// OLD
+import { Dialog } from "@blueprintjs/core";
+
+// NEW
+import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
+import Popover from "@material-ui/core/Popover";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 
 import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
@@ -53,6 +62,12 @@ const CurrentSelection = styled.p`
   padding: 1em;
   border-radius: 5px;
   border: 0.5px solid ${colors.FONT_BLUE};
+`;
+
+// NEW
+const StyledButton = styled(Button)`
+  color: red;
+  margin: 1em;
 `;
 
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
@@ -227,12 +242,69 @@ export const ManualSelect = ({ eventObj }: any) => {
     getImageAndGeometryFromServer(selectedDocData);
   };
 
+  /////// NEW ///////
+  const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+      typography: {
+        padding: theme.spacing(2),
+      },
+    })
+  );
+
+  const classes = useStyles();
+  console.log("classes, ", classes);
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
+  console.log("open, ", open);
+  console.log("anchorEl, ", anchorEl);
+
   return (
     <ManualSelectWrapper>
       <div>
         <h4>{selectedDocData.docName}</h4>
       </div>
-      <ManualSelectButton onClick={clickHandler}>
+      <Button
+        aria-describedby={id}
+        variant="contained"
+        color="primary"
+        onClick={handleClick}
+      >
+        Open Popover
+      </Button>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <Typography className={classes.typography}>
+          The content of the Popover.
+        </Typography>
+      </Popover>
+
+      {/* <ManualSelectButton onClick={clickHandler}>
         Manual Select
       </ManualSelectButton>
       <ManualSelectOverlay
@@ -258,7 +330,7 @@ export const ManualSelect = ({ eventObj }: any) => {
             </CurrentSelectionContext.Provider>
           </Layer>
         </Stage>
-      </ManualSelectOverlay>
+      </ManualSelectOverlay> */}
     </ManualSelectWrapper>
   );
 };
