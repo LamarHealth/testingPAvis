@@ -116,7 +116,9 @@ const FileStatus = (props: any) => {
   const fileInfoContext = useContext(FileContext);
 
   const currentFile = props.fileWithPreview.file;
-  const thumbnailSrc = props.fileWithPreview.preview;
+  const [thumbnailSrc, setThumbnailSrc] = useState(
+    props.fileWithPreview.preview
+  );
   const index = props.fileWithPreview.index;
 
   // upload file function
@@ -144,13 +146,14 @@ const FileStatus = (props: any) => {
           };
           updateLocalStorage(postSuccessResponse.documentInfo);
           fileInfoContext.fileDispatch(postSuccessResponse);
+          setUploadStatus(200);
           break;
-        case 400:
+        case 429:
+          setUploadStatus(429);
+          break;
         default:
-          setUploadStatus(400);
+          setUploadStatus(result.status);
       }
-
-      setUploadStatus(result.status);
     } catch {
       setUploadStatus(400);
     }
@@ -163,52 +166,31 @@ const FileStatus = (props: any) => {
   const canvasRef = useRef(null);
 
   // function assigned to onDocumentLoadSuccess, called after pdf is loaded. Note that this will only fire if the URL passed through the props points to a pdf; if it points to an image, the usePdf hook will fail and onDocumentLoadFail will fire instead (here left undefined)
-  const convertPdfToImage = (PDFDocumentProxy: any) => {
-    // PDFDocProxy is the interface of the pdfjs API. we are selecting only the first page to render
-    PDFDocumentProxy.getPage(1).then((page: any) => {
-      // set scale. in this case, affects resolution of thumbnail
-      const viewport = page.getViewport({ scale: PAGE_SCALE });
-      const insertionElement: any = document.querySelector("#insertion-point");
-      const shadowRoot: any = insertionElement.children[0].shadowRoot;
-      const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
-      const ctx = canvas.getContext("2d");
+  const convertToImage = () => {
+    URL.revokeObjectURL(thumbnailSrc); // revoke URL to avoid memory leak
+    const insertionElement: any = document.querySelector("#insertion-point");
+    const shadowRoot: any = insertionElement.children[0].shadowRoot;
+    const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
+    const dataUrl = canvas.toDataURL();
+    setThumbnailSrc(dataUrl);
 
-      // setting context for rendering
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+    // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
+    const base64 = dataUrl.split(",")[1];
+    const mime = dataUrl.split(",")[0].match(/:(.*?);/)[1];
+    const bin = atob(base64);
+    const length = bin.length;
+    const buf = new ArrayBuffer(length);
+    const arr = new Uint8Array(buf);
+    bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
 
-      const renderCtx = {
-        canvasContext: ctx,
-        viewport: viewport,
-      };
-
-      // render to canvas
-      page.render(renderCtx).promise.then(() => {
-        // after render, then convert to URL via .toDataURL()
-        const dataUrl = canvas.toDataURL();
-        // use URL as thumbnail img src
-        const thumbnail: any = shadowRoot.querySelector(`#thumbnail${index}`);
-        thumbnail.src = dataUrl;
-
-        // after thumbnail, convert to File and upload to server (using the following method: https://stackoverflow.com/questions/49925039/create-a-file-object-from-an-img-tag)
-        const base64 = dataUrl.split(",")[1];
-        const mime = dataUrl.split(",")[0].match(/:(.*?);/)[1];
-        const bin = atob(base64);
-        const length = bin.length;
-        const buf = new ArrayBuffer(length);
-        const arr = new Uint8Array(buf);
-        bin.split("").forEach((e, i) => (arr[i] = e.charCodeAt(0)));
-
-        const imageFileFromPdf = new File([buf], currentFile.name, {
-          type: mime,
-        });
-
-        //upload, and handle errors
-        if (imageFileFromPdf.type.includes("image/")) {
-          uploadImageFile(imageFileFromPdf);
-        }
-      });
+    const imageFileFromPdf = new File([buf], currentFile.name, {
+      type: mime,
     });
+
+    //upload, and handle errors
+    if (imageFileFromPdf.type.includes("image/")) {
+      uploadImageFile(imageFileFromPdf);
+    }
   };
 
   // the PDFJS usePdf hook
@@ -216,7 +198,8 @@ const FileStatus = (props: any) => {
     file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,
-    onDocumentLoadSuccess: convertPdfToImage,
+    scale: PAGE_SCALE,
+    onPageRenderSuccess: convertToImage,
   });
 
   useEffect(() => {
@@ -239,7 +222,7 @@ const FileStatus = (props: any) => {
           <FailureIcon />
         )}
         <div id="thumbnail-wrapper">
-          <Canvas id={`pdf-canvas${index}`} />
+          <Canvas id={`pdf-canvas${index}`} ref={canvasRef} />
           <Thumbnail
             id={`thumbnail${index}`}
             src={thumbnailSrc}
