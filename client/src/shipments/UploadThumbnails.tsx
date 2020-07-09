@@ -149,9 +149,7 @@ const FileStatus = (props: any) => {
           setUploadStatus(200);
           break;
         case 429:
-          console.log(
-            "throttling exception, too many requests, request denied"
-          );
+          setUploadStatus(429);
           break;
         default:
           setUploadStatus(result.status);

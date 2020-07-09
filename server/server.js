@@ -40,7 +40,8 @@ app.use(staticFiles);
 app.use(cors());
 
 ////// HELPER FUNCTIONS //////
-const sendSuccessfulResponse = (req, res, data, docID, docClass, s3) => {
+const sendSuccessfulResponse = (responsePayload, s3, data) => {
+  const { req, res, docID, docClass } = responsePayload;
   const parsedTextract = getKeyValues(data);
 
   res.json({
@@ -85,8 +86,9 @@ const sendSuccessfulResponse = (req, res, data, docID, docClass, s3) => {
   });
 };
 
-const sendError = (req, res, docID, docClass, errorCat, statusMessage) => {
-  res.status(errorCat).send({
+const sendError = (responsePayload, errorCode, statusMessage) => {
+  const { req, res, docID, docClass } = responsePayload;
+  res.status(errorCode).send({
     status: statusMessage,
     docID: docID,
     docType: req.files[0].mimetype.split("/")[1],
@@ -97,26 +99,23 @@ const sendError = (req, res, docID, docClass, errorCat, statusMessage) => {
   });
 };
 
-const delayedUpload = (
-  n,
-  maxN,
-  req,
-  res,
-  docID,
-  docClass,
-  textract,
-  textractParams,
-  s3
-) => {
+const delayedUpload = (n, maxN, uploadPayload) => {
+  const {
+    req,
+    res,
+    docID,
+    docClass,
+    textract,
+    textractParams,
+    s3,
+  } = uploadPayload;
+  const responsePayload = { req, res, docID, docClass };
   if (Math.pow(2, n) > maxN) {
     console.log(
       `throttling exception max timeout exceeded after ${n} tries. request failed.`
     );
     sendError(
-      req,
-      res,
-      docID,
-      docClass,
+      responsePayload,
       429,
       "throttling exception, max timeout exceeded. request failed."
     );
@@ -126,26 +125,15 @@ const delayedUpload = (
         if (err.code === "ThrottlingException") {
           console.log(`throttling exception detected. trying again x${n + 1}.`);
           return setTimeout(
-            () =>
-              delayedUpload(
-                n + 1,
-                maxN,
-                req,
-                res,
-                docID,
-                docClass,
-                textract,
-                textractParams,
-                s3
-              ),
+            () => delayedUpload(n + 1, maxN, uploadPayload),
             Math.pow(2, n)
           );
         } else {
-          sendError(req, res, docID, docClass, 500, "internal server error");
+          sendError(responsePayload, 500, "internal server error");
         }
       } else {
         console.log(`throttling exception resolved after ${n} tries`);
-        sendSuccessfulResponse(req, res, data, docID, docClass, s3);
+        sendSuccessfulResponse(responsePayload, s3, data);
       }
     });
   }
@@ -195,25 +183,25 @@ router.post("/api/upload_status", (req, res) => {
             console.log("s3.upload error: ", err);
             if (err.code === "ThrottlingException") {
               console.log("s3 throttling exception detected. trying again.");
-
-              delayedUpload(
-                1,
-                1000,
+              const uploadPayload = {
                 req,
                 res,
                 docID,
                 docClass,
                 textract,
                 textractParams,
-                s3
-              );
+                s3,
+              };
+              delayedUpload(1, 1000, uploadPayload);
             } else {
-              sendError(req, res, docID, docClass, 400, "error");
+              const responsePayload = { req, res, docID, docClass };
+              sendError(responsePayload, 400, "error");
             }
           }
           // an error occurred
           else {
-            sendSuccessfulResponse(req, res, data, docID, docClass, s3);
+            const responsePayload = { req, res, docID, docClass };
+            sendSuccessfulResponse(responsePayload, s3, data);
           }
         });
       });
