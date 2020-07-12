@@ -87,23 +87,17 @@ const Type = styled(Typography)`
 
 // render input dropdowns
 $(document).ready(function () {
-  let dropdownIndex = 0;
-
   $("input").click((event: any) => {
     // create a mounter and render Dropdown
-    const mounter = $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(
-      event.target
-    );
+    const mounter = $(`<div id="mounter"></div>`).insertAfter(event.target);
 
     ReactDOM.render(
-      <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
-      document.querySelector(`#mounter${dropdownIndex}`)
+      <Dropdown eventObj={event}></Dropdown>,
+      document.querySelector(`#mounter`)
     );
 
     // turn dropdownElement table into instance of Popper.js
-    const dropdownElement = document.querySelector(
-      `#dropdown${dropdownIndex}`
-    ) as HTMLElement;
+    const dropdownElement = document.querySelector(`#dropdown`) as HTMLElement;
 
     let popperInstance = createPopper(event.target, dropdownElement, {
       placement: "bottom-start",
@@ -112,7 +106,7 @@ $(document).ready(function () {
     // remove on mouseleave
     $(event.target).mouseleave(() => {
       // don't remove if hovering over the dropdownElement
-      if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
+      if ($(`#dropdown:hover`).length > 0) {
         $(dropdownElement).mouseleave(() => {
           dropdownElement.remove();
           mounter.remove();
@@ -124,8 +118,6 @@ $(document).ready(function () {
         popperInstance.destroy();
       }
     });
-
-    dropdownIndex++;
   });
 });
 

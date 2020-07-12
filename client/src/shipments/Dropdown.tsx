@@ -97,7 +97,6 @@ const ClosestMatch = styled.button`
 
 const TableBodyComponent = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];
-  dropdownIndex: number;
   eventObj: any;
   bestMatch: string;
 }) => {
@@ -140,12 +139,8 @@ const TableBodyComponent = (props: {
   );
 };
 
-export const DropdownTable = (props: {
-  dropdownIndex: number;
-  eventObj: any;
-}) => {
+export const DropdownTable = (props: { eventObj: any }) => {
   const eventObj = props.eventObj;
-  const dropdownIndex = props.dropdownIndex;
   const targetString = props.eventObj.target.placeholder;
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
@@ -215,7 +210,6 @@ export const DropdownTable = (props: {
       </TableHead>
       <TableBodyComponent
         sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
-        dropdownIndex={dropdownIndex}
         eventObj={eventObj}
         bestMatch={bestMatch}
       />
@@ -223,14 +217,14 @@ export const DropdownTable = (props: {
   );
 };
 
-export const Dropdown = ({ dropdownIndex, eventObj }: any) => {
+export const Dropdown = ({ eventObj }: any) => {
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const targetWidth = eventObj.target.offsetWidth;
 
   return (
-    <DropdownWrapper id={`dropdown${dropdownIndex}`} role="dropdown">
+    <DropdownWrapper id={`dropdown`} role="dropdown">
       {areThereDocs ? (
         isDocSelected ? (
           <div
@@ -239,10 +233,7 @@ export const Dropdown = ({ dropdownIndex, eventObj }: any) => {
             }
           >
             <ManualSelect eventObj={eventObj}></ManualSelect>
-            <DropdownTable
-              dropdownIndex={dropdownIndex}
-              eventObj={eventObj}
-            ></DropdownTable>
+            <DropdownTable eventObj={eventObj}></DropdownTable>
           </div>
         ) : (
           <p>Select a doc to see fill options</p>
