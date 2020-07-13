@@ -5,13 +5,8 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 
-// OLD
-import { Dialog } from "@blueprintjs/core";
-
-// NEW
-import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import Popover from "@material-ui/core/Popover";
-import Typography from "@material-ui/core/Typography";
+
 import Button from "@material-ui/core/Button";
 
 import { colors } from "./../common/colors";
@@ -29,7 +24,7 @@ const ManualSelectWrapper = styled.div`
   }
 `;
 
-const ManualSelectButton = styled.button`
+const StyledButton = styled(Button)`
   border: 1px solid white;
   border-radius: 5px;
   font-weight: bold;
@@ -42,14 +37,9 @@ const ManualSelectButton = styled.button`
   }
 `;
 
-const ManualSelectOverlay = styled(Dialog)`
-  width: auto;
-  height: auto;
-`;
-
 const CurrentSelectionWrapper = styled.div`
   padding: 1em 2em;
-  background-color: ${colors.CLOSEST_MATCH_ROW};
+  background-color: ${colors.MANUAL_SELECT_HEADER};
 
   h3 {
     margin: 0.8em 0 0.5em 0;
@@ -62,12 +52,6 @@ const CurrentSelection = styled.p`
   padding: 1em;
   border-radius: 5px;
   border: 0.5px solid ${colors.FONT_BLUE};
-`;
-
-// NEW
-const StyledButton = styled(Button)`
-  color: red;
-  margin: 1em;
 `;
 
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
@@ -152,17 +136,35 @@ const Header = ({ docImageURL, currentSelection }: any) => {
 };
 
 export const ManualSelect = ({ eventObj }: any) => {
-  const [overlayOpen, setOverlayOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
-
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-
   const [image] = useImage(docImageURL.url);
 
-  const docData = getKeyValuePairsByDoc();
+  // popover
+  const popoverOpen = Boolean(anchorEl);
+  const id = popoverOpen ? "docit-simple-popover" : undefined;
 
+  const popoverHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+    getImageAndGeometryFromServer(selectedDocData);
+  };
+
+  const renderBackdrop = () => {
+    // unfortunately not achievable via mui API or styled-components
+    const popoverRoot = document.querySelector("#docit-simple-popover");
+    const backdrop: any = popoverRoot?.children[0];
+    backdrop.style.backgroundColor = colors.MANUAL_SELECT_POPOVER_BACKDROP;
+  };
+
+  const popoverHandleClose = () => {
+    setAnchorEl(null);
+  };
+
+  // geometry
+  const docData = getKeyValuePairsByDoc();
   const selectedDocData = docData.filter(
     (doc) => doc.docID === globalSelectedFile.get()
   )[0];
@@ -172,7 +174,6 @@ export const ManualSelect = ({ eventObj }: any) => {
     const docType = doc.docType;
     const docID = doc.docID;
 
-    // get doc image
     const docImageResponse: any = await fetch(
       `${
         process.env.REACT_APP_API_PATH
@@ -186,7 +187,6 @@ export const ManualSelect = ({ eventObj }: any) => {
     const blob = await docImageResponse.blob();
     const objectURL = await URL.createObjectURL(blob);
 
-    // get image dimensions
     const img = new Image();
     img.src = objectURL;
     let urlObj: any = {
@@ -195,11 +195,12 @@ export const ManualSelect = ({ eventObj }: any) => {
     img.onload = function (this: any) {
       urlObj["width"] = this.naturalWidth;
       urlObj["height"] = this.naturalHeight;
+      urlObj["overlayPositionOffset"] =
+        (window.innerWidth - this.naturalWidth) / 2;
     };
 
     setDocImageURL(urlObj);
 
-    // get doc field data
     const linesGeometryResponse: any = await fetch(
       `${
         process.env.REACT_APP_API_PATH
@@ -225,7 +226,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        setOverlayOpen(false);
+        setAnchorEl(null);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
@@ -237,79 +238,39 @@ export const ManualSelect = ({ eventObj }: any) => {
     };
   }, [currentSelection]);
 
-  const clickHandler = () => {
-    setOverlayOpen(true);
-    getImageAndGeometryFromServer(selectedDocData);
-  };
-
-  /////// NEW ///////
-  const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-      typography: {
-        padding: theme.spacing(2),
-      },
-    })
-  );
-
-  const classes = useStyles();
-  console.log("classes, ", classes);
-
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-    null
-  );
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
-
-  console.log("open, ", open);
-  console.log("anchorEl, ", anchorEl);
-
   return (
     <ManualSelectWrapper>
       <div>
         <h4>{selectedDocData.docName}</h4>
       </div>
-      <Button
+      <StyledButton
         aria-describedby={id}
         variant="contained"
         color="primary"
-        onClick={handleClick}
+        onClick={popoverHandleClick}
       >
         Open Popover
-      </Button>
+      </StyledButton>
+
       <Popover
         id={id}
-        open={open}
+        open={popoverOpen}
         anchorEl={anchorEl}
-        onClose={handleClose}
+        onEnter={renderBackdrop}
+        onClose={popoverHandleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: 0, left: 0 }}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: "top",
+          horizontal: "left",
         }}
         transformOrigin={{
-          vertical: "top",
+          vertical: "center",
           horizontal: "center",
         }}
-      >
-        <Typography className={classes.typography}>
-          The content of the Popover.
-        </Typography>
-      </Popover>
-
-      {/* <ManualSelectButton onClick={clickHandler}>
-        Manual Select
-      </ManualSelectButton>
-      <ManualSelectOverlay
-        isOpen={overlayOpen}
-        onClose={() => setOverlayOpen(false)}
+        style={{
+          left: `${docImageURL.overlayPositionOffset}px`,
+        }}
       >
         <Header docImageURL={docImageURL} currentSelection={currentSelection} />
         <Stage width={docImageURL.width} height={docImageURL.height}>
@@ -330,7 +291,7 @@ export const ManualSelect = ({ eventObj }: any) => {
             </CurrentSelectionContext.Provider>
           </Layer>
         </Stage>
-      </ManualSelectOverlay> */}
+      </Popover>
     </ManualSelectWrapper>
   );
 };
