@@ -1,1 +1,4 @@
-export const PAGE_SCALE = 0.7;
+export const constants = {
+  PAGE_SCALE: 0.7,
+  SIDEBAR_WIDTH: "25em",
+};
