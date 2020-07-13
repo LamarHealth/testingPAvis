@@ -17,10 +17,10 @@ import uuidv from "uuid";
 
 const ManualSelectWrapper = styled.div`
   width: 100%;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
 
   h4 {
-    margin: 0.4em;
-    margin-left: 1em;
+    margin: 1em;
   }
 `;
 
@@ -249,7 +249,7 @@ export const ManualSelect = ({ eventObj }: any) => {
         color="primary"
         onClick={popoverHandleClick}
       >
-        Open Popover
+        Manual Select
       </StyledButton>
 
       <Popover

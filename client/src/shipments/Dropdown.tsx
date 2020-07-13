@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, createContext, useContext } from "react";
 import styled from "styled-components";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
-// NEW
 import IconButton from "@material-ui/core/IconButton";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
@@ -24,7 +23,6 @@ import {
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
-// dropdown table components
 const DropdownWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   border: 1px solid lightgrey;
@@ -36,35 +34,6 @@ const DropdownWrapper = styled.div`
   p {
     padding: 0.7em;
     margin: 0;
-  }
-`;
-
-const BlueprintTable = styled.table`
-  border-collapse: collapse;
-  margin: 0;
-  text-align: left;
-  width: 100%;
-
-  TableCell:nth-child(n + 1):nth-child(-n + 2) + TableCell,
-  th:nth-child(n + 1):nth-child(-n + 2) + th {
-    border-left: 1px solid lightgrey;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid lightgrey;
-
-    TableCell:nth-child(4) {
-      text-align: right;
-    }
-  }
-
-  th,
-  TableCell {
-    padding: 0.3em;
-  }
-
-  .closest-match-row {
-    background-color: ${colors.CLOSEST_MATCH_ROW};
   }
 `;
 
@@ -88,6 +57,27 @@ const ClosestMatch = styled.button`
   border: none;
   background-color: ${colors.TRANSPARENT};
   text-align: left;
+`;
+
+const StyledArrowDropdownIcon = styled(ArrowDropDownIcon)`
+  width: 2em;
+  height: 2em;
+`;
+
+const StyledArrowDropupIcon = styled(ArrowDropUpIcon)`
+  width: 2em;
+  height: 2em;
+`;
+
+const StyledIconButton = styled(IconButton)`
+  border: none;
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+
+  :hover {
+    opacity: 0.5;
+  }
 `;
 
 const TableBodyComponent = (props: {
@@ -131,6 +121,60 @@ const TableBodyComponent = (props: {
         );
       })}
     </TableBody>
+  );
+};
+
+const TableHeadContext = createContext({} as any);
+
+const TableHeadComponent = ({ targetString }: any) => {
+  const {
+    matchArrow,
+    matchScoreSortHandler,
+    alphabetArrow,
+    alphabeticSortHandler,
+  } = useContext(TableHeadContext);
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell>
+          <StyledIconButton onClick={matchScoreSortHandler}>
+            <table>
+              <tr>
+                <td>
+                  {matchArrow === "highest match" ? (
+                    <StyledArrowDropdownIcon />
+                  ) : (
+                    <StyledArrowDropupIcon />
+                  )}
+                </td>
+                <td>Match Score</td>
+              </tr>
+            </table>
+          </StyledIconButton>
+        </TableCell>
+        <TableCell>
+          <StyledIconButton onClick={alphabeticSortHandler}>
+            <table>
+              <tr>
+                <td>
+                  {alphabetArrow === "a-to-z" ? (
+                    <StyledArrowDropdownIcon />
+                  ) : (
+                    <StyledArrowDropupIcon />
+                  )}
+                </td>
+                <td>
+                  Field Name: <i>{targetString}</i>
+                </td>
+              </tr>
+            </table>
+          </StyledIconButton>
+        </TableCell>
+        <TableCell>Field Value</TableCell>
+        <TableCell />
+      </TableRow>
+    </TableHead>
   );
 };
 
@@ -178,31 +222,16 @@ export const DropdownTable = (props: { eventObj: any }) => {
 
   return (
     <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>
-            <IconButton onClick={matchScoreSortHandler}>
-              {matchArrow === "highest match" ? (
-                <ArrowDropDownIcon />
-              ) : (
-                <ArrowDropUpIcon />
-              )}
-            </IconButton>
-            Match Score
-          </TableCell>
-          <TableCell>
-            <IconButton onClick={alphabeticSortHandler}>
-              {alphabetArrow === "a-to-z" ? (
-                <ArrowDropDownIcon />
-              ) : (
-                <ArrowDropUpIcon />
-              )}
-            </IconButton>
-            Field Name: <i>{targetString}</i>
-          </TableCell>
-          <TableCell>Field Value</TableCell>
-        </TableRow>
-      </TableHead>
+      <TableHeadContext.Provider
+        value={{
+          matchArrow,
+          matchScoreSortHandler,
+          alphabetArrow,
+          alphabeticSortHandler,
+        }}
+      >
+        <TableHeadComponent targetString={targetString} />
+      </TableHeadContext.Provider>
       <TableBodyComponent
         sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
         eventObj={eventObj}
