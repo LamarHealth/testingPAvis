@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { colors } from "./../common/colors";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
+
+//@ts-ignore
+import root from "react-shadow/material-ui";
+
+import DocViewer from "./DocViewer";
 import WrappedJssComponent from "./ShadowComponent";
+import { RenderDropdown } from "./RenderDropdown";
 
 const SIDEBAR_WIDTH: string = "25em";
 
@@ -61,16 +67,28 @@ const ExpandButton = styled.button`
   }
 `;
 
-export const Sidebar = ({ children }: any) => {
+export const Sidebar = () => {
   const [isOpen, setOpen] = useState(false);
+
   return (
-    <WrappedJssComponent>
-      <Container open={isOpen}>
-        <Column open={isOpen}>{children}</Column>
-        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-          {isOpen ? <ChevronLeft /> : <ChevronRight />}
-        </ExpandButton>
-      </Container>
-    </WrappedJssComponent>
+    <div>
+      <WrappedJssComponent>
+        <Container open={isOpen}>
+          <Column open={isOpen}>
+            <DocViewer />
+          </Column>
+          <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+            {isOpen ? <ChevronLeft /> : <ChevronRight />}
+          </ExpandButton>
+        </Container>
+      </WrappedJssComponent>
+      <root.div>
+        <RenderDropdown />
+      </root.div>
+    </div>
   );
+};
+
+export const WrappedSidebar = () => {
+  return <Sidebar />;
 };

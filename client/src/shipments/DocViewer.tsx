@@ -1,12 +1,10 @@
 import React, { useReducer, useState, createContext } from "react";
-import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import Typography from "@material-ui/core/Typography";
 
 import { StyledDropzone } from "./DocUploader";
-import { Dropdown } from "./Dropdown";
 import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
@@ -21,7 +19,6 @@ import CardContent from "@material-ui/core/CardContent";
 
 import $ from "jquery";
 import { colors } from "./../common/colors";
-import { createPopper } from "@popperjs/core";
 import {
   createState as createSpecialHookState,
   useState as useSpecialHookState,
@@ -84,42 +81,6 @@ const Type = styled(Typography)`
   display: flex;
   margin: 1em 0;
 `;
-
-// render input dropdowns
-$(document).ready(function () {
-  $("input").click((event: any) => {
-    // create a mounter and render Dropdown
-    const mounter = $(`<div id="mounter"></div>`).insertAfter(event.target);
-
-    ReactDOM.render(
-      <Dropdown eventObj={event}></Dropdown>,
-      document.querySelector(`#mounter`)
-    );
-
-    // turn dropdownElement table into instance of Popper.js
-    const dropdownElement = document.querySelector(`#dropdown`) as HTMLElement;
-
-    let popperInstance = createPopper(event.target, dropdownElement, {
-      placement: "bottom-start",
-    });
-
-    // remove on mouseleave
-    $(event.target).mouseleave(() => {
-      // don't remove if hovering over the dropdownElement
-      if ($(`#dropdown:hover`).length > 0) {
-        $(dropdownElement).mouseleave(() => {
-          dropdownElement.remove();
-          mounter.remove();
-          popperInstance.destroy();
-        });
-      } else {
-        dropdownElement.remove();
-        mounter.remove();
-        popperInstance.destroy();
-      }
-    });
-  });
-});
 
 export const globalSelectedFileState = createSpecialHookState("");
 

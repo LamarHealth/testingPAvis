@@ -5,17 +5,15 @@ import $ from "jquery";
 // Load dotenv
 import dotenv from "dotenv";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
-import DocViewer from "./shipments/DocViewer";
 import { Sidebar } from "./shipments/Sidebar";
+
 dotenv.config();
 
 $('<span id="insertion-point"/>').insertBefore(document.body);
 
 ReactDOM.render(
   <>
-    <Sidebar>
-      <DocViewer />
-    </Sidebar>
+    <Sidebar />
     {process.env.REACT_APP_LOCAL && (
       <body>
         <ShipmentsDashboard />

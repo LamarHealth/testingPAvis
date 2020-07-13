@@ -14,11 +14,6 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
-import WrappedJssComponent from "./ShadowComponent";
-
-import { jssPreset, StylesProvider } from "@material-ui/styles";
-import { create } from "jss";
-
 import { colors } from "./../common/colors";
 import { ManualSelect } from "./ManualSelect";
 import {
