@@ -21,7 +21,7 @@ import {
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
-} from "./KeyValuePairs";
+} from "./keyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { DropdownContext } from "./RenderModal";
 
@@ -254,7 +254,7 @@ export const Modal = (props: { eventObj: any }) => {
 
   // rewriting pesky styles that penetrate the shadow DOM
   const rewriteStyles = () => {
-    const popoverEl = document.getElementById("docit-modal");
+    const popoverEl = document.getElementById("docit-main-modal");
     const shadowRoot = popoverEl?.children[2].children[0].shadowRoot;
     const newStyles = document.createElement("style");
     newStyles.innerHTML = ` 

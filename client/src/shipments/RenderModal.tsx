@@ -11,7 +11,7 @@ import { colors } from "../common/colors";
 import { constants } from "../common/constants";
 import { Modal } from "./Modal";
 import { globalSelectedFileState } from "./DocViewer";
-import { getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { getKeyValuePairsByDoc } from "./keyValuePairs";
 
 export const DropdownContext = createContext({} as any);
 
@@ -24,7 +24,7 @@ export const RenderModal = () => {
 
   // popover
   const popoverOpen = Boolean(modalAnchorEl);
-  const id = popoverOpen ? "docit-modal" : undefined;
+  const id = popoverOpen ? "docit-main-modal" : undefined;
 
   const popoverHandleClick = (event: any) => {
     setModalAnchorEl(event.currentTarget);
@@ -32,7 +32,7 @@ export const RenderModal = () => {
 
   const renderBackdrop = () => {
     // unfortunately not achievable via mui API or styled-components
-    const popoverRoot = document.querySelector("#docit-modal");
+    const popoverRoot = document.querySelector("#docit-main-modal");
     const backdrop: any = popoverRoot?.children[0];
     backdrop.style.backgroundColor = colors.MANUAL_SELECT_POPOVER_BACKDROP;
   };
