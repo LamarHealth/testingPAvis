@@ -1,51 +1,71 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
 
 import $ from "jquery";
-import { createPopper } from "@popperjs/core";
+//@ts-ignore
+import root from "react-shadow/material-ui";
 
+import Popover from "@material-ui/core/Popover";
+
+import { colors } from "./../common/colors";
+import { constants } from "./../common/constants";
 import { Dropdown } from "./Dropdown";
+import { rootCertificates } from "tls";
 
 export const RenderDropdown = () => {
+  const [eventObj, setEventObj] = useState(null) as any;
+  const [anchorEl, setAnchorEl] = useState(null) as any;
+
+  // popover
+  const popoverOpen = Boolean(anchorEl);
+  const id = popoverOpen ? "docit-modal" : undefined;
+
+  const popoverHandleClick = (event: any) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const renderBackdrop = () => {
+    // unfortunately not achievable via mui API or styled-components
+    const popoverRoot = document.querySelector("#docit-modal");
+    const backdrop: any = popoverRoot?.children[0];
+    backdrop.style.backgroundColor = colors.MANUAL_SELECT_POPOVER_BACKDROP;
+  };
+
+  const popoverHandleClose = () => {
+    setAnchorEl(null);
+  };
+
   $(document).ready(() => {
     $("input").click((event) => {
-      // create a mounter and render Dropdown
-      const mounter = $(`<div id="mounter"></div>`).insertAfter(event.target);
-
-      ReactDOM.render(
-        <Dropdown eventObj={event}></Dropdown>,
-        document.querySelector(`#mounter`)
-      );
-
-      // turn dropdownElement table into instance of Popper.js
-      const dropdownElement = document.querySelector(
-        `#dropdown`
-      ) as HTMLElement;
-
-      let popperInstance = createPopper(event.target, dropdownElement, {
-        placement: "bottom-start",
-      });
-
-      // remove on mouseleave
-      $(event.target).mouseleave(() => {
-        // don't remove if hovering over the dropdownElement
-        if ($(`#dropdown:hover`).length > 0) {
-          $(dropdownElement).mouseleave(() => {
-            dropdownElement.remove();
-            mounter.remove();
-            popperInstance.destroy();
-          });
-        } else {
-          dropdownElement.remove();
-          mounter.remove();
-          popperInstance.destroy();
-        }
-      });
+      setEventObj(event);
+      popoverHandleClick(event);
     });
   });
+
   return (
-    <p style={{ display: "none" }}>
-      need to return something in order to run the jquery above
-    </p>
+    <Popover
+      id={id}
+      open={popoverOpen}
+      anchorEl={anchorEl}
+      onEnter={renderBackdrop}
+      onClose={popoverHandleClose}
+      anchorReference="anchorPosition"
+      anchorPosition={{
+        top: 150,
+        left: (window.innerWidth - constants.MODAL_WIDTH) / 2,
+      }}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "left",
+      }}
+      transformOrigin={{
+        vertical: "center",
+        horizontal: "center",
+      }}
+    >
+      <root.div>
+        <div>{eventObj && <Dropdown eventObj={eventObj} />}</div>
+      </root.div>
+    </Popover>
   );
 };

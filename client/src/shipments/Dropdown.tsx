@@ -1,5 +1,4 @@
 import React, { useState, createContext, useContext } from "react";
-import styled from "styled-components";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -14,6 +13,7 @@ import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
 import { colors } from "./../common/colors";
+import { constants } from "./../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -23,62 +23,61 @@ import {
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 
-const DropdownWrapper = styled.div`
-  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
-  border: 1px solid lightgrey;
-  z-index: 2;
-  max-height: 24em;
-  overflow-x: hidden;
-  overflow-y: scroll;
+const dropdownWrapperStyles = {
+  backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
+  border: "1px solid lightgrey",
+  zIndex: 2,
+  maxHeight: "24em",
+  overflowX: "hidden",
+  overflowY: "scroll",
+};
 
-  p {
-    padding: 0.7em;
-    margin: 0;
-  }
-`;
+const fillButtonStyles = {
+  backgroundColor: `${colors.FILL_BUTTON}`,
+  color: "white",
+  border: "1px solid white",
+  borderRadius: "5px",
+  width: "4em",
+  height: "2em",
+  fontWeight: "bold",
+};
 
-const FillButton = styled.button`
-  background-color: #22c062;
-  color: white;
-  border: 1px solid white;
-  border-radius: 5px;
-  width: 4em;
-  height: 2em;
-  font-weight: bold;
+const closestMatchStyles = {
+  padding: 0,
+  width: "6.5em",
+  border: "none",
+  backgroundColor: `${colors.TRANSPARENT}`,
+  textAlign: "left",
+};
 
-  :hover {
-    opacity: 0.5;
-  }
-`;
+const arrowIconStyles = {
+  width: "2em",
+  height: "2em",
+};
 
-const ClosestMatch = styled.button`
-  padding: 0;
-  width: 6.5em;
-  border: none;
-  background-color: ${colors.TRANSPARENT};
-  text-align: left;
-`;
+const iconButtonStyles = {
+  border: "none",
+  backgroundColor: "transparent",
+  margin: 0,
+  padding: 0,
+};
 
-const StyledArrowDropdownIcon = styled(ArrowDropDownIcon)`
-  width: 2em;
-  height: 2em;
-`;
+const FillBttnContext = createContext({} as any);
 
-const StyledArrowDropupIcon = styled(ArrowDropUpIcon)`
-  width: 2em;
-  height: 2em;
-`;
-
-const StyledIconButton = styled(IconButton)`
-  border: none;
-  background-color: transparent;
-  margin: 0;
-  padding: 0;
-
-  :hover {
-    opacity: 0.5;
-  }
-`;
+const FillButton = () => {
+  const [fillBttnHover, setFillBttnHover] = useState({}) as any;
+  return (
+    <button
+      //@ts-ignore
+      style={{ ...fillButtonStyles, ...fillBttnHover }}
+      onMouseEnter={() => setFillBttnHover({ opacity: 0.5 })}
+      onMouseLeave={() => setFillBttnHover({ opacity: 1 })}
+      onClick={useContext(FillBttnContext)}
+    >
+      Fill
+    </button>
+  );
+};
 
 const TableBodyComponent = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];
@@ -107,15 +106,20 @@ const TableBodyComponent = (props: {
                 value={keyValue["distanceFromTarget"] * 100}
               />
               {keyValue["key"] === props.bestMatch && (
-                <ClosestMatch>
+                <button
+                  //@ts-ignore
+                  style={closestMatchStyles}
+                >
                   <i>closest match</i>
-                </ClosestMatch>
+                </button>
               )}
             </TableCell>
             <TableCell>{keyValue["key"]}</TableCell>
             <TableCell>{keyValue["value"]}</TableCell>
-            <TableCell onClick={fillButtonHandler}>
-              <FillButton>Fill</FillButton>
+            <TableCell>
+              <FillBttnContext.Provider value={fillButtonHandler}>
+                <FillButton />
+              </FillBttnContext.Provider>
             </TableCell>
           </TableRow>
         );
@@ -138,30 +142,38 @@ const TableHeadComponent = ({ targetString }: any) => {
     <TableHead>
       <TableRow>
         <TableCell>
-          <StyledIconButton onClick={matchScoreSortHandler}>
+          <IconButton
+            onClick={matchScoreSortHandler}
+            //@ts-ignore
+            style={iconButtonStyles}
+          >
             <table>
               <tr>
                 <td>
                   {matchArrow === "highest match" ? (
-                    <StyledArrowDropdownIcon />
+                    <ArrowDropDownIcon style={arrowIconStyles} />
                   ) : (
-                    <StyledArrowDropupIcon />
+                    <ArrowDropUpIcon style={arrowIconStyles} />
                   )}
                 </td>
                 <td>Match Score</td>
               </tr>
             </table>
-          </StyledIconButton>
+          </IconButton>
         </TableCell>
         <TableCell>
-          <StyledIconButton onClick={alphabeticSortHandler}>
+          <IconButton
+            onClick={alphabeticSortHandler}
+            //@ts-ignore
+            style={iconButtonStyles}
+          >
             <table>
               <tr>
                 <td>
                   {alphabetArrow === "a-to-z" ? (
-                    <StyledArrowDropdownIcon />
+                    <ArrowDropDownIcon style={arrowIconStyles} />
                   ) : (
-                    <StyledArrowDropupIcon />
+                    <ArrowDropUpIcon style={arrowIconStyles} />
                   )}
                 </td>
                 <td>
@@ -169,7 +181,7 @@ const TableHeadComponent = ({ targetString }: any) => {
                 </td>
               </tr>
             </table>
-          </StyledIconButton>
+          </IconButton>
         </TableCell>
         <TableCell>Field Value</TableCell>
         <TableCell />
@@ -245,17 +257,17 @@ export const Dropdown = ({ eventObj }: any) => {
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
-  const targetWidth = eventObj.target.offsetWidth;
 
   return (
-    <DropdownWrapper id={`dropdown`} role="dropdown">
+    <div
+      id={`dropdown`}
+      role="dropdown"
+      //@ts-ignore
+      style={dropdownWrapperStyles}
+    >
       {areThereDocs ? (
         isDocSelected ? (
-          <div
-            style={
-              targetWidth > 700 ? { width: targetWidth } : { width: "700px" }
-            }
-          >
+          <div style={{ width: `${constants.MODAL_WIDTH}px` }}>
             <ManualSelect eventObj={eventObj}></ManualSelect>
             <DropdownTable eventObj={eventObj}></DropdownTable>
           </div>
@@ -265,6 +277,6 @@ export const Dropdown = ({ eventObj }: any) => {
       ) : (
         <p>Upload documents on the sidebar to load results.</p>
       )}
-    </DropdownWrapper>
+    </div>
   );
 };

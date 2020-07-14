@@ -71,6 +71,8 @@ export const Sidebar = () => {
 
   return (
     <div>
+      <RenderDropdown />
+
       <WrappedJssComponent>
         <Container open={isOpen}>
           <Column open={isOpen}>
@@ -81,13 +83,10 @@ export const Sidebar = () => {
           </ExpandButton>
         </Container>
       </WrappedJssComponent>
-      <root.div>
-        <RenderDropdown />
-      </root.div>
     </div>
   );
 };
 
-export const WrappedSidebar = () => {
-  return <Sidebar />;
-};
+// export const WrappedSidebar = () => {
+//   return <Sidebar />;
+// };

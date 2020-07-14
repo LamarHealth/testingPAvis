@@ -6,7 +6,6 @@ import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 
 import Popover from "@material-ui/core/Popover";
-
 import Button from "@material-ui/core/Button";
 
 import { colors } from "./../common/colors";
