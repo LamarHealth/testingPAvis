@@ -5,6 +5,9 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 
+//@ts-ignore
+import root from "react-shadow/material-ui";
+
 import Popover from "@material-ui/core/Popover";
 import Button from "@material-ui/core/Button";
 
@@ -14,67 +17,68 @@ import { globalSelectedFileState } from "./DocViewer";
 
 import uuidv from "uuid";
 
-const ManualSelectWrapper = styled.div`
-  width: 100%;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+const wrapperStyles = {
+  width: "100%",
+  fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+};
 
-  h4 {
-    margin: 1em;
-  }
-`;
+const buttonStyles = {
+  border: "1px solid white",
+  borderRadius: "5px",
+  fontWeight: "bold",
+  backgroundColor: "#f9e526",
+  padding: "0.3em 1.3em",
+  margin: "0 0.4em 0.4em 1em",
+};
 
-const StyledButton = styled(Button)`
-  border: 1px solid white;
-  border-radius: 5px;
-  font-weight: bold;
-  background-color: #f9e526;
-  padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 1em;
+const currentSelectionWrapperStyles = {
+  padding: "1em 2em",
+  backgroundColor: `${colors.MANUAL_SELECT_HEADER}`,
+  boxSizing: "border-box",
+};
 
-  :hover {
-    opacity: 0.5;
-  }
-`;
-
-const CurrentSelectionWrapper = styled.div`
-  padding: 1em 2em;
-  background-color: ${colors.MANUAL_SELECT_HEADER};
-
-  h3 {
-    margin: 0.8em 0 0.5em 0;
-  }
-`;
-
-const CurrentSelection = styled.p`
-  margin: 0;
-  background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
-  padding: 1em;
-  border-radius: 5px;
-  border: 0.5px solid ${colors.FONT_BLUE};
-`;
+const currentSelectionStyles = {
+  margin: 0,
+  backgroundColor: `${colors.CURRENT_SELECTION_LIGHTBLUE}`,
+  padding: "1em",
+  borderRadius: "5px",
+  border: `0.5px solid ${colors.FONT_BLUE}`,
+};
 
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const [color, setColor] = useState("transparent");
-  const [filled, setFilled] = useState(false);
+  const { filled, setFilled, setCurrentSelection } = useContext(
+    CurrentSelectionContext
+  );
 
-  const { setCurrentSelection } = useContext(CurrentSelectionContext);
+  const amIFilled = filled[lineGeometry.ID] ? true : false;
 
   const fillAndSetCurrentSelection = () => {
-    if (!filled) {
+    if (!amIFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         return {
           ...prevCurrentSelection,
           [lineGeometry.ID]: lineGeometry.Text,
         };
       });
-      setFilled(true);
+      setFilled((otherFilleds: any) => {
+        return {
+          ...otherFilleds,
+          [lineGeometry.ID]: true,
+        };
+      });
     }
-    if (filled) {
+    if (amIFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
       });
-      setFilled(false);
+      setFilled((otherFilleds: any) => {
+        return {
+          ...otherFilleds,
+          [lineGeometry.ID]: false,
+        };
+      });
     }
   };
 
@@ -82,11 +86,9 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
     <Line
       onClick={fillAndSetCurrentSelection}
       onMouseEnter={() => {
-        if (filled) return;
         setColor(colors.MANUAL_SELECT_RECT_FILL);
       }}
       onMouseLeave={() => {
-        if (filled) return;
         setColor("transparent");
       }}
       points={Array.prototype.concat.apply(
@@ -97,7 +99,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         ])
       )}
       closed
-      fill={color}
+      fill={amIFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
     />
   );
@@ -107,8 +109,10 @@ const CurrentSelectionContext = createContext({} as any);
 
 const Header = ({ docImageURL, currentSelection }: any) => {
   return (
-    <CurrentSelectionWrapper
+    <div
+      //@ts-ignore
       style={{
+        ...currentSelectionWrapperStyles,
         width: `${docImageURL.width}px`,
       }}
     >
@@ -123,14 +127,35 @@ const Header = ({ docImageURL, currentSelection }: any) => {
           <p>
             <strong>Current Selection:</strong>
           </p>
-          <CurrentSelection>
+          <p style={currentSelectionStyles}>
             {Object.keys(currentSelection).map(
               (key, i) => currentSelection[key] + " "
             )}
-          </CurrentSelection>
+          </p>
         </div>
       )}
-    </CurrentSelectionWrapper>
+    </div>
+  );
+};
+
+const ButtonContext = createContext({} as any);
+
+const ManualSelectButton = () => {
+  const { id, popoverHandleClick } = useContext(ButtonContext);
+  const [hover, setHover] = useState({}) as any;
+  return (
+    <Button
+      aria-describedby={id}
+      variant="contained"
+      color="primary"
+      //@ts-ignore
+      style={{ ...buttonStyles, ...hover }}
+      onMouseEnter={() => setHover({ opacity: 0.5 })}
+      onMouseLeave={() => setHover({ opacity: 1 })}
+      onClick={popoverHandleClick}
+    >
+      Manual Select
+    </Button>
   );
 };
 
@@ -141,6 +166,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
+  const [filled, setFilled] = useState({} as any);
 
   // popover
   const popoverOpen = Boolean(anchorEl);
@@ -238,19 +264,13 @@ export const ManualSelect = ({ eventObj }: any) => {
   }, [currentSelection]);
 
   return (
-    <ManualSelectWrapper>
+    <div style={wrapperStyles}>
       <div>
-        <h4>{selectedDocData.docName}</h4>
+        <h4 style={{ margin: "1em" }}>{selectedDocData.docName}</h4>
       </div>
-      <StyledButton
-        aria-describedby={id}
-        variant="contained"
-        color="primary"
-        onClick={popoverHandleClick}
-      >
-        Manual Select
-      </StyledButton>
-
+      <ButtonContext.Provider value={{ id, popoverHandleClick }}>
+        <ManualSelectButton />
+      </ButtonContext.Provider>
       <Popover
         id={id}
         open={popoverOpen}
@@ -271,26 +291,35 @@ export const ManualSelect = ({ eventObj }: any) => {
           left: `${docImageURL.overlayPositionOffset}px`,
         }}
       >
-        <Header docImageURL={docImageURL} currentSelection={currentSelection} />
-        <Stage width={docImageURL.width} height={docImageURL.height}>
-          <Layer>
-            <KonvaImage image={image} />
-            <CurrentSelectionContext.Provider
-              value={{ currentSelection, setCurrentSelection }}
-            >
-              {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
-                return (
-                  <Polygon
-                    key={ndx}
-                    lineGeometry={lineGeometry}
-                    docImageURL={docImageURL}
-                  />
-                );
-              })}
-            </CurrentSelectionContext.Provider>
-          </Layer>
-        </Stage>
+        <root.div>
+          <Header
+            docImageURL={docImageURL}
+            currentSelection={currentSelection}
+          />
+          <Stage width={docImageURL.width} height={docImageURL.height}>
+            <Layer>
+              <KonvaImage image={image} />
+              <CurrentSelectionContext.Provider
+                value={{
+                  filled,
+                  setFilled,
+                  setCurrentSelection,
+                }}
+              >
+                {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
+                  return (
+                    <Polygon
+                      key={ndx}
+                      lineGeometry={lineGeometry}
+                      docImageURL={docImageURL}
+                    />
+                  );
+                })}
+              </CurrentSelectionContext.Provider>
+            </Layer>
+          </Stage>
+        </root.div>
       </Popover>
-    </ManualSelectWrapper>
+    </div>
   );
 };
