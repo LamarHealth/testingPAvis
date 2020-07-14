@@ -14,6 +14,7 @@ import Button from "@material-ui/core/Button";
 import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
+import { DropdownContext } from "./RenderModal";
 
 import uuidv from "uuid";
 
@@ -50,11 +51,10 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const { filled, setFilled, setCurrentSelection } = useContext(
     CurrentSelectionContext
   );
-
-  const amIFilled = filled[lineGeometry.ID] ? true : false;
+  const iAmFilled = filled[lineGeometry.ID] ? true : false;
 
   const fillAndSetCurrentSelection = () => {
-    if (!amIFilled) {
+    if (!iAmFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         return {
           ...prevCurrentSelection,
@@ -68,7 +68,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         };
       });
     }
-    if (amIFilled) {
+    if (iAmFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
@@ -99,7 +99,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         ])
       )}
       closed
-      fill={amIFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
+      fill={iAmFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
     />
   );
@@ -160,20 +160,24 @@ const ManualSelectButton = () => {
 };
 
 export const ManualSelect = ({ eventObj }: any) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [
+    manualSelAnchorEl,
+    setManualSelAnchorEl,
+  ] = useState<HTMLButtonElement | null>(null);
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
+  const { setModalAnchorEl } = useContext(DropdownContext);
 
   // popover
-  const popoverOpen = Boolean(anchorEl);
+  const popoverOpen = Boolean(manualSelAnchorEl);
   const id = popoverOpen ? "docit-simple-popover" : undefined;
 
   const popoverHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+    setManualSelAnchorEl(event.currentTarget);
     getImageAndGeometryFromServer(selectedDocData);
   };
 
@@ -185,7 +189,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   };
 
   const popoverHandleClose = () => {
-    setAnchorEl(null);
+    setManualSelAnchorEl(null);
   };
 
   // geometry
@@ -251,7 +255,8 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        setAnchorEl(null);
+        setManualSelAnchorEl(null);
+        setModalAnchorEl(null);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
@@ -274,7 +279,7 @@ export const ManualSelect = ({ eventObj }: any) => {
       <Popover
         id={id}
         open={popoverOpen}
-        anchorEl={anchorEl}
+        anchorEl={manualSelAnchorEl}
         onEnter={renderBackdrop}
         onClose={popoverHandleClose}
         anchorReference="anchorPosition"

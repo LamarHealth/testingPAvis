@@ -10,7 +10,7 @@ import root from "react-shadow/material-ui";
 
 import DocViewer from "./DocViewer";
 import WrappedJssComponent from "./ShadowComponent";
-import { RenderDropdown } from "./RenderDropdown";
+import { RenderModal } from "./RenderModal";
 
 const Column = styled.div`
   justify-content: flex-start;
@@ -71,7 +71,7 @@ export const Sidebar = () => {
 
   return (
     <div>
-      <RenderDropdown />
+      <RenderModal />
 
       <WrappedJssComponent>
         <Container open={isOpen}>

@@ -12,8 +12,8 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
-import { colors } from "./../common/colors";
-import { constants } from "./../common/constants";
+import { colors } from "../common/colors";
+import { constants } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -22,6 +22,7 @@ import {
   KeyValuesWithDistance,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
+import { DropdownContext } from "./RenderModal";
 
 const dropdownWrapperStyles = {
   backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
@@ -30,6 +31,7 @@ const dropdownWrapperStyles = {
   maxHeight: "24em",
   overflowX: "hidden",
   overflowY: "scroll",
+  width: `${constants.MODAL_WIDTH}px`,
 };
 
 const fillButtonStyles = {
@@ -66,13 +68,18 @@ const FillBttnContext = createContext({} as any);
 
 const FillButton = () => {
   const [fillBttnHover, setFillBttnHover] = useState({}) as any;
+  const { setModalAnchorEl } = useContext(DropdownContext);
+  const fillButtonHandler = useContext(FillBttnContext);
   return (
     <button
       //@ts-ignore
       style={{ ...fillButtonStyles, ...fillBttnHover }}
       onMouseEnter={() => setFillBttnHover({ opacity: 0.5 })}
       onMouseLeave={() => setFillBttnHover({ opacity: 1 })}
-      onClick={useContext(FillBttnContext)}
+      onClick={() => {
+        setModalAnchorEl(null);
+        fillButtonHandler();
+      }}
     >
       Fill
     </button>
@@ -190,7 +197,7 @@ const TableHeadComponent = ({ targetString }: any) => {
   );
 };
 
-export const DropdownTable = (props: { eventObj: any }) => {
+export const Modal = (props: { eventObj: any }) => {
   const eventObj = props.eventObj;
   const targetString = props.eventObj.target.placeholder;
 
@@ -233,50 +240,29 @@ export const DropdownTable = (props: { eventObj: any }) => {
   };
 
   return (
-    <Table>
-      <TableHeadContext.Provider
-        value={{
-          matchArrow,
-          matchScoreSortHandler,
-          alphabetArrow,
-          alphabeticSortHandler,
-        }}
-      >
-        <TableHeadComponent targetString={targetString} />
-      </TableHeadContext.Provider>
-      <TableBodyComponent
-        sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
-        eventObj={eventObj}
-        bestMatch={bestMatch}
-      />
-    </Table>
-  );
-};
-
-export const Dropdown = ({ eventObj }: any) => {
-  const areThereDocs = getKeyValuePairsByDoc().length > 0;
-  const isDocSelected =
-    useSpecialHookState(globalSelectedFileState).get() !== "";
-
-  return (
     <div
       id={`dropdown`}
-      role="dropdown"
       //@ts-ignore
       style={dropdownWrapperStyles}
     >
-      {areThereDocs ? (
-        isDocSelected ? (
-          <div style={{ width: `${constants.MODAL_WIDTH}px` }}>
-            <ManualSelect eventObj={eventObj}></ManualSelect>
-            <DropdownTable eventObj={eventObj}></DropdownTable>
-          </div>
-        ) : (
-          <p>Select a doc to see fill options</p>
-        )
-      ) : (
-        <p>Upload documents on the sidebar to load results.</p>
-      )}
+      <ManualSelect eventObj={eventObj}></ManualSelect>
+      <Table>
+        <TableHeadContext.Provider
+          value={{
+            matchArrow,
+            matchScoreSortHandler,
+            alphabetArrow,
+            alphabeticSortHandler,
+          }}
+        >
+          <TableHeadComponent targetString={targetString} />
+        </TableHeadContext.Provider>
+        <TableBodyComponent
+          sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
+          eventObj={eventObj}
+          bestMatch={bestMatch}
+        />
+      </Table>
     </div>
   );
 };
