@@ -11,6 +11,7 @@ import TableBody from "@material-ui/core/TableBody";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
 import { constants } from "../common/constants";
@@ -117,12 +118,18 @@ const TableBodyComponent = (props: {
                   //@ts-ignore
                   style={closestMatchStyles}
                 >
-                  <i>closest match</i>
+                  <Typography>
+                    <i>closest match</i>
+                  </Typography>
                 </button>
               )}
             </TableCell>
-            <TableCell>{keyValue["key"]}</TableCell>
-            <TableCell>{keyValue["value"]}</TableCell>
+            <TableCell>
+              <Typography>{keyValue["key"]}</Typography>
+            </TableCell>
+            <TableCell>
+              <Typography>{keyValue["value"]}</Typography>
+            </TableCell>
             <TableCell>
               <FillBttnContext.Provider value={fillButtonHandler}>
                 <FillButton />
@@ -163,7 +170,9 @@ const TableHeadComponent = ({ targetString }: any) => {
                     <ArrowDropUpIcon style={arrowIconStyles} />
                   )}
                 </td>
-                <td>Match Score</td>
+                <Typography variant="h4">
+                  <td>Match Score</td>
+                </Typography>
               </tr>
             </table>
           </IconButton>
@@ -184,13 +193,17 @@ const TableHeadComponent = ({ targetString }: any) => {
                   )}
                 </td>
                 <td>
-                  Field Name: <i>{targetString}</i>
+                  <Typography variant="h4">
+                    Field Name: <i>{targetString}</i>
+                  </Typography>
                 </td>
               </tr>
             </table>
           </IconButton>
         </TableCell>
-        <TableCell>Field Value</TableCell>
+        <TableCell>
+          <Typography variant="h4">Field Value</Typography>
+        </TableCell>
         <TableCell />
       </TableRow>
     </TableHead>

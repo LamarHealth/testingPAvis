@@ -10,6 +10,7 @@ import root from "react-shadow/material-ui";
 
 import Popover from "@material-ui/core/Popover";
 import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 
 import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
@@ -116,22 +117,22 @@ const Header = ({ docImageURL, currentSelection }: any) => {
         width: `${docImageURL.width}px`,
       }}
     >
-      <p>
+      <Typography>
         <i>
           <strong>Click</strong> to select a line; <strong>Click</strong> again
           to unselect; press <strong>Return</strong> key to fill.
         </i>
-      </p>
+      </Typography>
       {Object.keys(currentSelection).length > 0 && (
         <div>
-          <p>
+          <Typography>
             <strong>Current Selection:</strong>
-          </p>
-          <p style={currentSelectionStyles}>
+          </Typography>
+          <Typography style={currentSelectionStyles}>
             {Object.keys(currentSelection).map(
               (key, i) => currentSelection[key] + " "
             )}
-          </p>
+          </Typography>
         </div>
       )}
     </div>
@@ -154,7 +155,7 @@ const ManualSelectButton = () => {
       onMouseLeave={() => setHover({ opacity: 1 })}
       onClick={popoverHandleClick}
     >
-      Manual Select
+      <Typography style={{ margin: "0.2em 0.5em" }}>Manual Select</Typography>
     </Button>
   );
 };
@@ -270,9 +271,9 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   return (
     <div style={wrapperStyles}>
-      <div>
-        <h4 style={{ margin: "1em" }}>{selectedDocData.docName}</h4>
-      </div>
+      <Typography variant="h3" style={{ margin: "1em" }}>
+        {selectedDocData.docName}
+      </Typography>
       <ButtonContext.Provider value={{ id, popoverHandleClick }}>
         <ManualSelectButton />
       </ButtonContext.Provider>
