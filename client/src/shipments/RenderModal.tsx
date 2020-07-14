@@ -61,7 +61,7 @@ export const RenderModal = () => {
               onClose={popoverHandleClose}
               anchorReference="anchorPosition"
               anchorPosition={{
-                top: 150,
+                top: 100,
                 left: (window.innerWidth - constants.MODAL_WIDTH) / 2,
               }}
               anchorOrigin={{

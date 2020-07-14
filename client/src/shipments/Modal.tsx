@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useEffect } from "react";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -25,11 +25,11 @@ import {
 import { globalSelectedFileState } from "./DocViewer";
 import { DropdownContext } from "./RenderModal";
 
-const dropdownWrapperStyles = {
+const modalWrapperStyles = {
   backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
   border: "1px solid lightgrey",
   zIndex: 2,
-  maxHeight: "24em",
+  maxHeight: "500px",
   overflowX: "hidden",
   overflowY: "scroll",
   width: `${constants.MODAL_WIDTH}px`,
@@ -252,11 +252,27 @@ export const Modal = (props: { eventObj: any }) => {
     }
   };
 
+  // rewriting pesky styles that penetrate the shadow DOM
+  const rewriteStyles = () => {
+    const popoverEl = document.getElementById("docit-modal");
+    const shadowRoot = popoverEl?.children[2].children[0].shadowRoot;
+    const newStyles = document.createElement("style");
+    newStyles.innerHTML = ` 
+      :host * {
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+      }
+    `;
+    newStyles.type = "text/css";
+    shadowRoot?.appendChild(newStyles);
+  };
+
+  useEffect(() => rewriteStyles(), []);
+
   return (
     <div
-      id={`dropdown`}
+      id={`modal-wrapper`}
       //@ts-ignore
-      style={dropdownWrapperStyles}
+      style={modalWrapperStyles}
     >
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Table>

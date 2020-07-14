@@ -1,5 +1,4 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import styled from "styled-components";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
@@ -175,7 +174,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   // popover
   const popoverOpen = Boolean(manualSelAnchorEl);
-  const id = popoverOpen ? "docit-simple-popover" : undefined;
+  const id = popoverOpen ? "docit-manual-select-modal" : undefined;
 
   const popoverHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setManualSelAnchorEl(event.currentTarget);
@@ -184,7 +183,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   const renderBackdrop = () => {
     // unfortunately not achievable via mui API or styled-components
-    const popoverRoot = document.querySelector("#docit-simple-popover");
+    const popoverRoot = document.querySelector("#docit-manual-select-modal");
     const backdrop: any = popoverRoot?.children[0];
     backdrop.style.backgroundColor = colors.MANUAL_SELECT_POPOVER_BACKDROP;
   };
@@ -268,6 +267,29 @@ export const ManualSelect = ({ eventObj }: any) => {
       document.removeEventListener("keydown", keydownListener);
     };
   }, [currentSelection]);
+
+  // rewriting pesky styles that penetrate the shadow DOM
+  const rewriteStyles = () => {
+    const popoverEl = document.getElementById("docit-manual-select-modal");
+    if (!popoverEl) return;
+    const shadowRoot = popoverEl?.children[2].children[0].shadowRoot;
+    const alreadyExists = shadowRoot?.getElementById(
+      "manual-select-style-overwrite"
+    );
+    if (alreadyExists) return;
+    const newStyles = document.createElement("style");
+    newStyles.innerHTML = `
+      :host * {
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        font-size: 1em;
+      }
+    `;
+    newStyles.type = "text/css";
+    newStyles.id = "manual-select-style-overwrite";
+    shadowRoot?.appendChild(newStyles);
+  };
+
+  useEffect(() => rewriteStyles());
 
   return (
     <div style={wrapperStyles}>
