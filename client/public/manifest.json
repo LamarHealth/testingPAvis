@@ -1,8 +1,8 @@
 {
   "short_name": "DocIt",
-  "name": "DocIt Preview",
+  "name": "DocIt",
   "version": "1.0",
-  "description": "Preview for DocIt",
+  "description": "Automatically fill out web forms with data from PDFs, faxes, photos, and other documents.",
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

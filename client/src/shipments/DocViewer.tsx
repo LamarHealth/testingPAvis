@@ -110,8 +110,14 @@ const DocCell = (props: DocumentInfo) => {
     });
   };
 
+  const setSelected = () => {
+    globalSelectedFile.get() === props.docID
+      ? globalSelectedFile.set("")
+      : globalSelectedFile.set(`${props.docID}`);
+  };
+
   return (
-    <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
+    <Box onClick={setSelected}>
       <CardContent>
         {globalSelectedFile.get() === props.docID ? (
           <Type
@@ -120,8 +126,8 @@ const DocCell = (props: DocumentInfo) => {
               backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
             }}
           >
-            <CheckCircleIcon style={{ color: green[500] }} />
             {props.docName}
+            <CheckCircleIcon style={{ color: green[500] }} />
           </Type>
         ) : (
           <Type variant="subtitle1">{props.docName}</Type>
