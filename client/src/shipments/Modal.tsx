@@ -14,7 +14,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
-import { constants } from "../common/constants";
+import { MODAL_WIDTH } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -28,14 +28,14 @@ import { ModalContext } from "./RenderModal";
 const getModalWrapperStyles = () => {
   return {
     top: `100px`,
-    left: `${(window.innerWidth - constants.MODAL_WIDTH) / 2}px`,
+    left: `${(window.innerWidth - MODAL_WIDTH) / 2}px`,
     position: "absolute",
     backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
     zIndex: 2,
     maxHeight: "500px",
     overflowX: "hidden",
     overflowY: "scroll",
-    width: `${constants.MODAL_WIDTH}px`,
+    width: `${MODAL_WIDTH}px`,
   };
 };
 

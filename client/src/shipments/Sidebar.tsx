@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { colors } from "./../common/colors";
-import { constants } from "./../common/constants";
+import { SIDEBAR_WIDTH } from "./../common/constants";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
@@ -24,7 +24,7 @@ const Column = styled.div`
   display: flex;
   height: 100%;
   transition: all 1s;
-  width: ${constants.SIDEBAR_WIDTH};
+  width: ${SIDEBAR_WIDTH};
   background-color: ${colors.OFFWHITE};
   overflow: auto;
 `;
@@ -36,7 +36,7 @@ const Container = styled.div`
   z-index: 9999;
   transition: 1s;
   margin-left: ${(props: { open: boolean }) =>
-    props.open ? "0" : "-" + constants.SIDEBAR_WIDTH};
+    props.open ? "0" : "-" + SIDEBAR_WIDTH};
 `;
 
 const ExpandButton = styled.button`

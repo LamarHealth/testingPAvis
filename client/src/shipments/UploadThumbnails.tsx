@@ -17,7 +17,7 @@ import Typography from "@material-ui/core/Typography";
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
-import { constants } from "../common/constants";
+import { PAGE_SCALE } from "../common/constants";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -198,7 +198,7 @@ const FileStatus = (props: any) => {
     file: thumbnailSrc, // set the file source of the hook to the URL passed through the props
     page: 1,
     canvasRef,
-    scale: constants.PAGE_SCALE,
+    scale: PAGE_SCALE,
     onPageRenderSuccess: convertToImage,
   });
 
