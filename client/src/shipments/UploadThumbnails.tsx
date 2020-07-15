@@ -169,7 +169,7 @@ const FileStatus = (props: any) => {
   const convertToImage = () => {
     URL.revokeObjectURL(thumbnailSrc); // revoke URL to avoid memory leak
     const insertionElement: any = document.querySelector("#insertion-point");
-    const shadowRoot: any = insertionElement.children[0].children[0].shadowRoot;
+    const shadowRoot: any = insertionElement.children[0].shadowRoot;
     const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
     const dataUrl = canvas.toDataURL();
     setThumbnailSrc(dataUrl);

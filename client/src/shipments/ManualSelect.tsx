@@ -180,7 +180,8 @@ export const ManualSelect = ({ eventObj }: any) => {
   // modal
   const modalHandleClick = () => {
     setManualSelectModalOpen(true);
-    getImageAndGeometryFromServer(selectedDocData);
+    if (currentLinesGeometry.length === 0)
+      getImageAndGeometryFromServer(selectedDocData);
   };
   const id = manualSelectModalOpen ? "docit-manual-select-modal" : undefined;
   const isDocImageSet = Boolean(docImageURL.overlayPositionOffset);
@@ -291,20 +292,20 @@ export const ManualSelect = ({ eventObj }: any) => {
       <ButtonContext.Provider value={{ id, modalHandleClick }}>
         <ManualSelectButton />
       </ButtonContext.Provider>
-      <Modal
-        id={id}
-        open={manualSelectModalOpen}
-        onClose={() => setManualSelectModalOpen(false)}
-        aria-labelledby="manual-select-modal-title"
-        aria-describedby="manual-select-modal-descripton"
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={manualSelectModalOpen}>
-          <root.div>
-            {isDocImageSet && (
+      {isDocImageSet && (
+        <Modal
+          id={id}
+          open={manualSelectModalOpen}
+          onClose={() => setManualSelectModalOpen(false)}
+          aria-labelledby="manual-select-modal-title"
+          aria-describedby="manual-select-modal-descripton"
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={manualSelectModalOpen}>
+            <root.div>
               <div
                 //@ts-ignore
                 style={{
@@ -341,10 +342,10 @@ export const ManualSelect = ({ eventObj }: any) => {
                   </Layer>
                 </Stage>
               </div>
-            )}
-          </root.div>
-        </Fade>
-      </Modal>
+            </root.div>
+          </Fade>
+        </Modal>
+      )}
     </div>
   );
 };
