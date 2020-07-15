@@ -23,7 +23,7 @@ import {
   KeyValuesWithDistance,
 } from "./keyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
-import { DropdownContext } from "./RenderModal";
+import { ModalContext } from "./RenderModal";
 
 const getModalWrapperStyles = () => {
   return {
@@ -73,7 +73,7 @@ const FillBttnContext = createContext({} as any);
 
 const FillButton = () => {
   const [fillBttnHover, setFillBttnHover] = useState({}) as any;
-  const { setModalAnchorEl } = useContext(DropdownContext);
+  const { setMainModalOpen } = useContext(ModalContext);
   const fillButtonHandler = useContext(FillBttnContext);
   return (
     <button
@@ -82,7 +82,7 @@ const FillButton = () => {
       onMouseEnter={() => setFillBttnHover({ opacity: 0.5 })}
       onMouseLeave={() => setFillBttnHover({ opacity: 1 })}
       onClick={() => {
-        setModalAnchorEl(null);
+        setMainModalOpen(false);
         fillButtonHandler();
       }}
     >
@@ -216,6 +216,7 @@ const TableHeadComponent = ({ targetString }: any) => {
 
 export const ModalComponent = ({ eventObj }: any) => {
   const [modalStyle] = useState(getModalWrapperStyles);
+  const { mainModalOpen } = useContext(ModalContext);
   const targetString = eventObj.target.placeholder;
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);

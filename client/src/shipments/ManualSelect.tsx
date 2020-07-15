@@ -10,11 +10,13 @@ import root from "react-shadow/material-ui";
 import Modal from "@material-ui/core/Modal";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
 
 import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./keyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
-import { DropdownContext } from "./RenderModal";
+import { ModalContext } from "./RenderModal";
 
 import uuidv from "uuid";
 
@@ -171,7 +173,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
-  const { setMainModalOpen } = useContext(DropdownContext);
+  const { setMainModalOpen } = useContext(ModalContext);
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
   const [modalStyle] = useState(getModalWrapperStyles);
 
@@ -295,47 +297,53 @@ export const ManualSelect = ({ eventObj }: any) => {
         onClose={() => setManualSelectModalOpen(false)}
         aria-labelledby="manual-select-modal-title"
         aria-describedby="manual-select-modal-descripton"
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
       >
-        <root.div>
-          {isDocImageSet && (
-            <div
-              //@ts-ignore
-              style={{
-                ...modalStyle,
-                left: `${docImageURL.overlayPositionOffset}px`,
-              }}
-            >
-              <Header
-                docImageURL={docImageURL}
-                currentSelection={currentSelection}
-              />
-              <Stage width={docImageURL.width} height={docImageURL.height}>
-                <Layer>
-                  <KonvaImage image={image} />
-                  <CurrentSelectionContext.Provider
-                    value={{
-                      filled,
-                      setFilled,
-                      setCurrentSelection,
-                    }}
-                  >
-                    {currentLinesGeometry.map(
-                      (lineGeometry: any, ndx: number) => {
-                        return (
-                          <Polygon
-                            key={ndx}
-                            lineGeometry={lineGeometry}
-                            docImageURL={docImageURL}
-                          />
-                        );
-                      }
-                    )}
-                  </CurrentSelectionContext.Provider>
-                </Layer>
-              </Stage>
-            </div>
-          )}
-        </root.div>
+        <Fade in={manualSelectModalOpen}>
+          <root.div>
+            {isDocImageSet && (
+              <div
+                //@ts-ignore
+                style={{
+                  ...modalStyle,
+                  left: `${docImageURL.overlayPositionOffset}px`,
+                }}
+              >
+                <Header
+                  docImageURL={docImageURL}
+                  currentSelection={currentSelection}
+                />
+                <Stage width={docImageURL.width} height={docImageURL.height}>
+                  <Layer>
+                    <KonvaImage image={image} />
+                    <CurrentSelectionContext.Provider
+                      value={{
+                        filled,
+                        setFilled,
+                        setCurrentSelection,
+                      }}
+                    >
+                      {currentLinesGeometry.map(
+                        (lineGeometry: any, ndx: number) => {
+                          return (
+                            <Polygon
+                              key={ndx}
+                              lineGeometry={lineGeometry}
+                              docImageURL={docImageURL}
+                            />
+                          );
+                        }
+                      )}
+                    </CurrentSelectionContext.Provider>
+                  </Layer>
+                </Stage>
+              </div>
+            )}
+          </root.div>
+        </Fade>
       </Modal>
     </div>
   );

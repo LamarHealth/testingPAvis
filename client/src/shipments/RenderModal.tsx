@@ -4,16 +4,17 @@ import $ from "jquery";
 //@ts-ignore
 import root from "react-shadow/material-ui";
 
+import Modal from "@material-ui/core/Modal";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+
 import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { globalSelectedFileState } from "./DocViewer";
 import { getKeyValuePairsByDoc } from "./keyValuePairs";
 import { ModalComponent } from "./Modal";
 
-// NEW
-import Modal from "@material-ui/core/Modal";
-
-export const DropdownContext = createContext({} as any);
+export const ModalContext = createContext({} as any);
 
 export const RenderModal = () => {
   const [eventObj, setEventObj] = useState(null) as any;
@@ -38,13 +39,21 @@ export const RenderModal = () => {
           open={mainModalOpen}
           onClose={() => setMainModalOpen(false)}
           aria-labelledby="main-modal-title"
-          aria-describedby="main-modal-descripton"
+          aria-describedby="main-modal-description"
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
         >
-          <root.div>
-            <DropdownContext.Provider value={{ setMainModalOpen }}>
-              <>{eventObj && <ModalComponent eventObj={eventObj} />}</>
-            </DropdownContext.Provider>
-          </root.div>
+          <Fade in={mainModalOpen}>
+            <root.div>
+              <ModalContext.Provider
+                value={{ mainModalOpen, setMainModalOpen }}
+              >
+                <>{eventObj && <ModalComponent eventObj={eventObj} />}</>
+              </ModalContext.Provider>
+            </root.div>
+          </Fade>
         </Modal>
       )}
     </>
