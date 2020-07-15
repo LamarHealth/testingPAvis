@@ -75,7 +75,7 @@ export const RenderModal = () => {
             >
               <root.div>
                 <DropdownContext.Provider value={{ setModalAnchorEl }}>
-                  <div>{eventObj && <Modal eventObj={eventObj} />}</div>
+                  <>{eventObj && <Modal eventObj={eventObj} />}</>
                 </DropdownContext.Provider>
               </root.div>
             </Popover>

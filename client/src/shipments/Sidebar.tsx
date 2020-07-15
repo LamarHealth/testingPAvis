@@ -86,7 +86,3 @@ export const Sidebar = () => {
     </div>
   );
 };
-
-// export const WrappedSidebar = () => {
-//   return <Sidebar />;
-// };
