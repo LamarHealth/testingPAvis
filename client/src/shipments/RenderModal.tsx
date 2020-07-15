@@ -50,41 +50,35 @@ export const RenderModal = () => {
 
   return (
     <>
-      {areThereDocs ? (
-        isDocSelected ? (
-          <div style={{ width: `${constants.MODAL_WIDTH}px` }}>
-            <Popover
-              id={id}
-              open={popoverOpen}
-              anchorEl={modalAnchorEl}
-              onEnter={renderBackdrop}
-              onClose={popoverHandleClose}
-              anchorReference="anchorPosition"
-              anchorPosition={{
-                top: 100,
-                left: (window.innerWidth - constants.MODAL_WIDTH) / 2,
-              }}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              transformOrigin={{
-                vertical: "center",
-                horizontal: "center",
-              }}
-            >
-              <root.div>
-                <DropdownContext.Provider value={{ setModalAnchorEl }}>
-                  <>{eventObj && <Modal eventObj={eventObj} />}</>
-                </DropdownContext.Provider>
-              </root.div>
-            </Popover>
-          </div>
-        ) : (
-          <p style={{ display: "none" }}>**null**</p>
-        )
-      ) : (
-        <p style={{ display: "none" }}>**null**</p>
+      {areThereDocs && isDocSelected && (
+        <div style={{ width: `${constants.MODAL_WIDTH}px` }}>
+          <Popover
+            id={id}
+            open={popoverOpen}
+            anchorEl={modalAnchorEl}
+            onEnter={renderBackdrop}
+            onClose={popoverHandleClose}
+            anchorReference="anchorPosition"
+            anchorPosition={{
+              top: 100,
+              left: (window.innerWidth - constants.MODAL_WIDTH) / 2,
+            }}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+            transformOrigin={{
+              vertical: "center",
+              horizontal: "center",
+            }}
+          >
+            <root.div>
+              <DropdownContext.Provider value={{ setModalAnchorEl }}>
+                <>{eventObj && <Modal eventObj={eventObj} />}</>
+              </DropdownContext.Provider>
+            </root.div>
+          </Popover>
+        </div>
       )}
     </>
   );
