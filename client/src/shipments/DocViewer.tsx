@@ -117,26 +117,27 @@ const DocCell = (props: DocumentInfo) => {
   };
 
   return (
-    <Box onClick={setSelected}>
+    <Box>
       <CardContent>
-        {globalSelectedFile.get() === props.docID ? (
-          <Type
-            variant="subtitle1"
-            style={{
-              backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
-            }}
-          >
-            {props.docName}
-            <CheckCircleIcon style={{ color: green[500] }} />
+        <span onClick={setSelected}>
+          {globalSelectedFile.get() === props.docID ? (
+            <Type
+              variant="subtitle1"
+              style={{
+                backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+              }}
+            >
+              {props.docName}
+              <CheckCircleIcon style={{ color: green[500] }} />
+            </Type>
+          ) : (
+            <Type variant="subtitle1">{props.docName}</Type>
+          )}
+          <Type>
+            <FileCopyOutlinedIcon />
+            Format: {props.docType}
           </Type>
-        ) : (
-          <Type variant="subtitle1">{props.docName}</Type>
-        )}
-
-        <Type>
-          <FileCopyOutlinedIcon />
-          Format: {props.docType}
-        </Type>
+        </span>
         <Chip
           label="Complete Forms on Page"
           onClick={populateForms}
