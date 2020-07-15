@@ -3,6 +3,7 @@
   "name": "DocIt Preview",
   "version": "1.0",
   "description": "Preview for DocIt",
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

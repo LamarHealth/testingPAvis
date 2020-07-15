@@ -18,6 +18,7 @@ import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
 import { PAGE_SCALE } from "../common/constants";
+import { storage } from "../common/localstorage";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -100,14 +101,14 @@ const RefreshIcon = styled(LoopIcon)`
 `;
 
 const updateLocalStorage = (documentInfo: any) => {
-  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  const storedDocs = JSON.parse(storage.get("docList") || "[]");
   let updatedList = Array.isArray(storedDocs)
     ? storedDocs.filter((item: any) => {
         return typeof item === "object";
       })
     : [];
   updatedList.push(documentInfo);
-  localStorage.setItem("docList", JSON.stringify(updatedList));
+  storage.set("docList", JSON.stringify(updatedList));
 };
 
 const FileStatus = (props: any) => {

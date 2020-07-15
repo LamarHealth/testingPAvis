@@ -7,16 +7,17 @@ import dotenv from "dotenv";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 import DocViewer from "./shipments/DocViewer";
 import { Sidebar } from "./shipments/Sidebar";
+import { LOCAL_MODE } from "./common/constants";
 dotenv.config();
 
 $('<span id="insertion-point"/>').insertBefore(document.body);
-
+console.log(process.env);
 ReactDOM.render(
   <>
     <Sidebar>
       <DocViewer />
     </Sidebar>
-    {process.env.REACT_APP_LOCAL && (
+    {LOCAL_MODE && (
       <body>
         <ShipmentsDashboard />
       </body>

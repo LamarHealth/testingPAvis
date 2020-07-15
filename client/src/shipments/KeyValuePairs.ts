@@ -1,5 +1,5 @@
 import { getEditDistance } from "./LevenshteinField";
-
+import { storage } from "../common/localstorage";
 ///// INTERFACES /////
 // interface returned from getAllKeyValuePairs()
 export interface KeyValues {
@@ -23,7 +23,7 @@ export interface KeyValuesWithDistance {
 
 ///// FUNCTIONS /////
 export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
-  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  const storedDocs = JSON.parse(storage.get("docList") || "[]");
   const docDataByDoc: any = [];
   storedDocs.forEach((doc: any) => {
     const docName = doc.docName;
@@ -42,7 +42,7 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
 };
 
 export const getAllKeyValuePairs = () => {
-  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  const storedDocs = JSON.parse(storage.get("docList") || "[]");
   let docData: any = {};
   storedDocs.forEach((doc: any) => {
     const keyValuePairs = doc.keyValuePairs;

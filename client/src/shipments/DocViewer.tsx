@@ -3,14 +3,13 @@ import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
-import Typography from "@material-ui/core/Typography";
-
 import { StyledDropzone } from "./DocUploader";
 import { Dropdown } from "./Dropdown";
 import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
+import { storage } from "../common/localstorage";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -18,6 +17,7 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
 
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -195,12 +195,12 @@ const InstructionsCell = () => {
 };
 
 const removeDocument = (docID: String) => {
-  const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
+  const newDocList = JSON.parse(storage.get("docList") || "[]").filter(
     (item: DocumentInfo) => item.docID !== docID
   );
-  localStorage.setItem("docList", JSON.stringify(newDocList));
+  storage.set("docList", JSON.stringify(newDocList));
   return {
-    documents: JSON.parse(localStorage.getItem("docList") || "[]"),
+    documents: JSON.parse(storage.get("docList") || "[]"),
   };
 };
 
@@ -211,7 +211,7 @@ export const fileReducer = (
   switch (action.type) {
     case "append":
       return {
-        documents: [...JSON.parse(localStorage.getItem("docList") || "[]")],
+        documents: [...JSON.parse(storage.get("docList") || "[]")],
       };
     case "remove":
       return removeDocument(action.documentInfo.docID);
@@ -227,7 +227,7 @@ export const fileReducer = (
  */
 
 const initialState = {
-  documents: JSON.parse(localStorage.getItem("docList") || "[]"),
+  documents: JSON.parse(storage.get("docList") || "[]"),
 } as IDocumentList;
 
 const DocViewer = () => {
