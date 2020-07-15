@@ -10,7 +10,6 @@ import root from "react-shadow/material-ui";
 
 import DocViewer from "./DocViewer";
 import WrappedJssComponent from "./ShadowComponent";
-import { RenderModal } from "./RenderModal";
 
 const Column = styled.div`
   justify-content: flex-start;
@@ -70,19 +69,15 @@ export const Sidebar = () => {
   const [isOpen, setOpen] = useState(false);
 
   return (
-    <div>
-      <RenderModal />
-
-      <WrappedJssComponent>
-        <Container open={isOpen}>
-          <Column open={isOpen}>
-            <DocViewer />
-          </Column>
-          <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-            {isOpen ? <ChevronLeft /> : <ChevronRight />}
-          </ExpandButton>
-        </Container>
-      </WrappedJssComponent>
-    </div>
+    <WrappedJssComponent>
+      <Container open={isOpen}>
+        <Column open={isOpen}>
+          <DocViewer />
+        </Column>
+        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+          {isOpen ? <ChevronLeft /> : <ChevronRight />}
+        </ExpandButton>
+      </Container>
+    </WrappedJssComponent>
   );
 };

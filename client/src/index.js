@@ -6,6 +6,7 @@ import $ from "jquery";
 import dotenv from "dotenv";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 import { Sidebar } from "./shipments/Sidebar";
+import { RenderModal } from "./shipments/RenderModal";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ $('<span id="insertion-point"/>').insertBefore(document.body);
 
 ReactDOM.render(
   <>
+    <RenderModal />
     <Sidebar />
     {process.env.REACT_APP_LOCAL && (
       <body>
