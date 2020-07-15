@@ -7,7 +7,7 @@ import useImage from "use-image";
 //@ts-ignore
 import root from "react-shadow/material-ui";
 
-import Popover from "@material-ui/core/Popover";
+import Modal from "@material-ui/core/Modal";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
@@ -18,9 +18,14 @@ import { DropdownContext } from "./RenderModal";
 
 import uuidv from "uuid";
 
-const wrapperStyles = {
-  width: "100%",
-  fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+const getModalWrapperStyles = () => {
+  return {
+    top: `25px`,
+    position: "absolute",
+    zIndex: 2,
+    maxHeight: "675px",
+    overflowY: "scroll",
+  };
 };
 
 const buttonStyles = {
@@ -129,7 +134,7 @@ const Header = ({ docImageURL, currentSelection }: any) => {
           </Typography>
           <Typography style={currentSelectionStyles}>
             {Object.keys(currentSelection).map(
-              (key, i) => currentSelection[key] + " "
+              (key) => currentSelection[key] + " "
             )}
           </Typography>
         </div>
@@ -141,7 +146,7 @@ const Header = ({ docImageURL, currentSelection }: any) => {
 const ButtonContext = createContext({} as any);
 
 const ManualSelectButton = () => {
-  const { id, popoverHandleClick } = useContext(ButtonContext);
+  const { id, modalHandleClick } = useContext(ButtonContext);
   const [hover, setHover] = useState({}) as any;
   return (
     <Button
@@ -152,7 +157,7 @@ const ManualSelectButton = () => {
       style={{ ...buttonStyles, ...hover }}
       onMouseEnter={() => setHover({ opacity: 0.5 })}
       onMouseLeave={() => setHover({ opacity: 1 })}
-      onClick={popoverHandleClick}
+      onClick={modalHandleClick}
     >
       <Typography style={{ margin: "0.2em 0.5em" }}>Manual Select</Typography>
     </Button>
@@ -160,37 +165,23 @@ const ManualSelectButton = () => {
 };
 
 export const ManualSelect = ({ eventObj }: any) => {
-  const [
-    manualSelAnchorEl,
-    setManualSelAnchorEl,
-  ] = useState<HTMLButtonElement | null>(null);
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
-  const { setModalAnchorEl } = useContext(DropdownContext);
+  const { setMainModalOpen } = useContext(DropdownContext);
+  const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
+  const [modalStyle] = useState(getModalWrapperStyles);
 
-  // popover
-  const popoverOpen = Boolean(manualSelAnchorEl);
-  const id = popoverOpen ? "docit-manual-select-modal" : undefined;
-
-  const popoverHandleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setManualSelAnchorEl(event.currentTarget);
+  // modal
+  const modalHandleClick = () => {
+    setManualSelectModalOpen(true);
     getImageAndGeometryFromServer(selectedDocData);
   };
-
-  const renderBackdrop = () => {
-    // unfortunately not achievable via mui API or styled-components
-    const popoverRoot = document.querySelector("#docit-manual-select-modal");
-    const backdrop: any = popoverRoot?.children[0];
-    backdrop.style.backgroundColor = colors.MANUAL_SELECT_POPOVER_BACKDROP;
-  };
-
-  const popoverHandleClose = () => {
-    setManualSelAnchorEl(null);
-  };
+  const id = manualSelectModalOpen ? "docit-manual-select-modal" : undefined;
+  const isDocImageSet = Boolean(docImageURL.overlayPositionOffset);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -255,8 +246,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        setManualSelAnchorEl(null);
-        setModalAnchorEl(null);
+        setMainModalOpen(false);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
@@ -272,7 +262,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   const rewriteStyles = () => {
     const popoverEl = document.getElementById("docit-manual-select-modal");
     if (!popoverEl) return;
-    const shadowRoot = popoverEl?.children[2].children[0].shadowRoot;
+    const shadowRoot = popoverEl?.children[2].shadowRoot;
     const alreadyExists = shadowRoot?.getElementById(
       "manual-select-style-overwrite"
     );
@@ -292,62 +282,61 @@ export const ManualSelect = ({ eventObj }: any) => {
   useEffect(() => rewriteStyles());
 
   return (
-    <div style={wrapperStyles}>
+    <div>
       <Typography variant="h3" style={{ margin: "1em" }}>
         {selectedDocData.docName}
       </Typography>
-      <ButtonContext.Provider value={{ id, popoverHandleClick }}>
+      <ButtonContext.Provider value={{ id, modalHandleClick }}>
         <ManualSelectButton />
       </ButtonContext.Provider>
-      <Popover
+      <Modal
         id={id}
-        open={popoverOpen}
-        anchorEl={manualSelAnchorEl}
-        onEnter={renderBackdrop}
-        onClose={popoverHandleClose}
-        anchorReference="anchorPosition"
-        anchorPosition={{ top: 0, left: 0 }}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "center",
-          horizontal: "center",
-        }}
-        style={{
-          left: `${docImageURL.overlayPositionOffset}px`,
-        }}
+        open={manualSelectModalOpen}
+        onClose={() => setManualSelectModalOpen(false)}
+        aria-labelledby="manual-select-modal-title"
+        aria-describedby="manual-select-modal-descripton"
       >
         <root.div>
-          <Header
-            docImageURL={docImageURL}
-            currentSelection={currentSelection}
-          />
-          <Stage width={docImageURL.width} height={docImageURL.height}>
-            <Layer>
-              <KonvaImage image={image} />
-              <CurrentSelectionContext.Provider
-                value={{
-                  filled,
-                  setFilled,
-                  setCurrentSelection,
-                }}
-              >
-                {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
-                  return (
-                    <Polygon
-                      key={ndx}
-                      lineGeometry={lineGeometry}
-                      docImageURL={docImageURL}
-                    />
-                  );
-                })}
-              </CurrentSelectionContext.Provider>
-            </Layer>
-          </Stage>
+          {isDocImageSet && (
+            <div
+              //@ts-ignore
+              style={{
+                ...modalStyle,
+                left: `${docImageURL.overlayPositionOffset}px`,
+              }}
+            >
+              <Header
+                docImageURL={docImageURL}
+                currentSelection={currentSelection}
+              />
+              <Stage width={docImageURL.width} height={docImageURL.height}>
+                <Layer>
+                  <KonvaImage image={image} />
+                  <CurrentSelectionContext.Provider
+                    value={{
+                      filled,
+                      setFilled,
+                      setCurrentSelection,
+                    }}
+                  >
+                    {currentLinesGeometry.map(
+                      (lineGeometry: any, ndx: number) => {
+                        return (
+                          <Polygon
+                            key={ndx}
+                            lineGeometry={lineGeometry}
+                            docImageURL={docImageURL}
+                          />
+                        );
+                      }
+                    )}
+                  </CurrentSelectionContext.Provider>
+                </Layer>
+              </Stage>
+            </div>
+          )}
         </root.div>
-      </Popover>
+      </Modal>
     </div>
   );
 };

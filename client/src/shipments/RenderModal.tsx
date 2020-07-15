@@ -4,81 +4,48 @@ import $ from "jquery";
 //@ts-ignore
 import root from "react-shadow/material-ui";
 
-import Popover from "@material-ui/core/Popover";
 import { useState as useSpecialHookState } from "@hookstate/core";
 
-import { colors } from "../common/colors";
-import { constants } from "../common/constants";
-import { Modal } from "./Modal";
 import { globalSelectedFileState } from "./DocViewer";
 import { getKeyValuePairsByDoc } from "./keyValuePairs";
+import { ModalComponent } from "./Modal";
+
+// NEW
+import Modal from "@material-ui/core/Modal";
 
 export const DropdownContext = createContext({} as any);
 
 export const RenderModal = () => {
   const [eventObj, setEventObj] = useState(null) as any;
-  const [modalAnchorEl, setModalAnchorEl] = useState(null) as any;
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
-
-  // popover
-  const popoverOpen = Boolean(modalAnchorEl);
-  const id = popoverOpen ? "docit-main-modal" : undefined;
-
-  const popoverHandleClick = (event: any) => {
-    setModalAnchorEl(event.currentTarget);
-  };
-
-  const renderBackdrop = () => {
-    // unfortunately not achievable via mui API or styled-components
-    const popoverRoot = document.querySelector("#docit-main-modal");
-    const backdrop: any = popoverRoot?.children[0];
-    backdrop.style.backgroundColor = colors.MANUAL_SELECT_POPOVER_BACKDROP;
-  };
-
-  const popoverHandleClose = () => {
-    setModalAnchorEl(null);
-  };
+  const [mainModalOpen, setMainModalOpen] = useState(false);
+  const id = mainModalOpen ? "docit-main-modal" : undefined;
 
   $(document).ready(() => {
     $("input").click((event) => {
       setEventObj(event);
-      popoverHandleClick(event);
+      setMainModalOpen(true);
     });
   });
 
   return (
     <>
       {areThereDocs && isDocSelected && (
-        <div style={{ width: `${constants.MODAL_WIDTH}px` }}>
-          <Popover
-            id={id}
-            open={popoverOpen}
-            anchorEl={modalAnchorEl}
-            onEnter={renderBackdrop}
-            onClose={popoverHandleClose}
-            anchorReference="anchorPosition"
-            anchorPosition={{
-              top: 100,
-              left: (window.innerWidth - constants.MODAL_WIDTH) / 2,
-            }}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            transformOrigin={{
-              vertical: "center",
-              horizontal: "center",
-            }}
-          >
-            <root.div>
-              <DropdownContext.Provider value={{ setModalAnchorEl }}>
-                <>{eventObj && <Modal eventObj={eventObj} />}</>
-              </DropdownContext.Provider>
-            </root.div>
-          </Popover>
-        </div>
+        <Modal
+          id={id}
+          open={mainModalOpen}
+          onClose={() => setMainModalOpen(false)}
+          aria-labelledby="main-modal-title"
+          aria-describedby="main-modal-descripton"
+        >
+          <root.div>
+            <DropdownContext.Provider value={{ setMainModalOpen }}>
+              <>{eventObj && <ModalComponent eventObj={eventObj} />}</>
+            </DropdownContext.Provider>
+          </root.div>
+        </Modal>
       )}
     </>
   );

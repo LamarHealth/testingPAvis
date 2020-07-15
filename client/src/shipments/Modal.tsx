@@ -25,14 +25,18 @@ import {
 import { globalSelectedFileState } from "./DocViewer";
 import { DropdownContext } from "./RenderModal";
 
-const modalWrapperStyles = {
-  backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
-  border: "1px solid lightgrey",
-  zIndex: 2,
-  maxHeight: "500px",
-  overflowX: "hidden",
-  overflowY: "scroll",
-  width: `${constants.MODAL_WIDTH}px`,
+const getModalWrapperStyles = () => {
+  return {
+    top: `100px`,
+    left: `${(window.innerWidth - constants.MODAL_WIDTH) / 2}px`,
+    position: "absolute",
+    backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
+    zIndex: 2,
+    maxHeight: "500px",
+    overflowX: "hidden",
+    overflowY: "scroll",
+    width: `${constants.MODAL_WIDTH}px`,
+  };
 };
 
 const fillButtonStyles = {
@@ -210,9 +214,9 @@ const TableHeadComponent = ({ targetString }: any) => {
   );
 };
 
-export const Modal = (props: { eventObj: any }) => {
-  const eventObj = props.eventObj;
-  const targetString = props.eventObj.target.placeholder;
+export const ModalComponent = ({ eventObj }: any) => {
+  const [modalStyle] = useState(getModalWrapperStyles);
+  const targetString = eventObj.target.placeholder;
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const docData = getKeyValuePairsByDoc();
@@ -255,9 +259,9 @@ export const Modal = (props: { eventObj: any }) => {
   // rewriting pesky styles that penetrate the shadow DOM
   const rewriteStyles = () => {
     const popoverEl = document.getElementById("docit-main-modal");
-    const shadowRoot = popoverEl?.children[2].children[0].shadowRoot;
+    const shadowRoot = popoverEl?.children[2].shadowRoot;
     const newStyles = document.createElement("style");
-    newStyles.innerHTML = ` 
+    newStyles.innerHTML = `
       :host * {
         font-family: Roboto, Helvetica, Arial, sans-serif;
       }
@@ -270,9 +274,8 @@ export const Modal = (props: { eventObj: any }) => {
 
   return (
     <div
-      id={`modal-wrapper`}
       //@ts-ignore
-      style={modalWrapperStyles}
+      style={modalStyle}
     >
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Table>
