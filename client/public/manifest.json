@@ -1,8 +1,8 @@
 {
   "short_name": "DocIt",
-  "name": "DocIt Preview",
+  "name": "DocIt Development Build",
   "version": "1.0",
-  "description": "Preview for DocIt",
+  "description": "This extension is for beta testing",
   "permissions": ["storage"],
   "content_scripts": [
     {

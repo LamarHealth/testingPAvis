@@ -9,7 +9,6 @@ import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
 } from "./KeyValuePairs";
-import { storage } from "../common/localstorage";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -195,12 +194,12 @@ const InstructionsCell = () => {
 };
 
 const removeDocument = (docID: String) => {
-  const newDocList = JSON.parse(storage.get("docList") || "[]").filter(
+  const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
     (item: DocumentInfo) => item.docID !== docID
   );
-  storage.set("docList", JSON.stringify(newDocList));
+  localStorage.setItem("docList", JSON.stringify(newDocList));
   return {
-    documents: JSON.parse(storage.get("docList") || "[]"),
+    documents: JSON.parse(localStorage.getItem("docList") || "[]"),
   };
 };
 
@@ -211,7 +210,7 @@ export const fileReducer = (
   switch (action.type) {
     case "append":
       return {
-        documents: [...JSON.parse(storage.get("docList") || "[]")],
+        documents: [...JSON.parse(localStorage.getItem("docList") || "[]")],
       };
     case "remove":
       return removeDocument(action.documentInfo.docID);
@@ -227,7 +226,7 @@ export const fileReducer = (
  */
 
 const initialState = {
-  documents: JSON.parse(storage.get("docList") || "[]"),
+  documents: JSON.parse(localStorage.getItem("docList") || "[]"),
 } as IDocumentList;
 
 const DocViewer = () => {
