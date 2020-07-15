@@ -69,18 +69,18 @@ const iconButtonStyles = {
   padding: 0,
 };
 
-const FillBttnContext = createContext({} as any);
+const FillButtonContext = createContext({} as any);
 
 const FillButton = () => {
-  const [fillBttnHover, setFillBttnHover] = useState({}) as any;
+  const [fillButtonHover, setFillButtonHover] = useState({}) as any;
   const { setMainModalOpen } = useContext(ModalContext);
-  const fillButtonHandler = useContext(FillBttnContext);
+  const fillButtonHandler = useContext(FillButtonContext);
   return (
     <button
       //@ts-ignore
-      style={{ ...fillButtonStyles, ...fillBttnHover }}
-      onMouseEnter={() => setFillBttnHover({ opacity: 0.5 })}
-      onMouseLeave={() => setFillBttnHover({ opacity: 1 })}
+      style={{ ...fillButtonStyles, ...fillButtonHover }}
+      onMouseEnter={() => setFillButtonHover({ opacity: 0.5 })}
+      onMouseLeave={() => setFillButtonHover({ opacity: 1 })}
       onClick={() => {
         setMainModalOpen(false);
         fillButtonHandler();
@@ -135,9 +135,9 @@ const TableBodyComponent = (props: {
               <Typography>{keyValue["value"]}</Typography>
             </TableCell>
             <TableCell>
-              <FillBttnContext.Provider value={fillButtonHandler}>
+              <FillButtonContext.Provider value={fillButtonHandler}>
                 <FillButton />
-              </FillBttnContext.Provider>
+              </FillButtonContext.Provider>
             </TableCell>
           </TableRow>
         );
