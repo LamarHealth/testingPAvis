@@ -77,12 +77,6 @@ const StyledIconButton = styled(IconButton)`
   padding: 0;
 `;
 
-// NEW
-const Div = styled.div`
-  color: red;
-  border: 5px solid red;
-`;
-
 const FillButtonContext = createContext({} as any);
 
 const TableBodyComponent = (props: {
@@ -250,9 +244,6 @@ export const ModalComponent = ({ eventObj }: any) => {
 
   return (
     <ModalWrapper>
-      <Div>
-        <h1>hello world</h1>
-      </Div>
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Table>
         <TableHeadContext.Provider
