@@ -151,6 +151,7 @@ const Header = ({ docImageURL, currentSelection }: any) => {
 export const ManualSelect = ({ eventObj }: any) => {
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
+  const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
@@ -160,9 +161,13 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   // modal
   const modalHandleClick = () => {
-    setManualSelectModalOpen(true);
-    if (currentLinesGeometry.length === 0)
-      getImageAndGeometryFromServer(selectedDocData);
+    if (currentDocID === "" || currentDocID !== globalSelectedFile.get()) {
+      getImageAndGeometryFromServer(selectedDocData).then(() =>
+        setManualSelectModalOpen(true)
+      );
+    } else {
+      setManualSelectModalOpen(true);
+    }
   };
   const id = manualSelectModalOpen ? "docit-manual-select-modal" : undefined;
   const isDocImageSet = Boolean(docImageURL.overlayPositionOffset);
@@ -177,6 +182,8 @@ export const ManualSelect = ({ eventObj }: any) => {
     const docName = doc.docName;
     const docType = doc.docType;
     const docID = doc.docID;
+
+    setCurrentDocID(docID);
 
     const docImageResponse: any = await fetch(
       `${
