@@ -63,10 +63,10 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const { filled, setFilled, setCurrentSelection } = useContext(
     CurrentSelectionContext
   );
-  const iAmFilled = filled[lineGeometry.ID] ? true : false;
+  const isFilled = filled[lineGeometry.ID] ? true : false;
 
   const fillAndSetCurrentSelection = () => {
-    if (!iAmFilled) {
+    if (!isFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         return {
           ...prevCurrentSelection,
@@ -80,7 +80,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         };
       });
     }
-    if (iAmFilled) {
+    if (isFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
@@ -111,7 +111,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         ])
       )}
       closed
-      fill={iAmFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
+      fill={isFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
     />
   );
