@@ -75,9 +75,16 @@ const StyledIconButton = styled(IconButton)`
   background-color: transparent;
   margin: 0;
   padding: 0;
+  width: 2em;
+  height: 2em;
+  font-size: 1em;
 `;
 
-const FillButtonContext = createContext({} as any);
+const FlexCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
 
 const TableBodyComponent = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];
@@ -144,48 +151,33 @@ const TableHeadComponent = ({ targetString }: any) => {
 
   return (
     <TableHead>
-      <TableRow>
-        <TableCell>
+      <TableCell>
+        <FlexCell>
+          <Typography variant="subtitle1">Match Score</Typography>
           <StyledIconButton onClick={matchScoreSortHandler}>
-            <table>
-              <tr>
-                <td>
-                  {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
-                </td>
-                <Typography variant="h4">
-                  <td>Match Score</td>
-                </Typography>
-              </tr>
-            </table>
+            {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
           </StyledIconButton>
-        </TableCell>
-        <TableCell>
+        </FlexCell>
+      </TableCell>
+      <TableCell>
+        <FlexCell>
+          <Typography variant="subtitle1">
+            Field Name: <i>{targetString}</i>
+          </Typography>
           <StyledIconButton onClick={alphabeticSortHandler}>
-            <table>
-              <tr>
-                <td>
-                  {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
-                </td>
-                <td>
-                  <Typography variant="h4">
-                    Field Name: <i>{targetString}</i>
-                  </Typography>
-                </td>
-              </tr>
-            </table>
+            {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
           </StyledIconButton>
-        </TableCell>
-        <TableCell>
-          <Typography variant="h4">Field Value</Typography>
-        </TableCell>
-        <TableCell />
-      </TableRow>
+        </FlexCell>
+      </TableCell>
+      <TableCell>
+        <Typography variant="subtitle1">Field Value</Typography>
+      </TableCell>
+      <TableCell />
     </TableHead>
   );
 };
 
-export const ModalComponent = ({ eventObj }: any) => {
-  const { mainModalOpen } = useContext(ModalContext);
+export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);

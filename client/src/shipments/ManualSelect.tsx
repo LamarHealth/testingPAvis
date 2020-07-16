@@ -4,13 +4,10 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 
-//@ts-ignore
-import root from "react-shadow/material-ui";
-
 import styled from "styled-components";
 
 import Modal from "@material-ui/core/Modal";
-import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
@@ -126,15 +123,17 @@ const Header = ({ docImageURL, currentSelection }: any) => {
       }}
     >
       <Typography>
-        <i>
-          <strong>Click</strong> to select a line; <strong>Click</strong> again
-          to unselect; press <strong>Return</strong> key to fill.
-        </i>
+        <Box fontStyle="italic">
+          <b>Click</b> to select a line; <b>Click</b> again to unselect; press{" "}
+          <b>Return</b> key to fill.
+        </Box>
       </Typography>
       {Object.keys(currentSelection).length > 0 && (
         <div>
           <Typography>
-            <strong>Current Selection:</strong>
+            <Box fontStyle="fontWeightBold">
+              <strong>Current Selection:</strong>
+            </Box>
           </Typography>
           <CurrentSelection>
             {Object.keys(currentSelection).map(
@@ -248,32 +247,9 @@ export const ManualSelect = ({ eventObj }: any) => {
     };
   }, [currentSelection]);
 
-  // rewriting pesky styles that penetrate the shadow DOM
-  const rewriteStyles = () => {
-    const popoverEl = document.getElementById("docit-manual-select-modal");
-    if (!popoverEl) return;
-    const shadowRoot = popoverEl?.children[2].shadowRoot;
-    const alreadyExists = shadowRoot?.getElementById(
-      "manual-select-style-overwrite"
-    );
-    if (alreadyExists) return;
-    const newStyles = document.createElement("style");
-    newStyles.innerHTML = `
-      :host * {
-        font-family: Roboto, Helvetica, Arial, sans-serif;
-        font-size: 1em;
-      }
-    `;
-    newStyles.type = "text/css";
-    newStyles.id = "manual-select-style-overwrite";
-    shadowRoot?.appendChild(newStyles);
-  };
-
-  useEffect(() => rewriteStyles());
-
   return (
     <div>
-      <Typography variant="h3" style={{ margin: "1em" }}>
+      <Typography variant="h6" style={{ margin: "1em" }}>
         {selectedDocData.docName}
       </Typography>
       <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>

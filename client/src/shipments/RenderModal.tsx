@@ -5,13 +5,15 @@ import $ from "jquery";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
+import { ThemeProvider } from "@material-ui/core/styles";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { globalSelectedFileState } from "./DocViewer";
 import { getKeyValuePairsByDoc } from "./keyValuePairs";
-import { ModalComponent } from "./Modal";
+import { SelectModal } from "./SelectModal";
 import WrappedJssComponent from "./ShadowComponent";
+import { DEFAULT } from "../common/themes";
 
 export const ModalContext = createContext({} as any);
 
@@ -31,7 +33,7 @@ export const RenderModal = () => {
   });
 
   return (
-    <>
+    <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && (
         <Modal
           id={id}
@@ -49,12 +51,12 @@ export const RenderModal = () => {
               <ModalContext.Provider
                 value={{ mainModalOpen, setMainModalOpen }}
               >
-                <>{eventObj && <ModalComponent eventObj={eventObj} />}</>
+                <>{eventObj && <SelectModal eventObj={eventObj} />}</>
               </ModalContext.Provider>
             </WrappedJssComponent>
           </Fade>
         </Modal>
       )}
-    </>
+    </ThemeProvider>
   );
 };

@@ -1,12 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { colors } from "./../common/colors";
 import { SIDEBAR_WIDTH } from "./../common/constants";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
-
-//@ts-ignore
-import root from "react-shadow/material-ui";
 
 import DocViewer from "./DocViewer";
 import WrappedJssComponent from "./ShadowComponent";
