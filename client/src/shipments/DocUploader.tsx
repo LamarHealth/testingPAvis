@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";

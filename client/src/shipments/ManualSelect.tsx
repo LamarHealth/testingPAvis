@@ -1,23 +1,30 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
-import styled from "styled-components";
-import { Dialog } from "@blueprintjs/core";
+
 import { useState as useSpecialHookState } from "@hookstate/core";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 
+import styled from "styled-components";
+
+import Modal from "@material-ui/core/Modal";
+import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+
 import { colors } from "./../common/colors";
-import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
+import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./keyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
+import { ModalContext } from "./RenderModal";
+import WrappedJssComponent from "./ShadowComponent";
 
 import uuidv from "uuid";
 
-const ManualSelectWrapper = styled.div`
-  width: 100%;
-
-  h4 {
-    margin: 0.4em;
-    margin-left: 1em;
-  }
+const ModalWrapper = styled.div`
+  top: 25px;
+  position: absolute;
+  max-height: 675px;
+  overflow-y: scroll;
 `;
 
 const ManualSelectButton = styled.button`
@@ -28,26 +35,18 @@ const ManualSelectButton = styled.button`
   padding: 0.3em 1.3em;
   margin: 0 0.4em 0.4em 1em;
 
-  :hover {
-    opacity: 0.5;
+  p {
+    margin: 0.2em 0.5em;
   }
-`;
-
-const ManualSelectOverlay = styled(Dialog)`
-  width: auto;
-  height: auto;
 `;
 
 const CurrentSelectionWrapper = styled.div`
   padding: 1em 2em;
-  background-color: ${colors.CLOSEST_MATCH_ROW};
-
-  h3 {
-    margin: 0.8em 0 0.5em 0;
-  }
+  background-color: ${colors.MANUAL_SELECT_HEADER};
+  box-sizing: border-box;
 `;
 
-const CurrentSelection = styled.p`
+const CurrentSelection = styled(Typography)`
   margin: 0;
   background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
   padding: 1em;
@@ -57,26 +56,37 @@ const CurrentSelection = styled.p`
 
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const [color, setColor] = useState("transparent");
-  const [filled, setFilled] = useState(false);
-
-  const { setCurrentSelection } = useContext(CurrentSelectionContext);
+  const { filled, setFilled, setCurrentSelection } = useContext(
+    CurrentSelectionContext
+  );
+  const isFilled = filled[lineGeometry.ID] ? true : false;
 
   const fillAndSetCurrentSelection = () => {
-    if (!filled) {
+    if (!isFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         return {
           ...prevCurrentSelection,
           [lineGeometry.ID]: lineGeometry.Text,
         };
       });
-      setFilled(true);
+      setFilled((otherFilleds: any) => {
+        return {
+          ...otherFilleds,
+          [lineGeometry.ID]: true,
+        };
+      });
     }
-    if (filled) {
+    if (isFilled) {
       setCurrentSelection((prevCurrentSelection: any) => {
         delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
       });
-      setFilled(false);
+      setFilled((otherFilleds: any) => {
+        return {
+          ...otherFilleds,
+          [lineGeometry.ID]: false,
+        };
+      });
     }
   };
 
@@ -84,11 +94,9 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
     <Line
       onClick={fillAndSetCurrentSelection}
       onMouseEnter={() => {
-        if (filled) return;
         setColor(colors.MANUAL_SELECT_RECT_FILL);
       }}
       onMouseLeave={() => {
-        if (filled) return;
         setColor("transparent");
       }}
       points={Array.prototype.concat.apply(
@@ -99,7 +107,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
         ])
       )}
       closed
-      fill={color}
+      fill={isFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
     />
   );
@@ -114,20 +122,22 @@ const Header = ({ docImageURL, currentSelection }: any) => {
         width: `${docImageURL.width}px`,
       }}
     >
-      <p>
-        <i>
-          <strong>Click</strong> to select a line; <strong>Click</strong> again
-          to unselect; press <strong>Return</strong> key to fill.
-        </i>
-      </p>
+      <Typography>
+        <Box fontStyle="italic">
+          <b>Click</b> to select a line; <b>Click</b> again to unselect; press{" "}
+          <b>Return</b> key to fill.
+        </Box>
+      </Typography>
       {Object.keys(currentSelection).length > 0 && (
         <div>
-          <p>
-            <strong>Current Selection:</strong>
-          </p>
+          <Typography>
+            <Box fontStyle="fontWeightBold">
+              <strong>Current Selection:</strong>
+            </Box>
+          </Typography>
           <CurrentSelection>
             {Object.keys(currentSelection).map(
-              (key, i) => currentSelection[key] + " "
+              (key) => currentSelection[key] + " "
             )}
           </CurrentSelection>
         </div>
@@ -137,17 +147,31 @@ const Header = ({ docImageURL, currentSelection }: any) => {
 };
 
 export const ManualSelect = ({ eventObj }: any) => {
-  const [overlayOpen, setOverlayOpen] = useState(false);
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
+  const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
-
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-
   const [image] = useImage(docImageURL.url);
+  const [filled, setFilled] = useState({} as any);
+  const { setMainModalOpen } = useContext(ModalContext);
+  const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
 
+  // modal
+  const modalHandleClick = () => {
+    if (currentDocID === "" || currentDocID !== globalSelectedFile.get()) {
+      getImageAndGeometryFromServer(selectedDocData).then(() =>
+        setManualSelectModalOpen(true)
+      );
+    } else {
+      setManualSelectModalOpen(true);
+    }
+  };
+  const id = manualSelectModalOpen ? "docit-manual-select-modal" : undefined;
+  const isDocImageSet = Boolean(docImageURL.overlayPositionOffset);
+
+  // geometry
   const docData = getKeyValuePairsByDoc();
-
   const selectedDocData = docData.filter(
     (doc) => doc.docID === globalSelectedFile.get()
   )[0];
@@ -157,7 +181,8 @@ export const ManualSelect = ({ eventObj }: any) => {
     const docType = doc.docType;
     const docID = doc.docID;
 
-    // get doc image
+    setCurrentDocID(docID);
+
     const docImageResponse: any = await fetch(
       `${
         process.env.REACT_APP_API_PATH
@@ -171,7 +196,6 @@ export const ManualSelect = ({ eventObj }: any) => {
     const blob = await docImageResponse.blob();
     const objectURL = await URL.createObjectURL(blob);
 
-    // get image dimensions
     const img = new Image();
     img.src = objectURL;
     let urlObj: any = {
@@ -180,11 +204,12 @@ export const ManualSelect = ({ eventObj }: any) => {
     img.onload = function (this: any) {
       urlObj["width"] = this.naturalWidth;
       urlObj["height"] = this.naturalHeight;
+      urlObj["overlayPositionOffset"] =
+        (window.innerWidth - this.naturalWidth) / 2;
     };
 
     setDocImageURL(urlObj);
 
-    // get doc field data
     const linesGeometryResponse: any = await fetch(
       `${
         process.env.REACT_APP_API_PATH
@@ -210,7 +235,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        setOverlayOpen(false);
+        setMainModalOpen(false);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
@@ -222,43 +247,66 @@ export const ManualSelect = ({ eventObj }: any) => {
     };
   }, [currentSelection]);
 
-  const clickHandler = () => {
-    setOverlayOpen(true);
-    getImageAndGeometryFromServer(selectedDocData);
-  };
-
   return (
-    <ManualSelectWrapper>
-      <div>
-        <h4>{selectedDocData.docName}</h4>
-      </div>
-      <ManualSelectButton onClick={clickHandler}>
-        Manual Select
+    <div>
+      <Typography variant="h6" style={{ margin: "1em" }}>
+        {selectedDocData.docName}
+      </Typography>
+      <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
+        <Typography>Manual Select</Typography>
       </ManualSelectButton>
-      <ManualSelectOverlay
-        isOpen={overlayOpen}
-        onClose={() => setOverlayOpen(false)}
-      >
-        <Header docImageURL={docImageURL} currentSelection={currentSelection} />
-        <Stage width={docImageURL.width} height={docImageURL.height}>
-          <Layer>
-            <KonvaImage image={image} />
-            <CurrentSelectionContext.Provider
-              value={{ currentSelection, setCurrentSelection }}
-            >
-              {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
-                return (
-                  <Polygon
-                    key={ndx}
-                    lineGeometry={lineGeometry}
-                    docImageURL={docImageURL}
-                  />
-                );
-              })}
-            </CurrentSelectionContext.Provider>
-          </Layer>
-        </Stage>
-      </ManualSelectOverlay>
-    </ManualSelectWrapper>
+      {isDocImageSet && (
+        <Modal
+          id={id}
+          open={manualSelectModalOpen}
+          onClose={() => setManualSelectModalOpen(false)}
+          aria-labelledby="manual-select-modal-title"
+          aria-describedby="manual-select-modal-descripton"
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={manualSelectModalOpen}>
+            <WrappedJssComponent>
+              <ModalWrapper
+                style={{
+                  left: `${docImageURL.overlayPositionOffset}px`,
+                }}
+              >
+                <Header
+                  docImageURL={docImageURL}
+                  currentSelection={currentSelection}
+                />
+                <Stage width={docImageURL.width} height={docImageURL.height}>
+                  <Layer>
+                    <KonvaImage image={image} />
+                    <CurrentSelectionContext.Provider
+                      value={{
+                        filled,
+                        setFilled,
+                        setCurrentSelection,
+                      }}
+                    >
+                      {currentLinesGeometry.map(
+                        (lineGeometry: any, ndx: number) => {
+                          return (
+                            <Polygon
+                              key={ndx}
+                              lineGeometry={lineGeometry}
+                              docImageURL={docImageURL}
+                            />
+                          );
+                        }
+                      )}
+                    </CurrentSelectionContext.Provider>
+                  </Layer>
+                </Stage>
+              </ModalWrapper>
+            </WrappedJssComponent>
+          </Fade>
+        </Modal>
+      )}
+    </div>
   );
 };

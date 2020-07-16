@@ -28,7 +28,7 @@
     "dotenv": "^8.2.0",
     "jss": "^10.3.0",
     "react-frame-component": "^4.1.2",
-    "react-shadow": "^18.1.2",
+    "react-shadow": "^18.2.4",
     "typescript": "^3.7.5",
     "yarn": "^1.22.4"
   }

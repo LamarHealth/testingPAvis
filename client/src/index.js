@@ -5,8 +5,9 @@ import $ from "jquery";
 // Load dotenv
 import dotenv from "dotenv";
 import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
-import DocViewer from "./shipments/DocViewer";
 import { Sidebar } from "./shipments/Sidebar";
+import { RenderModal } from "./shipments/RenderModal";
+
 import { LOCAL_MODE } from "./common/constants";
 dotenv.config();
 
@@ -14,9 +15,8 @@ $('<span id="insertion-point"/>').insertBefore(document.body);
 console.log(process.env);
 ReactDOM.render(
   <>
-    <Sidebar>
-      <DocViewer />
-    </Sidebar>
+    <RenderModal />
+    <Sidebar />
     {LOCAL_MODE && (
       <body>
         <ShipmentsDashboard />

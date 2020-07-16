@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { colors } from "./../common/colors";
+import { SIDEBAR_WIDTH } from "./../common/constants";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
-import WrappedJssComponent from "./ShadowComponent";
 
-const SIDEBAR_WIDTH: string = "25em";
+import DocViewer from "./DocViewer";
+import WrappedJssComponent from "./ShadowComponent";
 
 const Column = styled.div`
   justify-content: flex-start;
@@ -61,12 +62,15 @@ const ExpandButton = styled.button`
   }
 `;
 
-export const Sidebar = ({ children }: any) => {
+export const Sidebar = () => {
   const [isOpen, setOpen] = useState(false);
+
   return (
     <WrappedJssComponent>
       <Container open={isOpen}>
-        <Column open={isOpen}>{children}</Column>
+        <Column open={isOpen}>
+          <DocViewer />
+        </Column>
         <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
           {isOpen ? <ChevronLeft /> : <ChevronRight />}
         </ExpandButton>

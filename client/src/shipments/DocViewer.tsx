@@ -1,14 +1,12 @@
 import React, { useReducer, useState, createContext } from "react";
-import ReactDOM from "react-dom";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import { Dropdown } from "./Dropdown";
 import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
-} from "./KeyValuePairs";
+} from "./keyValuePairs";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -20,7 +18,6 @@ import Typography from "@material-ui/core/Typography";
 
 import $ from "jquery";
 import { colors } from "./../common/colors";
-import { createPopper } from "@popperjs/core";
 import {
   createState as createSpecialHookState,
   useState as useSpecialHookState,
@@ -84,50 +81,6 @@ const Type = styled(Typography)`
   margin: 1em 0;
 `;
 
-// render input dropdowns
-$(document).ready(function () {
-  let dropdownIndex = 0;
-
-  $("input").click((event: any) => {
-    // create a mounter and render Dropdown
-    const mounter = $(`<div id="mounter${dropdownIndex}"></div>`).insertAfter(
-      event.target
-    );
-
-    ReactDOM.render(
-      <Dropdown dropdownIndex={dropdownIndex} eventObj={event}></Dropdown>,
-      document.querySelector(`#mounter${dropdownIndex}`)
-    );
-
-    // turn dropdownElement table into instance of Popper.js
-    const dropdownElement = document.querySelector(
-      `#dropdown${dropdownIndex}`
-    ) as HTMLElement;
-
-    let popperInstance = createPopper(event.target, dropdownElement, {
-      placement: "bottom-start",
-    });
-
-    // remove on mouseleave
-    $(event.target).mouseleave(() => {
-      // don't remove if hovering over the dropdownElement
-      if ($(`#dropdown${dropdownIndex - 1}:hover`).length > 0) {
-        $(dropdownElement).mouseleave(() => {
-          dropdownElement.remove();
-          mounter.remove();
-          popperInstance.destroy();
-        });
-      } else {
-        dropdownElement.remove();
-        mounter.remove();
-        popperInstance.destroy();
-      }
-    });
-
-    dropdownIndex++;
-  });
-});
-
 export const globalSelectedFileState = createSpecialHookState("");
 
 const DocCell = (props: DocumentInfo) => {
@@ -156,27 +109,34 @@ const DocCell = (props: DocumentInfo) => {
     });
   };
 
-  return (
-    <Box onClick={() => globalSelectedFile.set(`${props.docID}`)}>
-      <CardContent>
-        {globalSelectedFile.get() === props.docID ? (
-          <Type
-            variant="subtitle1"
-            style={{
-              backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
-            }}
-          >
-            <CheckCircleIcon style={{ color: green[500] }} />
-            {props.docName}
-          </Type>
-        ) : (
-          <Type variant="subtitle1">{props.docName}</Type>
-        )}
+  const setSelected = () => {
+    globalSelectedFile.get() === props.docID
+      ? globalSelectedFile.set("")
+      : globalSelectedFile.set(`${props.docID}`);
+  };
 
-        <Type>
-          <FileCopyOutlinedIcon />
-          Format: {props.docType}
-        </Type>
+  return (
+    <Box>
+      <CardContent>
+        <span onClick={setSelected}>
+          {globalSelectedFile.get() === props.docID ? (
+            <Type
+              variant="subtitle1"
+              style={{
+                backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+              }}
+            >
+              {props.docName}
+              <CheckCircleIcon style={{ color: green[500] }} />
+            </Type>
+          ) : (
+            <Type variant="subtitle1">{props.docName}</Type>
+          )}
+          <Type>
+            <FileCopyOutlinedIcon />
+            Format: {props.docType}
+          </Type>
+        </span>
         <Chip
           label="Complete Forms on Page"
           onClick={populateForms}
