@@ -1,8 +1,6 @@
 import React, { useState, createContext, useContext, useEffect } from "react";
-import ReactDOM from "react-dom";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
-import uuidv from "uuid";
 
 import styled from "styled-components";
 
@@ -16,8 +14,6 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Box from "@material-ui/core/Box";
 
 import { colors } from "../common/colors";
 import { MODAL_WIDTH } from "../common/constants";
@@ -30,7 +26,7 @@ import {
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
-import WrappedJssComponent from "./ShadowComponent";
+import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 const ModalWrapper = styled.div`
   top: 100px;
@@ -91,50 +87,6 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
-const AccuracyScoreBox = styled(Box)`
-  background: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
-  padding: 5px;
-  border-radius: 7px;
-  opacity: 0.5;
-
-  :hover {
-    opacity: 1;
-  }
-`;
-
-const AccuracyScoreEl = ({ value }: any) => {
-  return (
-    <AccuracyScoreBox display="inline-flex">
-      <CircularProgress
-        variant="static"
-        value={value}
-        color={value > 75 ? "primary" : "secondary"}
-      />
-      <Box
-        top={0}
-        left={0}
-        bottom={0}
-        right={0}
-        position="absolute"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <WrappedJssComponent>
-          <style>
-            {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: 14px; font-weight: 400}`}
-          </style>
-          <Typography
-            variant="caption"
-            component="div"
-            color="textSecondary"
-          >{`${Math.round(value)}%`}</Typography>
-        </WrappedJssComponent>
-      </Box>
-    </AccuracyScoreBox>
-  );
-};
-
 const TableBodyComponent = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];
   eventObj: any;
@@ -146,56 +98,10 @@ const TableBodyComponent = (props: {
   return (
     <TableBody>
       {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
-        const renderAccuracyScore = () => {
-          const input = eventObj.target;
-          const inputStyle = window.getComputedStyle(eventObj.target);
-          const inputZIndex = input.style.zIndex;
-          const positionedParent = input.offsetParent;
-          //@ts-ignore
-          const mounterID = uuidv();
-
-          // remove the old mounter
-          if (input.className.includes("has-docit-mounter")) {
-            //@ts-ignore
-            const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
-              input.className
-            )[0];
-            const oldMounterID = oldMounterClassName.replace(
-              "has-docit-mounter-",
-              ""
-            );
-            input.classList.remove(oldMounterClassName);
-            document
-              .getElementById(`docit-accuracy-score-mounter-${oldMounterID}`)
-              ?.remove();
-          }
-
-          // add the new mounter
-          const mounter = document.createElement("span");
-          mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
-          mounter.style.position = "absolute";
-          mounter.style.left = `${
-            parseInt(inputStyle.width.replace("px", "")) + input.offsetLeft - 25
-          }px`;
-          mounter.style.top = `${
-            parseInt(inputStyle.height.replace("px", "")) + input.offsetTop - 60
-          }px`;
-          mounter.style.zIndex =
-            inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
-          input.className += ` has-docit-mounter-${mounterID}`;
-
-          positionedParent.appendChild(mounter);
-
-          ReactDOM.render(
-            <AccuracyScoreEl value={keyValue.distanceFromTarget * 100} />,
-            mounter
-          );
-        };
-
         const fillButtonHandler = () => {
           props.eventObj.target.value = keyValue["value"];
           setMainModalOpen(false);
-          renderAccuracyScore();
+          renderAccuracyScore(eventObj.target, keyValue);
         };
 
         return (
