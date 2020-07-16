@@ -7,6 +7,8 @@ import useImage from "use-image";
 //@ts-ignore
 import root from "react-shadow/material-ui";
 
+import styled from "styled-components";
+
 import Modal from "@material-ui/core/Modal";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
@@ -17,41 +19,44 @@ import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./keyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
+import WrappedJssComponent from "./ShadowComponent";
 
 import uuidv from "uuid";
 
-const getModalWrapperStyles = () => {
-  return {
-    top: `25px`,
-    position: "absolute",
-    zIndex: 2,
-    maxHeight: "675px",
-    overflowY: "scroll",
-  };
-};
+const ModalWrapper = styled.div`
+  top: 25px;
+  position: absolute;
+  z-index: ;
+  max-height: 675px;
+  overflow-y: scroll;
+`;
 
-const buttonStyles = {
-  border: "1px solid white",
-  borderRadius: "5px",
-  fontWeight: "bold",
-  backgroundColor: "#f9e526",
-  padding: "0.3em 1.3em",
-  margin: "0 0.4em 0.4em 1em",
-};
+const ManualSelectButton = styled.button`
+  border: 1px solid white;
+  border-radius: 5px;
+  font-weight: bold;
+  background-color: #f9e526;
+  padding: 0.3em 1.3em;
+  margin: 0 0.4em 0.4em 1em;
 
-const currentSelectionWrapperStyles = {
-  padding: "1em 2em",
-  backgroundColor: `${colors.MANUAL_SELECT_HEADER}`,
-  boxSizing: "border-box",
-};
+  p {
+    margin: 0.2em 0.5em;
+  }
+`;
 
-const currentSelectionStyles = {
-  margin: 0,
-  backgroundColor: `${colors.CURRENT_SELECTION_LIGHTBLUE}`,
-  padding: "1em",
-  borderRadius: "5px",
-  border: `0.5px solid ${colors.FONT_BLUE}`,
-};
+const CurrentSelectionWrapper = styled.div`
+  padding: 1em 2em;
+  background-color: ${colors.MANUAL_SELECT_HEADER};
+  box-sizing: border-box;
+`;
+
+const CurrentSelection = styled(Typography)`
+  margin: 0;
+  background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
+  padding: 1em;
+  border-radius: 5px;
+  border: 0.5px solid ${colors.FONT_BLUE};
+`;
 
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const [color, setColor] = useState("transparent");
@@ -116,10 +121,8 @@ const CurrentSelectionContext = createContext({} as any);
 
 const Header = ({ docImageURL, currentSelection }: any) => {
   return (
-    <div
-      //@ts-ignore
+    <CurrentSelectionWrapper
       style={{
-        ...currentSelectionWrapperStyles,
         width: `${docImageURL.width}px`,
       }}
     >
@@ -134,35 +137,14 @@ const Header = ({ docImageURL, currentSelection }: any) => {
           <Typography>
             <strong>Current Selection:</strong>
           </Typography>
-          <Typography style={currentSelectionStyles}>
+          <CurrentSelection>
             {Object.keys(currentSelection).map(
               (key) => currentSelection[key] + " "
             )}
-          </Typography>
+          </CurrentSelection>
         </div>
       )}
-    </div>
-  );
-};
-
-const ButtonContext = createContext({} as any);
-
-const ManualSelectButton = () => {
-  const { id, modalHandleClick } = useContext(ButtonContext);
-  const [hover, setHover] = useState({}) as any;
-  return (
-    <Button
-      aria-describedby={id}
-      variant="contained"
-      color="primary"
-      //@ts-ignore
-      style={{ ...buttonStyles, ...hover }}
-      onMouseEnter={() => setHover({ opacity: 0.5 })}
-      onMouseLeave={() => setHover({ opacity: 1 })}
-      onClick={modalHandleClick}
-    >
-      <Typography style={{ margin: "0.2em 0.5em" }}>Manual Select</Typography>
-    </Button>
+    </CurrentSelectionWrapper>
   );
 };
 
@@ -175,7 +157,6 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [filled, setFilled] = useState({} as any);
   const { setMainModalOpen } = useContext(ModalContext);
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
-  const [modalStyle] = useState(getModalWrapperStyles);
 
   // modal
   const modalHandleClick = () => {
@@ -289,9 +270,9 @@ export const ManualSelect = ({ eventObj }: any) => {
       <Typography variant="h3" style={{ margin: "1em" }}>
         {selectedDocData.docName}
       </Typography>
-      <ButtonContext.Provider value={{ id, modalHandleClick }}>
-        <ManualSelectButton />
-      </ButtonContext.Provider>
+      <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
+        <Typography>Manual Select</Typography>
+      </ManualSelectButton>
       {isDocImageSet && (
         <Modal
           id={id}
@@ -305,11 +286,9 @@ export const ManualSelect = ({ eventObj }: any) => {
           }}
         >
           <Fade in={manualSelectModalOpen}>
-            <root.div>
-              <div
-                //@ts-ignore
+            <WrappedJssComponent>
+              <ModalWrapper
                 style={{
-                  ...modalStyle,
                   left: `${docImageURL.overlayPositionOffset}px`,
                 }}
               >
@@ -341,8 +320,8 @@ export const ManualSelect = ({ eventObj }: any) => {
                     </CurrentSelectionContext.Provider>
                   </Layer>
                 </Stage>
-              </div>
-            </root.div>
+              </ModalWrapper>
+            </WrappedJssComponent>
           </Fade>
         </Modal>
       )}

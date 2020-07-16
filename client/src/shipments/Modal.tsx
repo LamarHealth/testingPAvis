@@ -2,6 +2,8 @@ import React, { useState, createContext, useContext, useEffect } from "react";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
+import styled from "styled-components";
+
 import IconButton from "@material-ui/core/IconButton";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
@@ -25,82 +27,77 @@ import {
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 
-const getModalWrapperStyles = () => {
-  return {
-    top: `100px`,
-    left: `${(window.innerWidth - MODAL_WIDTH) / 2}px`,
-    position: "absolute",
-    backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND_GREEN}`,
-    zIndex: 2,
-    maxHeight: "500px",
-    overflowX: "hidden",
-    overflowY: "scroll",
-    width: `${MODAL_WIDTH}px`,
-  };
-};
+const ModalWrapper = styled.div`
+  top: 100px;
+  left: ${(window.innerWidth - MODAL_WIDTH) / 2}px;
+  position: absolute;
+  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
+  z-index: 2;
+  max-height: 500px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  width: ${MODAL_WIDTH}px;
+`;
 
-const fillButtonStyles = {
-  backgroundColor: `${colors.FILL_BUTTON}`,
-  color: "white",
-  border: "1px solid white",
-  borderRadius: "5px",
-  width: "4em",
-  height: "2em",
-  fontWeight: "bold",
-};
+const FillButton = styled.button`
+  background-color: ${colors.FILL_BUTTON};
+  color: white;
+  border: 1px solid white;
+  border-radius: 5px;
+  width: 4em;
+  height: 2em;
+  font-weight: bold;
+  :hover {
+    opacity: 0.5;
+  }
+`;
 
-const closestMatchStyles = {
-  padding: 0,
-  width: "6.5em",
-  border: "none",
-  backgroundColor: `${colors.TRANSPARENT}`,
-  textAlign: "left",
-};
+const ClosestMatch = styled.button`
+  padding: 0;
+  width: 6.5em;
+  border: none;
+  background-color: ${colors.TRANSPARENT};
+  text-align: left;
+`;
 
-const arrowIconStyles = {
-  width: "2em",
-  height: "2em",
-};
+const DownArrow = styled(ArrowDropDownIcon)`
+  width: 2em;
+  height: 2em;
+`;
 
-const iconButtonStyles = {
-  border: "none",
-  backgroundColor: "transparent",
-  margin: 0,
-  padding: 0,
-};
+const UpArrow = styled(ArrowDropUpIcon)`
+  width: 2em;
+  height: 2em;
+`;
+
+const StyledIconButton = styled(IconButton)`
+  border: none;
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+`;
+
+// NEW
+const Div = styled.div`
+  color: red;
+  border: 5px solid red;
+`;
 
 const FillButtonContext = createContext({} as any);
-
-const FillButton = () => {
-  const [fillButtonHover, setFillButtonHover] = useState({}) as any;
-  const { setMainModalOpen } = useContext(ModalContext);
-  const fillButtonHandler = useContext(FillButtonContext);
-  return (
-    <button
-      //@ts-ignore
-      style={{ ...fillButtonStyles, ...fillButtonHover }}
-      onMouseEnter={() => setFillButtonHover({ opacity: 0.5 })}
-      onMouseLeave={() => setFillButtonHover({ opacity: 1 })}
-      onClick={() => {
-        setMainModalOpen(false);
-        fillButtonHandler();
-      }}
-    >
-      Fill
-    </button>
-  );
-};
 
 const TableBodyComponent = (props: {
   sortedKeyValuePairs: KeyValuesWithDistance[];
   eventObj: any;
   bestMatch: string;
 }) => {
+  const { setMainModalOpen } = useContext(ModalContext);
+
   return (
     <TableBody>
       {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
         const fillButtonHandler = () => {
           props.eventObj.target.value = keyValue["value"];
+          setMainModalOpen(false);
         };
 
         return (
@@ -118,14 +115,11 @@ const TableBodyComponent = (props: {
                 value={keyValue["distanceFromTarget"] * 100}
               />
               {keyValue["key"] === props.bestMatch && (
-                <button
-                  //@ts-ignore
-                  style={closestMatchStyles}
-                >
+                <ClosestMatch>
                   <Typography>
                     <i>closest match</i>
                   </Typography>
-                </button>
+                </ClosestMatch>
               )}
             </TableCell>
             <TableCell>
@@ -135,9 +129,7 @@ const TableBodyComponent = (props: {
               <Typography>{keyValue["value"]}</Typography>
             </TableCell>
             <TableCell>
-              <FillButtonContext.Provider value={fillButtonHandler}>
-                <FillButton />
-              </FillButtonContext.Provider>
+              <FillButton onClick={fillButtonHandler}>Fill</FillButton>
             </TableCell>
           </TableRow>
         );
@@ -160,41 +152,25 @@ const TableHeadComponent = ({ targetString }: any) => {
     <TableHead>
       <TableRow>
         <TableCell>
-          <IconButton
-            onClick={matchScoreSortHandler}
-            //@ts-ignore
-            style={iconButtonStyles}
-          >
+          <StyledIconButton onClick={matchScoreSortHandler}>
             <table>
               <tr>
                 <td>
-                  {matchArrow === "highest match" ? (
-                    <ArrowDropDownIcon style={arrowIconStyles} />
-                  ) : (
-                    <ArrowDropUpIcon style={arrowIconStyles} />
-                  )}
+                  {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
                 </td>
                 <Typography variant="h4">
                   <td>Match Score</td>
                 </Typography>
               </tr>
             </table>
-          </IconButton>
+          </StyledIconButton>
         </TableCell>
         <TableCell>
-          <IconButton
-            onClick={alphabeticSortHandler}
-            //@ts-ignore
-            style={iconButtonStyles}
-          >
+          <StyledIconButton onClick={alphabeticSortHandler}>
             <table>
               <tr>
                 <td>
-                  {alphabetArrow === "a-to-z" ? (
-                    <ArrowDropDownIcon style={arrowIconStyles} />
-                  ) : (
-                    <ArrowDropUpIcon style={arrowIconStyles} />
-                  )}
+                  {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
                 </td>
                 <td>
                   <Typography variant="h4">
@@ -203,7 +179,7 @@ const TableHeadComponent = ({ targetString }: any) => {
                 </td>
               </tr>
             </table>
-          </IconButton>
+          </StyledIconButton>
         </TableCell>
         <TableCell>
           <Typography variant="h4">Field Value</Typography>
@@ -215,7 +191,6 @@ const TableHeadComponent = ({ targetString }: any) => {
 };
 
 export const ModalComponent = ({ eventObj }: any) => {
-  const [modalStyle] = useState(getModalWrapperStyles);
   const { mainModalOpen } = useContext(ModalContext);
   const targetString = eventObj.target.placeholder;
 
@@ -274,10 +249,10 @@ export const ModalComponent = ({ eventObj }: any) => {
   useEffect(() => rewriteStyles(), []);
 
   return (
-    <div
-      //@ts-ignore
-      style={modalStyle}
-    >
+    <ModalWrapper>
+      <Div>
+        <h1>hello world</h1>
+      </Div>
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Table>
         <TableHeadContext.Provider
@@ -296,6 +271,6 @@ export const ModalComponent = ({ eventObj }: any) => {
           bestMatch={bestMatch}
         />
       </Table>
-    </div>
+    </ModalWrapper>
   );
 };

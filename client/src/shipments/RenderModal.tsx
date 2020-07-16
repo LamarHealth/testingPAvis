@@ -1,8 +1,6 @@
 import React, { useState, createContext } from "react";
 
 import $ from "jquery";
-//@ts-ignore
-import root from "react-shadow/material-ui";
 
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -13,6 +11,7 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { globalSelectedFileState } from "./DocViewer";
 import { getKeyValuePairsByDoc } from "./keyValuePairs";
 import { ModalComponent } from "./Modal";
+import WrappedJssComponent from "./ShadowComponent";
 
 export const ModalContext = createContext({} as any);
 
@@ -46,13 +45,13 @@ export const RenderModal = () => {
           }}
         >
           <Fade in={mainModalOpen}>
-            <root.div>
+            <WrappedJssComponent>
               <ModalContext.Provider
                 value={{ mainModalOpen, setMainModalOpen }}
               >
                 <>{eventObj && <ModalComponent eventObj={eventObj} />}</>
               </ModalContext.Provider>
-            </root.div>
+            </WrappedJssComponent>
           </Fade>
         </Modal>
       )}
