@@ -1,8 +1,9 @@
 {
   "short_name": "DocIt",
-  "name": "DocIt",
+  "name": "DocIt Development Build",
   "version": "1.0",
-  "description": "Automatically fill out web forms with data from PDFs, faxes, photos, and other documents.",
+  "description": "This extension is for beta testing",
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

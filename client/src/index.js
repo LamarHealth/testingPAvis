@@ -8,15 +8,16 @@ import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
 import { Sidebar } from "./shipments/Sidebar";
 import { RenderModal } from "./shipments/RenderModal";
 
+import { LOCAL_MODE } from "./common/constants";
 dotenv.config();
 
 $('<span id="insertion-point"/>').insertBefore(document.body);
-
+console.log(process.env);
 ReactDOM.render(
   <>
     <RenderModal />
     <Sidebar />
-    {process.env.REACT_APP_LOCAL && (
+    {LOCAL_MODE && (
       <body>
         <ShipmentsDashboard />
       </body>

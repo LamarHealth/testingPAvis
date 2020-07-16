@@ -1,5 +1,4 @@
 import { getEditDistance } from "./LevenshteinField";
-
 ///// INTERFACES /////
 // interface returned from getAllKeyValuePairs()
 export interface KeyValues {

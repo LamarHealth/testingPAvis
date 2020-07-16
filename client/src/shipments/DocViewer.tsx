@@ -2,8 +2,6 @@ import React, { useReducer, useState, createContext } from "react";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
-import Typography from "@material-ui/core/Typography";
-
 import { StyledDropzone } from "./DocUploader";
 import {
   getLevenDistanceAndSort,
@@ -16,6 +14,7 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
 
 import $ from "jquery";
 import { colors } from "./../common/colors";
