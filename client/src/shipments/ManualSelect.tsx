@@ -26,7 +26,6 @@ import uuidv from "uuid";
 const ModalWrapper = styled.div`
   top: 25px;
   position: absolute;
-  z-index: ;
   max-height: 675px;
   overflow-y: scroll;
 `;
