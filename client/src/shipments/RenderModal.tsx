@@ -10,7 +10,7 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { globalSelectedFileState } from "./DocViewer";
-import { getKeyValuePairsByDoc } from "./keyValuePairs";
+import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
