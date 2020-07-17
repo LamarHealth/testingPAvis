@@ -5,6 +5,7 @@ import styled from "styled-components";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
 
 import uuidv from "uuid";
 
@@ -12,35 +13,43 @@ import { colors } from "./../common/colors";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 
-const AccuracyScoreBox = styled(Box)`
-  background: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
-  padding: 5px;
-  border-radius: 7px;
-  opacity: 0.5;
-
-  :hover {
-    opacity: 1;
-  }
+const AccuracyScoreBox = styled.div`
+  background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
+  padding: 3px;
+  border-radius: 5px;
 `;
 
+const StyledCircularProgress = styled(CircularProgress)`
+  position: relative;
+  top: 2px;
+`;
+
+const wrapperFlexStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    "& > * + *": {
+      marginLeft: theme.spacing(0.5),
+    },
+  },
+}));
+
+const greenCircleStyles = makeStyles({ root: { color: "green" } });
+const yellowCircleStyles = makeStyles({ root: { color: "goldenrod" } });
+const redCircleStyles = makeStyles({ root: { color: "red" } });
+
 const AccuracyScoreEl = ({ value }: any) => {
+  const wrapperClasses = wrapperFlexStyles();
+
+  const colorClasses =
+    value < 50
+      ? redCircleStyles().root
+      : value < 80
+      ? yellowCircleStyles().root
+      : greenCircleStyles().root;
+
   return (
-    <AccuracyScoreBox display="inline-flex">
-      <CircularProgress
-        variant="static"
-        value={value}
-        color={value > 75 ? "primary" : "secondary"}
-      />
-      <Box
-        top={0}
-        left={0}
-        bottom={0}
-        right={0}
-        position="absolute"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+    <AccuracyScoreBox className={wrapperClasses.root}>
+      <Box>
         <WrappedJssComponent>
           <style>
             {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: 14px; font-weight: 400}`}
@@ -52,6 +61,14 @@ const AccuracyScoreEl = ({ value }: any) => {
           >{`${Math.round(value)}%`}</Typography>
         </WrappedJssComponent>
       </Box>
+      <StyledCircularProgress
+        variant="static"
+        value={value}
+        color={"primary"}
+        size={"14px"}
+        thickness={10}
+        classes={{ colorPrimary: colorClasses }}
+      />
     </AccuracyScoreBox>
   );
 };
@@ -90,11 +107,14 @@ export const renderAccuracyScore = (
     inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
 
   function positionMounter() {
+    console.log(mounter.style.height);
+
     mounter.style.top = `${
-      parseInt(inputStyle.height.replace("px", "")) + target.offsetTop - 60
+      (parseInt(inputStyle.height.replace("px", "")) - 23) / 2 +
+      target.offsetTop
     }px`;
     mounter.style.left = `${
-      parseInt(inputStyle.width.replace("px", "")) + target.offsetLeft - 25
+      parseInt(inputStyle.width.replace("px", "")) + target.offsetLeft - 56
     }px`;
     console.log("hi");
   }
