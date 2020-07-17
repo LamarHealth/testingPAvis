@@ -10,18 +10,20 @@ import { makeStyles } from "@material-ui/core/styles";
 import uuidv from "uuid";
 
 import { colors } from "./../common/colors";
+import { ACC_SCORE_LARGE } from "./../common/constants";
+import { ACC_SCORE_MEDIUM } from "./../common/constants";
+import { ACC_SCORE_SMALL } from "./../common/constants";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 
 const AccuracyScoreBox = styled.div`
   background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
-  padding: 3px;
+  padding: 4px;
   border-radius: 5px;
 `;
 
 const StyledCircularProgress = styled(CircularProgress)`
   position: relative;
-  top: 2px;
 `;
 
 const wrapperFlexStyles = makeStyles((theme) => ({
@@ -37,7 +39,7 @@ const greenCircleStyles = makeStyles({ root: { color: "green" } });
 const yellowCircleStyles = makeStyles({ root: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ root: { color: "red" } });
 
-const AccuracyScoreEl = ({ value }: any) => {
+const AccuracyScoreEl = ({ value, inputHeight }: any) => {
   const wrapperClasses = wrapperFlexStyles();
 
   const colorClasses =
@@ -47,12 +49,19 @@ const AccuracyScoreEl = ({ value }: any) => {
       ? yellowCircleStyles().root
       : greenCircleStyles().root;
 
+  const size =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM
+      : ACC_SCORE_SMALL;
+
   return (
     <AccuracyScoreBox className={wrapperClasses.root}>
       <Box>
         <WrappedJssComponent>
           <style>
-            {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: 14px; font-weight: 400}`}
+            {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
           </style>
           <Typography
             variant="caption"
@@ -65,7 +74,7 @@ const AccuracyScoreEl = ({ value }: any) => {
         variant="static"
         value={value}
         color={"primary"}
-        size={"14px"}
+        size={`${size}px`}
         thickness={10}
         classes={{ colorPrimary: colorClasses }}
       />
@@ -106,17 +115,31 @@ export const renderAccuracyScore = (
   mounter.style.zIndex =
     inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
 
+  const inputHeight = parseInt(inputStyle.height.replace("px", ""));
+
+  const accuracyScoreElHeight =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE + 8
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM + 8
+      : ACC_SCORE_SMALL + 8;
+  const accuracyScoreElWidth =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE + 40
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM + 32
+      : ACC_SCORE_SMALL + 26;
+
   function positionMounter() {
-    console.log(mounter.style.height);
+    const scopedInputHeight = parseInt(inputStyle.height.replace("px", ""));
+    const scopedInputWidth = parseInt(inputStyle.width.replace("px", ""));
 
     mounter.style.top = `${
-      (parseInt(inputStyle.height.replace("px", "")) - 23) / 2 +
-      target.offsetTop
+      (scopedInputHeight - accuracyScoreElHeight) / 2 + target.offsetTop
     }px`;
     mounter.style.left = `${
-      parseInt(inputStyle.width.replace("px", "")) + target.offsetLeft - 56
+      scopedInputWidth + target.offsetLeft - (accuracyScoreElWidth + 5)
     }px`;
-    console.log("hi");
   }
   positionMounter();
 
@@ -127,8 +150,11 @@ export const renderAccuracyScore = (
   positionedParent.appendChild(mounter);
 
   ReactDOM.render(
-    //@ts-ignore
-    <AccuracyScoreEl value={keyValue.distanceFromTarget * 100} />,
+    <AccuracyScoreEl
+      //@ts-ignore
+      value={keyValue.distanceFromTarget * 100}
+      inputHeight={inputHeight}
+    />,
     mounter
   );
 };
