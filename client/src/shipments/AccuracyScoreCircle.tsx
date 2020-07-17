@@ -77,20 +77,31 @@ export const renderAccuracyScore = (
     document
       .getElementById(`docit-accuracy-score-mounter-${oldMounterID}`)
       ?.remove();
+
+    window.removeEventListener("resize", positionMounter);
   }
 
   // add the new mounter
   const mounter = document.createElement("span");
   mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
   mounter.style.position = "absolute";
-  mounter.style.left = `${
-    parseInt(inputStyle.width.replace("px", "")) + target.offsetLeft - 25
-  }px`;
-  mounter.style.top = `${
-    parseInt(inputStyle.height.replace("px", "")) + target.offsetTop - 60
-  }px`;
+
   mounter.style.zIndex =
     inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
+
+  function positionMounter() {
+    mounter.style.top = `${
+      parseInt(inputStyle.height.replace("px", "")) + target.offsetTop - 60
+    }px`;
+    mounter.style.left = `${
+      parseInt(inputStyle.width.replace("px", "")) + target.offsetLeft - 25
+    }px`;
+    console.log("hi");
+  }
+  positionMounter();
+
+  window.addEventListener("resize", positionMounter);
+
   target.className += ` has-docit-mounter-${mounterID}`;
 
   positionedParent.appendChild(mounter);
