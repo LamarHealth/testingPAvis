@@ -6,7 +6,7 @@ import { StyledDropzone } from "./DocUploader";
 import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
-} from "./keyValuePairs";
+} from "./KeyValuePairs";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -15,6 +15,7 @@ import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
+import Link from "@material-ui/core/Link";
 
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -79,6 +80,11 @@ const Box = styled(Card)`
 const Type = styled(Typography)`
   display: flex;
   margin: 1em 0;
+`;
+
+const FeedbackTypography = styled(Typography)`
+  margin: 0.5em auto;
+  color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
 export const globalSelectedFileState = createSpecialHookState("");
@@ -189,6 +195,25 @@ const initialState = {
   documents: JSON.parse(localStorage.getItem("docList") || "[]"),
 } as IDocumentList;
 
+const Feedback = () => {
+  return (
+    <FeedbackTypography>
+      <i>
+        <Link
+          href="https://docs.google.com/forms/d/e/1FAIpQLScTF2Y9xd8-pRQmajiWXn3dcx1emMTdu8etKOVXCcIRIYybCg/viewform?usp=sf_link"
+          color="inherit"
+          variant="body2"
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="always"
+        >
+          {"Provide feedback"}
+        </Link>
+      </i>
+    </FeedbackTypography>
+  );
+};
+
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
@@ -221,6 +246,7 @@ const DocViewer = () => {
         })}
       </TransitionGroup>
       <StyledDropzone />
+      <Feedback />
     </FileContext.Provider>
   );
 };
