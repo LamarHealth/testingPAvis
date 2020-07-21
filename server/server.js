@@ -110,11 +110,21 @@ router.post("/api/upload_status", (req, res) => {
               Bucket: `doc-classifier-bucket/${docID}`,
               Key: `rawJSON-${jsonifiedDocName}`,
               Body: Buffer.from(JSON.stringify(data)),
+              // Body: "fart-supreme",
             };
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                console.log("rawJSON s3 upload error: ", err);
+                logger.error(
+                  {
+                    docID,
+                    pngifiedDocName,
+                    route: "/api/upload_status/",
+                    type: "POST",
+                    s3error: err,
+                  },
+                  "rawJSON s3 upload error"
+                );
               }
             });
 
@@ -126,7 +136,16 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                console.log("parsedJSON s3 upload error: ", err);
+                logger.error(
+                  {
+                    docID,
+                    pngifiedDocName,
+                    route: "/api/upload_status/",
+                    type: "POST",
+                    s3error: err,
+                  },
+                  "parsedJSON s3 upload error"
+                );
               }
             });
           };

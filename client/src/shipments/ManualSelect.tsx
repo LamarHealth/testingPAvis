@@ -215,7 +215,7 @@ export const ManualSelect = ({ eventObj }: any) => {
         <Typography>Manual Select</Typography>
       </ManualSelectButton>
       {(errorFetchingGeometry || errorFetchingImage) && errorMessage}
-      {isDocImageSet && (
+      {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
         <Modal
           id={id}
           open={manualSelectModalOpen}
