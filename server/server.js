@@ -32,7 +32,10 @@ AWS.config.update({
 const app = express();
 
 // pino logging
-const logger = pino({ level: process.env.LOG_LEVEL || "info" });
+const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  prettyPrint: { colorize: true },
+});
 const expressLogger = expressPino({ logger });
 
 // can disable this if don't want every request/response logged to console

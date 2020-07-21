@@ -19,8 +19,7 @@
   },
   "scripts": {
     "build": "babel . --ignore node_modules,build --out-dir build",
-    "start": "LOG_LEVEL=debug nodemon --exec babel-node server.js | ./node_modules/.bin/pino-pretty",
-    "start:logging": "LOG_LEVEL=debug yarn start | ./node_modules/.bin/pino-pretty",
+    "start": "nodemon --exec babel-node server.js",
     "start:prod": "node build/server.js",
     "test": "jest --verbose"
   },
