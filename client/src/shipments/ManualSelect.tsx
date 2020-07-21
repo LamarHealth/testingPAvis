@@ -160,12 +160,18 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [filled, setFilled] = useState({} as any);
   const { setMainModalOpen } = useContext(ModalContext);
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
-  const [fetchError, setFetchError] = useState("" as any);
-  const errorFetchingResources = fetchError !== "";
+  const [errorFetchingImage, setErrorFetchingImage] = useState(false);
+  const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("" as any);
 
   // modal
   const modalHandleClick = () => {
-    if (currentDocID === "" || currentDocID !== globalSelectedFile.get()) {
+    if (
+      currentDocID === "" ||
+      currentDocID !== globalSelectedFile.get() ||
+      errorFetchingImage ||
+      errorFetchingGeometry
+    ) {
       getImageAndGeometryFromServer(selectedDocData).then(() =>
         setManualSelectModalOpen(true)
       );
@@ -191,7 +197,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // error handlers
     const defaultError = (errorCode: number) => {
-      setFetchError(
+      setErrorMessage(
         <ErrorMessage>
           <i>
             <strong>Error {errorCode}</strong>: unable to fetch resources from
@@ -202,7 +208,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     };
 
     const noSuchKeyError = (errorCode: number) => {
-      setFetchError(
+      setErrorMessage(
         <ErrorMessage>
           <i>
             <strong>Error {errorCode}</strong>: document could not be found on
@@ -240,14 +246,17 @@ export const ManualSelect = ({ eventObj }: any) => {
             (window.innerWidth - this.naturalWidth) / 2;
         };
         setDocImageURL(urlObj);
+        setErrorFetchingImage(false);
         break;
       case 404:
         const statusMessage = (await docImageResponse.json()).status;
         if (statusMessage === "document does not exist on s3") {
+          setErrorFetchingImage(true);
           noSuchKeyError(docImageResponse.status);
           break;
         }
       default:
+        setErrorFetchingImage(true);
         defaultError(docImageResponse.status);
     }
 
@@ -271,14 +280,17 @@ export const ManualSelect = ({ eventObj }: any) => {
           return { ...lineGeometry, ID: uuidv() };
         });
         setCurrentLinesGeometry(linesGeometry);
+        setErrorFetchingGeometry(false);
         break;
       case 404:
         const statusMessage = (await docImageResponse.json()).status;
         if (statusMessage === "document does not exist on s3") {
+          setErrorFetchingGeometry(true);
           noSuchKeyError(linesGeometryResponse.status);
           break;
         }
       default:
+        setErrorFetchingGeometry(true);
         defaultError(linesGeometryResponse.status);
     }
   };
@@ -308,7 +320,7 @@ export const ManualSelect = ({ eventObj }: any) => {
       <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
         <Typography>Manual Select</Typography>
       </ManualSelectButton>
-      {errorFetchingResources && fetchError}
+      {(errorFetchingGeometry || errorFetchingImage) && errorMessage}
       {isDocImageSet && (
         <Modal
           id={id}
