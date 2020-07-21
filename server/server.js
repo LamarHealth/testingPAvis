@@ -16,6 +16,8 @@ import multer from "multer";
 import AWS, { Textract, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
 import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
+const pino = require("pino");
+const expressPino = require("express-pino-logger");
 
 // Routes
 // AWS
@@ -28,6 +30,13 @@ AWS.config.update({
 });
 
 const app = express();
+
+// pino logging
+const logger = pino({ level: process.env.LOG_LEVEL || "info" });
+const expressLogger = expressPino({ logger });
+
+// can disable this if don't want every request/response logged to console
+app.use(expressLogger);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -203,7 +212,16 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 
   s3.getObject(s3GetParams, (error, data) => {
     if (error) {
-      console.log("error getting doc image from S3: ", error);
+      logger.error(
+        {
+          docID,
+          docName,
+          route: "/api/doc-image/",
+          type: "GET",
+          s3error: error,
+        },
+        "error getting doc image from S3"
+      );
       switch (error.code) {
         case "NoSuchKey":
           res.status(error.statusCode).send({
@@ -241,7 +259,16 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
 
   s3.getObject(s3rawJSONParams, (error, data) => {
     if (error) {
-      console.log("error getting raw JSON file from S3: ", error);
+      logger.error(
+        {
+          docID,
+          docName,
+          route: "/api/lines-geometry/",
+          type: "GET",
+          s3error: error,
+        },
+        "error raw JSON file from S3"
+      );
       switch (error.code) {
         case "NoSuchKey":
           res.status(error.statusCode).send({
@@ -280,7 +307,7 @@ router.get("/api/hello", (req, res) => {
 router.post("/api/timedpost", (req, res) => {
   let waitedResponse;
   setTimeout(() => {
-    console.log("sdflsjkdfjkls");
+    logger.info("sdflsjkdfjkls");
     // waitedResponse = { express: "Hello From Express" + `File: ${req.name}` };
     res.json({ express: "Hello From Express" + `File: ${req.name}` });
   }, 3000);
@@ -294,5 +321,5 @@ app.use("/*", staticFiles);
 
 app.set("port", process.env.PORT || 3001);
 app.listen(app.get("port"), () => {
-  console.log(`Listening on ${app.get("port")}`);
+  logger.info(`Listening on ${app.get("port")}`);
 });
