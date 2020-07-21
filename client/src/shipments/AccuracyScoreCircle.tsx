@@ -95,9 +95,7 @@ export const renderAccuracyScore = (
   // remove the old mounter
   if (target.className.includes("has-docit-mounter")) {
     //@ts-ignore
-    const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
-      target.className
-    )[0];
+    const oldMounterClassName = target.className;
     const oldMounterID = oldMounterClassName.replace("has-docit-mounter-", "");
     target.classList.remove(oldMounterClassName);
     document
