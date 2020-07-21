@@ -23,7 +23,7 @@ import {
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
-} from "./keyValuePairs";
+} from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 

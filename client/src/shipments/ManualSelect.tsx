@@ -10,7 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 
-import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./keyValuePairs";
+import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";

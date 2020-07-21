@@ -6,7 +6,7 @@ import { StyledDropzone } from "./DocUploader";
 import {
   getLevenDistanceAndSort,
   getKeyValuePairsByDoc,
-} from "./keyValuePairs";
+} from "./KeyValuePairs";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
