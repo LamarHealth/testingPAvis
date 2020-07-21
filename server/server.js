@@ -203,13 +203,22 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 
   s3.getObject(s3GetParams, (error, data) => {
     if (error) {
-      console.error("error getting doc image from S3: ", error);
-      res.status(400).send({
-        status: "error",
-        docID: req.params.docID,
-        docName: req.params.docName,
-        rawJSONDocName: rawJSONDocName,
-      });
+      console.log("error getting doc image from S3: ", error);
+      switch (error.code) {
+        case "NoSuchKey":
+          res.status(error.statusCode).send({
+            status: "document does not exist on s3",
+            docID: req.params.docID,
+            docName: req.params.docName,
+          });
+          break;
+        default:
+          res.status(400).send({
+            status: "error",
+            docID: req.params.docID,
+            docName: req.params.docName,
+          });
+      }
     } else {
       const justTheData = data.Body;
 
@@ -233,12 +242,23 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
   s3.getObject(s3rawJSONParams, (error, data) => {
     if (error) {
       console.log("error getting raw JSON file from S3: ", error);
-      res.status(400).send({
-        status: "error",
-        docID: req.params.docID,
-        docName: req.params.docName,
-        rawJSONDocName: rawJSONDocName,
-      });
+      switch (error.code) {
+        case "NoSuchKey":
+          res.status(error.statusCode).send({
+            status: "document does not exist on s3",
+            docID: req.params.docID,
+            docName: req.params.docName,
+            rawJSONDocName: rawJSONDocName,
+          });
+          break;
+        default:
+          res.status(400).send({
+            status: "error",
+            docID: req.params.docID,
+            docName: req.params.docName,
+            rawJSONDocName: rawJSONDocName,
+          });
+      }
     } else {
       const rawJSON = JSON.parse(data.Body);
       const parsedLinesGeometry = getLinesGeometry(rawJSON);

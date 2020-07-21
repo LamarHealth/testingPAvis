@@ -54,6 +54,10 @@ const CurrentSelection = styled(Typography)`
   border: 0.5px solid ${colors.FONT_BLUE};
 `;
 
+const ErrorMessage = styled(Typography)`
+  margin: 1em;
+`;
+
 const Polygon = ({ lineGeometry, docImageURL }: any) => {
   const [color, setColor] = useState("transparent");
   const { filled, setFilled, setCurrentSelection } = useContext(
@@ -156,6 +160,8 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [filled, setFilled] = useState({} as any);
   const { setMainModalOpen } = useContext(ModalContext);
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
+  const [fetchError, setFetchError] = useState("" as any);
+  const errorFetchingResources = fetchError !== "";
 
   // modal
   const modalHandleClick = () => {
@@ -183,6 +189,30 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     setCurrentDocID(docID);
 
+    // error handlers
+    const defaultError = (errorCode: number) => {
+      setFetchError(
+        <ErrorMessage>
+          <i>
+            <strong>Error {errorCode}</strong>: unable to fetch resources from
+            server. Try again later.
+          </i>
+        </ErrorMessage>
+      );
+    };
+
+    const noSuchKeyError = (errorCode: number) => {
+      setFetchError(
+        <ErrorMessage>
+          <i>
+            <strong>Error {errorCode}</strong>: document could not be found on
+            the server. Try uploading the document and trying again.
+          </i>
+        </ErrorMessage>
+      );
+    };
+
+    // get image
     const docImageResponse: any = await fetch(
       `${
         process.env.REACT_APP_API_PATH
@@ -193,23 +223,35 @@ export const ManualSelect = ({ eventObj }: any) => {
       }
     );
 
-    const blob = await docImageResponse.blob();
-    const objectURL = await URL.createObjectURL(blob);
+    switch (docImageResponse.status) {
+      case 200:
+        const blob = await docImageResponse.blob();
+        const objectURL = await URL.createObjectURL(blob);
 
-    const img = new Image();
-    img.src = objectURL;
-    let urlObj: any = {
-      url: objectURL,
-    };
-    img.onload = function (this: any) {
-      urlObj["width"] = this.naturalWidth;
-      urlObj["height"] = this.naturalHeight;
-      urlObj["overlayPositionOffset"] =
-        (window.innerWidth - this.naturalWidth) / 2;
-    };
+        const img = new Image();
+        img.src = objectURL;
+        let urlObj: any = {
+          url: objectURL,
+        };
+        img.onload = function (this: any) {
+          urlObj["width"] = this.naturalWidth;
+          urlObj["height"] = this.naturalHeight;
+          urlObj["overlayPositionOffset"] =
+            (window.innerWidth - this.naturalWidth) / 2;
+        };
+        setDocImageURL(urlObj);
+        break;
+      case 404:
+        const statusMessage = (await docImageResponse.json()).status;
+        if (statusMessage === "document does not exist on s3") {
+          noSuchKeyError(docImageResponse.status);
+          break;
+        }
+      default:
+        defaultError(docImageResponse.status);
+    }
 
-    setDocImageURL(urlObj);
-
+    // get geometry
     const linesGeometryResponse: any = await fetch(
       `${
         process.env.REACT_APP_API_PATH
@@ -220,14 +262,25 @@ export const ManualSelect = ({ eventObj }: any) => {
       }
     );
 
-    const linesGeometry = (
-      await linesGeometryResponse.json()
-    ).linesGeometry.map((lineGeometry: any) => {
-      //@ts-ignore
-      return { ...lineGeometry, ID: uuidv() };
-    });
-
-    setCurrentLinesGeometry(linesGeometry);
+    switch (linesGeometryResponse.status) {
+      case 200:
+        const linesGeometry = (
+          await linesGeometryResponse.json()
+        ).linesGeometry.map((lineGeometry: any) => {
+          //@ts-ignore
+          return { ...lineGeometry, ID: uuidv() };
+        });
+        setCurrentLinesGeometry(linesGeometry);
+        break;
+      case 404:
+        const statusMessage = (await docImageResponse.json()).status;
+        if (statusMessage === "document does not exist on s3") {
+          noSuchKeyError(linesGeometryResponse.status);
+          break;
+        }
+      default:
+        defaultError(linesGeometryResponse.status);
+    }
   };
 
   // return key listener
@@ -255,6 +308,7 @@ export const ManualSelect = ({ eventObj }: any) => {
       <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
         <Typography>Manual Select</Typography>
       </ManualSelectButton>
+      {errorFetchingResources && fetchError}
       {isDocImageSet && (
         <Modal
           id={id}
