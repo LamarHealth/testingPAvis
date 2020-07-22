@@ -200,7 +200,7 @@ const Feedback = () => {
     <FeedbackTypography>
       <i>
         <Link
-          href="https://docs.google.com/forms/d/e/1FAIpQLScTF2Y9xd8-pRQmajiWXn3dcx1emMTdu8etKOVXCcIRIYybCg/viewform?usp=sf_link"
+          href="https://forms.gle/4XBbuJnACkbaZ5578"
           color="inherit"
           variant="body2"
           target="_blank"
