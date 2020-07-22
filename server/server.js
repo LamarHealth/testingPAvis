@@ -93,7 +93,7 @@ router.post("/api/upload_status", (req, res) => {
           const parsedTextract = getKeyValues(data);
 
           // helper functions
-          const docErrorLogger = (msg, error = "") => {
+          const logError = (msg, error = "") => {
             logger.error(
               {
                 docID,
@@ -130,7 +130,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                docErrorLogger("rawJSON S3 upload error", err);
+                logError("rawJSON S3 upload error", err);
               }
             });
 
@@ -142,7 +142,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                docErrorLogger("parsedJSON s3 upload error", err);
+                logError("parsedJSON s3 upload error", err);
               }
             });
           };
@@ -161,7 +161,7 @@ router.post("/api/upload_status", (req, res) => {
 
           const delayedUpload = (n, maxN) => {
             if (n > maxN) {
-              docErrorLogger(
+              logError(
                 `Max tries error: ${n} tries`,
                 `Throttling exception max tries exceeded after ${n} tries. Request failed.`
               );
@@ -181,7 +181,7 @@ router.post("/api/upload_status", (req, res) => {
                       Math.pow(2, n)
                     );
                   } else {
-                    docErrorLogger(
+                    logError(
                       "Some other error after a throttling exception",
                       err
                     );
@@ -197,7 +197,7 @@ router.post("/api/upload_status", (req, res) => {
 
           // handle errors
           if (err) {
-            docErrorLogger("S3.upload error", err);
+            logError("S3.upload error", err);
             // throttling exception
             if (err.code === "ThrottlingException") {
               logger.info("S3 throttling exception detected. Trying again.");
