@@ -23,9 +23,10 @@ import {
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
-} from "./keyValuePairs";
+} from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
+import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 const ModalWrapper = styled.div`
   top: 100px;
@@ -92,6 +93,7 @@ const TableBodyComponent = (props: {
   bestMatch: string;
 }) => {
   const { setMainModalOpen } = useContext(ModalContext);
+  const eventObj = props.eventObj;
 
   return (
     <TableBody>
@@ -99,6 +101,7 @@ const TableBodyComponent = (props: {
         const fillButtonHandler = () => {
           props.eventObj.target.value = keyValue["value"];
           setMainModalOpen(false);
+          renderAccuracyScore(eventObj.target, keyValue);
         };
 
         return (
