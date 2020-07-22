@@ -1,4 +1,6 @@
 import { getEditDistance } from "./LevenshteinField";
+import { globalSelectedFileState } from "./DocViewer";
+
 ///// INTERFACES /////
 // interface returned from getAllKeyValuePairs()
 export interface KeyValues {
@@ -17,10 +19,46 @@ export interface KeyValuesByDoc {
 export interface KeyValuesWithDistance {
   key: string;
   value: string;
-  distanceFromTarget: string;
+  distanceFromTarget: number;
 }
 
 ///// FUNCTIONS /////
+export const deleteKeyValuePairFromDoc = (
+  globalSelectedFile: any,
+  faultyKey: string,
+  faultyValue: string
+) => {
+  let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  console.log("storedDocs 1, ", storedDocs);
+
+  let index = undefined as any;
+  let selectedDoc = storedDocs.filter((doc: any, i: any) => {
+    const itMatches = doc.docID === globalSelectedFile.get();
+    if (itMatches) index = i;
+    return itMatches;
+  })[0];
+
+  // console.log("selectedDoc, ", selectedDoc);
+  // console.log("index, ", index);
+
+  const newKVPairs = {} as any;
+  Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
+    if (key !== faultyKey && selectedDoc.keyValuePairs[key] !== faultyValue) {
+      newKVPairs[key] = selectedDoc.keyValuePairs[key];
+    }
+  });
+
+  // console.log("newKVPairs, ", newKVPairs);
+  selectedDoc.keyValuePairs = newKVPairs;
+
+  // console.log("selectedDoc, ", selectedDoc);
+
+  storedDocs[index] = selectedDoc;
+
+  // console.log("storedDocs 2, ", storedDocs);
+  localStorage.setItem("docList", JSON.stringify(storedDocs));
+};
+
 export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   const docDataByDoc: any = [];

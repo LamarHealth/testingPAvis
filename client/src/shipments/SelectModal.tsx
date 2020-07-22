@@ -27,6 +27,7 @@ import {
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
+  deleteKeyValuePairFromDoc,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
@@ -90,29 +91,45 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
+const TableRowContext = createContext({} as any);
+
 const TableRowComponent = (props: {
-  keyValue: any;
+  keyValue: KeyValuesWithDistance;
   eventObj: any;
   bestMatch: string;
   i: number;
 }) => {
   const keyValue = props.keyValue;
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const { setMainModalOpen } = useContext(ModalContext);
-  const [collapseOpen, setCollapseOpen] = useState(false);
+  const { setDocData } = useContext(TableRowContext);
+  const [softCollapse, setSoftCollapse] = useState(false);
+  const [hardCollapse, setHardCollapse] = useState(false);
 
   const fillButtonHandler = () => {
     props.eventObj.target.value = keyValue["value"];
     setMainModalOpen(false);
   };
   const reportButtonHandler = () => {
-    setCollapseOpen(true);
+    setSoftCollapse(true);
   };
   const handleClickAway = () => {
-    setCollapseOpen(false);
+    setSoftCollapse(false);
   };
-  const handleChipClick = () => {
-    console.log("hello");
+  const removeKVPair = () => {
+    deleteKeyValuePairFromDoc(
+      globalSelectedFile,
+      keyValue["key"],
+      keyValue["value"]
+    );
+    setDocData(getKeyValuePairsByDoc());
+    setHardCollapse(true);
+    setSoftCollapse(false);
   };
+
+  useEffect(() => {
+    setHardCollapse(false);
+  }, [hardCollapse]);
 
   return (
     <TableRow
@@ -141,7 +158,7 @@ const TableRowComponent = (props: {
         <Typography>{keyValue["value"]}</Typography>
       </TableCell>
       <TableCell>
-        <Collapse in={!collapseOpen}>
+        <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
           <FlexCell>
             <FillButton onClick={fillButtonHandler}>Fill</FillButton>
             <IconButton onClick={reportButtonHandler}>
@@ -154,11 +171,11 @@ const TableRowComponent = (props: {
           touchEvent="onTouchStart"
           onClickAway={handleClickAway}
         >
-          <Collapse in={collapseOpen}>
+          <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
             <Chip
               label="Confirm Unrelated"
               variant="outlined"
-              onClick={handleChipClick}
+              onClick={removeKVPair}
             />
           </Collapse>
         </ClickAwayListener>
@@ -209,7 +226,7 @@ export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const docData = getKeyValuePairsByDoc();
+  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
   const selectedDocData = docData.filter(
     (doc) => doc.docID === globalSelectedFile.get()
   )[0];
@@ -282,14 +299,16 @@ export const SelectModal = ({ eventObj }: any) => {
           <TableHeadComponent targetString={targetString} />
         </TableHeadContext.Provider>
         <TableBody>
-          {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
-            <TableRowComponent
-              keyValue={keyValue}
-              eventObj={eventObj}
-              bestMatch={bestMatch}
-              i={i}
-            />
-          ))}
+          <TableRowContext.Provider value={{ setDocData }}>
+            {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+              <TableRowComponent
+                keyValue={keyValue}
+                eventObj={eventObj}
+                bestMatch={bestMatch}
+                i={i}
+              />
+            ))}
+          </TableRowContext.Provider>
         </TableBody>
       </Table>
     </ModalWrapper>
