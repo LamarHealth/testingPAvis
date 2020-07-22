@@ -34,7 +34,7 @@ const app = express();
 // pino logging
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
-  prettyPrint: { colorize: true },
+  prettyPrint: process.env.PINO_PRETTY === "true" ? true : false,
 });
 const expressLogger = expressPino({ logger });
 
@@ -93,6 +93,19 @@ router.post("/api/upload_status", (req, res) => {
           const parsedTextract = getKeyValues(data);
 
           // helper functions
+          const pinoUploadStatusErrorLogger = (error, msg) => {
+            logger.error(
+              {
+                docID,
+                pngifiedDocName,
+                route: "/api/upload_status/",
+                type: "POST",
+                error: error,
+              },
+              msg
+            );
+          };
+
           const sendSuccessfulResponse = () => {
             res.json({
               status: "complete",
@@ -113,21 +126,11 @@ router.post("/api/upload_status", (req, res) => {
               Bucket: `doc-classifier-bucket/${docID}`,
               Key: `rawJSON-${jsonifiedDocName}`,
               Body: Buffer.from(JSON.stringify(data)),
-              // Body: "fart-supreme",
             };
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                logger.error(
-                  {
-                    docID,
-                    pngifiedDocName,
-                    route: "/api/upload_status/",
-                    type: "POST",
-                    s3error: err,
-                  },
-                  "rawJSON s3 upload error"
-                );
+                pinoUploadStatusErrorLogger(err, "rawJSON S3 upload error");
               }
             });
 
@@ -139,16 +142,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                logger.error(
-                  {
-                    docID,
-                    pngifiedDocName,
-                    route: "/api/upload_status/",
-                    type: "POST",
-                    s3error: err,
-                  },
-                  "parsedJSON s3 upload error"
-                );
+                pinoUploadStatusErrorLogger(err, "parsedJSON s3 upload error");
               }
             });
           };
@@ -167,18 +161,19 @@ router.post("/api/upload_status", (req, res) => {
 
           const delayedUpload = (n, maxN) => {
             if (n > maxN) {
-              console.log(
-                `throttling exception max timeout exceeded after ${n} tries. request failed.`
+              pinoUploadStatusErrorLogger(
+                `max tries error: ${n} tries`,
+                `throttling exception max tries exceeded after ${n} tries. request failed.`
               );
               sendError(
                 429,
-                "throttling exception, max timeout exceeded. request failed."
+                "throttling exception, max trie exceeded. request failed."
               );
             } else {
               textract.analyzeDocument(textractParams, (err, data) => {
                 if (err) {
                   if (err.code === "ThrottlingException") {
-                    console.log(
+                    logger.info(
                       `throttling exception detected. trying again x${n + 1}.`
                     );
                     return setTimeout(
@@ -186,10 +181,14 @@ router.post("/api/upload_status", (req, res) => {
                       Math.pow(2, n)
                     );
                   } else {
+                    pinoUploadStatusErrorLogger(
+                      err,
+                      "some other error after a throttling exception"
+                    );
                     sendError(500, "internal server error");
                   }
                 } else {
-                  console.log(`throttling exception resolved after ${n} tries`);
+                  logger.info(`throttling exception resolved after ${n} tries`);
                   sendSuccessfulResponse();
                 }
               });
@@ -198,10 +197,10 @@ router.post("/api/upload_status", (req, res) => {
 
           // handle errors
           if (err) {
-            console.log("s3.upload error: ", err);
+            pinoUploadStatusErrorLogger(err, "S3.upload error");
             // throttling exception
             if (err.code === "ThrottlingException") {
-              console.log("s3 throttling exception detected. trying again.");
+              logger.info("s3 throttling exception detected. trying again.");
               delayedUpload(1, 15);
             } else {
               sendError(400, "error");
@@ -214,7 +213,7 @@ router.post("/api/upload_status", (req, res) => {
       });
     } else {
       setTimeout(() => {
-        res.console.error("Could not process document");
+        logger.error("Could not process document");
       }, 2000);
     }
   });
