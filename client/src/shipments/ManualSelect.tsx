@@ -174,7 +174,7 @@ export const ManualSelect = ({ eventObj }: any) => {
         setErrorFetchingGeometry(false);
         break;
       case 404:
-        const statusMessage = (await docImageResponse.json()).status;
+        const statusMessage = (await linesGeometryResponse.json()).status;
         if (statusMessage === "document does not exist on s3") {
           setErrorFetchingGeometry(true);
           noSuchKeyError(linesGeometryResponse.status);

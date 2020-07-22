@@ -281,7 +281,8 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
       logger.error(
         {
           docID,
-          docName,
+          docName: req.params.docName,
+          rawJSONDocName: rawJSONDocName,
           route: "/api/lines-geometry/",
           type: "GET",
           s3error: error,
