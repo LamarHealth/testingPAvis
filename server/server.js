@@ -93,7 +93,7 @@ router.post("/api/upload_status", (req, res) => {
           const parsedTextract = getKeyValues(data);
 
           // helper functions
-          const pinoUploadStatusErrorLogger = (error, msg) => {
+          const docErrorLogger = (msg, error = "") => {
             logger.error(
               {
                 docID,
@@ -130,7 +130,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                pinoUploadStatusErrorLogger(err, "rawJSON S3 upload error");
+                docErrorLogger("rawJSON S3 upload error", err);
               }
             });
 
@@ -142,7 +142,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                pinoUploadStatusErrorLogger(err, "parsedJSON s3 upload error");
+                docErrorLogger("parsedJSON s3 upload error", err);
               }
             });
           };
@@ -161,29 +161,29 @@ router.post("/api/upload_status", (req, res) => {
 
           const delayedUpload = (n, maxN) => {
             if (n > maxN) {
-              pinoUploadStatusErrorLogger(
-                `max tries error: ${n} tries`,
-                `throttling exception max tries exceeded after ${n} tries. request failed.`
+              docErrorLogger(
+                `Max tries error: ${n} tries`,
+                `Throttling exception max tries exceeded after ${n} tries. Request failed.`
               );
               sendError(
                 429,
-                "throttling exception, max trie exceeded. request failed."
+                "Throttling exception, max tries exceeded. request failed."
               );
             } else {
               textract.analyzeDocument(textractParams, (err, data) => {
                 if (err) {
                   if (err.code === "ThrottlingException") {
                     logger.info(
-                      `throttling exception detected. trying again x${n + 1}.`
+                      `Throttling exception detected. Trying again x${n + 1}.`
                     );
                     return setTimeout(
                       () => delayedUpload(n + 1, maxN),
                       Math.pow(2, n)
                     );
                   } else {
-                    pinoUploadStatusErrorLogger(
-                      err,
-                      "some other error after a throttling exception"
+                    docErrorLogger(
+                      "Some other error after a throttling exception",
+                      err
                     );
                     sendError(500, "internal server error");
                   }
@@ -197,10 +197,10 @@ router.post("/api/upload_status", (req, res) => {
 
           // handle errors
           if (err) {
-            pinoUploadStatusErrorLogger(err, "S3.upload error");
+            docErrorLogger("S3.upload error", err);
             // throttling exception
             if (err.code === "ThrottlingException") {
-              logger.info("s3 throttling exception detected. trying again.");
+              logger.info("S3 throttling exception detected. Trying again.");
               delayedUpload(1, 15);
             } else {
               sendError(400, "error");
@@ -212,9 +212,7 @@ router.post("/api/upload_status", (req, res) => {
         });
       });
     } else {
-      setTimeout(() => {
-        logger.error("Could not process document");
-      }, 2000);
+      logger.error("Could not process document. Multer error.", req.body);
     }
   });
 });

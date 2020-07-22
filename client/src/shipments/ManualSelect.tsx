@@ -17,6 +17,7 @@ import WrappedJssComponent from "./ShadowComponent";
 import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
+import { API_PATH } from "../common/constants";
 
 const ModalWrapper = styled.div`
   top: 25px;
@@ -114,9 +115,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // get image
     const docImageResponse: any = await fetch(
-      `${
-        process.env.REACT_APP_API_PATH
-      }/api/doc-image/${docID}/${encodeURIComponent(`
+      `${API_PATH}/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         method: "GET",
@@ -156,9 +155,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     // get geometry
     const linesGeometryResponse: any = await fetch(
-      `${
-        process.env.REACT_APP_API_PATH
-      }/api/lines-geometry/${docID}/${encodeURIComponent(`
+      `${API_PATH}/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
         method: "GET",

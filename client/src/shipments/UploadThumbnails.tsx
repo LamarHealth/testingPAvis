@@ -17,7 +17,7 @@ import Typography from "@material-ui/core/Typography";
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
-import { PAGE_SCALE } from "../common/constants";
+import { PAGE_SCALE, API_PATH } from "../common/constants";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -129,13 +129,10 @@ const FileStatus = (props: any) => {
     const formData = new FormData();
     formData.append("myfile", file);
     try {
-      const result = await fetch(
-        `${process.env.REACT_APP_API_PATH}/api/upload_status`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const result = await fetch(`${API_PATH}/api/upload_status`, {
+        method: "POST",
+        body: formData,
+      });
       // Status code cases
       switch (result.status) {
         case 200:
