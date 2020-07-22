@@ -93,7 +93,7 @@ router.post("/api/upload_status", (req, res) => {
           const parsedTextract = getKeyValues(data);
 
           // helper functions
-          const pinoUploadStatusErrorLogger = (error, msg) => {
+          const logError = (error, msg) => {
             logger.error(
               {
                 docID,
@@ -130,7 +130,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                pinoUploadStatusErrorLogger(err, "rawJSON S3 upload error");
+                logError(err, "rawJSON S3 upload error");
               }
             });
 
@@ -142,7 +142,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                pinoUploadStatusErrorLogger(err, "parsedJSON s3 upload error");
+                logError(err, "parsedJSON s3 upload error");
               }
             });
           };
@@ -161,7 +161,7 @@ router.post("/api/upload_status", (req, res) => {
 
           const delayedUpload = (n, maxN) => {
             if (n > maxN) {
-              pinoUploadStatusErrorLogger(
+              logError(
                 `max tries error: ${n} tries`,
                 `throttling exception max tries exceeded after ${n} tries. request failed.`
               );
@@ -181,7 +181,7 @@ router.post("/api/upload_status", (req, res) => {
                       Math.pow(2, n)
                     );
                   } else {
-                    pinoUploadStatusErrorLogger(
+                    logError(
                       err,
                       "some other error after a throttling exception"
                     );
@@ -197,7 +197,7 @@ router.post("/api/upload_status", (req, res) => {
 
           // handle errors
           if (err) {
-            pinoUploadStatusErrorLogger(err, "S3.upload error");
+            logError(err, "S3.upload error");
             // throttling exception
             if (err.code === "ThrottlingException") {
               logger.info("s3 throttling exception detected. trying again.");
