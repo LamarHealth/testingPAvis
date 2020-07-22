@@ -110,12 +110,6 @@ const TableRowComponent = (props: {
     props.eventObj.target.value = keyValue["value"];
     setMainModalOpen(false);
   };
-  const reportButtonHandler = () => {
-    setSoftCollapse(true);
-  };
-  const handleClickAway = () => {
-    setSoftCollapse(false);
-  };
   const removeKVPair = () => {
     deleteKeyValuePairFromDoc(
       globalSelectedFile,
@@ -161,7 +155,7 @@ const TableRowComponent = (props: {
         <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
           <FlexCell>
             <FillButton onClick={fillButtonHandler}>Fill</FillButton>
-            <IconButton onClick={reportButtonHandler}>
+            <IconButton onClick={() => setSoftCollapse(true)}>
               <HighlightOffIcon />
             </IconButton>
           </FlexCell>
@@ -169,7 +163,7 @@ const TableRowComponent = (props: {
         <ClickAwayListener
           mouseEvent="onMouseDown"
           touchEvent="onTouchStart"
-          onClickAway={handleClickAway}
+          onClickAway={() => setSoftCollapse(false)}
         >
           <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
             <Chip
