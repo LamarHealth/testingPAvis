@@ -14,6 +14,10 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
+import Collapse from "@material-ui/core/Collapse";
+import Chip from "@material-ui/core/Chip";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
 import { MODAL_WIDTH } from "../common/constants";
@@ -86,56 +90,80 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
-const TableBodyComponent = (props: {
-  sortedKeyValuePairs: KeyValuesWithDistance[];
+const TableRowComponent = (props: {
+  keyValue: any;
   eventObj: any;
   bestMatch: string;
+  i: number;
 }) => {
+  const keyValue = props.keyValue;
   const { setMainModalOpen } = useContext(ModalContext);
+  const [collapseOpen, setCollapseOpen] = useState(false);
+
+  const fillButtonHandler = () => {
+    props.eventObj.target.value = keyValue["value"];
+    setMainModalOpen(false);
+  };
+  const reportButtonHandler = () => {
+    setCollapseOpen(true);
+  };
+  const handleClickAway = () => {
+    setCollapseOpen(false);
+  };
+  const handleChipClick = () => {
+    console.log("hello");
+  };
 
   return (
-    <TableBody>
-      {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
-        const fillButtonHandler = () => {
-          props.eventObj.target.value = keyValue["value"];
-          setMainModalOpen(false);
-        };
-
-        return (
-          <TableRow
-            key={i}
-            className={
-              keyValue["key"] === props.bestMatch
-                ? "closest-match-row"
-                : "table-row"
-            }
-          >
-            <TableCell>
-              <LinearProgress
-                variant={"determinate"}
-                value={keyValue["distanceFromTarget"] * 100}
-              />
-              {keyValue["key"] === props.bestMatch && (
-                <ClosestMatch>
-                  <Typography>
-                    <i>closest match</i>
-                  </Typography>
-                </ClosestMatch>
-              )}
-            </TableCell>
-            <TableCell>
-              <Typography>{keyValue["key"]}</Typography>
-            </TableCell>
-            <TableCell>
-              <Typography>{keyValue["value"]}</Typography>
-            </TableCell>
-            <TableCell>
-              <FillButton onClick={fillButtonHandler}>Fill</FillButton>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
+    <TableRow
+      key={props.i}
+      className={
+        keyValue["key"] === props.bestMatch ? "closest-match-row" : "table-row"
+      }
+    >
+      <TableCell>
+        <LinearProgress
+          variant={"determinate"}
+          value={keyValue["distanceFromTarget"] * 100}
+        />
+        {keyValue["key"] === props.bestMatch && (
+          <ClosestMatch>
+            <Typography>
+              <i>closest match</i>
+            </Typography>
+          </ClosestMatch>
+        )}
+      </TableCell>
+      <TableCell>
+        <Typography>{keyValue["key"]}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{keyValue["value"]}</Typography>
+      </TableCell>
+      <TableCell>
+        <Collapse in={!collapseOpen}>
+          <FlexCell>
+            <FillButton onClick={fillButtonHandler}>Fill</FillButton>
+            <IconButton onClick={reportButtonHandler}>
+              <HighlightOffIcon />
+            </IconButton>
+          </FlexCell>
+        </Collapse>
+        <ClickAwayListener
+          mouseEvent="onMouseDown"
+          touchEvent="onTouchStart"
+          onClickAway={handleClickAway}
+        >
+          <Collapse in={collapseOpen}>
+            <Chip
+              label="Confirm Unrelated"
+              variant="outlined"
+              onClick={handleChipClick}
+            />
+          </Collapse>
+        </ClickAwayListener>
+      </TableCell>
+    </TableRow>
   );
 };
 
@@ -194,6 +222,11 @@ export const SelectModal = ({ eventObj }: any) => {
 
   const [sort, setSort] = useState("highest match");
 
+  const dynamicallySortedKeyValuePairs = sortKeyValuePairs(
+    sortedKeyValuePairs,
+    sort
+  );
+
   // match score sort
   const [matchArrow, setMatchArrow] = useState("highest match");
   const matchScoreSortHandler = () => {
@@ -248,11 +281,16 @@ export const SelectModal = ({ eventObj }: any) => {
         >
           <TableHeadComponent targetString={targetString} />
         </TableHeadContext.Provider>
-        <TableBodyComponent
-          sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
-          eventObj={eventObj}
-          bestMatch={bestMatch}
-        />
+        <TableBody>
+          {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+            <TableRowComponent
+              keyValue={keyValue}
+              eventObj={eventObj}
+              bestMatch={bestMatch}
+              i={i}
+            />
+          ))}
+        </TableBody>
       </Table>
     </ModalWrapper>
   );
