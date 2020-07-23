@@ -6,3 +6,6 @@ export const API_PATH =
   process.env.REACT_APP_LOCAL === "local"
     ? ""
     : "https://docit-web.herokuapp.com";
+export const ACC_SCORE_LARGE = 14;
+export const ACC_SCORE_MEDIUM = 10;
+export const ACC_SCORE_SMALL = 7;

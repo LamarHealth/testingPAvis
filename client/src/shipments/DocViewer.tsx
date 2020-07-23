@@ -24,6 +24,7 @@ import {
 } from "@hookstate/core";
 
 import ButtonsBox from "./ButtonsBox";
+import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -92,7 +93,7 @@ const DocCell = (props: DocumentInfo) => {
         (doc) => doc.docID === props.docID
       )[0];
 
-      $("input").each(function () {
+      $("input").each(function (inputEl) {
         const targetString = $(this).attr("placeholder");
 
         if (typeof targetString === "undefined") {
@@ -103,6 +104,10 @@ const DocCell = (props: DocumentInfo) => {
           keyValuePairs,
           targetString
         );
+
+        if (sortedKeyValuePairs[0].value !== "") {
+          renderAccuracyScore(this, sortedKeyValuePairs[0]);
+        }
 
         $(this).attr("value", sortedKeyValuePairs[0]["value"]);
       });
