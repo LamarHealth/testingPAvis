@@ -243,7 +243,7 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
       );
       switch (error.code) {
         case "NoSuchKey":
-          res.status(error.statusCode).send({
+          res.status(410).send({
             status: "document does not exist on s3",
             docID: req.params.docID,
             docName: req.params.docName,
@@ -291,7 +291,7 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
       );
       switch (error.code) {
         case "NoSuchKey":
-          res.status(error.statusCode).send({
+          res.status(410).send({
             status: "document does not exist on s3",
             docID: req.params.docID,
             docName: req.params.docName,

@@ -114,6 +114,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     switch (docImageResponse.status) {
       case 200:
+        setErrorFetchingImage(false);
         const blob = await docImageResponse.blob();
         const objectURL = await URL.createObjectURL(blob);
 
@@ -129,27 +130,14 @@ export const ManualSelect = ({ eventObj }: any) => {
             (window.innerWidth - this.naturalWidth) / 2;
         };
         setDocImageURL(urlObj);
-        setErrorFetchingImage(false);
         break;
-      case 404:
-        let statusMessage;
-        try {
-          // if unable to find endpoint, won't be able to read the body stream/will throw an error
-          statusMessage = (await docImageResponse.json()).status;
-        } catch {
-          setErrorFetchingImage(true);
-          setErrorCode(docImageResponse.status);
-          break;
-        }
-
-        if (statusMessage === "document does not exist on s3") {
-          setErrorFetchingImage(true);
-          setErrorMessage(
-            "document could not be found on the server. Try uploading the document and trying again."
-          );
-          setErrorCode(docImageResponse.status);
-          break;
-        }
+      case 410:
+        setErrorFetchingImage(true);
+        setErrorCode(docImageResponse.status);
+        setErrorMessage(
+          "document could not be found on the server. Try uploading the document and trying again."
+        );
+        break;
       default:
         setErrorFetchingImage(true);
         setErrorCode(docImageResponse.status);
@@ -166,6 +154,7 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     switch (linesGeometryResponse.status) {
       case 200:
+        setErrorFetchingGeometry(false);
         const linesGeometry = (
           await linesGeometryResponse.json()
         ).linesGeometry.map((lineGeometry: any) => {
@@ -173,27 +162,14 @@ export const ManualSelect = ({ eventObj }: any) => {
           return { ...lineGeometry, ID: uuidv() };
         });
         setCurrentLinesGeometry(linesGeometry);
-        setErrorFetchingGeometry(false);
         break;
-      case 404:
-        let statusMessage;
-        try {
-          // if unable to find endpoint, won't be able to read the body stream/will throw an error
-          statusMessage = (await linesGeometryResponse.json()).status;
-        } catch {
-          setErrorFetchingGeometry(true);
-          setErrorCode(linesGeometryResponse.status);
-          break;
-        }
-
-        if (statusMessage === "document does not exist on s3") {
-          setErrorFetchingGeometry(true);
-          setErrorMessage(
-            "document could not be found on the server. Try uploading the document and trying again."
-          );
-          setErrorCode(linesGeometryResponse.status);
-          break;
-        }
+      case 410:
+        setErrorFetchingGeometry(true);
+        setErrorCode(linesGeometryResponse.status);
+        setErrorMessage(
+          "document could not be found on the server. Try uploading the document and trying again."
+        );
+        break;
       default:
         setErrorFetchingGeometry(true);
         setErrorCode(linesGeometryResponse.status);
