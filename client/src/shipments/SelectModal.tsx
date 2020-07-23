@@ -192,11 +192,13 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
         );
         break;
     }
-    setTimeout(() => setMessageCollapse(false), 5000);
   };
 
+  // cleanup
   useEffect(() => {
     setHardCollapse(false);
+    const closeMessage = setTimeout(() => setMessageCollapse(false), 5000);
+    return () => clearTimeout(closeMessage);
   }, [hardCollapse]);
 
   return (
