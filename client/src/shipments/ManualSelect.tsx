@@ -9,15 +9,12 @@ import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
-import { ThemeProvider } from "@material-ui/core/styles";
 
-import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { KonvaModal } from "./KonvaModal";
-import { DEFAULT } from "./../common/themes";
 
 import uuidv from "uuid";
 import { API_PATH } from "../common/constants";
