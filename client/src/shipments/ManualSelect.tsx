@@ -43,6 +43,16 @@ const ErrorMessage = styled(Typography)`
   margin: 1em;
 `;
 
+const ErrorLine = (props: { errorCode: number; msg: string }) => {
+  return (
+    <ErrorMessage>
+      <i>
+        <strong>Error {props.errorCode}</strong>: {props.msg}
+      </i>
+    </ErrorMessage>
+  );
+};
+
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = ({ eventObj }: any) => {
@@ -57,7 +67,10 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
   const [errorFetchingImage, setErrorFetchingImage] = useState(false);
   const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("" as any);
+  const [errorMessage, setErrorMessage] = useState(
+    "unable to fetch resources from server. Try again later."
+  );
+  const [errorCode, setErrorCode] = useState(400);
 
   // modal
   const modalHandleClick = () => {
@@ -89,20 +102,6 @@ export const ManualSelect = ({ eventObj }: any) => {
     const docID = doc.docID;
 
     setCurrentDocID(docID);
-
-    // error handlers
-    const error = (
-      errorCode: number,
-      msg = "unable to fetch resources from server. Try again later."
-    ) => {
-      setErrorMessage(
-        <ErrorMessage>
-          <i>
-            <strong>Error {errorCode}</strong>: {msg}
-          </i>
-        </ErrorMessage>
-      );
-    };
 
     // get image
     const docImageResponse: any = await fetch(
@@ -139,21 +138,21 @@ export const ManualSelect = ({ eventObj }: any) => {
           statusMessage = (await docImageResponse.json()).status;
         } catch {
           setErrorFetchingImage(true);
-          error(docImageResponse.status);
+          setErrorCode(docImageResponse.status);
           break;
         }
 
         if (statusMessage === "document does not exist on s3") {
           setErrorFetchingImage(true);
-          error(
-            docImageResponse.status,
+          setErrorMessage(
             "document could not be found on the server. Try uploading the document and trying again."
           );
+          setErrorCode(docImageResponse.status);
           break;
         }
       default:
         setErrorFetchingImage(true);
-        error(docImageResponse.status);
+        setErrorCode(docImageResponse.status);
     }
 
     // get geometry
@@ -182,22 +181,22 @@ export const ManualSelect = ({ eventObj }: any) => {
           // if unable to find endpoint, won't be able to read the body stream/will throw an error
           statusMessage = (await linesGeometryResponse.json()).status;
         } catch {
-          setErrorFetchingImage(true);
-          error(linesGeometryResponse.status);
+          setErrorFetchingGeometry(true);
+          setErrorCode(linesGeometryResponse.status);
           break;
         }
 
         if (statusMessage === "document does not exist on s3") {
           setErrorFetchingGeometry(true);
-          error(
-            linesGeometryResponse.status,
+          setErrorMessage(
             "document could not be found on the server. Try uploading the document and trying again."
           );
+          setErrorCode(linesGeometryResponse.status);
           break;
         }
       default:
         setErrorFetchingGeometry(true);
-        error(linesGeometryResponse.status);
+        setErrorCode(linesGeometryResponse.status);
     }
   };
 
@@ -226,7 +225,9 @@ export const ManualSelect = ({ eventObj }: any) => {
       <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
         <Typography>Manual Select</Typography>
       </ManualSelectButton>
-      {(errorFetchingGeometry || errorFetchingImage) && errorMessage}
+      {(errorFetchingGeometry || errorFetchingImage) && (
+        <ErrorLine errorCode={errorCode} msg={errorMessage} />
+      )}
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
         <Modal
           id={id}

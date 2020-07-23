@@ -287,7 +287,7 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
           type: "GET",
           s3error: error,
         },
-        "error raw JSON file from S3"
+        "error getting raw JSON file from S3"
       );
       switch (error.code) {
         case "NoSuchKey":
