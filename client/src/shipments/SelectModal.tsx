@@ -95,7 +95,43 @@ const ErrorMessage = styled(Typography)`
   margin: 1em;
 `;
 
-const TableRowContext = createContext({} as any);
+const TableHeadContext = createContext({} as any);
+
+const TableHeadComponent = ({ targetString }: any) => {
+  const {
+    matchArrow,
+    matchScoreSortHandler,
+    alphabetArrow,
+    alphabeticSortHandler,
+  } = useContext(TableHeadContext);
+
+  return (
+    <TableHead>
+      <TableCell>
+        <FlexCell>
+          <Typography variant="subtitle1">Match Score</Typography>
+          <StyledIconButton onClick={matchScoreSortHandler}>
+            {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
+          </StyledIconButton>
+        </FlexCell>
+      </TableCell>
+      <TableCell>
+        <FlexCell>
+          <Typography variant="subtitle1">
+            Field Name: <i>{targetString}</i>
+          </Typography>
+          <StyledIconButton onClick={alphabeticSortHandler}>
+            {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
+          </StyledIconButton>
+        </FlexCell>
+      </TableCell>
+      <TableCell>
+        <Typography variant="subtitle1">Field Value</Typography>
+      </TableCell>
+      <TableCell />
+    </TableHead>
+  );
+};
 
 const TableRowComponent = (props: {
   keyValue: KeyValuesWithDistance;
@@ -111,7 +147,7 @@ const TableRowComponent = (props: {
     setDocData,
     setRemoveKVMessage,
     setCollapse,
-  } = useContext(TableRowContext);
+  } = useContext(TableContext);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
 
@@ -234,56 +270,10 @@ const TableRowComponent = (props: {
   );
 };
 
-const TableHeadContext = createContext({} as any);
+const TableContext = createContext({} as any);
 
-const TableHeadComponent = ({ targetString }: any) => {
-  const {
-    matchArrow,
-    matchScoreSortHandler,
-    alphabetArrow,
-    alphabeticSortHandler,
-  } = useContext(TableHeadContext);
-
-  return (
-    <TableHead>
-      <TableCell>
-        <FlexCell>
-          <Typography variant="subtitle1">Match Score</Typography>
-          <StyledIconButton onClick={matchScoreSortHandler}>
-            {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
-          </StyledIconButton>
-        </FlexCell>
-      </TableCell>
-      <TableCell>
-        <FlexCell>
-          <Typography variant="subtitle1">
-            Field Name: <i>{targetString}</i>
-          </Typography>
-          <StyledIconButton onClick={alphabeticSortHandler}>
-            {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
-          </StyledIconButton>
-        </FlexCell>
-      </TableCell>
-      <TableCell>
-        <Typography variant="subtitle1">Field Value</Typography>
-      </TableCell>
-      <TableCell />
-    </TableHead>
-  );
-};
-
-export const SelectModal = ({ eventObj }: any) => {
-  const targetString = eventObj.target.placeholder;
-
-  const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
-  const [collapse, setCollapse] = useState(false);
-
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
-  )[0];
-
+const TableComponent = () => {
+  const { targetString, selectedDocData, eventObj } = useContext(TableContext);
   const sortedKeyValuePairs = getLevenDistanceAndSort(
     selectedDocData,
     targetString
@@ -321,6 +311,47 @@ export const SelectModal = ({ eventObj }: any) => {
     }
   };
 
+  return (
+    <Table>
+      <TableHeadContext.Provider
+        value={{
+          matchArrow,
+          matchScoreSortHandler,
+          alphabetArrow,
+          alphabeticSortHandler,
+        }}
+      >
+        <TableHeadComponent targetString={targetString} />
+      </TableHeadContext.Provider>
+      <TableBody>
+        {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+          <TableRowComponent
+            keyValue={keyValue}
+            eventObj={eventObj}
+            bestMatch={bestMatch}
+            i={i}
+          />
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
+
+export const SelectModal = ({ eventObj }: any) => {
+  const targetString = eventObj.target.placeholder;
+
+  const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
+  const [collapse, setCollapse] = useState(false);
+
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
+  const selectedDocData = docData.filter(
+    (doc) => doc.docID === globalSelectedFile.get()
+  )[0];
+
+  const areThereKVPairs =
+    Object.keys(selectedDocData.keyValuePairs).length > 0 ? true : false;
+
   // rewriting pesky styles that penetrate the shadow DOM
   const rewriteStyles = () => {
     const popoverEl = document.getElementById("docit-main-modal");
@@ -341,37 +372,27 @@ export const SelectModal = ({ eventObj }: any) => {
     <ModalWrapper>
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Collapse in={collapse}>{removeKVMessage}</Collapse>
-      <Table>
-        <TableHeadContext.Provider
+      {areThereKVPairs ? (
+        <TableContext.Provider
           value={{
-            matchArrow,
-            matchScoreSortHandler,
-            alphabetArrow,
-            alphabeticSortHandler,
+            targetString,
+            selectedDocData,
+            setDocData,
+            setRemoveKVMessage,
+            setCollapse,
+            eventObj,
           }}
         >
-          <TableHeadComponent targetString={targetString} />
-        </TableHeadContext.Provider>
-        <TableBody>
-          <TableRowContext.Provider
-            value={{
-              selectedDocData,
-              setDocData,
-              setRemoveKVMessage,
-              setCollapse,
-            }}
-          >
-            {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
-              <TableRowComponent
-                keyValue={keyValue}
-                eventObj={eventObj}
-                bestMatch={bestMatch}
-                i={i}
-              />
-            ))}
-          </TableRowContext.Provider>
-        </TableBody>
-      </Table>
+          <TableComponent />
+        </TableContext.Provider>
+      ) : (
+        <ErrorMessage>
+          <i>
+            The selected document doesn't have any key / value pairs. Try using
+            Manual Select.
+          </i>
+        </ErrorMessage>
+      )}
     </ModalWrapper>
   );
 };
