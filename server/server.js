@@ -328,7 +328,7 @@ router.post("/api/remove-kv-pair/:docID/:docName", (req, res) => {
   const docName = req.params.docName.trim();
   const faultyKVPair = req.body;
 
-  console.log("faultyKVPair, ", faultyKVPair);
+  logger.info({ docID, docName, faultyKVPair }, "Faulty KV pair received.");
 
   res.json({
     status: "complete",
