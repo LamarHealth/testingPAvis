@@ -94,13 +94,12 @@ export const ManualSelect = ({ eventObj }: any) => {
     // error handlers
     const error = (
       errorCode: number,
-      msg = ": unable to fetch resources from server. Try again later."
+      msg = "unable to fetch resources from server. Try again later."
     ) => {
       setErrorMessage(
         <ErrorMessage>
           <i>
-            <strong>Error {errorCode}</strong>
-            {msg}
+            <strong>Error {errorCode}</strong>: {msg}
           </i>
         </ErrorMessage>
       );
@@ -149,7 +148,7 @@ export const ManualSelect = ({ eventObj }: any) => {
           setErrorFetchingImage(true);
           error(
             docImageResponse.status,
-            ": document could not be found on the server. Try uploading the document and trying again."
+            "document could not be found on the server. Try uploading the document and trying again."
           );
           break;
         }
@@ -193,7 +192,7 @@ export const ManualSelect = ({ eventObj }: any) => {
           setErrorFetchingGeometry(true);
           error(
             linesGeometryResponse.status,
-            ": document could not be found on the server. Try uploading the document and trying again."
+            "document could not be found on the server. Try uploading the document and trying again."
           );
           break;
         }
