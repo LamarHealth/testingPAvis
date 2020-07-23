@@ -32,6 +32,7 @@ import {
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
   top: 100px;
@@ -92,10 +93,6 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
-const ErrorMessage = styled(Typography)`
-  margin: 1em;
-`;
-
 const TableHeadContext = createContext({} as any);
 
 const TableHeadComponent = ({ targetString }: any) => {
@@ -142,6 +139,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     setRemoveKVMessage,
     setCollapse,
     eventObj,
+    targetString,
   } = useContext(TableContext);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
@@ -176,38 +174,28 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
         headers: { "Content-Type": "application/json" },
         method: "POST",
         body: JSON.stringify({
+          targetString,
           key: keyValue["key"],
           value: keyValue["value"],
         }),
       }
     );
 
+    // set message
+    setCollapse(true);
     switch (result.status) {
-      case 200:
+      case 204:
         setRemoveKVMessage(
-          <ErrorMessage>
-            <i>
-              Your note has been received. We have flagged this key / value pair
-              as faulty and will work to be more accurate in the future.
-            </i>
-          </ErrorMessage>
+          "Your note has been received. We have flagged this key / value pair as faulty and will work to be more accurate in the future."
         );
-        setCollapse(true);
-        setTimeout(() => setCollapse(false), 5000);
         break;
       default:
         setRemoveKVMessage(
-          <ErrorMessage>
-            <i>
-              The faulty key / value pair has been removed from your browser,
-              but we are unable to pass this note on to the server at this time.
-            </i>
-          </ErrorMessage>
+          "The faulty key / value pair has been removed from your browser, but we are unable to pass this note on to the server at this time."
         );
-        setCollapse(true);
-        setTimeout(() => setCollapse(false), 5000);
         break;
     }
+    setTimeout(() => setCollapse(false), 5000);
   };
 
   useEffect(() => {
@@ -343,6 +331,14 @@ const TableComponent = () => {
   );
 };
 
+const Message = ({ msg }: any) => {
+  return (
+    <ErrorMessage>
+      <i>{msg}</i>
+    </ErrorMessage>
+  );
+};
+
 export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
 
@@ -361,7 +357,9 @@ export const SelectModal = ({ eventObj }: any) => {
   return (
     <ModalWrapper>
       <ManualSelect eventObj={eventObj}></ManualSelect>
-      <Collapse in={collapse}>{removeKVMessage}</Collapse>
+      <Collapse in={collapse}>
+        <Message msg={removeKVMessage} />
+      </Collapse>
       {areThereKVPairs ? (
         <TableContext.Provider
           value={{
@@ -376,12 +374,11 @@ export const SelectModal = ({ eventObj }: any) => {
           <TableComponent />
         </TableContext.Provider>
       ) : (
-        <ErrorMessage>
-          <i>
-            The selected document doesn't have any key / value pairs. Try using
-            Manual Select.
-          </i>
-        </ErrorMessage>
+        <Message
+          msg={
+            "The selected document doesn't have any key / value pairs. Try using Manual Select."
+          }
+        />
       )}
     </ModalWrapper>
   );

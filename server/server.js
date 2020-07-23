@@ -330,7 +330,7 @@ router.post("/api/remove-kv-pair/:docID/:docName", (req, res) => {
 
   logger.info({ docID, docName, faultyKVPair }, "Faulty KV pair received.");
 
-  res.json({
+  res.status(204).json({
     status: "complete",
     docID,
     docName,
