@@ -31,6 +31,7 @@ import {
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
+import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 const ModalWrapper = styled.div`
   top: 100px;
@@ -149,6 +150,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const fillButtonHandler = () => {
     eventObj.target.value = keyValue["value"];
     setMainModalOpen(false);
+    renderAccuracyScore(eventObj.target, keyValue);
   };
   const removeKVPair = async () => {
     deleteKVPairFromLocalStorage(

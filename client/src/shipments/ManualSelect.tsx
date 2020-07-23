@@ -11,12 +11,14 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
+import { ThemeProvider } from "@material-ui/core/styles";
 
 import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";
+import { DEFAULT } from "./../common/themes";
 
 import uuidv from "uuid";
 
@@ -268,42 +270,44 @@ export const ManualSelect = ({ eventObj }: any) => {
           }}
         >
           <Fade in={manualSelectModalOpen}>
-            <WrappedJssComponent>
-              <ModalWrapper
-                style={{
-                  left: `${docImageURL.overlayPositionOffset}px`,
-                }}
-              >
-                <Header
-                  docImageURL={docImageURL}
-                  currentSelection={currentSelection}
-                />
-                <Stage width={docImageURL.width} height={docImageURL.height}>
-                  <Layer>
-                    <KonvaImage image={image} />
-                    <CurrentSelectionContext.Provider
-                      value={{
-                        filled,
-                        setFilled,
-                        setCurrentSelection,
-                      }}
-                    >
-                      {currentLinesGeometry.map(
-                        (lineGeometry: any, ndx: number) => {
-                          return (
-                            <Polygon
-                              key={ndx}
-                              lineGeometry={lineGeometry}
-                              docImageURL={docImageURL}
-                            />
-                          );
-                        }
-                      )}
-                    </CurrentSelectionContext.Provider>
-                  </Layer>
-                </Stage>
-              </ModalWrapper>
-            </WrappedJssComponent>
+            <ThemeProvider theme={DEFAULT}>
+              <WrappedJssComponent>
+                <ModalWrapper
+                  style={{
+                    left: `${docImageURL.overlayPositionOffset}px`,
+                  }}
+                >
+                  <Header
+                    docImageURL={docImageURL}
+                    currentSelection={currentSelection}
+                  />
+                  <Stage width={docImageURL.width} height={docImageURL.height}>
+                    <Layer>
+                      <KonvaImage image={image} />
+                      <CurrentSelectionContext.Provider
+                        value={{
+                          filled,
+                          setFilled,
+                          setCurrentSelection,
+                        }}
+                      >
+                        {currentLinesGeometry.map(
+                          (lineGeometry: any, ndx: number) => {
+                            return (
+                              <Polygon
+                                key={ndx}
+                                lineGeometry={lineGeometry}
+                                docImageURL={docImageURL}
+                              />
+                            );
+                          }
+                        )}
+                      </CurrentSelectionContext.Provider>
+                    </Layer>
+                  </Stage>
+                </ModalWrapper>
+              </WrappedJssComponent>
+            </ThemeProvider>
           </Fade>
         </Modal>
       )}
