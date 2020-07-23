@@ -1,26 +1,23 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
-import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 
 import styled from "styled-components";
 
 import Modal from "@material-ui/core/Modal";
-import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
-import { ThemeProvider } from "@material-ui/core/styles";
 
-import { colors } from "./../common/colors";
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";
-import { DEFAULT } from "./../common/themes";
+import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
+import { API_PATH } from "../common/constants";
 
 const ModalWrapper = styled.div`
   top: 25px;
@@ -42,111 +39,21 @@ const ManualSelectButton = styled.button`
   }
 `;
 
-const CurrentSelectionWrapper = styled.div`
-  padding: 1em 2em;
-  background-color: ${colors.MANUAL_SELECT_HEADER};
-  box-sizing: border-box;
+const ErrorMessage = styled(Typography)`
+  margin: 1em;
 `;
 
-const CurrentSelection = styled(Typography)`
-  margin: 0;
-  background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
-  padding: 1em;
-  border-radius: 5px;
-  border: 0.5px solid ${colors.FONT_BLUE};
-`;
-
-const Polygon = ({ lineGeometry, docImageURL }: any) => {
-  const [color, setColor] = useState("transparent");
-  const { filled, setFilled, setCurrentSelection } = useContext(
-    CurrentSelectionContext
-  );
-  const isFilled = filled[lineGeometry.ID] ? true : false;
-
-  const fillAndSetCurrentSelection = () => {
-    if (!isFilled) {
-      setCurrentSelection((prevCurrentSelection: any) => {
-        return {
-          ...prevCurrentSelection,
-          [lineGeometry.ID]: lineGeometry.Text,
-        };
-      });
-      setFilled((otherFilleds: any) => {
-        return {
-          ...otherFilleds,
-          [lineGeometry.ID]: true,
-        };
-      });
-    }
-    if (isFilled) {
-      setCurrentSelection((prevCurrentSelection: any) => {
-        delete prevCurrentSelection[lineGeometry.ID];
-        return { ...prevCurrentSelection };
-      });
-      setFilled((otherFilleds: any) => {
-        return {
-          ...otherFilleds,
-          [lineGeometry.ID]: false,
-        };
-      });
-    }
-  };
-
+const ErrorLine = (props: { errorCode: number; msg: string }) => {
   return (
-    <Line
-      onClick={fillAndSetCurrentSelection}
-      onMouseEnter={() => {
-        setColor(colors.MANUAL_SELECT_RECT_FILL);
-      }}
-      onMouseLeave={() => {
-        setColor("transparent");
-      }}
-      points={Array.prototype.concat.apply(
-        [],
-        lineGeometry.Coordinates.map((geometry: any) => [
-          docImageURL.width * geometry.X,
-          docImageURL.height * geometry.Y,
-        ])
-      )}
-      closed
-      fill={isFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
-      stroke={colors.MANUAL_SELECT_RECT_STROKE}
-    />
+    <ErrorMessage>
+      <i>
+        <strong>Error {props.errorCode}</strong>: {props.msg}
+      </i>
+    </ErrorMessage>
   );
 };
 
-const CurrentSelectionContext = createContext({} as any);
-
-const Header = ({ docImageURL, currentSelection }: any) => {
-  return (
-    <CurrentSelectionWrapper
-      style={{
-        width: `${docImageURL.width}px`,
-      }}
-    >
-      <Typography>
-        <Box fontStyle="italic">
-          <b>Click</b> to select a line; <b>Click</b> again to unselect; press{" "}
-          <b>Return</b> key to fill.
-        </Box>
-      </Typography>
-      {Object.keys(currentSelection).length > 0 && (
-        <div>
-          <Typography>
-            <Box fontStyle="fontWeightBold">
-              <strong>Current Selection:</strong>
-            </Box>
-          </Typography>
-          <CurrentSelection>
-            {Object.keys(currentSelection).map(
-              (key) => currentSelection[key] + " "
-            )}
-          </CurrentSelection>
-        </div>
-      )}
-    </CurrentSelectionWrapper>
-  );
-};
+export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = ({ eventObj }: any) => {
   const [docImageURL, setDocImageURL] = useState({} as any);
@@ -158,10 +65,21 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [filled, setFilled] = useState({} as any);
   const { setMainModalOpen } = useContext(ModalContext);
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
+  const [errorFetchingImage, setErrorFetchingImage] = useState(false);
+  const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(
+    "unable to fetch resources from server. Try again later."
+  );
+  const [errorCode, setErrorCode] = useState(400);
 
   // modal
   const modalHandleClick = () => {
-    if (currentDocID === "" || currentDocID !== globalSelectedFile.get()) {
+    if (
+      currentDocID === "" ||
+      currentDocID !== globalSelectedFile.get() ||
+      errorFetchingImage ||
+      errorFetchingGeometry
+    ) {
       getImageAndGeometryFromServer(selectedDocData).then(() =>
         setManualSelectModalOpen(true)
       );
@@ -185,51 +103,75 @@ export const ManualSelect = ({ eventObj }: any) => {
 
     setCurrentDocID(docID);
 
+    // get image
     const docImageResponse: any = await fetch(
-      `${
-        process.env.REACT_APP_API_PATH
-      }/api/doc-image/${docID}/${encodeURIComponent(`
+      `${API_PATH}/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         method: "GET",
       }
     );
 
-    const blob = await docImageResponse.blob();
-    const objectURL = await URL.createObjectURL(blob);
+    switch (docImageResponse.status) {
+      case 200:
+        setErrorFetchingImage(false);
+        const blob = await docImageResponse.blob();
+        const objectURL = await URL.createObjectURL(blob);
 
-    const img = new Image();
-    img.src = objectURL;
-    let urlObj: any = {
-      url: objectURL,
-    };
-    img.onload = function (this: any) {
-      urlObj["width"] = this.naturalWidth;
-      urlObj["height"] = this.naturalHeight;
-      urlObj["overlayPositionOffset"] =
-        (window.innerWidth - this.naturalWidth) / 2;
-    };
+        const img = new Image();
+        img.src = objectURL;
+        let urlObj: any = {
+          url: objectURL,
+        };
+        img.onload = function (this: any) {
+          urlObj["width"] = this.naturalWidth;
+          urlObj["height"] = this.naturalHeight;
+          urlObj["overlayPositionOffset"] =
+            (window.innerWidth - this.naturalWidth) / 2;
+        };
+        setDocImageURL(urlObj);
+        break;
+      case 410:
+        setErrorFetchingImage(true);
+        setErrorCode(docImageResponse.status);
+        const statusMessage = (await docImageResponse.json()).status;
+        setErrorMessage(statusMessage);
+        break;
+      default:
+        setErrorFetchingImage(true);
+        setErrorCode(docImageResponse.status);
+    }
 
-    setDocImageURL(urlObj);
-
+    // get geometry
     const linesGeometryResponse: any = await fetch(
-      `${
-        process.env.REACT_APP_API_PATH
-      }/api/lines-geometry/${docID}/${encodeURIComponent(`
+      `${API_PATH}/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
         method: "GET",
       }
     );
 
-    const linesGeometry = (
-      await linesGeometryResponse.json()
-    ).linesGeometry.map((lineGeometry: any) => {
-      //@ts-ignore
-      return { ...lineGeometry, ID: uuidv() };
-    });
-
-    setCurrentLinesGeometry(linesGeometry);
+    switch (linesGeometryResponse.status) {
+      case 200:
+        setErrorFetchingGeometry(false);
+        const linesGeometry = (
+          await linesGeometryResponse.json()
+        ).linesGeometry.map((lineGeometry: any) => {
+          //@ts-ignore
+          return { ...lineGeometry, ID: uuidv() };
+        });
+        setCurrentLinesGeometry(linesGeometry);
+        break;
+      case 410:
+        setErrorFetchingGeometry(true);
+        setErrorCode(linesGeometryResponse.status);
+        const statusMessage = (await linesGeometryResponse.json()).status;
+        setErrorMessage(statusMessage);
+        break;
+      default:
+        setErrorFetchingGeometry(true);
+        setErrorCode(linesGeometryResponse.status);
+    }
   };
 
   // return key listener
@@ -257,7 +199,10 @@ export const ManualSelect = ({ eventObj }: any) => {
       <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
         <Typography>Manual Select</Typography>
       </ManualSelectButton>
-      {isDocImageSet && (
+      {(errorFetchingGeometry || errorFetchingImage) && (
+        <ErrorLine errorCode={errorCode} msg={errorMessage} />
+      )}
+      {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
         <Modal
           id={id}
           open={manualSelectModalOpen}
@@ -270,44 +215,27 @@ export const ManualSelect = ({ eventObj }: any) => {
           }}
         >
           <Fade in={manualSelectModalOpen}>
-            <ThemeProvider theme={DEFAULT}>
-              <WrappedJssComponent>
-                <ModalWrapper
-                  style={{
-                    left: `${docImageURL.overlayPositionOffset}px`,
+            <WrappedJssComponent>
+              <ModalWrapper
+                style={{
+                  left: `${docImageURL.overlayPositionOffset}px`,
+                }}
+              >
+                <KonvaModalContext.Provider
+                  value={{
+                    docImageURL,
+                    currentSelection,
+                    image,
+                    filled,
+                    setFilled,
+                    setCurrentSelection,
+                    currentLinesGeometry,
                   }}
                 >
-                  <Header
-                    docImageURL={docImageURL}
-                    currentSelection={currentSelection}
-                  />
-                  <Stage width={docImageURL.width} height={docImageURL.height}>
-                    <Layer>
-                      <KonvaImage image={image} />
-                      <CurrentSelectionContext.Provider
-                        value={{
-                          filled,
-                          setFilled,
-                          setCurrentSelection,
-                        }}
-                      >
-                        {currentLinesGeometry.map(
-                          (lineGeometry: any, ndx: number) => {
-                            return (
-                              <Polygon
-                                key={ndx}
-                                lineGeometry={lineGeometry}
-                                docImageURL={docImageURL}
-                              />
-                            );
-                          }
-                        )}
-                      </CurrentSelectionContext.Provider>
-                    </Layer>
-                  </Stage>
-                </ModalWrapper>
-              </WrappedJssComponent>
-            </ThemeProvider>
+                  <KonvaModal />
+                </KonvaModalContext.Provider>
+              </ModalWrapper>
+            </WrappedJssComponent>
           </Fade>
         </Modal>
       )}

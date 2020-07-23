@@ -2,7 +2,7 @@ import { getEditDistance } from "./LevenshteinField";
 import { globalSelectedFileState } from "./DocViewer";
 
 ///// INTERFACES /////
-// interface returned from getAllKeyValuePairs()
+// interface returned from getAllKeyValuePairs() .
 export interface KeyValues {
   [key: string]: string; //e.g. "Date": "7/5/2015"
 }

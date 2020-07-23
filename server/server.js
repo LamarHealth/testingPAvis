@@ -16,6 +16,8 @@ import multer from "multer";
 import AWS, { Textract, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
 import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
+const pino = require("pino");
+const expressPino = require("express-pino-logger");
 
 // Routes
 // AWS
@@ -28,6 +30,16 @@ AWS.config.update({
 });
 
 const app = express();
+
+// pino logging
+const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  prettyPrint: process.env.PINO_PRETTY === "true" ? true : false,
+});
+const expressLogger = expressPino({ logger });
+
+// can disable this if don't want every request/response logged to console
+app.use(expressLogger);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -81,6 +93,19 @@ router.post("/api/upload_status", (req, res) => {
           const parsedTextract = getKeyValues(data);
 
           // helper functions
+          const logError = (msg, error = "") => {
+            logger.error(
+              {
+                docID,
+                pngifiedDocName,
+                route: "/api/upload_status/",
+                type: "POST",
+                error: error,
+              },
+              msg
+            );
+          };
+
           const sendSuccessfulResponse = () => {
             res.json({
               status: "complete",
@@ -105,7 +130,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                console.log("rawJSON s3 upload error: ", err);
+                logError("rawJSON S3 upload error", err);
               }
             });
 
@@ -117,7 +142,7 @@ router.post("/api/upload_status", (req, res) => {
 
             s3.upload(s3params, (err, data) => {
               if (err) {
-                console.log("parsedJSON s3 upload error: ", err);
+                logError("parsedJSON s3 upload error", err);
               }
             });
           };
@@ -136,29 +161,34 @@ router.post("/api/upload_status", (req, res) => {
 
           const delayedUpload = (n, maxN) => {
             if (n > maxN) {
-              console.log(
-                `throttling exception max timeout exceeded after ${n} tries. request failed.`
+              logError(
+                `Max tries error: ${n} tries`,
+                `Throttling exception max tries exceeded after ${n} tries. Request failed.`
               );
               sendError(
                 429,
-                "throttling exception, max timeout exceeded. request failed."
+                "Throttling exception, max tries exceeded. request failed."
               );
             } else {
               textract.analyzeDocument(textractParams, (err, data) => {
                 if (err) {
                   if (err.code === "ThrottlingException") {
-                    console.log(
-                      `throttling exception detected. trying again x${n + 1}.`
+                    logger.info(
+                      `Throttling exception detected. Trying again x${n + 1}.`
                     );
                     return setTimeout(
                       () => delayedUpload(n + 1, maxN),
                       Math.pow(2, n)
                     );
                   } else {
+                    logError(
+                      "Some other error after a throttling exception",
+                      err
+                    );
                     sendError(500, "internal server error");
                   }
                 } else {
-                  console.log(`throttling exception resolved after ${n} tries`);
+                  logger.info(`throttling exception resolved after ${n} tries`);
                   sendSuccessfulResponse();
                 }
               });
@@ -167,10 +197,10 @@ router.post("/api/upload_status", (req, res) => {
 
           // handle errors
           if (err) {
-            console.log("s3.upload error: ", err);
+            logError("S3.upload error", err);
             // throttling exception
             if (err.code === "ThrottlingException") {
-              console.log("s3 throttling exception detected. trying again.");
+              logger.info("S3 throttling exception detected. Trying again.");
               delayedUpload(1, 15);
             } else {
               sendError(400, "error");
@@ -182,9 +212,7 @@ router.post("/api/upload_status", (req, res) => {
         });
       });
     } else {
-      setTimeout(() => {
-        res.console.error("Could not process document");
-      }, 2000);
+      logger.error("Could not process document. Multer error.", req.body);
     }
   });
 });
@@ -203,13 +231,32 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 
   s3.getObject(s3GetParams, (error, data) => {
     if (error) {
-      console.error("error getting doc image from S3: ", error);
-      res.status(400).send({
-        status: "error",
-        docID: req.params.docID,
-        docName: req.params.docName,
-        rawJSONDocName: rawJSONDocName,
-      });
+      logger.error(
+        {
+          docID,
+          docName,
+          route: "/api/doc-image/",
+          type: "GET",
+          s3error: error,
+        },
+        "error getting doc image from S3"
+      );
+      switch (error.code) {
+        case "NoSuchKey":
+          res.status(410).send({
+            status:
+              "Document could not be found on the server. Please try re-uploading your document and trying again.",
+            docID: req.params.docID,
+            docName: req.params.docName,
+          });
+          break;
+        default:
+          res.status(400).send({
+            status: "error",
+            docID: req.params.docID,
+            docName: req.params.docName,
+          });
+      }
     } else {
       const justTheData = data.Body;
 
@@ -232,13 +279,35 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
 
   s3.getObject(s3rawJSONParams, (error, data) => {
     if (error) {
-      console.log("error getting raw JSON file from S3: ", error);
-      res.status(400).send({
-        status: "error",
-        docID: req.params.docID,
-        docName: req.params.docName,
-        rawJSONDocName: rawJSONDocName,
-      });
+      logger.error(
+        {
+          docID,
+          docName: req.params.docName,
+          rawJSONDocName: rawJSONDocName,
+          route: "/api/lines-geometry/",
+          type: "GET",
+          s3error: error,
+        },
+        "error getting raw JSON file from S3"
+      );
+      switch (error.code) {
+        case "NoSuchKey":
+          res.status(410).send({
+            status:
+              "Document could not be found on the server. Please try re-uploading your document and trying again.",
+            docID: req.params.docID,
+            docName: req.params.docName,
+            rawJSONDocName: rawJSONDocName,
+          });
+          break;
+        default:
+          res.status(400).send({
+            status: "error",
+            docID: req.params.docID,
+            docName: req.params.docName,
+            rawJSONDocName: rawJSONDocName,
+          });
+      }
     } else {
       const rawJSON = JSON.parse(data.Body);
       const parsedLinesGeometry = getLinesGeometry(rawJSON);
@@ -276,7 +345,7 @@ router.get("/api/hello", (req, res) => {
 router.post("/api/timedpost", (req, res) => {
   let waitedResponse;
   setTimeout(() => {
-    console.log("sdflsjkdfjkls");
+    logger.info("sdflsjkdfjkls");
     // waitedResponse = { express: "Hello From Express" + `File: ${req.name}` };
     res.json({ express: "Hello From Express" + `File: ${req.name}` });
   }, 3000);
@@ -290,5 +359,5 @@ app.use("/*", staticFiles);
 
 app.set("port", process.env.PORT || 3001);
 app.listen(app.get("port"), () => {
-  console.log(`Listening on ${app.get("port")}`);
+  logger.info(`Listening on ${app.get("port")}`);
 });
