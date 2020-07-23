@@ -11,19 +11,13 @@ import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import { ThemeProvider } from "@material-ui/core/styles";
 
-<<<<<<< HEAD
-=======
 import { colors } from "./../common/colors";
->>>>>>> master
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";
-<<<<<<< HEAD
 import { KonvaModal } from "./KonvaModal";
-=======
 import { DEFAULT } from "./../common/themes";
->>>>>>> master
 
 import uuidv from "uuid";
 import { API_PATH } from "../common/constants";
