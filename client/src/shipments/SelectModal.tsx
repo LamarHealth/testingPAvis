@@ -133,26 +133,22 @@ const TableHeadComponent = ({ targetString }: any) => {
   );
 };
 
-const TableRowComponent = (props: {
-  keyValue: KeyValuesWithDistance;
-  eventObj: any;
-  bestMatch: string;
-  i: number;
-}) => {
-  const keyValue = props.keyValue;
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const { setMainModalOpen } = useContext(ModalContext);
   const {
     selectedDocData,
     setDocData,
     setRemoveKVMessage,
     setCollapse,
+    eventObj,
   } = useContext(TableContext);
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
+  const keyValue = props.keyValue;
 
   const fillButtonHandler = () => {
-    props.eventObj.target.value = keyValue["value"];
+    eventObj.target.value = keyValue["value"];
     setMainModalOpen(false);
   };
   const removeKVPair = async () => {
@@ -218,6 +214,40 @@ const TableRowComponent = (props: {
   }, [hardCollapse]);
 
   return (
+    <>
+      <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
+        <FlexCell>
+          <FillButton onClick={fillButtonHandler}>Fill</FillButton>
+          <IconButton onClick={() => setSoftCollapse(true)}>
+            <HighlightOffIcon />
+          </IconButton>
+        </FlexCell>
+      </Collapse>
+      <ClickAwayListener
+        mouseEvent="onMouseDown"
+        touchEvent="onTouchStart"
+        onClickAway={() => setSoftCollapse(false)}
+      >
+        <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
+          <Chip
+            label="Confirm Unrelated"
+            variant="outlined"
+            onClick={removeKVPair}
+          />
+        </Collapse>
+      </ClickAwayListener>
+    </>
+  );
+};
+
+const TableRowComponent = (props: {
+  keyValue: KeyValuesWithDistance;
+  bestMatch: string;
+  i: number;
+}) => {
+  const keyValue = props.keyValue;
+
+  return (
     <TableRow
       key={props.i}
       className={
@@ -244,27 +274,7 @@ const TableRowComponent = (props: {
         <Typography>{keyValue["value"]}</Typography>
       </TableCell>
       <TableCell>
-        <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
-          <FlexCell>
-            <FillButton onClick={fillButtonHandler}>Fill</FillButton>
-            <IconButton onClick={() => setSoftCollapse(true)}>
-              <HighlightOffIcon />
-            </IconButton>
-          </FlexCell>
-        </Collapse>
-        <ClickAwayListener
-          mouseEvent="onMouseDown"
-          touchEvent="onTouchStart"
-          onClickAway={() => setSoftCollapse(false)}
-        >
-          <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
-            <Chip
-              label="Confirm Unrelated"
-              variant="outlined"
-              onClick={removeKVPair}
-            />
-          </Collapse>
-        </ClickAwayListener>
+        <ButtonsCell keyValue={keyValue} />
       </TableCell>
     </TableRow>
   );
@@ -273,7 +283,7 @@ const TableRowComponent = (props: {
 const TableContext = createContext({} as any);
 
 const TableComponent = () => {
-  const { targetString, selectedDocData, eventObj } = useContext(TableContext);
+  const { targetString, selectedDocData } = useContext(TableContext);
   const sortedKeyValuePairs = getLevenDistanceAndSort(
     selectedDocData,
     targetString
@@ -325,12 +335,7 @@ const TableComponent = () => {
       </TableHeadContext.Provider>
       <TableBody>
         {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
-          <TableRowComponent
-            keyValue={keyValue}
-            eventObj={eventObj}
-            bestMatch={bestMatch}
-            i={i}
-          />
+          <TableRowComponent keyValue={keyValue} bestMatch={bestMatch} i={i} />
         ))}
       </TableBody>
     </Table>
@@ -351,22 +356,6 @@ export const SelectModal = ({ eventObj }: any) => {
 
   const areThereKVPairs =
     Object.keys(selectedDocData.keyValuePairs).length > 0 ? true : false;
-
-  // rewriting pesky styles that penetrate the shadow DOM
-  const rewriteStyles = () => {
-    const popoverEl = document.getElementById("docit-main-modal");
-    const shadowRoot = popoverEl?.children[2].shadowRoot;
-    const newStyles = document.createElement("style");
-    newStyles.innerHTML = `
-      :host * {
-        font-family: Roboto, Helvetica, Arial, sans-serif;
-      }
-    `;
-    newStyles.type = "text/css";
-    shadowRoot?.appendChild(newStyles);
-  };
-
-  useEffect(() => rewriteStyles(), []);
 
   return (
     <ModalWrapper>
