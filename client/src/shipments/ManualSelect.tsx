@@ -134,9 +134,8 @@ export const ManualSelect = ({ eventObj }: any) => {
       case 410:
         setErrorFetchingImage(true);
         setErrorCode(docImageResponse.status);
-        setErrorMessage(
-          "document could not be found on the server. Try uploading the document and trying again."
-        );
+        const statusMessage = (await docImageResponse.json()).status;
+        setErrorMessage(statusMessage);
         break;
       default:
         setErrorFetchingImage(true);
@@ -166,9 +165,8 @@ export const ManualSelect = ({ eventObj }: any) => {
       case 410:
         setErrorFetchingGeometry(true);
         setErrorCode(linesGeometryResponse.status);
-        setErrorMessage(
-          "document could not be found on the server. Try uploading the document and trying again."
-        );
+        const statusMessage = (await linesGeometryResponse.json()).status;
+        setErrorMessage(statusMessage);
         break;
       default:
         setErrorFetchingGeometry(true);
