@@ -67,9 +67,10 @@ export const ManualSelect = ({ eventObj }: any) => {
       errorFetchingImage ||
       errorFetchingGeometry
     ) {
-      getImageAndGeometryFromServer(selectedDocData).then(() =>
-        setManualSelectModalOpen(true)
-      );
+      getImageAndGeometryFromServer(selectedDocData);
+      // .then(() =>
+      setManualSelectModalOpen(true);
+      // );
     } else {
       setManualSelectModalOpen(true);
     }
@@ -91,23 +92,15 @@ export const ManualSelect = ({ eventObj }: any) => {
     setCurrentDocID(docID);
 
     // error handlers
-    const defaultError = (errorCode: number) => {
+    const error = (
+      errorCode: number,
+      msg = ": unable to fetch resources from server. Try again later."
+    ) => {
       setErrorMessage(
         <ErrorMessage>
           <i>
-            <strong>Error {errorCode}</strong>: unable to fetch resources from
-            server. Try again later.
-          </i>
-        </ErrorMessage>
-      );
-    };
-
-    const noSuchKeyError = (errorCode: number) => {
-      setErrorMessage(
-        <ErrorMessage>
-          <i>
-            <strong>Error {errorCode}</strong>: document could not be found on
-            the server. Try uploading the document and trying again.
+            <strong>Error {errorCode}</strong>
+            {msg}
           </i>
         </ErrorMessage>
       );
@@ -142,15 +135,26 @@ export const ManualSelect = ({ eventObj }: any) => {
         setErrorFetchingImage(false);
         break;
       case 404:
-        const statusMessage = (await docImageResponse.json()).status;
+        let statusMessage;
+        try {
+          // if unable to find endpoint, won't be able to read the body stream/will throw an error
+          statusMessage = (await docImageResponse.json()).status;
+        } catch {
+          setErrorFetchingImage(true);
+          error(docImageResponse.status);
+        }
+
         if (statusMessage === "document does not exist on s3") {
           setErrorFetchingImage(true);
-          noSuchKeyError(docImageResponse.status);
+          error(
+            docImageResponse.status,
+            ": document could not be found on the server. Try uploading the document and trying again."
+          );
           break;
         }
       default:
         setErrorFetchingImage(true);
-        defaultError(docImageResponse.status);
+        error(docImageResponse.status);
     }
 
     // get geometry
@@ -177,12 +181,17 @@ export const ManualSelect = ({ eventObj }: any) => {
         const statusMessage = (await linesGeometryResponse.json()).status;
         if (statusMessage === "document does not exist on s3") {
           setErrorFetchingGeometry(true);
-          noSuchKeyError(linesGeometryResponse.status);
+          // noSuchKeyError(linesGeometryResponse.status);
+          error(
+            linesGeometryResponse.status,
+            ": document could not be found on the server. Try uploading the document and trying again."
+          );
           break;
         }
       default:
         setErrorFetchingGeometry(true);
-        defaultError(linesGeometryResponse.status);
+        // defaultError(linesGeometryResponse.status);
+        error(linesGeometryResponse.status);
     }
   };
 
