@@ -142,6 +142,7 @@ export const ManualSelect = ({ eventObj }: any) => {
         } catch {
           setErrorFetchingImage(true);
           error(docImageResponse.status);
+          break;
         }
 
         if (statusMessage === "document does not exist on s3") {
@@ -178,10 +179,18 @@ export const ManualSelect = ({ eventObj }: any) => {
         setErrorFetchingGeometry(false);
         break;
       case 404:
-        const statusMessage = (await linesGeometryResponse.json()).status;
+        let statusMessage;
+        try {
+          // if unable to find endpoint, won't be able to read the body stream/will throw an error
+          statusMessage = (await linesGeometryResponse.json()).status;
+        } catch {
+          setErrorFetchingImage(true);
+          error(linesGeometryResponse.status);
+          break;
+        }
+
         if (statusMessage === "document does not exist on s3") {
           setErrorFetchingGeometry(true);
-          // noSuchKeyError(linesGeometryResponse.status);
           error(
             linesGeometryResponse.status,
             ": document could not be found on the server. Try uploading the document and trying again."
@@ -190,7 +199,6 @@ export const ManualSelect = ({ eventObj }: any) => {
         }
       default:
         setErrorFetchingGeometry(true);
-        // defaultError(linesGeometryResponse.status);
         error(linesGeometryResponse.status);
     }
   };
