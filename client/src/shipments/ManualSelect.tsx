@@ -67,10 +67,9 @@ export const ManualSelect = ({ eventObj }: any) => {
       errorFetchingImage ||
       errorFetchingGeometry
     ) {
-      getImageAndGeometryFromServer(selectedDocData);
-      // .then(() =>
-      setManualSelectModalOpen(true);
-      // );
+      getImageAndGeometryFromServer(selectedDocData).then(() =>
+        setManualSelectModalOpen(true)
+      );
     } else {
       setManualSelectModalOpen(true);
     }
