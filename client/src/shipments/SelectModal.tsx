@@ -137,7 +137,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     selectedDocData,
     setDocData,
     setRemoveKVMessage,
-    setCollapse,
+    setMessageCollapse,
     eventObj,
     targetString,
   } = useContext(TableContext);
@@ -180,7 +180,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     );
 
     // set message
-    setCollapse(true);
+    setMessageCollapse(true);
     switch (result.status) {
       case 202:
         const statusMessage = (await result.json()).status;
@@ -192,7 +192,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
         );
         break;
     }
-    setTimeout(() => setCollapse(false), 5000);
+    setTimeout(() => setMessageCollapse(false), 5000);
   };
 
   useEffect(() => {
@@ -340,7 +340,7 @@ export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
 
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
-  const [collapse, setCollapse] = useState(false);
+  const [messageCollapse, setMessageCollapse] = useState(false);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -348,13 +348,12 @@ export const SelectModal = ({ eventObj }: any) => {
     (doc) => doc.docID === globalSelectedFile.get()
   )[0];
 
-  const areThereKVPairs =
-    Object.keys(selectedDocData.keyValuePairs).length > 0 ? true : false;
+  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
 
   return (
     <ModalWrapper>
       <ManualSelect eventObj={eventObj}></ManualSelect>
-      <Collapse in={collapse}>
+      <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />
       </Collapse>
       {areThereKVPairs ? (
@@ -364,7 +363,7 @@ export const SelectModal = ({ eventObj }: any) => {
             selectedDocData,
             setDocData,
             setRemoveKVMessage,
-            setCollapse,
+            setMessageCollapse,
             eventObj,
           }}
         >
