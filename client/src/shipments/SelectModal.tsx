@@ -20,7 +20,7 @@ import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
-import { MODAL_WIDTH } from "../common/constants";
+import { MODAL_WIDTH, API_PATH } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -166,9 +166,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     const docID = selectedDocData.docID;
 
     const result = await fetch(
-      `${
-        process.env.REACT_APP_API_PATH
-      }/api/remove-kv-pair/${docID}/${encodeURIComponent(`
+      `${API_PATH}/api/remove-kv-pair/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         headers: { "Content-Type": "application/json" },
@@ -184,10 +182,9 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     // set message
     setCollapse(true);
     switch (result.status) {
-      case 204:
-        setRemoveKVMessage(
-          "Your note has been received. We have flagged this key / value pair as faulty and will work to be more accurate in the future."
-        );
+      case 202:
+        const statusMessage = (await result.json()).status;
+        setRemoveKVMessage(statusMessage);
         break;
       default:
         setRemoveKVMessage(
