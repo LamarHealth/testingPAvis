@@ -24,7 +24,7 @@ export interface KeyValuesWithDistance {
 
 ///// FUNCTIONS /////
 export const deleteKVPairFromLocalStorage = (
-  globalSelectedFile: any,
+  selectedDocID: any,
   faultyKey: string,
   faultyValue: string
 ) => {
@@ -32,7 +32,7 @@ export const deleteKVPairFromLocalStorage = (
 
   let index = undefined as any;
   let selectedDoc = storedDocs.filter((doc: any, i: any) => {
-    const itMatches = doc.docID === globalSelectedFile.get();
+    const itMatches = doc.docID === selectedDocID;
     if (itMatches) index = i;
     return itMatches;
   })[0];

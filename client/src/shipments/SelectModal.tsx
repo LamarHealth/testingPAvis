@@ -142,7 +142,6 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     setCollapse,
     eventObj,
   } = useContext(TableContext);
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
@@ -153,7 +152,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   };
   const removeKVPair = async () => {
     deleteKVPairFromLocalStorage(
-      globalSelectedFile,
+      selectedDocData.docID,
       keyValue["key"],
       keyValue["value"]
     );
