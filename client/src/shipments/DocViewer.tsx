@@ -105,6 +105,13 @@ const DocCell = (props: DocumentInfo) => {
           return;
         }
 
+        const areThereKVPairs =
+          Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
+
+        if (!areThereKVPairs) {
+          return;
+        }
+
         const sortedKeyValuePairs = getLevenDistanceAndSort(
           keyValuePairs,
           targetString
