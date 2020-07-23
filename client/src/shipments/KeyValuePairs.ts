@@ -23,13 +23,12 @@ export interface KeyValuesWithDistance {
 }
 
 ///// FUNCTIONS /////
-export const deleteKeyValuePairFromDoc = (
+export const deleteKVPairFromLocalStorage = (
   globalSelectedFile: any,
   faultyKey: string,
   faultyValue: string
 ) => {
   let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-  console.log("storedDocs 1, ", storedDocs);
 
   let index = undefined as any;
   let selectedDoc = storedDocs.filter((doc: any, i: any) => {
@@ -38,9 +37,6 @@ export const deleteKeyValuePairFromDoc = (
     return itMatches;
   })[0];
 
-  // console.log("selectedDoc, ", selectedDoc);
-  // console.log("index, ", index);
-
   const newKVPairs = {} as any;
   Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
     if (key !== faultyKey && selectedDoc.keyValuePairs[key] !== faultyValue) {
@@ -48,14 +44,10 @@ export const deleteKeyValuePairFromDoc = (
     }
   });
 
-  // console.log("newKVPairs, ", newKVPairs);
   selectedDoc.keyValuePairs = newKVPairs;
-
-  // console.log("selectedDoc, ", selectedDoc);
 
   storedDocs[index] = selectedDoc;
 
-  // console.log("storedDocs 2, ", storedDocs);
   localStorage.setItem("docList", JSON.stringify(storedDocs));
 };
 

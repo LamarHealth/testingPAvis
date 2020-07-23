@@ -27,7 +27,7 @@ import {
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
-  deleteKeyValuePairFromDoc,
+  deleteKVPairFromLocalStorage,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
@@ -91,6 +91,10 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
+const ErrorMessage = styled(Typography)`
+  margin: 1em;
+`;
+
 const TableRowContext = createContext({} as any);
 
 const TableRowComponent = (props: {
@@ -102,7 +106,12 @@ const TableRowComponent = (props: {
   const keyValue = props.keyValue;
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const { setMainModalOpen } = useContext(ModalContext);
-  const { setDocData } = useContext(TableRowContext);
+  const {
+    selectedDocData,
+    setDocData,
+    setRemoveKVMessage,
+    setCollapse,
+  } = useContext(TableRowContext);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
 
@@ -110,8 +119,8 @@ const TableRowComponent = (props: {
     props.eventObj.target.value = keyValue["value"];
     setMainModalOpen(false);
   };
-  const removeKVPair = () => {
-    deleteKeyValuePairFromDoc(
+  const removeKVPair = async () => {
+    deleteKVPairFromLocalStorage(
       globalSelectedFile,
       keyValue["key"],
       keyValue["value"]
@@ -119,6 +128,53 @@ const TableRowComponent = (props: {
     setDocData(getKeyValuePairsByDoc());
     setHardCollapse(true);
     setSoftCollapse(false);
+
+    // query server
+    const docName = selectedDocData.docName;
+    const docType = selectedDocData.docType;
+    const docID = selectedDocData.docID;
+
+    const result = await fetch(
+      `${
+        process.env.REACT_APP_API_PATH
+      }/api/remove-kv-pair/${docID}/${encodeURIComponent(`
+        ${docName}.${docType}`)}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({
+          key: keyValue["key"],
+          value: keyValue["value"],
+        }),
+      }
+    );
+
+    switch (result.status) {
+      case 200:
+        setRemoveKVMessage(
+          <ErrorMessage>
+            <i>
+              Your note has been received. We have flagged this key / value pair
+              as faulty and will work to be more accurate in the future.
+            </i>
+          </ErrorMessage>
+        );
+        setCollapse(true);
+        setTimeout(() => setCollapse(false), 5000);
+        break;
+      default:
+        setRemoveKVMessage(
+          <ErrorMessage>
+            <i>
+              The faulty key / value pair has been removed from your browser,
+              but we are unable to pass this note on to the server at this time.
+            </i>
+          </ErrorMessage>
+        );
+        setCollapse(true);
+        setTimeout(() => setCollapse(false), 5000);
+        break;
+    }
   };
 
   useEffect(() => {
@@ -219,6 +275,9 @@ const TableHeadComponent = ({ targetString }: any) => {
 export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
 
+  const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
+  const [collapse, setCollapse] = useState(false);
+
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
   const selectedDocData = docData.filter(
@@ -281,6 +340,7 @@ export const SelectModal = ({ eventObj }: any) => {
   return (
     <ModalWrapper>
       <ManualSelect eventObj={eventObj}></ManualSelect>
+      <Collapse in={collapse}>{removeKVMessage}</Collapse>
       <Table>
         <TableHeadContext.Provider
           value={{
@@ -293,7 +353,14 @@ export const SelectModal = ({ eventObj }: any) => {
           <TableHeadComponent targetString={targetString} />
         </TableHeadContext.Provider>
         <TableBody>
-          <TableRowContext.Provider value={{ setDocData }}>
+          <TableRowContext.Provider
+            value={{
+              selectedDocData,
+              setDocData,
+              setRemoveKVMessage,
+              setCollapse,
+            }}
+          >
             {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
               <TableRowComponent
                 keyValue={keyValue}

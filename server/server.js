@@ -253,6 +253,22 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
   });
 });
 
+// POST remove KV pair
+router.post("/api/remove-kv-pair/:docID/:docName", (req, res) => {
+  const docID = req.params.docID.trim();
+  const docName = req.params.docName.trim();
+  const faultyKVPair = req.body;
+
+  console.log("faultyKVPair, ", faultyKVPair);
+
+  res.json({
+    status: "complete",
+    docID,
+    docName,
+    faultyKVPair,
+  });
+});
+
 router.get("/api/hello", (req, res) => {
   res.json({ express: "Hello From Express" });
 });
