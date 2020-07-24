@@ -29,7 +29,7 @@ const Container = styled.div`
   border-color: ${(props) => getColor(props)};
   border-style: dashed;
   background-color: ${colors.WHITE};
-  color: gray;
+  color: ${colors.DROPZONE_TEXT_GREY};
   outline: none;
   transition: border 0.24s ease-in-out;
   transition: background-color 0.24s ease-in-out;

@@ -322,6 +322,23 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
   });
 });
 
+// POST remove KV pair
+router.post("/api/report-kv-pair/:docID/:docName", (req, res) => {
+  const docID = req.params.docID.trim();
+  const docName = req.params.docName.trim();
+  const faultyKVPair = req.body;
+
+  logger.info({ docID, docName, faultyKVPair }, "Faulty KV pair received.");
+
+  res.status(202).send({
+    status:
+      "Your note has been received. We have flagged this key / value pair as faulty and will work to be more accurate in the future.",
+    docID,
+    docName,
+    faultyKVPair,
+  });
+});
+
 router.get("/api/hello", (req, res) => {
   res.json({ express: "Hello From Express" });
 });

@@ -39,7 +39,7 @@ const ManualSelectButton = styled.button`
   }
 `;
 
-const ErrorMessage = styled(Typography)`
+export const ErrorMessage = styled(Typography)`
   margin: 1em;
 `;
 

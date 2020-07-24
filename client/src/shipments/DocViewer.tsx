@@ -15,6 +15,7 @@ import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
+import Link from "@material-ui/core/Link";
 
 import $ from "jquery";
 import { colors } from "./../common/colors";
@@ -82,6 +83,11 @@ const Type = styled(Typography)`
   margin: 1em 0;
 `;
 
+const FeedbackTypography = styled(Typography)`
+  margin: 0.5em auto;
+  color: ${colors.DROPZONE_TEXT_GREY};
+`;
+
 export const globalSelectedFileState = createSpecialHookState("");
 
 const DocCell = (props: DocumentInfo) => {
@@ -97,6 +103,13 @@ const DocCell = (props: DocumentInfo) => {
         const targetString = $(this).attr("placeholder");
 
         if (typeof targetString === "undefined") {
+          return;
+        }
+
+        const areThereKVPairs =
+          Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
+
+        if (!areThereKVPairs) {
           return;
         }
 
@@ -144,7 +157,10 @@ const DocCell = (props: DocumentInfo) => {
         </span>
         <Chip
           label="Complete Forms on Page"
-          onClick={populateForms}
+          onClick={() => {
+            populateForms();
+            globalSelectedFile.set(`${props.docID}`);
+          }}
           variant="outlined"
           style={{ marginRight: "0.5em" }}
         />
@@ -194,6 +210,25 @@ const initialState = {
   documents: JSON.parse(localStorage.getItem("docList") || "[]"),
 } as IDocumentList;
 
+const Feedback = () => {
+  return (
+    <FeedbackTypography>
+      <i>
+        <Link
+          href="https://forms.gle/4XBbuJnACkbaZ5578"
+          color="inherit"
+          variant="body2"
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="always"
+        >
+          {"Provide feedback"}
+        </Link>
+      </i>
+    </FeedbackTypography>
+  );
+};
+
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
@@ -226,6 +261,7 @@ const DocViewer = () => {
         })}
       </TransitionGroup>
       <StyledDropzone />
+      <Feedback />
     </FileContext.Provider>
   );
 };

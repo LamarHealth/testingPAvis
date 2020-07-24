@@ -14,19 +14,25 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
+import Collapse from "@material-ui/core/Collapse";
+import Chip from "@material-ui/core/Chip";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
-import { MODAL_WIDTH } from "../common/constants";
+import { MODAL_WIDTH, API_PATH } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
   getLevenDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
+  deleteKVPairFromLocalStorage,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
   top: 100px;
@@ -87,61 +93,6 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
-const TableBodyComponent = (props: {
-  sortedKeyValuePairs: KeyValuesWithDistance[];
-  eventObj: any;
-  bestMatch: string;
-}) => {
-  const { setMainModalOpen } = useContext(ModalContext);
-  const eventObj = props.eventObj;
-
-  return (
-    <TableBody>
-      {props.sortedKeyValuePairs.map((keyValue: any, i: number) => {
-        const fillButtonHandler = () => {
-          props.eventObj.target.value = keyValue["value"];
-          setMainModalOpen(false);
-          renderAccuracyScore(eventObj.target, keyValue);
-        };
-
-        return (
-          <TableRow
-            key={i}
-            className={
-              keyValue["key"] === props.bestMatch
-                ? "closest-match-row"
-                : "table-row"
-            }
-          >
-            <TableCell>
-              <LinearProgress
-                variant={"determinate"}
-                value={keyValue["distanceFromTarget"] * 100}
-              />
-              {keyValue["key"] === props.bestMatch && (
-                <ClosestMatch>
-                  <Typography>
-                    <i>closest match</i>
-                  </Typography>
-                </ClosestMatch>
-              )}
-            </TableCell>
-            <TableCell>
-              <Typography>{keyValue["key"]}</Typography>
-            </TableCell>
-            <TableCell>
-              <Typography>{keyValue["value"]}</Typography>
-            </TableCell>
-            <TableCell>
-              <FillButton onClick={fillButtonHandler}>Fill</FillButton>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
-  );
-};
-
 const TableHeadContext = createContext({} as any);
 
 const TableHeadComponent = ({ targetString }: any) => {
@@ -180,15 +131,156 @@ const TableHeadComponent = ({ targetString }: any) => {
   );
 };
 
-export const SelectModal = ({ eventObj }: any) => {
-  const targetString = eventObj.target.placeholder;
+const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
+  const { setMainModalOpen } = useContext(ModalContext);
+  const {
+    selectedDocData,
+    setDocData,
+    setRemoveKVMessage,
+    setMessageCollapse,
+    eventObj,
+    targetString,
+  } = useContext(TableContext);
+  const [softCollapse, setSoftCollapse] = useState(false);
+  const [hardCollapse, setHardCollapse] = useState(false);
+  const keyValue = props.keyValue;
 
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const docData = getKeyValuePairsByDoc();
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
-  )[0];
+  const fillButtonHandler = () => {
+    eventObj.target.value = keyValue["value"];
+    setMainModalOpen(false);
+    renderAccuracyScore(eventObj.target, keyValue);
+  };
+  const reportKVPair = async (remove: boolean = false) => {
+    if (remove) {
+      deleteKVPairFromLocalStorage(
+        selectedDocData.docID,
+        keyValue["key"],
+        keyValue["value"]
+      );
+    }
 
+    setDocData(getKeyValuePairsByDoc());
+    setHardCollapse(true);
+    setSoftCollapse(false);
+
+    // query server
+    const docName = selectedDocData.docName;
+    const docType = selectedDocData.docType;
+    const docID = selectedDocData.docID;
+
+    const result = await fetch(
+      `${API_PATH}/api/report-kv-pair/${docID}/${encodeURIComponent(`
+        ${docName}.${docType}`)}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({
+          targetString,
+          key: keyValue["key"],
+          value: keyValue["value"],
+        }),
+      }
+    );
+
+    // set message
+    setMessageCollapse(true);
+    switch (result.status) {
+      case 202:
+        const statusMessage = (await result.json()).status;
+        setRemoveKVMessage(statusMessage);
+        break;
+      default:
+        setRemoveKVMessage(
+          "The faulty key / value pair has been removed from your browser, but we are unable to pass this note on to the server at this time."
+        );
+        break;
+    }
+  };
+
+  // cleanup
+  useEffect(() => {
+    setHardCollapse(false);
+    const closeMessage = setTimeout(() => setMessageCollapse(false), 5000);
+    return () => clearTimeout(closeMessage);
+  }, [hardCollapse]);
+
+  return (
+    <>
+      <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
+        <FlexCell>
+          <FillButton onClick={fillButtonHandler}>Fill</FillButton>
+          <IconButton onClick={() => setSoftCollapse(true)}>
+            <HighlightOffIcon />
+          </IconButton>
+        </FlexCell>
+      </Collapse>
+      <ClickAwayListener
+        mouseEvent="onMouseDown"
+        touchEvent="onTouchStart"
+        onClickAway={() => setSoftCollapse(false)}
+      >
+        <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
+          <Chip
+            label="Report Unrelated"
+            variant="outlined"
+            onClick={() => reportKVPair()}
+            style={{ marginBottom: "1em" }}
+          />
+          <Chip
+            label="Delete Row"
+            variant="outlined"
+            onClick={() => reportKVPair(true)}
+          />
+        </Collapse>
+      </ClickAwayListener>
+    </>
+  );
+};
+
+const TableRowComponent = (props: {
+  keyValue: KeyValuesWithDistance;
+  bestMatch: string;
+  i: number;
+}) => {
+  const keyValue = props.keyValue;
+
+  return (
+    <TableRow
+      key={props.i}
+      className={
+        keyValue["key"] === props.bestMatch ? "closest-match-row" : "table-row"
+      }
+    >
+      <TableCell>
+        <LinearProgress
+          variant={"determinate"}
+          value={keyValue["distanceFromTarget"] * 100}
+        />
+        {keyValue["key"] === props.bestMatch && (
+          <ClosestMatch>
+            <Typography>
+              <i>closest match</i>
+            </Typography>
+          </ClosestMatch>
+        )}
+      </TableCell>
+      <TableCell>
+        <Typography>{keyValue["key"]}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{keyValue["value"]}</Typography>
+      </TableCell>
+      <TableCell>
+        <ButtonsCell keyValue={keyValue} />
+      </TableCell>
+    </TableRow>
+  );
+};
+
+const TableContext = createContext({} as any);
+
+const TableComponent = () => {
+  const { targetString, selectedDocData } = useContext(TableContext);
   const sortedKeyValuePairs = getLevenDistanceAndSort(
     selectedDocData,
     targetString
@@ -196,6 +288,11 @@ export const SelectModal = ({ eventObj }: any) => {
   const bestMatch = sortedKeyValuePairs[0].key;
 
   const [sort, setSort] = useState("highest match");
+
+  const dynamicallySortedKeyValuePairs = sortKeyValuePairs(
+    sortedKeyValuePairs,
+    sort
+  );
 
   // match score sort
   const [matchArrow, setMatchArrow] = useState("highest match");
@@ -221,42 +318,75 @@ export const SelectModal = ({ eventObj }: any) => {
     }
   };
 
-  // rewriting pesky styles that penetrate the shadow DOM
-  const rewriteStyles = () => {
-    const popoverEl = document.getElementById("docit-main-modal");
-    const shadowRoot = popoverEl?.children[2].shadowRoot;
-    const newStyles = document.createElement("style");
-    newStyles.innerHTML = `
-      :host * {
-        font-family: Roboto, Helvetica, Arial, sans-serif;
-      }
-    `;
-    newStyles.type = "text/css";
-    shadowRoot?.appendChild(newStyles);
-  };
+  return (
+    <Table>
+      <TableHeadContext.Provider
+        value={{
+          matchArrow,
+          matchScoreSortHandler,
+          alphabetArrow,
+          alphabeticSortHandler,
+        }}
+      >
+        <TableHeadComponent targetString={targetString} />
+      </TableHeadContext.Provider>
+      <TableBody>
+        {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+          <TableRowComponent keyValue={keyValue} bestMatch={bestMatch} i={i} />
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
 
-  useEffect(() => rewriteStyles(), []);
+const Message = ({ msg }: any) => {
+  return (
+    <ErrorMessage>
+      <i>{msg}</i>
+    </ErrorMessage>
+  );
+};
+
+export const SelectModal = ({ eventObj }: any) => {
+  const targetString = eventObj.target.placeholder;
+
+  const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
+  const [messageCollapse, setMessageCollapse] = useState(false);
+
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
+  const selectedDocData = docData.filter(
+    (doc) => doc.docID === globalSelectedFile.get()
+  )[0];
+
+  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
 
   return (
     <ModalWrapper>
       <ManualSelect eventObj={eventObj}></ManualSelect>
-      <Table>
-        <TableHeadContext.Provider
+      <Collapse in={messageCollapse}>
+        <Message msg={removeKVMessage} />
+      </Collapse>
+      {areThereKVPairs ? (
+        <TableContext.Provider
           value={{
-            matchArrow,
-            matchScoreSortHandler,
-            alphabetArrow,
-            alphabeticSortHandler,
+            targetString,
+            selectedDocData,
+            setDocData,
+            setRemoveKVMessage,
+            setMessageCollapse,
+            eventObj,
           }}
         >
-          <TableHeadComponent targetString={targetString} />
-        </TableHeadContext.Provider>
-        <TableBodyComponent
-          sortedKeyValuePairs={sortKeyValuePairs(sortedKeyValuePairs, sort)}
-          eventObj={eventObj}
-          bestMatch={bestMatch}
+          <TableComponent />
+        </TableContext.Provider>
+      ) : (
+        <Message
+          msg={
+            "The selected document doesn't have any key / value pairs. Try using Manual Select."
+          }
         />
-      </Table>
+      )}
     </ModalWrapper>
   );
 };
