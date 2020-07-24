@@ -150,12 +150,15 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     setMainModalOpen(false);
     renderAccuracyScore(eventObj.target, keyValue);
   };
-  const removeKVPair = async () => {
-    deleteKVPairFromLocalStorage(
-      selectedDocData.docID,
-      keyValue["key"],
-      keyValue["value"]
-    );
+  const reportKVPair = async (remove: boolean = false) => {
+    if (remove) {
+      deleteKVPairFromLocalStorage(
+        selectedDocData.docID,
+        keyValue["key"],
+        keyValue["value"]
+      );
+    }
+
     setDocData(getKeyValuePairsByDoc());
     setHardCollapse(true);
     setSoftCollapse(false);
@@ -166,7 +169,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     const docID = selectedDocData.docID;
 
     const result = await fetch(
-      `${API_PATH}/api/remove-kv-pair/${docID}/${encodeURIComponent(`
+      `${API_PATH}/api/report-kv-pair/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
         headers: { "Content-Type": "application/json" },
@@ -218,9 +221,15 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
       >
         <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
           <Chip
-            label="Confirm Unrelated"
+            label="Report Unrelated"
             variant="outlined"
-            onClick={removeKVPair}
+            onClick={() => reportKVPair()}
+            style={{ marginBottom: "1em" }}
+          />
+          <Chip
+            label="Delete Row"
+            variant="outlined"
+            onClick={() => reportKVPair(true)}
           />
         </Collapse>
       </ClickAwayListener>

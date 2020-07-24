@@ -1,5 +1,4 @@
 import { getEditDistance } from "./LevenshteinField";
-import { globalSelectedFileState } from "./DocViewer";
 
 ///// INTERFACES /////
 // interface returned from getAllKeyValuePairs() .

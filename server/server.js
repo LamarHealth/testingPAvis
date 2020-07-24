@@ -323,7 +323,7 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
 });
 
 // POST remove KV pair
-router.post("/api/remove-kv-pair/:docID/:docName", (req, res) => {
+router.post("/api/report-kv-pair/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const docName = req.params.docName.trim();
   const faultyKVPair = req.body;
