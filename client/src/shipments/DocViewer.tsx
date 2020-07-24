@@ -157,7 +157,10 @@ const DocCell = (props: DocumentInfo) => {
         </span>
         <Chip
           label="Complete Forms on Page"
-          onClick={populateForms}
+          onClick={() => {
+            populateForms();
+            globalSelectedFile.set(`${props.docID}`);
+          }}
           variant="outlined"
           style={{ marginRight: "0.5em" }}
         />
