@@ -266,6 +266,11 @@ const TableRowComponent = (props: {
       </TableCell>
       <TableCell>
         <Typography>{keyValue["key"]}</Typography>
+        {keyValue.interpretedFrom && (
+          <Typography variant="caption">
+            <i>Interpreted from: {keyValue["interpretedFrom"]}</i>
+          </Typography>
+        )}
       </TableCell>
       <TableCell>
         <Typography>{keyValue["value"]}</Typography>

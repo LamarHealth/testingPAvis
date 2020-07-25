@@ -36,3 +36,15 @@ export const getEditDistance = function (a: string, b: string): number {
 
   return matrix[b.length][a.length];
 };
+
+export const getEditDistancePercentage = (
+  key: string,
+  longestKeyLength: number,
+  targetString: string
+) => {
+  return (
+    (longestKeyLength -
+      getEditDistance(targetString.toLowerCase(), key.toLowerCase())) /
+    longestKeyLength
+  );
+};

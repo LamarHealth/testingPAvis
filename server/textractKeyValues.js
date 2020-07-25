@@ -34,7 +34,9 @@ export const getKvRelationship = (keyMap, valueMap, blockMap) => {
     let valueBlock = findValueBlock(keyBlock, valueMap);
     let key = getText(keyBlock, blockMap);
     let val = getText(valueBlock, blockMap);
-    kvs[key] = val;
+    if (key !== "" || val !== "") {
+      kvs[key] = val;
+    }
   });
   return kvs;
 };

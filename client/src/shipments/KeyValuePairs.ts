@@ -1,4 +1,4 @@
-import { getEditDistance } from "./LevenshteinField";
+import { getEditDistancePercentage } from "./LevenshteinField";
 
 ///// INTERFACES /////
 // interface returned from getAllKeyValuePairs() .
@@ -12,6 +12,7 @@ export interface KeyValuesByDoc {
   docType: string;
   docID: string;
   keyValuePairs: KeyValues;
+  interpretedKeys: KeyValues;
 }
 
 // interface returned from getLevenDistanceAndSort()
@@ -19,6 +20,7 @@ export interface KeyValuesWithDistance {
   key: string;
   value: string;
   distanceFromTarget: number;
+  interpretedFrom?: string;
 }
 
 ///// FUNCTIONS /////
@@ -30,11 +32,13 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
     const docType = doc.docType;
     const docID = doc.docID;
     const keyValuePairs = doc.keyValuePairs;
+    const interpretedKeys = doc.interpretedKeys;
     const docObj = {
       docName,
       docType,
       docID,
       keyValuePairs,
+      interpretedKeys,
     };
     docDataByDoc.push(docObj);
   });
@@ -66,18 +70,36 @@ export const getLevenDistanceAndSort = (
     let entry: any = {};
     entry["key"] = key;
     entry["value"] = docData.keyValuePairs[key];
-    entry["distanceFromTarget"] =
-      (longestKeyLength -
-        getEditDistance(targetString.toLowerCase(), key.toLowerCase())) /
-      longestKeyLength;
+    entry["distanceFromTarget"] = getEditDistancePercentage(
+      key,
+      longestKeyLength,
+      targetString
+    );
     return entry;
   });
 
-  docKeyValuePairs.sort((a, b) =>
+  const interpretedKeyValues = Object.keys(docData.interpretedKeys).map(
+    (key) => {
+      let entry: any = {};
+      entry["key"] = docData.interpretedKeys[key];
+      entry["value"] = lowercaseKeys(docData.keyValuePairs)[key];
+      entry["distanceFromTarget"] = getEditDistancePercentage(
+        docData.interpretedKeys[key],
+        longestKeyLength,
+        targetString
+      );
+      entry["interpretedFrom"] = key;
+      return entry;
+    }
+  );
+
+  const combinedKeyValuePairs = docKeyValuePairs.concat(interpretedKeyValues);
+
+  combinedKeyValuePairs.sort((a, b) =>
     a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
   );
 
-  return docKeyValuePairs;
+  return combinedKeyValuePairs;
 };
 
 export const sortKeyValuePairs = (
@@ -137,4 +159,13 @@ export const deleteKVPairFromLocalStorage = (
   storedDocs[index] = selectedDoc;
 
   localStorage.setItem("docList", JSON.stringify(storedDocs));
+};
+
+// helper functions
+const lowercaseKeys = (initialObject: any) => {
+  const lowercasedObject = {} as any;
+  Object.keys(initialObject).forEach((key) => {
+    lowercasedObject[key.toLowerCase()] = initialObject[key];
+  });
+  return lowercasedObject;
 };

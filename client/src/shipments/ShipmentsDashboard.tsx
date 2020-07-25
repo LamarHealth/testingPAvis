@@ -47,7 +47,7 @@ class ShipmentsDashboard extends React.Component {
             <h3>Shipment</h3>
             <FormContainer placeholder="Description" />
             <FormContainer placeholder="Consigned To" />
-            <FormContainer placeholder="B/L Number" />
+            <FormContainer placeholder="Bill of Lading Number" />
             <FormContainer placeholder="Carrier Booking" />
             <FormContainer placeholder="Consignor" />
             <FormContainer placeholder="Email" />
