@@ -22,34 +22,6 @@ export interface KeyValuesWithDistance {
 }
 
 ///// FUNCTIONS /////
-export const deleteKVPairFromLocalStorage = (
-  selectedDocID: any,
-  faultyKey: string,
-  faultyValue: string
-) => {
-  let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-
-  let index = undefined as any;
-  let selectedDoc = storedDocs.filter((doc: any, i: any) => {
-    const itMatches = doc.docID === selectedDocID;
-    if (itMatches) index = i;
-    return itMatches;
-  })[0];
-
-  const newKVPairs = {} as any;
-  Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
-    if (key !== faultyKey && selectedDoc.keyValuePairs[key] !== faultyValue) {
-      newKVPairs[key] = selectedDoc.keyValuePairs[key];
-    }
-  });
-
-  selectedDoc.keyValuePairs = newKVPairs;
-
-  storedDocs[index] = selectedDoc;
-
-  localStorage.setItem("docList", JSON.stringify(storedDocs));
-};
-
 export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   const docDataByDoc: any = [];
@@ -137,4 +109,32 @@ export const sortKeyValuePairs = (
   // if the sorting fails (it won't), but to satisfy typescript putting this here:
   console.log("sorting failed");
   return keyValuePairs;
+};
+
+export const deleteKVPairFromLocalStorage = (
+  selectedDocID: any,
+  faultyKey: string,
+  faultyValue: string
+) => {
+  let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+
+  let index = undefined as any;
+  let selectedDoc = storedDocs.filter((doc: any, i: any) => {
+    const itMatches = doc.docID === selectedDocID;
+    if (itMatches) index = i;
+    return itMatches;
+  })[0];
+
+  const newKVPairs = {} as any;
+  Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
+    if (key !== faultyKey && selectedDoc.keyValuePairs[key] !== faultyValue) {
+      newKVPairs[key] = selectedDoc.keyValuePairs[key];
+    }
+  });
+
+  selectedDoc.keyValuePairs = newKVPairs;
+
+  storedDocs[index] = selectedDoc;
+
+  localStorage.setItem("docList", JSON.stringify(storedDocs));
 };

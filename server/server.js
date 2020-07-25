@@ -15,7 +15,11 @@ import path from "path";
 import multer from "multer";
 import AWS, { Textract, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
-import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
+import {
+  getKeyValues,
+  getInterpretations,
+  getLinesGeometry,
+} from "./textractKeyValues";
 const pino = require("pino");
 const expressPino = require("express-pino-logger");
 
@@ -90,7 +94,8 @@ router.post("/api/upload_status", (req, res) => {
       // All docs are uploaded just in case
       s3.upload(s3params, function (err, data) {
         textract.analyzeDocument(textractParams, (err, data) => {
-          const parsedTextract = getKeyValues(data);
+          const keyValuePairs = getKeyValues(data);
+          const interpretedKeys = getInterpretations(keyValuePairs);
 
           // helper functions
           const logError = (msg, error = "") => {
@@ -114,7 +119,8 @@ router.post("/api/upload_status", (req, res) => {
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
               filePath: "",
-              keyValuePairs: parsedTextract,
+              keyValuePairs,
+              interpretedKeys,
             });
 
             const jsonifiedDocName = req.files[0].originalname.replace(
@@ -137,7 +143,7 @@ router.post("/api/upload_status", (req, res) => {
             s3params = {
               Bucket: `doc-classifier-bucket/${docID}`,
               Key: `parsedJSON-${jsonifiedDocName}`,
-              Body: Buffer.from(JSON.stringify(parsedTextract)),
+              Body: Buffer.from(JSON.stringify(keyValuePairs)),
             };
 
             s3.upload(s3params, (err, data) => {

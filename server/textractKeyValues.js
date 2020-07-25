@@ -1,3 +1,5 @@
+import fs from "fs";
+
 /**
  * Helper function used to parse textract tree
  */
@@ -102,4 +104,54 @@ export const getKeyValues = (response) => {
   const [kvmap, valueMap, blockMap] = getKvMap(response);
   const kvRelationship = getKvRelationship(kvmap, valueMap, blockMap);
   return kvRelationship;
+};
+
+// helper functions
+const reverseDictionary = (dictionary) => {
+  // switches keys and values, and where key: [array, of, values] makes a single unique key / value pair for each
+  let reversedDictionary = {};
+  Object.keys(dictionary).forEach((key) => {
+    const interpretedValues = dictionary[key];
+    if (Array.isArray(interpretedValues)) {
+      interpretedValues.forEach((value) => {
+        reversedDictionary[value] = key;
+      });
+    }
+  });
+  return reversedDictionary;
+};
+
+const lowercaseObject = (initialObject) => {
+  const lowercasedObject = {};
+  Object.keys(initialObject).forEach((key) => {
+    lowercasedObject[key.toLowerCase()] = initialObject[key].toLowerCase();
+  });
+  return lowercasedObject;
+};
+
+// get interpreted keys from kv pairs using the mastersKeysDictionary
+export const getInterpretations = (uppercaseKVPairs) => {
+  const kvPairs = lowercaseObject(uppercaseKVPairs);
+
+  // get the dictionary
+  const mastersKeysDictionary = JSON.parse(
+    fs.readFileSync("./dictionaries/mastersKeysDictionary.json", "utf-8")
+  );
+  // reverse it, so that each value is a unique key
+  let reversedKeysDictionary = lowercaseObject(
+    reverseDictionary(mastersKeysDictionary)
+  );
+
+  let interpretedKeys = {};
+  Object.keys(reversedKeysDictionary).forEach((searchKey) => {
+    Object.keys(kvPairs).forEach((key) => {
+      if (key.includes(searchKey)) {
+        interpretedKeys[key] = key.replace(
+          searchKey,
+          reversedKeysDictionary[searchKey]
+        );
+      }
+    });
+  });
+  return interpretedKeys;
 };

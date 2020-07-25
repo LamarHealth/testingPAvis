@@ -1,0 +1,33 @@
+{
+  "Bill of Lading Number": ["B/L NUMBER"],
+  "Freight Terms": "",
+  "Export References": "",
+  "Shipper": ["Consignor", "Exporter", "Ship From"],
+  "Shipper Name": ["Consignor Name", "Exporter Name", "Ship From Name"],
+  "Shipper Address": [
+    "Consignor Address",
+    "Exporter Address",
+    "Ship From Address"
+  ],
+  "Shipper Contact Info": [
+    "Consignor Contact Info",
+    "Exporter Contact Info",
+    "Ship From Contact Info"
+  ],
+  "Consignee": ["Consigned to", "Ship To"],
+  "Consignee Name": ["Consigned to Name", "Ship To Name"],
+  "Consignee Address": ["Consigned to Address", "Ship To Address"],
+  "Consignee Contact Info": [
+    "Consigned to Contact Info",
+    "Ship To Contact Info"
+  ],
+  "Notify Party": ["Intermediate Consignee"],
+  "Notify Party Name": ["Intermediate Consignee Name"],
+  "Notify Party Address": ["Intermediate Consignee Address"],
+  "Notify Party Contact Info": ["Intermediate Consignee Contact Info"],
+  "Shipper's Declaration of Value": ["Declared Value"],
+  "Express Release": "",
+  "AES ITN": ["AES"],
+  "HS Code": "",
+  "Comments": ""
+}
