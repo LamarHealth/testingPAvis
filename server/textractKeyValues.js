@@ -1,5 +1,5 @@
 import fs from "fs";
-import mastersKeysDictionary from "./dictionaries/mastersKeysDictionary";
+import mastersKeysDictionary from "./dictionaries/mastersKeysDictionary.json";
 
 /**
  * Helper function used to parse textract tree
