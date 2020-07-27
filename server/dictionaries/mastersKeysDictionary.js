@@ -1,4 +1,4 @@
-{
+const mastersKeysDictionary = {
   "Bill of Lading Number": ["B/L Number"],
   "Freight Terms": "",
   "Export References": "",
@@ -7,19 +7,19 @@
   "Shipper Address": [
     "Consignor Address",
     "Exporter Address",
-    "Ship From Address"
+    "Ship From Address",
   ],
   "Shipper Contact Info": [
     "Consignor Contact Info",
     "Exporter Contact Info",
-    "Ship From Contact Info"
+    "Ship From Contact Info",
   ],
   "Consignee": ["Consigned to", "Ship To"],
   "Consignee Name": ["Consigned to Name", "Ship To Name"],
   "Consignee Address": ["Consigned to Address", "Ship To Address"],
   "Consignee Contact Info": [
     "Consigned to Contact Info",
-    "Ship To Contact Info"
+    "Ship To Contact Info",
   ],
   "Notify Party": ["Intermediate Consignee"],
   "Notify Party Name": ["Intermediate Consignee Name"],
@@ -29,5 +29,7 @@
   "Express Release": "",
   "AES ITN": ["AES"],
   "HS Code": "",
-  "Comments": ""
-}
+  "Comments": "",
+};
+
+export default mastersKeysDictionary;

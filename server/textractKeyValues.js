@@ -1,4 +1,5 @@
 import fs from "fs";
+import mastersKeysDictionary from "./dictionaries/mastersKeysDictionary";
 
 /**
  * Helper function used to parse textract tree
@@ -135,11 +136,7 @@ const lowercaseObject = (initialObject) => {
 export const getInterpretations = (uppercaseKVPairs) => {
   const kvPairs = lowercaseObject(uppercaseKVPairs);
 
-  // get the dictionary
-  const mastersKeysDictionary = JSON.parse(
-    fs.readFileSync("./dictionaries/mastersKeysDictionary.json", "utf-8")
-  );
-  // reverse it, so that each value is a unique key
+  // reverse the dictionary, so that each value is a unique key
   let reversedKeysDictionary = lowercaseObject(
     reverseDictionary(mastersKeysDictionary)
   );
