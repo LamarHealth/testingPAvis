@@ -5,27 +5,20 @@ import masters5KeyValuePairs from "./kv_relationships_output/masters5.json";
 import { getInterpretations } from "./../../textractKeyValues";
 import { getLevenDistanceAndSort } from "./javascript_copies/KeyValuePairsCOPY";
 
-const docKvps = [
+const comparisonArr = [
   masters3KeyValuePairs,
   masters4KeyValuePairs,
   masters5KeyValuePairs,
-];
-
-// needs to fit shape of interface KeyValuesByDoc if we are using the typescript... if we are using the js workaround, then not necessary
-const docifyDoc = (kvps, addInterpreted) => {
+].map((kvps) => {
   return {
-    docName: "some-doc-name",
-    docType: "pdf",
-    docID: "s0m3-Uu1D-r4nd0m-nuMb3r-s3qu3nce",
-    keyValuePairs: kvps,
-    interpretedKeys: addInterpreted ? getInterpretations(kvps) : {},
-  };
-};
-
-const comparisonArr = docKvps.map((kvps) => {
-  return {
-    withInterpreted: docifyDoc(kvps, true),
-    noInterpreted: docifyDoc(kvps, false),
+    withInterpreted: {
+      keyValuePairs: kvps,
+      interpretedKeys: getInterpretations(kvps),
+    },
+    noInterpreted: {
+      keyValuePairs: kvps,
+      interpretedKeys: {},
+    },
   };
 });
 
