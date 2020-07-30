@@ -24,6 +24,8 @@ const testForKeys = (testName, fieldsObj, parsedTextractData) => {
   });
 };
 
+// NOTE: this test is being ignored by jest in package.json.
+
 const testForValues = (testName, fieldsObj, parsedTextractData) => {
   return Object.keys(fieldsObj).map((key, i) => {
     // accounting for partial match. If they key exists in the data, then create a RE from it to match a partial; otherwise, continue with undefined
