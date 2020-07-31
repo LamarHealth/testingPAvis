@@ -1,29 +1,6 @@
 // NOTE: this is a javascript copy of the typescript KeyValuePairs.ts file in client. used for testing. jest and babel throwing a gnarly error when try to import typescript functions... so this is a workaround.
 
-import { getEditDistancePercentage } from "./LevenshteinFieldCOPY";
-
-// ///// INTERFACES /////
-// // interface returned from getAllKeyValuePairs() .
-// export interface KeyValues {
-//   [key: string]: string; //e.g. "Date": "7/5/2015"
-// }
-
-// // interface returned from getKeyValuePairsByDoc()
-// export interface KeyValuesByDoc {
-//   docName: string;
-//   docType: string;
-//   docID: string;
-//   keyValuePairs: KeyValues;
-//   interpretedKeys: KeyValues;
-// }
-
-// // interface returned from getLevenDistanceAndSort()
-// export interface KeyValuesWithDistance {
-//   key: string;
-//   value: string;
-//   distanceFromTarget: number;
-//   interpretedFrom?: string;
-// }
+import { getDistancePercentage } from "./LevenshteinFieldCOPY";
 
 ///// FUNCTIONS /////
 export const getKeyValuePairsByDoc = () => {
@@ -60,7 +37,7 @@ export const getAllKeyValuePairs = () => {
   return { areThereDocs: !(storedDocs[0] === undefined), docData };
 };
 
-export const getLevenDistanceAndSort = (docData, targetString) => {
+export const getEditDistanceAndSort = (docData, targetString, method) => {
   const longestKeyLength = Object.keys(
     docData.keyValuePairs
   ).reduce((acc, cv) => (acc.length > cv.length ? acc : cv)).length;
@@ -69,10 +46,11 @@ export const getLevenDistanceAndSort = (docData, targetString) => {
     let entry = {};
     entry["key"] = key;
     entry["value"] = docData.keyValuePairs[key];
-    entry["distanceFromTarget"] = getEditDistancePercentage(
+    entry["distanceFromTarget"] = getDistancePercentage(
       key,
       longestKeyLength,
-      targetString
+      targetString,
+      method
     );
     return entry;
   });
@@ -82,10 +60,11 @@ export const getLevenDistanceAndSort = (docData, targetString) => {
       let entry = {};
       entry["key"] = docData.interpretedKeys[key];
       entry["value"] = lowercaseKeys(docData.keyValuePairs)[key];
-      entry["distanceFromTarget"] = getEditDistancePercentage(
+      entry["distanceFromTarget"] = getDistancePercentage(
         docData.interpretedKeys[key],
         longestKeyLength,
-        targetString
+        targetString,
+        method
       );
       entry["interpretedFrom"] = key;
       return entry;
