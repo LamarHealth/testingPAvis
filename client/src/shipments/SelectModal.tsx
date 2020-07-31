@@ -24,7 +24,7 @@ import { MODAL_WIDTH, API_PATH } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
-  getLevenDistanceAndSort,
+  getEditDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
   deleteKVPairFromLocalStorage,
@@ -286,9 +286,10 @@ const TableContext = createContext({} as any);
 
 const TableComponent = () => {
   const { targetString, selectedDocData } = useContext(TableContext);
-  const sortedKeyValuePairs = getLevenDistanceAndSort(
+  const sortedKeyValuePairs = getEditDistanceAndSort(
     selectedDocData,
-    targetString
+    targetString,
+    "lc substring"
   );
   const bestMatch = sortedKeyValuePairs[0].key;
 

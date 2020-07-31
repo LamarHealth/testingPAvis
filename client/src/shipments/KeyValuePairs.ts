@@ -1,4 +1,4 @@
-import { getEditDistancePercentage } from "./LevenshteinField";
+import { getDistancePercentage } from "./LevenshteinField";
 
 ///// INTERFACES /////
 // interface returned from getAllKeyValuePairs() .
@@ -15,7 +15,7 @@ export interface KeyValuesByDoc {
   interpretedKeys: KeyValues;
 }
 
-// interface returned from getLevenDistanceAndSort()
+// interface returned from getEditDistanceAndSort()
 export interface KeyValuesWithDistance {
   key: string;
   value: string;
@@ -58,9 +58,10 @@ export const getAllKeyValuePairs = () => {
   return { areThereDocs: !(storedDocs[0] === undefined), docData };
 };
 
-export const getLevenDistanceAndSort = (
+export const getEditDistanceAndSort = (
   docData: KeyValuesByDoc,
-  targetString: string
+  targetString: string,
+  method: string
 ): KeyValuesWithDistance[] => {
   const longestKeyLength = Object.keys(
     docData.keyValuePairs
@@ -70,10 +71,11 @@ export const getLevenDistanceAndSort = (
     let entry: any = {};
     entry["key"] = key;
     entry["value"] = docData.keyValuePairs[key];
-    entry["distanceFromTarget"] = getEditDistancePercentage(
+    entry["distanceFromTarget"] = getDistancePercentage(
       key,
       longestKeyLength,
-      targetString
+      targetString,
+      method
     );
     return entry;
   });
@@ -83,10 +85,11 @@ export const getLevenDistanceAndSort = (
       let entry: any = {};
       entry["key"] = docData.interpretedKeys[key];
       entry["value"] = lowercaseKeys(docData.keyValuePairs)[key];
-      entry["distanceFromTarget"] = getEditDistancePercentage(
+      entry["distanceFromTarget"] = getDistancePercentage(
         docData.interpretedKeys[key],
         longestKeyLength,
-        targetString
+        targetString,
+        method
       );
       entry["interpretedFrom"] = key;
       return entry;
