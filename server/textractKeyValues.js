@@ -33,8 +33,8 @@ export const getKvRelationship = (keyMap, valueMap, blockMap) => {
   Object.entries(keyMap).forEach((keyValueBlock) => {
     let [blockId, keyBlock] = keyValueBlock;
     let valueBlock = findValueBlock(keyBlock, valueMap);
-    let key = getText(keyBlock, blockMap);
-    let val = getText(valueBlock, blockMap);
+    let key = getText(keyBlock, blockMap, "key");
+    let val = getText(valueBlock, blockMap, "value");
     if (key !== "" || val !== "") {
       kvs[key] = val;
     }
@@ -77,7 +77,7 @@ export const findValueBlock = (keyBlock, valueMap) => {
   return valueBlock;
 };
 
-export const getText = (result, blocksMap) => {
+export const getText = (result, blocksMap, type) => {
   let text = "";
   if (result && "Relationships" in result) {
     result["Relationships"].forEach((relationship) => {
@@ -95,6 +95,9 @@ export const getText = (result, blocksMap) => {
         });
       }
     });
+  }
+  if (type === "key" && ":" in key) {
+    text = /(\w|\W)*(?=:$)/.exec(text.trim())[0];
   }
   return text;
 };

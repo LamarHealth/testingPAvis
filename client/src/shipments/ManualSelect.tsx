@@ -127,7 +127,6 @@ export const ManualSelect = ({ eventObj }: any) => {
             height: (DOC_IMAGE_WIDTH * this.naturalHeight) / this.naturalWidth,
             overlayPositionOffset: (window.innerWidth - DOC_IMAGE_WIDTH) / 2,
           };
-
           setDocImageURL(urlObj);
         };
         break;
