@@ -78,6 +78,7 @@ class ShipmentsDashboard extends React.Component {
               labelFor="text-input"
               labelInfo="(required)"
             >
+              <FormContainer placeholder="Bill of Lading Number" />
               <FormContainer placeholder="Freight Terms" />
               <FormContainer placeholder="Export References" />
               <h3>Shipper</h3>
