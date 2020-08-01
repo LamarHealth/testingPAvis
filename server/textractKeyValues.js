@@ -96,9 +96,9 @@ export const getText = (result, blocksMap, type) => {
       }
     });
   }
-  if (type === "key" && ":" in key) {
-    text = /(\w|\W)*(?=:$)/.exec(text.trim())[0];
-  }
+  // if (type === "key" && ":" in key) {
+  //   text = /(\w|\W)*(?=:$)/.exec(text.trim())[0];
+  // }
   return text;
 };
 
