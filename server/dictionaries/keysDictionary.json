@@ -1,0 +1,13 @@
+{
+  "Bill of Lading": ["B/L"],
+  "Freight Terms": "",
+  "Export References": "",
+  "Shipper": ["Consignor", "Exporter", "Ship From"],
+  "Consignee": ["Consigned to", "Ship To"],
+  "Notify Party": ["Intermediate Consignee"],
+  "Shipper's Declaration of Value": ["Declared Value"],
+  "Express Release": "",
+  "AES ITN": ["AES"],
+  "HS Code": "",
+  "Comments": ""
+}
