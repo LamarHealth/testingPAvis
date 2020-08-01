@@ -275,12 +275,13 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const rawJSONDocName = `rawJSON-${req.params.docName.trim()}.json`;
+  const s3Key = `${docID}/${rawJSONDocName}`;
 
   const s3 = new S3();
 
   const s3rawJSONParams = {
     Bucket: "doc-classifier-bucket",
-    Key: `${docID}/${rawJSONDocName}`,
+    Key: s3Key,
   };
 
   s3.getObject(s3rawJSONParams, (error, data) => {
@@ -290,6 +291,7 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
           docID,
           docName: req.params.docName,
           rawJSONDocName: rawJSONDocName,
+          s3Key,
           route: "/api/lines-geometry/",
           type: "GET",
           s3error: error,
