@@ -61,7 +61,8 @@ export const getLongestCommonSubstring = (
       }
     }
   }
-  return longestSubstring.length;
+
+  return longestSubstring.trim().length;
 };
 
 export const getDistancePercentage = (
