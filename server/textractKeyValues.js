@@ -134,13 +134,14 @@ const sanitizeObject = (initialObject) => {
     val = val.toLowerCase();
 
     key = key
-      .replace(/[0-9]/g, "") //replace '##.'
       .replace(/\:/g, "") //replace colons
+      .replace(/([0-9]+([\W]))/g, "") //replace '##.'
       .replace(/(\(.*\))|(\(.*$)/g, "") //replace parens
       .trim(); //replace whitespace
 
     // assign to accum
     accum[key] = val;
+    return accum;
   }, {});
   return sanitizedObj;
 };
@@ -150,7 +151,7 @@ export const getInterpretations = (uppercaseKVPairs) => {
   const kvPairs = sanitizeObject(uppercaseKVPairs);
 
   // reverse the dictionary, so that each value is a unique key
-  let reversedKeysDictionary = sanitizeKeys(
+  let reversedKeysDictionary = sanitizeObject(
     expandTermsDictionary(keysDictionary)
   );
 
