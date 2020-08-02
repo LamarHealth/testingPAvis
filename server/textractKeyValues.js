@@ -1,4 +1,3 @@
-import fs from "fs";
 import keysDictionary from "./dictionaries/keysDictionary.json";
 
 /**
@@ -113,35 +112,46 @@ export const getKeyValues = (response) => {
 };
 
 // helper functions
-const reverseDictionary = (dictionary) => {
-  // switches keys and values, and where key: [array, of, values] makes a single unique key / value pair for each
-  let reversedDictionary = {};
+const expandTermsDictionary = (dictionary) => {
+  // Expands the canonical terms list to include all similar variations of strings.
+  let expandedTerms = {};
   Object.keys(dictionary).forEach((key) => {
     const interpretedValues = dictionary[key];
     if (Array.isArray(interpretedValues)) {
       interpretedValues.forEach((value) => {
-        reversedDictionary[value] = key;
+        expandedTerms[value] = key;
       });
     }
   });
-  return reversedDictionary;
+  return expandedTerms;
 };
 
-const lowercaseObject = (initialObject) => {
-  const lowercasedObject = {};
-  Object.keys(initialObject).forEach((key) => {
-    lowercasedObject[key.toLowerCase()] = initialObject[key].toLowerCase();
-  });
-  return lowercasedObject;
+const sanitizeObject = (initialObject) => {
+  const sanitizedObj = Object.entries(initialObject).reduce((accum, kvp) => {
+    let key = kvp[0];
+    let val = kvp[1];
+    key = key.toLowerCase();
+    val = val.toLowerCase();
+
+    key = key
+      .replace(/[0-9]/g, "") //replace '##.'
+      .replace(/\:/g, "") //replace colons
+      .replace(/(\(.*\))|(\(.*$)/g, "") //replace parens
+      .trim(); //replace whitespace
+
+    // assign to accum
+    accum[key] = val;
+  }, {});
+  return sanitizedObj;
 };
 
 // get interpreted keys from kv pairs using the keysDictionary
 export const getInterpretations = (uppercaseKVPairs) => {
-  const kvPairs = lowercaseObject(uppercaseKVPairs);
+  const kvPairs = sanitizeObject(uppercaseKVPairs);
 
   // reverse the dictionary, so that each value is a unique key
-  let reversedKeysDictionary = lowercaseObject(
-    reverseDictionary(keysDictionary)
+  let reversedKeysDictionary = sanitizeKeys(
+    expandTermsDictionary(keysDictionary)
   );
 
   let interpretedKeys = {};

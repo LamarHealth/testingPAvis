@@ -1,5 +1,5 @@
 {
-  "Bill of Lading": ["B/L"],
+  "Bill of Lading": ["B/L", "B/Lno."],
   "Freight Terms": "",
   "Export References": "",
   "Shipper": ["Consignor", "Exporter", "Ship From"],
