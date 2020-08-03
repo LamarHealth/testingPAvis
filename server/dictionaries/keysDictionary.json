@@ -6,8 +6,8 @@
   "Consignee": ["Consigned to", "Ship To"],
   "Notify Party": ["Intermediate Consignee"],
   "Shipper's Declaration of Value": ["Declared Value"],
-  "Express Release": "",
-  "AES ITN": ["AES"],
+  "Express Release": ["Release"],
+  "AES ITN": ["AES", "ITN"],
   "HS Code": "",
   "Comments": ""
 }
