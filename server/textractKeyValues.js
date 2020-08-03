@@ -32,8 +32,8 @@ export const getKvRelationship = (keyMap, valueMap, blockMap) => {
   Object.entries(keyMap).forEach((keyValueBlock) => {
     let [blockId, keyBlock] = keyValueBlock;
     let valueBlock = findValueBlock(keyBlock, valueMap);
-    let key = getText(keyBlock, blockMap, "key");
-    let val = getText(valueBlock, blockMap, "value");
+    let key = getText(keyBlock, blockMap, "key").trim();
+    let val = getText(valueBlock, blockMap, "value").trim();
     if (key !== "" || val !== "") {
       kvs[key] = val;
     }
