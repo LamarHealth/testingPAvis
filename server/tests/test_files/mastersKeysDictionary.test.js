@@ -1,4 +1,3 @@
-import { mastersKeys } from "./canonical_keys/mastersKeys";
 import masters3KeyValuePairs from "./kv_relationships_output_CURRENT/masters3.json";
 import masters4KeyValuePairs from "./kv_relationships_output_CURRENT/masters4.json";
 import masters5KeyValuePairs from "./kv_relationships_output_CURRENT/masters5.json";
@@ -37,7 +36,9 @@ const testDoc = (doc, method, matchFields) => {
     const value = entry[1];
     const topMatch = getEditDistanceAndSort(doc, key, method)[0];
     test(`WANT: (${key}: ${value}) --> TOP KVP: (${topMatch.key}: ${topMatch.value})`, () => {
-      expect(topMatch.value).toMatch(value === "" ? "" : new RegExp(value)); // could use jest .toContain here instead of an RE, but then it wouldn't be able to test an equality for "". Would have to do some kind of control flow either way.
+      value === ""
+        ? expect(topMatch.value).toBe("")
+        : expect(topMatch.value).toContain(value);
     });
   });
 };

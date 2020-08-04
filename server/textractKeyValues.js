@@ -107,7 +107,10 @@ export const getText = (result, blocksMap, type) => {
  */
 export const getKeyValues = (response) => {
   const [kvmap, valueMap, blockMap] = getKvMap(response);
-  const kvRelationship = getKvRelationship(kvmap, valueMap, blockMap);
+  const kvRelationship = sanitizeObject(
+    getKvRelationship(kvmap, valueMap, blockMap),
+    false
+  );
   return kvRelationship;
 };
 
@@ -126,18 +129,15 @@ const expandTermsDictionary = (dictionary) => {
   return expandedTerms;
 };
 
-const sanitizeObject = (initialObject) => {
+const sanitizeObject = (initialObject, sanitizeVals) => {
   const sanitizedObj = Object.entries(initialObject).reduce((accum, kvp) => {
-    let key = kvp[0];
-    let val = kvp[1];
-    key = key.toLowerCase();
-    val = val.toLowerCase();
-
-    key = key
+    let key = kvp[0]
+      .toLowerCase()
       .replace(/\:/g, "") //replace colons
       .replace(/([0-9]+([\W]))/g, "") //replace '##.'
       .replace(/(\(.*\))|(\(.*$)/g, "") //replace parens
       .trim(); //replace whitespace
+    let val = sanitizeVals === true ? kvp[1].toLowerCase() : kvp[1];
 
     // assign to accum
     accum[key] = val;
@@ -148,7 +148,7 @@ const sanitizeObject = (initialObject) => {
 
 // get interpreted keys from kv pairs using the keysDictionary
 export const getInterpretations = (uppercaseKVPairs) => {
-  const kvPairs = sanitizeObject(uppercaseKVPairs);
+  const kvPairs = sanitizeObject(uppercaseKVPairs, true);
 
   // reverse the dictionary, so that each value is a unique key
   let reversedKeysDictionary = sanitizeObject(

@@ -98,9 +98,27 @@ export const getEditDistanceAndSort = (
 
   const combinedKeyValuePairs = docKeyValuePairs.concat(interpretedKeyValues);
 
-  combinedKeyValuePairs.sort((a, b) =>
-    a.distanceFromTarget > b.distanceFromTarget ? -1 : 1
-  );
+  combinedKeyValuePairs.sort((a, b) => {
+    if (
+      // if same distance, then use leven to break the tie
+      a.distanceFromTarget === b.distanceFromTarget &&
+      method === "lc substring"
+    ) {
+      a.secondaryDistFromTarget = getDistancePercentage(
+        a.key,
+        longestKeyLength,
+        targetString,
+        "leven"
+      );
+      b.secondaryDistFromTarget = getDistancePercentage(
+        b.key,
+        longestKeyLength,
+        targetString,
+        "leven"
+      );
+      return a.secondaryDistFromTarget > b.secondaryDistFromTarget ? -1 : 1;
+    } else return a.distanceFromTarget > b.distanceFromTarget ? -1 : 1;
+  });
 
   return combinedKeyValuePairs;
 };
