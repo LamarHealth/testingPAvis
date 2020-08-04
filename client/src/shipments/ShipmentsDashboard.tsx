@@ -17,6 +17,7 @@ class ShipmentsDashboard extends React.Component {
       margin: 1em;
       height: 90vh;
       width: 100vw;
+      justify-content: center;
     `;
     const ChecklistColumn = styled.div`
       display: flex;
@@ -34,7 +35,6 @@ class ShipmentsDashboard extends React.Component {
         <ChecklistColumn>
           <h1>Sample Shipping Form</h1>
           <FormGroup
-            helperText="Helper text with details..."
             label="Shipping Instructions Required Fields"
             labelFor="text-input"
             labelInfo="(required)"
