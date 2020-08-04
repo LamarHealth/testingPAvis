@@ -349,17 +349,25 @@ const Message = ({ msg }: any) => {
 
 export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
-
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
-
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
-  )[0];
 
-  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+  const filterDocData = (docData: any) =>
+    docData.filter((doc: any) => doc.docID === globalSelectedFile.get())[0];
+  const checkKVPairs = (selectedDocData: any) =>
+    Object.keys(selectedDocData.keyValuePairs).length > 0;
+
+  const selectedDocData = filterDocData(docData);
+
+  // handle if new doc uploaded while modal open--call getKeyValuePairsByDoc() again
+  selectedDocData === undefined && setDocData(getKeyValuePairsByDoc());
+  const areThereKVPairs =
+    selectedDocData === undefined
+      ? // need to call twice; can't just setDocData(...) and go because react setState is async
+        checkKVPairs(filterDocData(getKeyValuePairsByDoc()))
+      : checkKVPairs(selectedDocData);
 
   return (
     <ModalWrapper>
