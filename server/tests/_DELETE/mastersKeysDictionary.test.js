@@ -2,10 +2,10 @@ import masters3KeyValuePairs from "./kv_relationships_output_sanitized/masters3.
 import masters4KeyValuePairs from "./kv_relationships_output_sanitized/masters4.json";
 import masters5KeyValuePairs from "./kv_relationships_output_sanitized/masters5.json";
 import shipDoc2KeyValuePairs from "./kv_relationships_output_sanitized/shippingDoc2.json";
-import masters3MatchFields from "./field_matches/masters3.json";
-import masters4MatchFields from "./field_matches/masters4.json";
-import masters5MatchFields from "./field_matches/masters5.json";
-import shipDoc2MatchFields from "./field_matches/shippingDoc2.json";
+import masters3MatchFields from "../test_files/field_matches/masters3.json";
+import masters4MatchFields from "../test_files/field_matches/masters4.json";
+import masters5MatchFields from "../test_files/field_matches/masters5.json";
+import shipDoc2MatchFields from "../test_files/field_matches/shippingDoc2.json";
 import { getInterpretations } from "../../textractKeyValues";
 import { getEditDistanceAndSort } from "./javascript_copies/KeyValuePairsCOPY";
 
