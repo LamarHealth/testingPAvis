@@ -28,6 +28,7 @@ import {
   sortKeyValuePairs,
   KeyValuesWithDistance,
   deleteKVPairFromLocalStorage,
+  KeyValuesByDoc,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
@@ -363,11 +364,24 @@ export const SelectModal = ({ eventObj }: any) => {
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
-  )[0];
+  const filterDocData = (docData: KeyValuesByDoc[]) =>
+    docData.filter(
+      (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
+    )[0];
+  const selectedDocData = filterDocData(docData);
 
-  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+  const checkKVPairs = (selectedDocData: KeyValuesByDoc) =>
+    Object.keys(selectedDocData.keyValuePairs).length > 0;
+  let areThereKVPairs;
+  // handle if doc is added while modal open
+  if (selectedDocData === undefined) {
+    const newDocData = getKeyValuePairsByDoc();
+    // need to set both separately, because react setState() is async
+    setDocData(newDocData);
+    areThereKVPairs = checkKVPairs(filterDocData(newDocData));
+  } else {
+    areThereKVPairs = checkKVPairs(selectedDocData);
+  }
 
   return (
     <ModalWrapper>

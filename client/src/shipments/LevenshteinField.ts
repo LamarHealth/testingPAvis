@@ -73,21 +73,21 @@ export const getDistancePercentage = (
   targetString: string,
   method: string
 ) => {
-  let dist;
   switch (method) {
     case "leven":
-      dist =
+      return (
         (longestKeyLength -
           getLevenDistance(targetString.toLowerCase(), key.toLowerCase())) /
-        longestKeyLength;
-      break;
+        longestKeyLength
+      );
     case "lc substring":
-      dist =
+      return (
         getLongestCommonSubstring(
           targetString.toLowerCase(),
           key.toLowerCase()
-        ) / targetString.length;
+        ) / targetString.length
+      );
+    default:
+      return 0;
   }
-
-  return dist;
 };
