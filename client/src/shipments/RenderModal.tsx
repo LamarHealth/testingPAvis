@@ -26,7 +26,7 @@ export const RenderModal = () => {
   const id = mainModalOpen ? "docit-main-modal" : undefined;
 
   $(document).ready(() => {
-    $("input").click((event) => {
+    $("input[type='text']").click((event) => {
       setEventObj(event);
       setMainModalOpen(true);
     });
