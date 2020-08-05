@@ -161,4 +161,3 @@ client_docs/
 *.pem
 *.crt
 *.key
-build.zip

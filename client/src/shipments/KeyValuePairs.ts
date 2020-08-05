@@ -12,6 +12,7 @@ export interface KeyValuesByDoc {
   docType: string;
   docID: string;
   keyValuePairs: KeyValues;
+  interpretedKeys: KeyValues;
 }
 
 // interface returned from getEditDistanceAndSort()
@@ -19,37 +20,10 @@ export interface KeyValuesWithDistance {
   key: string;
   value: string;
   distanceFromTarget: number;
+  interpretedFrom?: string;
 }
 
 ///// FUNCTIONS /////
-export const deleteKVPairFromLocalStorage = (
-  selectedDocID: any,
-  faultyKey: string,
-  faultyValue: string
-) => {
-  let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-
-  let index = undefined as any;
-  let selectedDoc = storedDocs.filter((doc: any, i: any) => {
-    const itMatches = doc.docID === selectedDocID;
-    if (itMatches) index = i;
-    return itMatches;
-  })[0];
-
-  const newKVPairs = {} as any;
-  Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
-    if (key !== faultyKey && selectedDoc.keyValuePairs[key] !== faultyValue) {
-      newKVPairs[key] = selectedDoc.keyValuePairs[key];
-    }
-  });
-
-  selectedDoc.keyValuePairs = newKVPairs;
-
-  storedDocs[index] = selectedDoc;
-
-  localStorage.setItem("docList", JSON.stringify(storedDocs));
-};
-
 export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   const docDataByDoc: any = [];
@@ -58,11 +32,13 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
     const docType = doc.docType;
     const docID = doc.docID;
     const keyValuePairs = doc.keyValuePairs;
+    const interpretedKeys = doc.interpretedKeys;
     const docObj = {
       docName,
       docType,
       docID,
       keyValuePairs,
+      interpretedKeys,
     };
     docDataByDoc.push(docObj);
   });
@@ -144,7 +120,7 @@ export const getEditDistanceAndSort = (
     } else return a.distanceFromTarget > b.distanceFromTarget ? -1 : 1;
   });
 
-  return docKeyValuePairs;
+  return combinedKeyValuePairs;
 };
 
 export const sortKeyValuePairs = (
@@ -173,4 +149,41 @@ export const sortKeyValuePairs = (
           a.key > b.key ? -1 : 1
       );
   }
+};
+
+export const deleteKVPairFromLocalStorage = (
+  selectedDocID: any,
+  faultyKey: string,
+  faultyValue: string
+) => {
+  let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+
+  let index = undefined as any;
+  let selectedDoc = storedDocs.filter((doc: any, i: any) => {
+    const itMatches = doc.docID === selectedDocID;
+    if (itMatches) index = i;
+    return itMatches;
+  })[0];
+
+  const newKVPairs = {} as any;
+  Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
+    if (key !== faultyKey && selectedDoc.keyValuePairs[key] !== faultyValue) {
+      newKVPairs[key] = selectedDoc.keyValuePairs[key];
+    }
+  });
+
+  selectedDoc.keyValuePairs = newKVPairs;
+
+  storedDocs[index] = selectedDoc;
+
+  localStorage.setItem("docList", JSON.stringify(storedDocs));
+};
+
+// helper functions
+const lowercaseKeys = (initialObject: any) => {
+  const lowercasedObject = {} as any;
+  Object.keys(initialObject).forEach((key) => {
+    lowercasedObject[key.toLowerCase()] = initialObject[key];
+  });
+  return lowercasedObject;
 };
