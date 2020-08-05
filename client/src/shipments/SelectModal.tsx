@@ -362,7 +362,7 @@ export const SelectModal = ({ eventObj }: any) => {
     )[0];
   const selectedDocData = filterDocData(docData);
 
-  const checkKVPairs = (selectedDocData: any) =>
+  const checkKVPairs = (selectedDocData: KeyValuesByDoc) =>
     Object.keys(selectedDocData.keyValuePairs).length > 0;
   let areThereKVPairs;
   // handle if doc is added while modal open
