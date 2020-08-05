@@ -355,11 +355,20 @@ export const SelectModal = ({ eventObj }: any) => {
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
-  )[0];
+  const filterDocData = (docData: any) =>
+    docData.filter((doc: any) => doc.docID === globalSelectedFile.get())[0];
+  const selectedDocData = filterDocData(docData);
 
-  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+  const checkKVPairs = (selectedDocData: any) =>
+    Object.keys(selectedDocData.keyValuePairs).length > 0;
+  let areThereKVPairs;
+  if (selectedDocData === undefined) {
+    const newDocData = getKeyValuePairsByDoc();
+    setDocData(newDocData);
+    areThereKVPairs = checkKVPairs(filterDocData(newDocData));
+  } else {
+    areThereKVPairs = checkKVPairs(selectedDocData);
+  }
 
   return (
     <ModalWrapper>
