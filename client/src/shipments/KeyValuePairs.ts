@@ -61,7 +61,7 @@ export const getAllKeyValuePairs = () => {
 export const getEditDistanceAndSort = (
   docData: KeyValuesByDoc,
   targetString: string,
-  method: string
+  method: "lc substring" | "leven"
 ): KeyValuesWithDistance[] => {
   const longestKeyLength = Object.keys(
     docData.keyValuePairs
@@ -125,7 +125,7 @@ export const getEditDistanceAndSort = (
 
 export const sortKeyValuePairs = (
   keyValuePairs: KeyValuesWithDistance[],
-  sortingMethod: string
+  sortingMethod: "highest match" | "lowest match" | "a-to-z" | "z-to-a"
 ): KeyValuesWithDistance[] => {
   switch (sortingMethod) {
     case "highest match":
@@ -149,9 +149,6 @@ export const sortKeyValuePairs = (
           a.key > b.key ? -1 : 1
       );
   }
-  // if the sorting fails (it won't), but to satisfy typescript putting this here:
-  console.log("sorting failed");
-  return keyValuePairs;
 };
 
 export const deleteKVPairFromLocalStorage = (

@@ -293,7 +293,9 @@ const TableComponent = () => {
   );
   const bestMatch = sortedKeyValuePairs[0].key;
 
-  const [sort, setSort] = useState("highest match");
+  const [sort, setSort] = useState(
+    "highest match" as "highest match" | "lowest match" | "a-to-z" | "z-to-a"
+  );
 
   const dynamicallySortedKeyValuePairs = sortKeyValuePairs(
     sortedKeyValuePairs,
