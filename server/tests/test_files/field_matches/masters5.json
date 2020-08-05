@@ -1,0 +1,19 @@
+{
+  "Bill of Lading Number": "CUS123456",
+  "Freight Terms": "PREPAID",
+  "Export References": "",
+  "Shipper Name": "",
+  "Shipper Address": "2600 Peaky Blinders Road Suite 123 Birmingham TX 11253 United States",
+  "Shipper Contact Info": "Phone: +1 987-321-6325 Fax: +1 817-639-7894",
+  "Consignee Name": "LVA p.A.p",
+  "Consignee Address": "Via Leornardo pasta 136 69036 Limito di pioltello MI Italy",
+  "Consignee Contact Info": "Phone: +63 02 998745",
+  "Notify Party Name": "",
+  "Notify Party Address": "",
+  "Notify Party Contact Info": "",
+  "Shipper’s Declaration of Value": "",
+  "Express Release": true,
+  "AES ITN": "W12318132803629",
+  "HS Code": "",
+  "Comments": ""
+}

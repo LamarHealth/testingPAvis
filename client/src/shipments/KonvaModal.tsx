@@ -6,6 +6,7 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "./../common/colors";
+import { DOC_IMAGE_WIDTH } from "./../common/constants";
 import { KonvaModalContext } from "./ManualSelect";
 
 const CurrentSelectionWrapper = styled.div`
@@ -72,7 +73,7 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
       points={Array.prototype.concat.apply(
         [],
         lineGeometry.Coordinates.map((geometry: any) => [
-          docImageURL.width * geometry.X,
+          DOC_IMAGE_WIDTH * geometry.X,
           docImageURL.height * geometry.Y,
         ])
       )}
@@ -83,11 +84,11 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
   );
 };
 
-const Header = ({ docImageURL, currentSelection }: any) => {
+const Header = ({ currentSelection }: any) => {
   return (
     <CurrentSelectionWrapper
       style={{
-        width: `${docImageURL.width}px`,
+        width: `${DOC_IMAGE_WIDTH}px`,
       }}
     >
       <Typography>
@@ -127,9 +128,13 @@ export const KonvaModal = () => {
   return (
     <>
       <Header docImageURL={docImageURL} currentSelection={currentSelection} />
-      <Stage width={docImageURL.width} height={docImageURL.height}>
+      <Stage width={DOC_IMAGE_WIDTH} height={docImageURL.height}>
         <Layer>
-          <KonvaImage image={image} />
+          <KonvaImage
+            image={image}
+            width={DOC_IMAGE_WIDTH}
+            height={docImageURL.height}
+          />
           <CurrentSelectionContext.Provider
             value={{
               filled,

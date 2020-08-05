@@ -15,7 +15,11 @@ import path from "path";
 import multer from "multer";
 import AWS, { Textract, S3 } from "aws-sdk";
 import uuidv4 from "uuid";
-import { getKeyValues, getLinesGeometry } from "./textractKeyValues";
+import {
+  getKeyValues,
+  getInterpretations,
+  getLinesGeometry,
+} from "./textractKeyValues";
 const pino = require("pino");
 const expressPino = require("express-pino-logger");
 
@@ -90,7 +94,8 @@ router.post("/api/upload_status", (req, res) => {
       // All docs are uploaded just in case
       s3.upload(s3params, function (err, data) {
         textract.analyzeDocument(textractParams, (err, data) => {
-          const parsedTextract = getKeyValues(data);
+          const keyValuePairs = getKeyValues(data);
+          const interpretedKeys = getInterpretations(keyValuePairs);
 
           // helper functions
           const logError = (msg, error = "") => {
@@ -114,7 +119,8 @@ router.post("/api/upload_status", (req, res) => {
               docClass: docClass,
               docName: req.files[0].originalname.split(".")[0],
               filePath: "",
-              keyValuePairs: parsedTextract,
+              keyValuePairs,
+              interpretedKeys,
             });
 
             const jsonifiedDocName = req.files[0].originalname.replace(
@@ -137,7 +143,7 @@ router.post("/api/upload_status", (req, res) => {
             s3params = {
               Bucket: `doc-classifier-bucket/${docID}`,
               Key: `parsedJSON-${jsonifiedDocName}`,
-              Body: Buffer.from(JSON.stringify(parsedTextract)),
+              Body: Buffer.from(JSON.stringify(keyValuePairs)),
             };
 
             s3.upload(s3params, (err, data) => {
@@ -269,12 +275,13 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const rawJSONDocName = `rawJSON-${req.params.docName.trim()}.json`;
+  const s3Key = `${docID}/${rawJSONDocName}`;
 
   const s3 = new S3();
 
   const s3rawJSONParams = {
     Bucket: "doc-classifier-bucket",
-    Key: `${docID}/${rawJSONDocName}`,
+    Key: s3Key,
   };
 
   s3.getObject(s3rawJSONParams, (error, data) => {
@@ -284,6 +291,7 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
           docID,
           docName: req.params.docName,
           rawJSONDocName: rawJSONDocName,
+          s3Key,
           route: "/api/lines-geometry/",
           type: "GET",
           s3error: error,

@@ -1,4 +1,4 @@
-export const getEditDistance = function (a: string, b: string): number {
+export const getLevenDistance = function (a: string, b: string): number {
   // from https://gist.github.com/andrei-m/982927, MIT license
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
@@ -35,4 +35,59 @@ export const getEditDistance = function (a: string, b: string): number {
   }
 
   return matrix[b.length][a.length];
+};
+
+export const getLongestCommonSubstring = (
+  str1: string,
+  str2: string
+): number => {
+  let longestSubstring = "";
+  let currentSubstring = "";
+  for (let i = 0; i < str1.length; i++) {
+    for (let j = 0; j < str2.length; j++) {
+      if (str1[i] === str2[j]) {
+        currentSubstring = str1[i];
+        const remainingChars = Math.min(str1.length - i, str2.length - j);
+        for (let k = 1; k < remainingChars; k++) {
+          if (str1[i + k] === str2[j + k]) {
+            currentSubstring += str1[i + k];
+          } else {
+            break;
+          }
+        }
+        if (currentSubstring.length > longestSubstring.length) {
+          longestSubstring = currentSubstring;
+        }
+      }
+    }
+  }
+
+  longestSubstring = longestSubstring.trim();
+
+  return longestSubstring.length;
+};
+
+export const getDistancePercentage = (
+  key: string,
+  longestKeyLength: number,
+  targetString: string,
+  method: string
+) => {
+  switch (method) {
+    case "leven":
+      return (
+        (longestKeyLength -
+          getLevenDistance(targetString.toLowerCase(), key.toLowerCase())) /
+        longestKeyLength
+      );
+    case "lc substring":
+      return (
+        getLongestCommonSubstring(
+          targetString.toLowerCase(),
+          key.toLowerCase()
+        ) / targetString.length
+      );
+    default:
+      return 0;
+  }
 };

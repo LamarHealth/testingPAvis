@@ -1,3 +1,5 @@
+import keysDictionary from "./dictionaries/keysDictionary.json";
+
 /**
  * Helper function used to parse textract tree
  */
@@ -30,9 +32,11 @@ export const getKvRelationship = (keyMap, valueMap, blockMap) => {
   Object.entries(keyMap).forEach((keyValueBlock) => {
     let [blockId, keyBlock] = keyValueBlock;
     let valueBlock = findValueBlock(keyBlock, valueMap);
-    let key = getText(keyBlock, blockMap);
-    let val = getText(valueBlock, blockMap);
-    kvs[key] = val;
+    let key = getText(keyBlock, blockMap, "key").trim();
+    let val = getText(valueBlock, blockMap, "value").trim();
+    if (key !== "" || val !== "") {
+      kvs[key] = val;
+    }
   });
   return kvs;
 };
@@ -72,7 +76,7 @@ export const findValueBlock = (keyBlock, valueMap) => {
   return valueBlock;
 };
 
-export const getText = (result, blocksMap) => {
+export const getText = (result, blocksMap, type) => {
   let text = "";
   if (result && "Relationships" in result) {
     result["Relationships"].forEach((relationship) => {
@@ -91,6 +95,9 @@ export const getText = (result, blocksMap) => {
       }
     });
   }
+  // if (type === "key" && ":" in key) {
+  //   text = /(\w|\W)*(?=:$)/.exec(text.trim())[0];
+  // }
   return text;
 };
 
@@ -100,6 +107,64 @@ export const getText = (result, blocksMap) => {
  */
 export const getKeyValues = (response) => {
   const [kvmap, valueMap, blockMap] = getKvMap(response);
-  const kvRelationship = getKvRelationship(kvmap, valueMap, blockMap);
+  const kvRelationship = sanitizeObject(
+    getKvRelationship(kvmap, valueMap, blockMap),
+    false
+  );
   return kvRelationship;
+};
+
+// helper functions
+const expandTermsDictionary = (dictionary) => {
+  // Expands the canonical terms list to include all similar variations of strings.
+  let expandedTerms = {};
+  Object.keys(dictionary).forEach((key) => {
+    const interpretedValues = dictionary[key];
+    if (Array.isArray(interpretedValues)) {
+      interpretedValues.forEach((value) => {
+        expandedTerms[value] = key;
+      });
+    }
+  });
+  return expandedTerms;
+};
+
+const sanitizeObject = (initialObject, sanitizeVals) => {
+  const sanitizedObj = Object.entries(initialObject).reduce((accum, kvp) => {
+    let key = kvp[0]
+      .toLowerCase()
+      .replace(/\:/g, "") //replace colons
+      .replace(/([0-9]+([\W]))/g, "") //replace '##.'
+      .replace(/(\(.*\))|(\(.*$)/g, "") //replace parens
+      .trim(); //replace whitespace
+    let val = sanitizeVals === true ? kvp[1].toLowerCase() : kvp[1];
+
+    // assign to accum
+    accum[key] = val;
+    return accum;
+  }, {});
+  return sanitizedObj;
+};
+
+// get interpreted keys from kv pairs using the keysDictionary
+export const getInterpretations = (uppercaseKVPairs) => {
+  const kvPairs = sanitizeObject(uppercaseKVPairs, true);
+
+  // reverse the dictionary, so that each value is a unique key
+  let reversedKeysDictionary = sanitizeObject(
+    expandTermsDictionary(keysDictionary)
+  );
+
+  let interpretedKeys = {};
+  Object.keys(reversedKeysDictionary).forEach((searchKey) => {
+    Object.keys(kvPairs).forEach((key) => {
+      if (key.includes(searchKey)) {
+        interpretedKeys[key] = key.replace(
+          searchKey,
+          reversedKeysDictionary[searchKey]
+        );
+      }
+    });
+  });
+  return interpretedKeys;
 };

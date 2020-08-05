@@ -3,10 +3,7 @@ import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import {
-  getLevenDistanceAndSort,
-  getKeyValuePairsByDoc,
-} from "./KeyValuePairs";
+import { getEditDistanceAndSort, getKeyValuePairsByDoc } from "./KeyValuePairs";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -113,9 +110,10 @@ const DocCell = (props: DocumentInfo) => {
           return;
         }
 
-        const sortedKeyValuePairs = getLevenDistanceAndSort(
+        const sortedKeyValuePairs = getEditDistanceAndSort(
           keyValuePairs,
-          targetString
+          targetString,
+          "lc substring"
         );
 
         if (sortedKeyValuePairs[0].value !== "") {

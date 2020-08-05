@@ -24,7 +24,7 @@ import { MODAL_WIDTH, API_PATH } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
-  getLevenDistanceAndSort,
+  getEditDistanceAndSort,
   sortKeyValuePairs,
   KeyValuesWithDistance,
   deleteKVPairFromLocalStorage,
@@ -267,6 +267,11 @@ const TableRowComponent = (props: {
       </TableCell>
       <TableCell>
         <Typography>{keyValue["key"]}</Typography>
+        {keyValue.interpretedFrom && (
+          <Typography variant="caption">
+            <i>Interpreted from: {keyValue["interpretedFrom"]}</i>
+          </Typography>
+        )}
       </TableCell>
       <TableCell>
         <Typography>{keyValue["value"]}</Typography>
@@ -282,13 +287,16 @@ const TableContext = createContext({} as any);
 
 const TableComponent = () => {
   const { targetString, selectedDocData } = useContext(TableContext);
-  const sortedKeyValuePairs = getLevenDistanceAndSort(
+  const sortedKeyValuePairs = getEditDistanceAndSort(
     selectedDocData,
-    targetString
+    targetString,
+    "lc substring"
   );
   const bestMatch = sortedKeyValuePairs[0].key;
 
-  const [sort, setSort] = useState("highest match");
+  const [sort, setSort] = useState(
+    "highest match" as "highest match" | "lowest match" | "a-to-z" | "z-to-a"
+  );
 
   const dynamicallySortedKeyValuePairs = sortKeyValuePairs(
     sortedKeyValuePairs,
