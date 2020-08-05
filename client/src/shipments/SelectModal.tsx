@@ -28,6 +28,7 @@ import {
   sortKeyValuePairs,
   KeyValuesWithDistance,
   deleteKVPairFromLocalStorage,
+  KeyValuesByDoc,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { ModalContext } from "./RenderModal";
@@ -355,8 +356,10 @@ export const SelectModal = ({ eventObj }: any) => {
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const filterDocData = (docData: any) =>
-    docData.filter((doc: any) => doc.docID === globalSelectedFile.get())[0];
+  const filterDocData = (docData: KeyValuesByDoc[]) =>
+    docData.filter(
+      (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
+    )[0];
   const selectedDocData = filterDocData(docData);
 
   const checkKVPairs = (selectedDocData: any) =>
