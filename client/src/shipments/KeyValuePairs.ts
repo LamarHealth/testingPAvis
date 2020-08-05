@@ -94,10 +94,13 @@ export const getLevenDistanceAndSort = (
     let entry: any = {};
     entry["key"] = key;
     entry["value"] = docData.keyValuePairs[key];
-    entry["distanceFromTarget"] =
+    const distanceFromTarget =
       (longestKeyLength -
         getEditDistance(targetString.toLowerCase(), key.toLowerCase())) /
       longestKeyLength;
+    entry["distanceFromTarget"] =
+      distanceFromTarget > 0 ? distanceFromTarget : 0;
+
     return entry;
   });
 
