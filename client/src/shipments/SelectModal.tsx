@@ -135,8 +135,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const { setMainModalOpen } = useContext(ModalContext);
   const {
     selectedDocData,
-    getAndFilterDocData,
-    setSelectedDocData,
+    setDocData,
     setRemoveKVMessage,
     setMessageCollapse,
     eventObj,
@@ -160,7 +159,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
       );
     }
 
-    setSelectedDocData(getAndFilterDocData());
+    setDocData(getKeyValuePairsByDoc());
     setHardCollapse(true);
     setSoftCollapse(false);
 
@@ -350,14 +349,16 @@ const Message = ({ msg }: any) => {
 
 export const SelectModal = ({ eventObj }: any) => {
   const targetString = eventObj.target.placeholder;
+
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
+
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const getAndFilterDocData = () =>
-    getKeyValuePairsByDoc().filter(
-      (doc: any) => doc.docID === globalSelectedFile.get()
-    )[0];
-  const [selectedDocData, setSelectedDocData] = useState(getAndFilterDocData());
+  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
+  const selectedDocData = docData.filter(
+    (doc) => doc.docID === globalSelectedFile.get()
+  )[0];
+
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
 
   return (
@@ -371,8 +372,7 @@ export const SelectModal = ({ eventObj }: any) => {
           value={{
             targetString,
             selectedDocData,
-            getAndFilterDocData,
-            setSelectedDocData,
+            setDocData,
             setRemoveKVMessage,
             setMessageCollapse,
             eventObj,
