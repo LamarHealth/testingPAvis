@@ -2,9 +2,9 @@ import { parseTextract } from "../../textractParser";
 import masters3TextractJSON from "../textract_output/masters3.json";
 import masters4TextractJSON from "../textract_output/masters4.json";
 import masters5TextractJSON from "../textract_output/masters5.json";
-import { masters3Fields } from "./masters3Fields";
-import { masters4Fields } from "./masters4Fields";
-import { masters5Fields } from "./masters5Fields";
+import { masters3Fields } from "./hardcoded_fields/masters3Fields";
+import { masters4Fields } from "./hardcoded_fields/masters4Fields";
+import { masters5Fields } from "./hardcoded_fields/masters5Fields";
 
 const [
   masters3ParsedTextract,
@@ -23,6 +23,8 @@ const testForKeys = (testName, fieldsObj, parsedTextractData) => {
     });
   });
 };
+
+// NOTE: this test is being ignored by jest in package.json.
 
 const testForValues = (testName, fieldsObj, parsedTextractData) => {
   return Object.keys(fieldsObj).map((key, i) => {

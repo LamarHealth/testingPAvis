@@ -18,6 +18,7 @@ import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
 import { API_PATH } from "../common/constants";
+import { DOC_IMAGE_WIDTH } from "../common/constants";
 
 const ModalWrapper = styled.div`
   top: 25px;
@@ -120,16 +121,14 @@ export const ManualSelect = ({ eventObj }: any) => {
 
         const img = new Image();
         img.src = objectURL;
-        let urlObj: any = {
-          url: objectURL,
-        };
         img.onload = function (this: any) {
-          urlObj["width"] = this.naturalWidth;
-          urlObj["height"] = this.naturalHeight;
-          urlObj["overlayPositionOffset"] =
-            (window.innerWidth - this.naturalWidth) / 2;
+          let urlObj: any = {
+            url: objectURL,
+            height: (DOC_IMAGE_WIDTH * this.naturalHeight) / this.naturalWidth,
+            overlayPositionOffset: (window.innerWidth - DOC_IMAGE_WIDTH) / 2,
+          };
+          setDocImageURL(urlObj);
         };
-        setDocImageURL(urlObj);
         break;
       case 410:
         setErrorFetchingImage(true);
