@@ -71,11 +71,14 @@ export const getEditDistanceAndSort = (
     let entry: any = {};
     entry["key"] = key;
     entry["value"] = docData.keyValuePairs[key];
-    const distanceFromTarget = (entry[
-      "distanceFromTarget"
-    ] = getDistancePercentage(key, longestKeyLength, targetString, method));
-    entry["distanceFromTarget"] =
-      distanceFromTarget > 0 ? distanceFromTarget : 0;
+
+    const distPercentage = getDistancePercentage(
+      key,
+      longestKeyLength,
+      targetString,
+      method
+    );
+    entry["distanceFromTarget"] = distPercentage > 0 ? distPercentage : 0;
 
     return entry;
   });
