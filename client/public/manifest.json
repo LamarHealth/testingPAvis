@@ -1,9 +1,8 @@
 {
   "short_name": "DocIt",
-  "name": "DocIt Development Build",
-  "version": "1.0",
-  "description": "This extension is for beta testing",
-  "permissions": ["storage"],
+  "name": "DocIt",
+  "version": "1.0.1",
+  "description": "DocIt enables users to fill out web forms with OCR data",
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
