@@ -135,7 +135,8 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const { setMainModalOpen } = useContext(ModalContext);
   const {
     selectedDocData,
-    setDocData,
+    getAndFilterDocData,
+    setSelectedDocData,
     setRemoveKVMessage,
     setMessageCollapse,
     eventObj,
@@ -159,7 +160,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
       );
     }
 
-    setDocData(getKeyValuePairsByDoc());
+    setSelectedDocData(getAndFilterDocData());
     setHardCollapse(true);
     setSoftCollapse(false);
 
@@ -360,22 +361,12 @@ export const SelectModal = ({ eventObj }: any) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-
-  const filterDocData = (docData: any) =>
-    docData.filter((doc: any) => doc.docID === globalSelectedFile.get())[0];
-  const checkKVPairs = (selectedDocData: any) =>
-    Object.keys(selectedDocData.keyValuePairs).length > 0;
-
-  const selectedDocData = filterDocData(docData);
-
-  // handle if new doc uploaded while modal open--call getKeyValuePairsByDoc() again
-  selectedDocData === undefined && setDocData(getKeyValuePairsByDoc());
-  const areThereKVPairs =
-    selectedDocData === undefined
-      ? // need to call twice; can't just setDocData(...) and go because react setState is async
-        checkKVPairs(filterDocData(getKeyValuePairsByDoc()))
-      : checkKVPairs(selectedDocData);
+  const getAndFilterDocData = () =>
+    getKeyValuePairsByDoc().filter(
+      (doc: any) => doc.docID === globalSelectedFile.get()
+    )[0];
+  const [selectedDocData, setSelectedDocData] = useState(getAndFilterDocData());
+  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
 
   return (
     <ModalWrapper>
@@ -388,7 +379,8 @@ export const SelectModal = ({ eventObj }: any) => {
           value={{
             targetString,
             selectedDocData,
-            setDocData,
+            getAndFilterDocData,
+            setSelectedDocData,
             setRemoveKVMessage,
             setMessageCollapse,
             eventObj,
