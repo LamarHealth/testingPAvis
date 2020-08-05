@@ -370,8 +370,10 @@ export const SelectModal = ({ eventObj }: any) => {
   const checkKVPairs = (selectedDocData: any) =>
     Object.keys(selectedDocData.keyValuePairs).length > 0;
   let areThereKVPairs;
+  // handle if doc is added while modal open
   if (selectedDocData === undefined) {
     const newDocData = getKeyValuePairsByDoc();
+    // need to set both separately, because react setState() is async
     setDocData(newDocData);
     areThereKVPairs = checkKVPairs(filterDocData(newDocData));
   } else {
