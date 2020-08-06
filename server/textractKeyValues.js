@@ -1,4 +1,4 @@
-import keysDictionary from "./dictionaries/keysDictionary.json";
+import keysDictionary from "./keysDictionary.json";
 
 /**
  * Helper function used to parse textract tree
