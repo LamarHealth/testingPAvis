@@ -166,8 +166,6 @@ const FileStatus = (props: any) => {
     const shadowRoot: any = insertionElement.children[0].shadowRoot;
     const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
 
-    console.log("canvas, ", canvas);
-
     const dataUrl = canvas.toDataURL();
     setThumbnailSrc(dataUrl);
 
