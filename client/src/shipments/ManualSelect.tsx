@@ -192,7 +192,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   }, [currentSelection]);
 
   return (
-    <div>
+    <React.Fragment>
       <Typography variant="h6" style={{ margin: "1em" }}>
         {selectedDocData.docName}
       </Typography>
@@ -213,6 +213,7 @@ export const ManualSelect = ({ eventObj }: any) => {
           BackdropProps={{
             timeout: 500,
           }}
+          style={{ zIndex: 99999 }}
         >
           <Fade in={manualSelectModalOpen}>
             <WrappedJssComponent>
@@ -239,6 +240,6 @@ export const ManualSelect = ({ eventObj }: any) => {
           </Fade>
         </Modal>
       )}
-    </div>
+    </React.Fragment>
   );
 };
