@@ -80,7 +80,13 @@
     ]
   },
   "devDependencies": {
+    "@babel/preset-flow": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@babel/preset-env": "^7.10.3",
     "concurrently": "^5.0.2",
     "nodemon": "^2.0.2"
+  },
+  "jest": {
+    "verbose": true
   }
 }
