@@ -20,7 +20,7 @@
   "scripts": {
     "build": "babel . --ignore node_modules,build --out-dir build",
     "start": "nodemon --exec babel-node server.js",
-    "start:prod": "cd build && node server.js",
+    "start:prod": "node build/server.js",
     "test": "jest"
   },
   "devDependencies": {
