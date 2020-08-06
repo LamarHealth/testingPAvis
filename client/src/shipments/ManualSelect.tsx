@@ -19,11 +19,12 @@ import { KonvaModal } from "./KonvaModal";
 import uuidv from "uuid";
 import { API_PATH } from "../common/constants";
 import { DOC_IMAGE_WIDTH } from "../common/constants";
+import { KONVA_MODAL_HEIGHT } from "../common/constants";
 
 const ModalWrapper = styled.div`
   top: 25px;
   position: absolute;
-  max-height: 675px;
+  max-height: ${KONVA_MODAL_HEIGHT}px;
   overflow-y: scroll;
 `;
 
