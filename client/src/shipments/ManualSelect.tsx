@@ -9,6 +9,7 @@ import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
+import Chip from "@material-ui/core/Chip";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
@@ -28,17 +29,11 @@ const ModalWrapper = styled.div`
   overflow-y: scroll;
 `;
 
-const ManualSelectButton = styled.button`
-  border: 1px solid white;
-  border-radius: 5px;
+const ManualSelectButton = styled(Chip)`
   font-weight: bold;
   background-color: #f9e526;
   padding: 0.3em 1.3em;
   margin: 0 0.4em 0.4em 1em;
-
-  p {
-    margin: 0.2em 0.5em;
-  }
 `;
 
 export const ErrorMessage = styled(Typography)`
@@ -196,9 +191,12 @@ export const ManualSelect = ({ eventObj }: any) => {
       <Typography variant="h6" style={{ margin: "1em" }}>
         {selectedDocData.docName}
       </Typography>
-      <ManualSelectButton aria-describedby={id} onClick={modalHandleClick}>
-        <Typography>Manual Select</Typography>
-      </ManualSelectButton>
+      <ManualSelectButton
+        label="Manual Select"
+        variant="outlined"
+        onClick={modalHandleClick}
+      />
+
       {(errorFetchingGeometry || errorFetchingImage) && (
         <ErrorLine errorCode={errorCode} msg={errorMessage} />
       )}
