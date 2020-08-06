@@ -63,9 +63,6 @@ const ThumbInner = styled.div`
 // canvas element for PDFJS
 const Canvas = styled.canvas`
   position: relative;
-  display: block;
-  width: auto;
-  height: 100%;
   display: none;
 `;
 
@@ -168,6 +165,9 @@ const FileStatus = (props: any) => {
     const insertionElement: any = document.querySelector("#insertion-point");
     const shadowRoot: any = insertionElement.children[0].shadowRoot;
     const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
+
+    console.log("canvas, ", canvas);
+
     const dataUrl = canvas.toDataURL();
     setThumbnailSrc(dataUrl);
 
