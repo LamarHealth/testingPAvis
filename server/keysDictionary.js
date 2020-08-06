@@ -1,4 +1,4 @@
-{
+export const keysDictionary = {
   "Bill of Lading": ["B/L", "B/Lno."],
   "Freight Terms": "",
   "Export References": "",
@@ -9,5 +9,5 @@
   "Express Release": "",
   "AES ITN": ["AES", "ITN"],
   "HS Code": "",
-  "Comments": ""
-}
+  "Comments": "",
+};
