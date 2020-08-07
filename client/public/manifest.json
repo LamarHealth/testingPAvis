@@ -11,8 +11,10 @@
     }
   ],
   "browser_action": {
-    "default_popup": "popup.html",
     "default_title": "open the popup"
   },
-  "manifest_version": 2
+  "manifest_version": 2,
+  "background": {
+    "scripts": ["background.js"]
+  }
 }
