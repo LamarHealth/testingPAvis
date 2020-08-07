@@ -66,15 +66,14 @@ const ExpandButton = styled.button`
 export const Sidebar = () => {
   const [isOpen, setOpen] = useState(false);
 
-  chrome.runtime.onMessage.addListener(function (
-    request,
-    sender,
-    sendResponse
-  ) {
-    if (request.message == "open sesame") {
-      setOpen(!isOpen);
-    }
-  });
+  // open the sidebar if extension icon clicked
+  if (process.env.REACT_APP_LOCAL !== "local") {
+    chrome.runtime.onMessage.addListener(function (request) {
+      if (request.message == "open sesame") {
+        setOpen(!isOpen);
+      }
+    });
+  }
 
   return (
     <WrappedJssComponent>
