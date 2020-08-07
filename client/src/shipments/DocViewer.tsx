@@ -23,6 +23,7 @@ import {
 
 import ButtonsBox from "./ButtonsBox";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { assignTargetString } from "./libertyInputsDictionary";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -96,8 +97,8 @@ const DocCell = (props: DocumentInfo) => {
         (doc) => doc.docID === props.docID
       )[0];
 
-      $("input").each(function (inputEl) {
-        const targetString = $(this).attr("placeholder");
+      $("input").each(function () {
+        const targetString = assignTargetString($(this));
 
         if (typeof targetString === "undefined") {
           return;

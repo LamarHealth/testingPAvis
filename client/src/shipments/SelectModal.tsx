@@ -356,9 +356,7 @@ const Message = ({ msg }: any) => {
   );
 };
 
-export const SelectModal = ({ eventObj }: any) => {
-  const targetString = eventObj.target.placeholder;
-
+export const SelectModal = ({ eventObj, targetString }: any) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
 

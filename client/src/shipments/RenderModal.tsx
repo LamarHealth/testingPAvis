@@ -14,11 +14,13 @@ import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
+import { assignTargetString } from "./libertyInputsDictionary";
 
 export const ModalContext = createContext({} as any);
 
 export const RenderModal = () => {
   const [eventObj, setEventObj] = useState(null) as any;
+  const [targetString, setTargetString] = useState(undefined as any);
   const areThereDocs = getKeyValuePairsByDoc().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
@@ -26,8 +28,9 @@ export const RenderModal = () => {
   const id = mainModalOpen ? "docit-main-modal" : undefined;
 
   $(document).ready(() => {
-    $("input").click((event) => {
+    $("input").click(function (event) {
       setEventObj(event);
+      setTargetString(assignTargetString($(this)));
       setMainModalOpen(true);
     });
   });
@@ -51,7 +54,14 @@ export const RenderModal = () => {
               <ModalContext.Provider
                 value={{ mainModalOpen, setMainModalOpen }}
               >
-                <>{eventObj && <SelectModal eventObj={eventObj} />}</>
+                <>
+                  {eventObj && (
+                    <SelectModal
+                      eventObj={eventObj}
+                      targetString={targetString}
+                    />
+                  )}
+                </>
               </ModalContext.Provider>
             </WrappedJssComponent>
           </Fade>
