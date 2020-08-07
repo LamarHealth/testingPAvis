@@ -23,7 +23,10 @@ import {
 
 import ButtonsBox from "./ButtonsBox";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
-import { assignTargetString } from "./libertyInputsDictionary";
+import {
+  assignTargetString,
+  handleFreightTerms,
+} from "./libertyInputsDictionary";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -97,8 +100,12 @@ const DocCell = (props: DocumentInfo) => {
         (doc) => doc.docID === props.docID
       )[0];
 
+      $("select").each(function () {
+        handleFreightTerms(this, keyValuePairs);
+      });
+
       $("input").each(function () {
-        const targetString = assignTargetString($(this));
+        const targetString = assignTargetString(this);
 
         if (typeof targetString === "undefined") {
           return;
