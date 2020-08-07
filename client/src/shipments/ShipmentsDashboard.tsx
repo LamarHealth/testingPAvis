@@ -40,8 +40,17 @@ class ShipmentsDashboard extends React.Component {
             labelInfo="(required)"
           >
             <FormContainer placeholder="Bill of Lading Number" />
-            <FormContainer placeholder="Freight Terms" />
-            <FormContainer placeholder="Export References" />
+            <FormContainer id="Freight Terms" />
+            <FormContainer id="Export References" />
+            Freight Terms:{" "}
+            <select
+              id="CMGeneralFreightTerms"
+              className="form-control"
+              autoComplete="off"
+            >
+              <option value="2">Collect</option>
+              <option value="1">Prepaid</option>
+            </select>
             <h3>Shipper</h3>
             <FormContainer placeholder="Shipper Name" />
             <FormContainer placeholder="Shipper Address" />
