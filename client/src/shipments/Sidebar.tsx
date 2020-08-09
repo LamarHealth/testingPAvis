@@ -80,7 +80,7 @@ export const Sidebar = () => {
   return (
     <WrappedJssComponent>
       <Container open={isOpen}>
-        <Column open={true}>
+        <Column open={isOpen}>
           <DocViewer />
         </Column>
         <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
