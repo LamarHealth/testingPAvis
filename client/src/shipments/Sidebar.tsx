@@ -68,17 +68,20 @@ export const Sidebar = () => {
 
   // open the sidebar if extension icon clicked
   if (process.env.REACT_APP_LOCAL !== "local") {
-    chrome.runtime.onMessage.addListener(function (request) {
+    const callback = function (request: any) {
       if (request.message == "open sesame") {
+        console.log("hello there");
+        chrome.runtime.onMessage.removeListener(callback);
         setOpen(!isOpen);
       }
-    });
+    };
+    chrome.runtime.onMessage.addListener(callback);
   }
 
   return (
     <WrappedJssComponent>
       <Container open={isOpen}>
-        <Column open={isOpen}>
+        <Column open={true}>
           <DocViewer />
         </Column>
         <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
