@@ -70,7 +70,6 @@ export const Sidebar = () => {
   if (process.env.REACT_APP_LOCAL !== "local") {
     const callback = function (request: any) {
       if (request.message == "open sesame") {
-        console.log("hello there");
         chrome.runtime.onMessage.removeListener(callback);
         setOpen(!isOpen);
       }
