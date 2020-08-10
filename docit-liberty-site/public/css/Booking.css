@@ -1,0 +1,23 @@
+.voidedBooking{
+    color:red;
+    text-decoration: line-through;
+}
+
+.disabledAction{
+    color: lightgray;
+}
+
+.selectedRow{
+    background: lightsteelblue;
+}
+
+/* Update HTML2PDF Rocket HTML found in GeneralFunctions.js function htmlToPdf */
+.pdfText_Normal{
+    font-size:55%;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+/* Update HTML2PDF Rocket HTML found in GeneralFunctions.js function htmlToPdf */
+.pdfFontType{
+    font-family: 'Times New Roman', Times, serif;
+}
