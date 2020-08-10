@@ -12,7 +12,7 @@ import { LOCAL_MODE } from "./common/constants";
 dotenv.config();
 
 $('<span id="insertion-point"/>').insertBefore(document.body);
-console.log(process.env);
+
 ReactDOM.render(
   <>
     <RenderModal />
