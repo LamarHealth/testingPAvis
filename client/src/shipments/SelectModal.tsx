@@ -356,7 +356,12 @@ const Message = ({ msg }: any) => {
   );
 };
 
-export const SelectModal = ({ eventObj, targetString }: any) => {
+interface SelectProps {
+  eventObj: any;
+  targetString: string;
+}
+
+export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
 
