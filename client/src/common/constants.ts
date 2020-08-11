@@ -1,5 +1,6 @@
 export const SIDEBAR_WIDTH = "25em";
 export const PAGE_SCALE = (1.1 * window.innerWidth) / 1440;
+export const MODAL_SHADOW = "0px 0px 15px 3px rgba(102, 102, 102, 0.15)";
 export const DOC_IMAGE_WIDTH = window.innerWidth * (2 / 3);
 export const KONVA_MODAL_HEIGHT = window.innerHeight * (6 / 7);
 export const KONVA_MODAL_OFFSET_Y = 25;

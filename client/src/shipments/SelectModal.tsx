@@ -25,6 +25,7 @@ import {
   MODAL_OFFSET_X,
   MODAL_OFFSET_Y,
   API_PATH,
+  MODAL_SHADOW,
 } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
@@ -51,6 +52,7 @@ const ModalWrapper = styled.div`
   overflow-y: scroll;
   width: ${MODAL_WIDTH}px;
   border: 1px solid ${colors.MODAL_BORDER};
+  box-shadow: ${MODAL_SHADOW};
 `;
 
 const CloseButton = styled.button`

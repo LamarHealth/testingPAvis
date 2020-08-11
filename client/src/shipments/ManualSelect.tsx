@@ -25,6 +25,7 @@ import {
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
   KONVA_MODAL_OFFSET_Y,
+  MODAL_SHADOW,
 } from "../common/constants";
 
 const ModalWrapper = styled.div`
@@ -33,6 +34,7 @@ const ModalWrapper = styled.div`
   height: ${KONVA_MODAL_HEIGHT}px;
   overflow-y: scroll;
   border: 1px solid ${colors.MODAL_BORDER};
+  box-shadow: ${MODAL_SHADOW};
 `;
 
 const ManualSelectButton = styled(Chip)`
