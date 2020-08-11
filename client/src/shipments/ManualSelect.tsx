@@ -215,6 +215,7 @@ export const ManualSelect = ({ eventObj }: any) => {
             timeout: 500,
           }}
           style={{ zIndex: 99999 }}
+          disableBackdropClick={true}
         >
           <Fade in={manualSelectModalOpen}>
             <WrappedJssComponent>
@@ -232,6 +233,7 @@ export const ManualSelect = ({ eventObj }: any) => {
                     setFilled,
                     setCurrentSelection,
                     currentLinesGeometry,
+                    setManualSelectModalOpen,
                   }}
                 >
                   <KonvaModal />

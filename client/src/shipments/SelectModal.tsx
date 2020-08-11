@@ -47,6 +47,21 @@ const ModalWrapper = styled.div`
   width: ${MODAL_WIDTH}px;
 `;
 
+const CloseButton = styled.button`
+  float: right;
+  margin: 1em;
+  height: 3em;
+  width: 3em;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  transition: 0.5s;
+
+  :hover {
+    border: 1px solid ${colors.DROPZONE_TEXT_GREY};
+  }
+`;
+
 const FillButton = styled.button`
   background-color: ${colors.FILL_BUTTON};
   color: white;
@@ -364,6 +379,7 @@ export interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
+  const { setMainModalOpen } = useContext(MainModalContext);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -388,6 +404,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
 
   return (
     <ModalWrapper>
+      <CloseButton onClick={() => setMainModalOpen(false)}>X</CloseButton>
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />

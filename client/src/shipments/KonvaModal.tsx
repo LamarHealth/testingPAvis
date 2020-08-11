@@ -9,6 +9,22 @@ import { colors } from "./../common/colors";
 import { DOC_IMAGE_WIDTH } from "./../common/constants";
 import { KonvaModalContext } from "./ManualSelect";
 
+// cannot import from SelectModal... likely a shadow dom issue
+const CloseButton = styled.button`
+  float: right;
+  margin: 1em;
+  height: 3em;
+  width: 3em;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  transition: 0.5s;
+
+  :hover {
+    border: 1px solid ${colors.DROPZONE_TEXT_GREY};
+  }
+`;
+
 const CurrentSelectionWrapper = styled.div`
   padding: 1em 2em;
   background-color: ${colors.MANUAL_SELECT_HEADER};
@@ -124,9 +140,13 @@ export const KonvaModal = () => {
     setFilled,
     setCurrentSelection,
     currentLinesGeometry,
+    setManualSelectModalOpen,
   } = useContext(KonvaModalContext);
   return (
     <>
+      <CloseButton onClick={() => setManualSelectModalOpen(false)}>
+        X
+      </CloseButton>
       <Header docImageURL={docImageURL} currentSelection={currentSelection} />
       <Stage width={DOC_IMAGE_WIDTH} height={docImageURL.height}>
         <Layer>

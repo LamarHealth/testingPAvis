@@ -6,7 +6,7 @@ import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import { ThemeProvider } from "@material-ui/core/styles";
-import Draggable, { DraggableData } from "react-draggable";
+import Draggable from "react-draggable";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -54,6 +54,7 @@ export const RenderModal = () => {
           BackdropProps={{
             timeout: 500,
           }}
+          disableBackdropClick={true}
         >
           <Fade in={mainModalOpen}>
             <Draggable
