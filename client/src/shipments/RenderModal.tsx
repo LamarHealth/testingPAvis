@@ -6,7 +6,7 @@ import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import { ThemeProvider } from "@material-ui/core/styles";
-import Draggable from "react-draggable";
+import Draggable, { DraggableData } from "react-draggable";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -27,6 +27,7 @@ export const RenderModal = () => {
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
+  const [draggableCoords, setDraggableCoords] = useState({ x: 0, y: 0 });
   const id = mainModalOpen ? "docit-main-modal" : undefined;
 
   $(document).ready(() => {
@@ -36,6 +37,9 @@ export const RenderModal = () => {
       setMainModalOpen(true);
     });
   });
+
+  const getCoordinates = (e: any, data: any) =>
+    setDraggableCoords({ x: data.x, y: data.y });
 
   return (
     <ThemeProvider theme={DEFAULT}>
@@ -52,7 +56,11 @@ export const RenderModal = () => {
           }}
         >
           <Fade in={mainModalOpen}>
-            <Draggable disabled={manualSelectModalOpen ? true : false}>
+            <Draggable
+              disabled={manualSelectModalOpen ? true : false}
+              onStop={getCoordinates}
+              defaultPosition={{ x: draggableCoords.x, y: draggableCoords.y }}
+            >
               <div>
                 <WrappedJssComponent>
                   <MainModalContext.Provider
