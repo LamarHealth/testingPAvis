@@ -20,7 +20,12 @@ import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
-import { MODAL_WIDTH, API_PATH } from "../common/constants";
+import {
+  MODAL_WIDTH,
+  MODAL_OFFSET_X,
+  MODAL_OFFSET_Y,
+  API_PATH,
+} from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -36,8 +41,8 @@ import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
-  top: 100px;
-  left: ${(window.innerWidth - MODAL_WIDTH) / 2}px;
+  top: ${MODAL_OFFSET_Y}px;
+  left: ${MODAL_OFFSET_X}px;
   position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   z-index: 2;
@@ -379,7 +384,9 @@ export interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const { setMainModalOpen } = useContext(MainModalContext);
+  const { setMainModalOpen, setSelectModalHeight } = useContext(
+    MainModalContext
+  );
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -392,6 +399,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const checkKVPairs = (selectedDocData: KeyValuesByDoc) =>
     Object.keys(selectedDocData.keyValuePairs).length > 0;
   let areThereKVPairs;
+
   // handle if doc is added while modal open
   if (selectedDocData === undefined) {
     const newDocData = getKeyValuePairsByDoc();
@@ -403,7 +411,19 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   }
 
   return (
-    <ModalWrapper>
+    <ModalWrapper
+      // set modal height
+      ref={(input: HTMLDivElement) => {
+        // need to cast type to getComputedStyle()
+        const wrapper = input as Element;
+        if (wrapper as Element) {
+          const modalHeight = parseInt(
+            window.getComputedStyle(wrapper).height.replace("px", "")
+          );
+          setSelectModalHeight(modalHeight);
+        }
+      }}
+    >
       <CloseButton onClick={() => setMainModalOpen(false)}>X</CloseButton>
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Collapse in={messageCollapse}>
