@@ -31,7 +31,7 @@ import {
   KeyValuesByDoc,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
-import { ModalContext } from "./RenderModal";
+import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { ErrorMessage } from "./ManualSelect";
 
@@ -133,7 +133,7 @@ const TableHeadComponent = ({ targetString }: any) => {
 };
 
 const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
-  const { setMainModalOpen } = useContext(ModalContext);
+  const { setMainModalOpen } = useContext(MainModalContext);
   const {
     selectedDocData,
     setDocData,
@@ -356,7 +356,7 @@ const Message = ({ msg }: any) => {
   );
 };
 
-interface SelectProps {
+export interface SelectProps {
   eventObj: any;
   targetString: string;
 }

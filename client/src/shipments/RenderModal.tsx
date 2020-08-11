@@ -6,6 +6,7 @@ import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import { ThemeProvider } from "@material-ui/core/styles";
+import Draggable from "react-draggable";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -16,7 +17,7 @@ import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import { assignTargetString } from "./libertyInputsDictionary";
 
-export const ModalContext = createContext({} as any);
+export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
   const [eventObj, setEventObj] = useState(null) as any;
@@ -25,6 +26,7 @@ export const RenderModal = () => {
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
+  const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
   const id = mainModalOpen ? "docit-main-modal" : undefined;
 
   $(document).ready(() => {
@@ -50,20 +52,29 @@ export const RenderModal = () => {
           }}
         >
           <Fade in={mainModalOpen}>
-            <WrappedJssComponent>
-              <ModalContext.Provider
-                value={{ mainModalOpen, setMainModalOpen }}
-              >
-                <>
-                  {eventObj && (
-                    <SelectModal
-                      eventObj={eventObj}
-                      targetString={targetString}
-                    />
-                  )}
-                </>
-              </ModalContext.Provider>
-            </WrappedJssComponent>
+            <Draggable disabled={manualSelectModalOpen ? true : false}>
+              <div>
+                <WrappedJssComponent>
+                  <MainModalContext.Provider
+                    value={{
+                      mainModalOpen,
+                      setMainModalOpen,
+                      manualSelectModalOpen,
+                      setManualSelectModalOpen,
+                    }}
+                  >
+                    <>
+                      {eventObj && (
+                        <SelectModal
+                          eventObj={eventObj}
+                          targetString={targetString}
+                        />
+                      )}
+                    </>
+                  </MainModalContext.Provider>
+                </WrappedJssComponent>
+              </div>
+            </Draggable>
           </Fade>
         </Modal>
       )}

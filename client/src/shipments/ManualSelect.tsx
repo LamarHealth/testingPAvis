@@ -2,7 +2,6 @@ import React, { useState, useEffect, createContext, useContext } from "react";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 import useImage from "use-image";
-
 import styled from "styled-components";
 
 import Modal from "@material-ui/core/Modal";
@@ -13,7 +12,7 @@ import Chip from "@material-ui/core/Chip";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
-import { ModalContext } from "./RenderModal";
+import { MainModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { KonvaModal } from "./KonvaModal";
 
@@ -60,8 +59,11 @@ export const ManualSelect = ({ eventObj }: any) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
-  const { setMainModalOpen } = useContext(ModalContext);
-  const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
+  const {
+    setMainModalOpen,
+    manualSelectModalOpen,
+    setManualSelectModalOpen,
+  } = useContext(MainModalContext);
   const [errorFetchingImage, setErrorFetchingImage] = useState(false);
   const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
@@ -174,6 +176,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
+        setManualSelectModalOpen(false);
         setMainModalOpen(false);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
