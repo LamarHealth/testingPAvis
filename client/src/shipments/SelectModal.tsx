@@ -385,9 +385,7 @@ export interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const { setMainModalOpen, setSelectModalHeight } = useContext(
-    MainModalContext
-  );
+  const { setMainModalOpen, setMainModalHeight } = useContext(MainModalContext);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -421,7 +419,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
           const modalHeight = parseInt(
             window.getComputedStyle(wrapper).height.replace("px", "")
           );
-          setSelectModalHeight(modalHeight);
+          setMainModalHeight(modalHeight);
         }
       }}
     >

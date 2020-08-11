@@ -19,14 +19,18 @@ import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
 import { colors } from "../common/colors";
-import { API_PATH } from "../common/constants";
-import { DOC_IMAGE_WIDTH } from "../common/constants";
-import { KONVA_MODAL_MAX_HEIGHT } from "../common/constants";
+import {
+  API_PATH,
+  KONVA_MODAL_OFFSET_X,
+  DOC_IMAGE_WIDTH,
+  KONVA_MODAL_HEIGHT,
+  KONVA_MODAL_OFFSET_Y,
+} from "../common/constants";
 
 const ModalWrapper = styled.div`
-  top: 25px;
+  top: ${KONVA_MODAL_OFFSET_Y}px;
   position: absolute;
-  max-height: ${KONVA_MODAL_MAX_HEIGHT}px;
+  height: ${KONVA_MODAL_HEIGHT}px;
   overflow-y: scroll;
   border: 1px solid ${colors.MODAL_BORDER};
 `;
@@ -64,8 +68,10 @@ export const ManualSelect = ({ eventObj }: any) => {
   const [filled, setFilled] = useState({} as any);
   const {
     setMainModalOpen,
-    manualSelectModalOpen,
-    setManualSelectModalOpen,
+    konvaModalOpen,
+    setKonvaModalOpen,
+    konvaModalDraggCoords,
+    setKonvaModalDraggCoords,
   } = useContext(MainModalContext);
   const [errorFetchingImage, setErrorFetchingImage] = useState(false);
   const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
@@ -73,10 +79,12 @@ export const ManualSelect = ({ eventObj }: any) => {
     "unable to fetch resources from server. Try again later."
   );
   const [errorCode, setErrorCode] = useState(400);
-  const [draggableCoords, setDraggableCoords] = useState({
-    x: 0,
-    y: 0,
-  });
+  const [minY, maxY, minX, maxX] = [
+    0 - KONVA_MODAL_OFFSET_Y - KONVA_MODAL_HEIGHT + 70,
+    0 + (window.innerHeight - KONVA_MODAL_OFFSET_Y) - 70,
+    0 - KONVA_MODAL_OFFSET_X - DOC_IMAGE_WIDTH + 70,
+    0 + DOC_IMAGE_WIDTH + KONVA_MODAL_OFFSET_X - 70,
+  ];
 
   // modal
   const modalHandleClick = () => {
@@ -87,14 +95,14 @@ export const ManualSelect = ({ eventObj }: any) => {
       errorFetchingGeometry
     ) {
       getImageAndGeometryFromServer(selectedDocData).then(() =>
-        setManualSelectModalOpen(true)
+        setKonvaModalOpen(true)
       );
     } else {
-      setManualSelectModalOpen(true);
+      setKonvaModalOpen(true);
     }
   };
-  const id = manualSelectModalOpen ? "docit-manual-select-modal" : undefined;
-  const isDocImageSet = Boolean(docImageURL.overlayPositionOffset);
+  const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
+  const isDocImageSet = Boolean(docImageURL.height);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -130,7 +138,6 @@ export const ManualSelect = ({ eventObj }: any) => {
           let urlObj: any = {
             url: objectURL,
             height: (DOC_IMAGE_WIDTH * this.naturalHeight) / this.naturalWidth,
-            overlayPositionOffset: (window.innerWidth - DOC_IMAGE_WIDTH) / 2,
           };
           setDocImageURL(urlObj);
         };
@@ -183,7 +190,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        setManualSelectModalOpen(false);
+        setKonvaModalOpen(false);
         setMainModalOpen(false);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
@@ -195,6 +202,14 @@ export const ManualSelect = ({ eventObj }: any) => {
       document.removeEventListener("keydown", keydownListener);
     };
   }, [currentSelection]);
+
+  // draggable
+  const getCoordinates = (e: any, data: DraggableData) => {
+    let [x, y] = [data.x, data.y];
+    x = x < minX ? minX : x > maxX ? maxX : x;
+    y = y < minY ? minY : y > maxY ? maxY : y;
+    setKonvaModalDraggCoords({ x, y });
+  };
 
   return (
     <React.Fragment>
@@ -213,8 +228,8 @@ export const ManualSelect = ({ eventObj }: any) => {
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
         <Modal
           id={id}
-          open={manualSelectModalOpen}
-          onClose={() => setManualSelectModalOpen(false)}
+          open={konvaModalOpen}
+          onClose={() => setKonvaModalOpen(false)}
           aria-labelledby="manual-select-modal-title"
           aria-describedby="manual-select-modal-descripton"
           BackdropComponent={Backdrop}
@@ -223,18 +238,19 @@ export const ManualSelect = ({ eventObj }: any) => {
           }}
           style={{ zIndex: 99999 }}
         >
-          <Fade in={manualSelectModalOpen}>
+          <Fade in={konvaModalOpen}>
             <Draggable
-              position={{ x: draggableCoords.x, y: draggableCoords.y }}
-              onStop={(e: any, data: DraggableData) =>
-                setDraggableCoords({ x: data.x, y: data.y })
-              }
+              position={{
+                x: konvaModalDraggCoords.x,
+                y: konvaModalDraggCoords.y,
+              }}
+              onStop={getCoordinates}
             >
               <div>
                 <WrappedJssComponent>
                   <ModalWrapper
                     style={{
-                      left: `${docImageURL.overlayPositionOffset}px`,
+                      left: `${KONVA_MODAL_OFFSET_X}px`,
                     }}
                   >
                     <KonvaModalContext.Provider
@@ -246,7 +262,7 @@ export const ManualSelect = ({ eventObj }: any) => {
                         setFilled,
                         setCurrentSelection,
                         currentLinesGeometry,
-                        setManualSelectModalOpen,
+                        setKonvaModalOpen,
                       }}
                     >
                       <KonvaModal />

@@ -140,13 +140,11 @@ export const KonvaModal = () => {
     setFilled,
     setCurrentSelection,
     currentLinesGeometry,
-    setManualSelectModalOpen,
+    setKonvaModalOpen,
   } = useContext(KonvaModalContext);
   return (
     <>
-      <CloseButton onClick={() => setManualSelectModalOpen(false)}>
-        X
-      </CloseButton>
+      <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
       <Header docImageURL={docImageURL} currentSelection={currentSelection} />
       <Stage width={DOC_IMAGE_WIDTH} height={docImageURL.height}>
         <Layer>

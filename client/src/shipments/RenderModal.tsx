@@ -33,9 +33,9 @@ export const RenderModal = () => {
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const id = mainModalOpen ? "docit-main-modal" : undefined;
-  const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
-  const [selectModalHeight, setSelectModalHeight] = useState(250); // est. lower bound for modal height
-  const [draggableCoords, setDraggableCoords] = useState({
+  const [konvaModalOpen, setKonvaModalOpen] = useState(false);
+  const [mainModalHeight, setMainModalHeight] = useState(250); // est. lower bound for select modal height
+  const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
     x: 0,
     y: 0,
   });
@@ -43,6 +43,10 @@ export const RenderModal = () => {
   const [maxY, setMaxY] = useState(0);
   const [minX, setMinX] = useState(0);
   const [maxX, setMaxX] = useState(0);
+  const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
+    x: 0,
+    y: 0,
+  });
 
   // handle input el click
   $(document).ready(() => {
@@ -55,11 +59,11 @@ export const RenderModal = () => {
 
   // set min / max for draggable, after height is set
   useEffect(() => {
-    setMinY(0 - MODAL_OFFSET_Y - selectModalHeight + 70);
+    setMinY(0 - MODAL_OFFSET_Y - mainModalHeight + 70);
     setMaxY(0 + (window.innerHeight - MODAL_OFFSET_Y) - 70);
     setMinX(0 - MODAL_OFFSET_X - MODAL_WIDTH + 70);
     setMaxX(0 + MODAL_WIDTH + MODAL_OFFSET_X - 70);
-  }, [selectModalHeight]);
+  }, [mainModalHeight]);
 
   // if the modal height changes, make sure modal isn't off page
   useEffect(() => getCoordinates(), [minY]);
@@ -72,11 +76,11 @@ export const RenderModal = () => {
       [x, y] = [data.x, data.y];
     } else {
       // i.e. as callback for useEffect, when the modal height changes
-      [x, y] = [draggableCoords.x, draggableCoords.y];
+      [x, y] = [mainModalDraggCoords.x, mainModalDraggCoords.y];
     }
     x = x < minX ? minX : x > maxX ? maxX : x;
     y = y < minY ? minY : y > maxY ? maxY : y;
-    setDraggableCoords({ x, y });
+    setMainModalDraggCoords({ x, y });
   };
 
   return (
@@ -98,9 +102,12 @@ export const RenderModal = () => {
         >
           <Fade in={mainModalOpen}>
             <Draggable
-              disabled={manualSelectModalOpen ? true : false}
+              disabled={konvaModalOpen ? true : false}
               onStop={getCoordinates}
-              position={{ x: draggableCoords.x, y: draggableCoords.y }}
+              position={{
+                x: mainModalDraggCoords.x,
+                y: mainModalDraggCoords.y,
+              }}
             >
               <div>
                 <WrappedJssComponent>
@@ -108,9 +115,11 @@ export const RenderModal = () => {
                     value={{
                       mainModalOpen,
                       setMainModalOpen,
-                      manualSelectModalOpen,
-                      setManualSelectModalOpen,
-                      setSelectModalHeight,
+                      konvaModalOpen,
+                      setKonvaModalOpen,
+                      setMainModalHeight,
+                      konvaModalDraggCoords,
+                      setKonvaModalDraggCoords,
                     }}
                   >
                     <>
