@@ -50,6 +50,7 @@ const ModalWrapper = styled.div`
   overflow-x: hidden;
   overflow-y: scroll;
   width: ${MODAL_WIDTH}px;
+  border: 1px solid ${colors.MODAL_BORDER};
 `;
 
 const CloseButton = styled.button`

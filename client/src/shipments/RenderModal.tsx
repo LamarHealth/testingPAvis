@@ -90,9 +90,11 @@ export const RenderModal = () => {
           aria-describedby="main-modal-description"
           BackdropComponent={Backdrop}
           BackdropProps={{
-            timeout: 500,
+            invisible: true,
           }}
-          disableBackdropClick={true}
+          disableEnforceFocus
+          disableAutoFocus
+          disableScrollLock
         >
           <Fade in={mainModalOpen}>
             <Draggable
