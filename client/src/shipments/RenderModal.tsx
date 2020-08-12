@@ -39,10 +39,6 @@ export const RenderModal = () => {
     x: 0,
     y: 0,
   });
-  const [minY, setMinY] = useState(0);
-  const [maxY, setMaxY] = useState(0);
-  const [minX, setMinX] = useState(0);
-  const [maxX, setMaxX] = useState(0);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: 0,
     y: 0,
@@ -57,29 +53,20 @@ export const RenderModal = () => {
     });
   });
 
-  // set min / max for draggable, after height is set
+  // handle modal height change if it results in pushing modal off screen
+  const handleModalHeightChange = () => {
+    let [x, y] = [mainModalDraggCoords.x, mainModalDraggCoords.y];
+    const minY = -MODAL_OFFSET_Y - mainModalHeight + 70;
+    y = y < minY ? minY : y;
+    setMainModalDraggCoords({ x, y });
+  };
   useEffect(() => {
-    setMinY(0 - MODAL_OFFSET_Y - mainModalHeight + 70);
-    setMaxY(0 + (window.innerHeight - MODAL_OFFSET_Y) - 70);
-    setMinX(0 - MODAL_OFFSET_X - MODAL_WIDTH + 70);
-    setMaxX(0 + MODAL_WIDTH + MODAL_OFFSET_X - 70);
+    handleModalHeightChange();
   }, [mainModalHeight]);
 
-  // if the modal height changes, make sure modal isn't off page
-  useEffect(() => getCoordinates(), [minY]);
-
-  // set modal coords. if modal is dragged off page, then will reposition
-  const getCoordinates = (e?: any, data?: DraggableData) => {
-    let x, y;
-    if (data) {
-      // i.e. as callback for <Draggable> onStop
-      [x, y] = [data.x, data.y];
-    } else {
-      // i.e. as callback for useEffect, when the modal height changes
-      [x, y] = [mainModalDraggCoords.x, mainModalDraggCoords.y];
-    }
-    x = x < minX ? minX : x > maxX ? maxX : x;
-    y = y < minY ? minY : y > maxY ? maxY : y;
+  // set modal coords
+  const handleDragStop = (e: any, data: DraggableData) => {
+    let [x, y] = [data.x, data.y];
     setMainModalDraggCoords({ x, y });
   };
 
@@ -103,10 +90,16 @@ export const RenderModal = () => {
           <Fade in={mainModalOpen}>
             <Draggable
               disabled={konvaModalOpen ? true : false}
-              onStop={getCoordinates}
+              onStop={handleDragStop}
               position={{
                 x: mainModalDraggCoords.x,
                 y: mainModalDraggCoords.y,
+              }}
+              bounds={{
+                left: -MODAL_OFFSET_X - MODAL_WIDTH + 70,
+                top: -MODAL_OFFSET_Y - mainModalHeight + 70,
+                right: MODAL_WIDTH + MODAL_OFFSET_X - 70,
+                bottom: window.innerHeight - MODAL_OFFSET_Y - 70,
               }}
             >
               <div>

@@ -81,12 +81,6 @@ export const ManualSelect = ({ eventObj }: any) => {
     "unable to fetch resources from server. Try again later."
   );
   const [errorCode, setErrorCode] = useState(400);
-  const [minY, maxY, minX, maxX] = [
-    0 - KONVA_MODAL_OFFSET_Y - KONVA_MODAL_HEIGHT + 70,
-    0 + (window.innerHeight - KONVA_MODAL_OFFSET_Y) - 70,
-    0 - KONVA_MODAL_OFFSET_X - DOC_IMAGE_WIDTH + 70,
-    0 + DOC_IMAGE_WIDTH + KONVA_MODAL_OFFSET_X - 70,
-  ];
 
   // modal
   const modalHandleClick = () => {
@@ -206,10 +200,8 @@ export const ManualSelect = ({ eventObj }: any) => {
   }, [currentSelection]);
 
   // draggable
-  const getCoordinates = (e: any, data: DraggableData) => {
+  const handleDragStop = (e: any, data: DraggableData) => {
     let [x, y] = [data.x, data.y];
-    x = x < minX ? minX : x > maxX ? maxX : x;
-    y = y < minY ? minY : y > maxY ? maxY : y;
     setKonvaModalDraggCoords({ x, y });
   };
 
@@ -246,7 +238,13 @@ export const ManualSelect = ({ eventObj }: any) => {
                 x: konvaModalDraggCoords.x,
                 y: konvaModalDraggCoords.y,
               }}
-              onStop={getCoordinates}
+              onStop={handleDragStop}
+              bounds={{
+                left: KONVA_MODAL_OFFSET_X - DOC_IMAGE_WIDTH + 70,
+                top: KONVA_MODAL_OFFSET_Y - KONVA_MODAL_HEIGHT + 70,
+                right: DOC_IMAGE_WIDTH + KONVA_MODAL_OFFSET_X - 70,
+                bottom: window.innerHeight - KONVA_MODAL_OFFSET_Y - 70,
+              }}
             >
               <div>
                 <WrappedJssComponent>
