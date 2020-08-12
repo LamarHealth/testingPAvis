@@ -25,6 +25,10 @@ import {
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
   KONVA_MODAL_OFFSET_Y,
+  KONVA_MODAL_LEFT_BOUND,
+  KONVA_MODAL_TOP_BOUND,
+  KONVA_MODAL_RIGHT_BOUND,
+  KONVA_MODAL_BOTTOM_BOUND,
   MODAL_SHADOW,
 } from "../common/constants";
 
@@ -240,10 +244,10 @@ export const ManualSelect = ({ eventObj }: any) => {
               }}
               onStop={handleDragStop}
               bounds={{
-                left: KONVA_MODAL_OFFSET_X - DOC_IMAGE_WIDTH + 70,
-                top: KONVA_MODAL_OFFSET_Y - KONVA_MODAL_HEIGHT + 70,
-                right: DOC_IMAGE_WIDTH + KONVA_MODAL_OFFSET_X - 70,
-                bottom: window.innerHeight - KONVA_MODAL_OFFSET_Y - 70,
+                left: KONVA_MODAL_LEFT_BOUND,
+                top: KONVA_MODAL_TOP_BOUND,
+                right: KONVA_MODAL_RIGHT_BOUND,
+                bottom: KONVA_MODAL_BOTTOM_BOUND,
               }}
             >
               <div>

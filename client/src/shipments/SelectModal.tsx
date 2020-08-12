@@ -21,9 +21,9 @@ import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
 import {
-  MODAL_WIDTH,
-  MODAL_OFFSET_X,
-  MODAL_OFFSET_Y,
+  MAIN_MODAL_WIDTH,
+  MAIN_MODAL_OFFSET_X,
+  MAIN_MODAL_OFFSET_Y,
   API_PATH,
   MODAL_SHADOW,
 } from "../common/constants";
@@ -42,15 +42,15 @@ import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
-  top: ${MODAL_OFFSET_Y}px;
-  left: ${MODAL_OFFSET_X}px;
+  top: ${MAIN_MODAL_OFFSET_Y}px;
+  left: ${MAIN_MODAL_OFFSET_X}px;
   position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   z-index: 2;
   max-height: 500px;
   overflow-x: hidden;
   overflow-y: scroll;
-  width: ${MODAL_WIDTH}px;
+  width: ${MAIN_MODAL_WIDTH}px;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
 `;

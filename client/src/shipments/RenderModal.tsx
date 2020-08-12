@@ -16,9 +16,10 @@ import { SelectModal } from "./SelectModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import {
-  MODAL_WIDTH,
-  MODAL_OFFSET_X,
-  MODAL_OFFSET_Y,
+  MAIN_MODAL_OFFSET_Y,
+  MAIN_MODAL_LEFT_BOUND,
+  MAIN_MODAL_BOTTOM_BOUND,
+  MAIN_MODAL_RIGHT_BOUND,
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
 import { useEffect } from "react";
@@ -56,7 +57,7 @@ export const RenderModal = () => {
   // handle modal height change if it results in pushing modal off screen
   const handleModalHeightChange = () => {
     let [x, y] = [mainModalDraggCoords.x, mainModalDraggCoords.y];
-    const minY = -MODAL_OFFSET_Y - mainModalHeight + 70;
+    const minY = -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70;
     y = y < minY ? minY : y;
     setMainModalDraggCoords({ x, y });
   };
@@ -96,10 +97,10 @@ export const RenderModal = () => {
                 y: mainModalDraggCoords.y,
               }}
               bounds={{
-                left: -MODAL_OFFSET_X - MODAL_WIDTH + 70,
-                top: -MODAL_OFFSET_Y - mainModalHeight + 70,
-                right: MODAL_WIDTH + MODAL_OFFSET_X - 70,
-                bottom: window.innerHeight - MODAL_OFFSET_Y - 70,
+                left: MAIN_MODAL_LEFT_BOUND,
+                top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
+                right: MAIN_MODAL_RIGHT_BOUND,
+                bottom: MAIN_MODAL_BOTTOM_BOUND,
               }}
             >
               <div>
