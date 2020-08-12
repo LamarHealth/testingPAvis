@@ -56,10 +56,12 @@ export const RenderModal = () => {
 
   // handle modal height change if it results in pushing modal off screen
   const handleModalHeightChange = () => {
-    let [x, y] = [mainModalDraggCoords.x, mainModalDraggCoords.y];
+    let y = mainModalDraggCoords.y;
     const minY = -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70;
     y = y < minY ? minY : y;
-    setMainModalDraggCoords({ x, y });
+    setMainModalDraggCoords((prev) => {
+      return { ...prev, y };
+    });
   };
   useEffect(() => {
     handleModalHeightChange();
