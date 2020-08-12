@@ -5,6 +5,8 @@ import useImage from "use-image";
 import styled from "styled-components";
 import Draggable, { DraggableData } from "react-draggable";
 
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -39,6 +41,14 @@ const ModalWrapper = styled.div`
   overflow-y: scroll;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
+`;
+
+const CloseButton = styled(IconButton)`
+  float: right;
+`;
+
+const DocName = styled(Typography)`
+  margin: 1em;
 `;
 
 const ManualSelectButton = styled(Chip)`
@@ -211,9 +221,12 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   return (
     <React.Fragment>
-      <Typography variant="h6" style={{ margin: "1em" }}>
+      <CloseButton onClick={() => setMainModalOpen(false)}>
+        <CloseIcon />
+      </CloseButton>
+      <DocName id="doc-name-typography" variant="h6">
         {selectedDocData.docName}
-      </Typography>
+      </DocName>
       <ManualSelectButton
         label="Manual Select"
         variant="outlined"

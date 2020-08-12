@@ -5,6 +5,7 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import styled from "styled-components";
 
 import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
 import Table from "@material-ui/core/Table";
@@ -55,20 +56,20 @@ const ModalWrapper = styled.div`
   box-shadow: ${MODAL_SHADOW};
 `;
 
-const CloseButton = styled.button`
-  float: right;
-  margin: 1em;
-  height: 3em;
-  width: 3em;
-  background: none;
-  border: none;
-  border-radius: 50%;
-  transition: 0.5s;
+// const CloseButton = styled.button`
+//   float: right;
+//   margin: 1em;
+//   height: 3em;
+//   width: 3em;
+//   background: none;
+//   border: none;
+//   border-radius: 50%;
+//   transition: 0.5s;
 
-  :hover {
-    border: 1px solid ${colors.DROPZONE_TEXT_GREY};
-  }
-`;
+//   :hover {
+//     border: 1px solid ${colors.DROPZONE_TEXT_GREY};
+//   }
+// `;
 
 const FillButton = styled.button`
   background-color: ${colors.FILL_BUTTON};
@@ -425,7 +426,6 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
         }
       }}
     >
-      <CloseButton onClick={() => setMainModalOpen(false)}>X</CloseButton>
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />
