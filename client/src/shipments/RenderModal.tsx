@@ -6,6 +6,7 @@ import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import { ThemeProvider } from "@material-ui/core/styles";
+import Draggable, { DraggableData } from "react-draggable";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -14,9 +15,16 @@ import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
+import {
+  MAIN_MODAL_OFFSET_Y,
+  MAIN_MODAL_LEFT_BOUND,
+  MAIN_MODAL_BOTTOM_BOUND,
+  MAIN_MODAL_RIGHT_BOUND,
+} from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
+import { useEffect } from "react";
 
-export const ModalContext = createContext({} as any);
+export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
   const [eventObj, setEventObj] = useState(null) as any;
@@ -26,7 +34,18 @@ export const RenderModal = () => {
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const id = mainModalOpen ? "docit-main-modal" : undefined;
+  const [konvaModalOpen, setKonvaModalOpen] = useState(false);
+  const [mainModalHeight, setMainModalHeight] = useState(250); // est. lower bound for select modal height
+  const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
+    x: 0,
+    y: 0,
+  });
 
+  // handle input el click
   $(document).ready(() => {
     $("input").click(function (event) {
       setEventObj(event);
@@ -34,6 +53,25 @@ export const RenderModal = () => {
       setMainModalOpen(true);
     });
   });
+
+  // handle modal height change if it results in pushing modal off screen
+  const handleModalHeightChange = () => {
+    let y = mainModalDraggCoords.y;
+    const minY = -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70;
+    y = y < minY ? minY : y;
+    setMainModalDraggCoords((prev) => {
+      return { ...prev, y };
+    });
+  };
+  useEffect(() => {
+    handleModalHeightChange();
+  }, [mainModalHeight]);
+
+  // set modal coords
+  const handleDragStop = (e: any, data: DraggableData) => {
+    let [x, y] = [data.x, data.y];
+    setMainModalDraggCoords({ x, y });
+  };
 
   return (
     <ThemeProvider theme={DEFAULT}>
@@ -46,24 +84,52 @@ export const RenderModal = () => {
           aria-describedby="main-modal-description"
           BackdropComponent={Backdrop}
           BackdropProps={{
-            timeout: 500,
+            invisible: true,
           }}
+          disableEnforceFocus
+          disableAutoFocus
+          disableScrollLock
         >
           <Fade in={mainModalOpen}>
-            <WrappedJssComponent>
-              <ModalContext.Provider
-                value={{ mainModalOpen, setMainModalOpen }}
-              >
-                <>
-                  {eventObj && (
-                    <SelectModal
-                      eventObj={eventObj}
-                      targetString={targetString}
-                    />
-                  )}
-                </>
-              </ModalContext.Provider>
-            </WrappedJssComponent>
+            <Draggable
+              disabled={konvaModalOpen ? true : false}
+              onStop={handleDragStop}
+              position={{
+                x: mainModalDraggCoords.x,
+                y: mainModalDraggCoords.y,
+              }}
+              bounds={{
+                left: MAIN_MODAL_LEFT_BOUND,
+                top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
+                right: MAIN_MODAL_RIGHT_BOUND,
+                bottom: MAIN_MODAL_BOTTOM_BOUND,
+              }}
+            >
+              <div>
+                <WrappedJssComponent>
+                  <MainModalContext.Provider
+                    value={{
+                      mainModalOpen,
+                      setMainModalOpen,
+                      konvaModalOpen,
+                      setKonvaModalOpen,
+                      setMainModalHeight,
+                      konvaModalDraggCoords,
+                      setKonvaModalDraggCoords,
+                    }}
+                  >
+                    <>
+                      {eventObj && (
+                        <SelectModal
+                          eventObj={eventObj}
+                          targetString={targetString}
+                        />
+                      )}
+                    </>
+                  </MainModalContext.Provider>
+                </WrappedJssComponent>
+              </div>
+            </Draggable>
           </Fade>
         </Modal>
       )}
