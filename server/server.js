@@ -57,6 +57,11 @@ const staticFiles = express.static(path.join(__dirname, "../../client/build"));
 app.use(staticFiles);
 app.use(cors());
 
+// make sure there is a folder there
+fs.mkdir("temp_files", { recursive: true }, (err) => {
+  if (err) logger.error(err);
+});
+
 // TODO: Run this through Textract
 // var upload = multer({ storage: multer.memoryStorage() }).any();
 router.post("/api/upload_status", (req, res) => {
@@ -99,10 +104,19 @@ router.post("/api/upload_status", (req, res) => {
         // All docs are uploaded just in case
         s3.upload(s3params, function (err, data) {
           textract.analyzeDocument(textractParams, (err, data) => {
-            const keyValuePairs = getKeyValues(data);
-            const interpretedKeys = getInterpretations(keyValuePairs);
-
             // helper functions
+            const sendError = (errorCode, statusMessage) => {
+              res.status(errorCode).send({
+                status: statusMessage,
+                docID: docID,
+                docType: req.files[0].mimetype.split("/")[1],
+                docClass: docClass,
+                docName: req.files[0].originalname.split(".")[0],
+                filePath: "",
+                keyValuePairs: "NA",
+              });
+            };
+
             const logError = (msg, error = "") => {
               logger.error(
                 {
@@ -115,6 +129,14 @@ router.post("/api/upload_status", (req, res) => {
                 msg
               );
             };
+
+            let keyValuePairs, interpretedKeys;
+            try {
+              keyValuePairs = getKeyValues(data);
+              interpretedKeys = getInterpretations(keyValuePairs);
+            } catch (err) {
+              logError("error parsing textract data, ", err);
+            }
 
             const sendSuccessfulResponse = () => {
               res.json({
@@ -155,18 +177,6 @@ router.post("/api/upload_status", (req, res) => {
                 if (err) {
                   logError("parsedJSON s3 upload error", err);
                 }
-              });
-            };
-
-            const sendError = (errorCode, statusMessage) => {
-              res.status(errorCode).send({
-                status: statusMessage,
-                docID: docID,
-                docType: req.files[0].mimetype.split("/")[1],
-                docClass: docClass,
-                docName: req.files[0].originalname.split(".")[0],
-                filePath: "",
-                keyValuePairs: "NA",
               });
             };
 
@@ -228,78 +238,51 @@ router.post("/api/upload_status", (req, res) => {
 
       //////// HANDLE PDF //////////
       if (!req.files[0].mimetype.includes("image")) {
+        const pdfPath = `temp_files/${docID}.pdf`;
+        const pngPath = `temp_files/${docID}.png`;
+
         const deleteFiles = () => {
-          fs.unlink(`temp_files/${docID}.png`, (err) => {
+          fs.unlink(pngPath, (err) => {
             if (err) logger.error(err);
           });
-          fs.unlink(`temp_files/${docID}.pdf`, (err) => {
+          fs.unlink(pdfPath, (err) => {
             if (err) logger.error(err);
           });
         };
 
-        fs.mkdir("temp_files", { recursive: true }, (err) => {
-          if (err) logger.err(err);
+        fs.writeFile(pdfPath, docBuffer, async (err) => {
+          if (err) logger.error(err);
           else {
-            fs.writeFile(`temp_files/${docID}.pdf`, docBuffer, (err) => {
-              if (err) logger.error(err);
-              else {
-                exec(
-                  `magick convert -density 300 -flatten temp_files/${docID}.pdf[0] -colorspace RGB temp_files/${docID}.png`,
-                  (error, stdout, stderr) => {
-                    if (error) {
-                      logger.error(
-                        { msg: error.message },
-                        `error convering pdf using image magick`
-                      );
-                      deleteFiles();
-                      return;
-                    }
-                    if (stderr) {
-                      logger.error(
-                        { stderr },
-                        `STDERR converting pdf using image magick`
-                      );
-                    }
-                    fs.readFile(`temp_files/${docID}.png`, (err, data) => {
-                      if (err) {
-                        deleteFiles();
-                        logger.error(err);
-                      }
-
-                      // check if > 5MB
-                      fs.stat(`temp_files/${docID}.png`, (err, stats) => {
-                        if (err) {
-                          deleteFiles();
-                          logger.error(err);
-                        } else {
-                          const pngSize = stats["size"] / 1000000;
-                          if (pngSize < 5) {
-                            deleteFiles();
-                            uploadToS3TextractAndSendResponse(
-                              Buffer.from(data)
-                            );
-                          } else {
-                            deleteFiles();
-                            logger.error("png size > 5MB");
-                            res.status(405).send({
-                              status: "file size exceeds 5MB, cannot parse",
-                              docID: docID,
-                              docType: req.files[0].mimetype.split("/")[1],
-                              docName: req.files[0].originalname.split(".")[0],
-                              filePath: "",
-                              keyValuePairs: "NA",
-                            });
-                          }
-                        }
-                      });
-                    });
+            exec(
+              `magick convert -density 300 -flatten ${pdfPath}[0] -colorspace RGB ${pngPath}`,
+              (error, stdout, stderr) => {
+                if (error) {
+                  logger.error(
+                    { msg: error.message },
+                    `error convering pdf using image magick`
+                  );
+                  deleteFiles();
+                  return;
+                }
+                if (stderr) {
+                  logger.error(
+                    { stderr },
+                    `STDERR converting pdf using image magick`
+                  );
+                }
+                fs.readFile(pngPath, (err, data) => {
+                  if (err) {
+                    deleteFiles();
+                    logger.error(err);
+                  } else {
+                    deleteFiles();
+                    uploadToS3TextractAndSendResponse(Buffer.from(data));
                   }
-                );
+                });
               }
-            });
+            );
           }
         });
-
         //////// HANDLE PNG //////////
       } else {
         uploadToS3TextractAndSendResponse(docBuffer);
