@@ -286,7 +286,6 @@ router.post("/api/upload_status", (req, res) => {
                                 "file size exceeds 5MB, cannot parse with textract",
                               docID: docID,
                               docType: req.files[0].mimetype.split("/")[1],
-                              docClass: docClass,
                               docName: req.files[0].originalname.split(".")[0],
                               filePath: "",
                               keyValuePairs: "NA",
