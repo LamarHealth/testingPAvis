@@ -228,8 +228,17 @@ router.post("/api/upload_status", (req, res) => {
 
       //////// HANDLE PDF //////////
       if (!req.files[0].mimetype.includes("image")) {
+        const deleteFiles = () => {
+          fs.unlink(`temp_files/${docID}.png`, (err) => {
+            if (err) logger.error(err);
+          });
+          fs.unlink(`temp_files/${docID}.pdf`, (err) => {
+            if (err) logger.error(err);
+          });
+        };
+
         fs.writeFile(`temp_files/${docID}.pdf`, docBuffer, (err) => {
-          if (err) throw err;
+          if (err) logger.error(err);
           else {
             exec(
               `magick convert -density 300 temp_files/${docID}.pdf -quality 100 temp_files/${docID}.png`,
@@ -239,22 +248,46 @@ router.post("/api/upload_status", (req, res) => {
                     { msg: error.message },
                     `error convering pdf using image magick`
                   );
+                  deleteFiles();
                   return;
                 }
                 if (stderr) {
                   logger.error(
                     { stderr },
-                    `STDERR convering pdf using image magick`
+                    `STDERR converting pdf using image magick`
                   );
                 }
                 fs.readFile(`temp_files/${docID}.png`, (err, data) => {
-                  if (err) throw err;
-                  uploadToS3TextractAndSendResponse(Buffer.from(data));
-                  fs.unlink(`temp_files/${docID}.png`, (err) => {
-                    if (err) throw err;
-                  });
-                  fs.unlink(`temp_files/${docID}.pdf`, (err) => {
-                    if (err) throw err;
+                  if (err) {
+                    deleteFiles();
+                    logger.error(err);
+                  }
+
+                  // check if > 5MB
+                  fs.stat(`temp_files/${docID}.png`, (err, stats) => {
+                    if (err) {
+                      deleteFiles();
+                      logger.error(err);
+                    } else {
+                      const pngSize = stats["size"] / 1000000;
+                      if (pngSize < 5) {
+                        deleteFiles();
+                        uploadToS3TextractAndSendResponse(Buffer.from(data));
+                      } else {
+                        deleteFiles();
+                        logger.error("png size > 5MB");
+                        res.status(405).send({
+                          status:
+                            "file size exceeds 5MB, cannot parse with textract",
+                          docID: docID,
+                          docType: req.files[0].mimetype.split("/")[1],
+                          docClass: docClass,
+                          docName: req.files[0].originalname.split(".")[0],
+                          filePath: "",
+                          keyValuePairs: "NA",
+                        });
+                      }
+                    }
                   });
                 });
               }
