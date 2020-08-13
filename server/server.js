@@ -244,7 +244,7 @@ router.post("/api/upload_status", (req, res) => {
               if (err) logger.error(err);
               else {
                 exec(
-                  `magick convert -density 300 -flatten temp_files/${docID}.pdf[0] -quality 100 temp_files/${docID}.png`,
+                  `magick convert -density 300 -flatten temp_files/${docID}.pdf[0] -quality 100 -colorspace RGB temp_files/${docID}.png`,
                   (error, stdout, stderr) => {
                     if (error) {
                       logger.error(
