@@ -244,7 +244,7 @@ router.post("/api/upload_status", (req, res) => {
               if (err) logger.error(err);
               else {
                 exec(
-                  `magick convert -density 300 -flatten temp_files/${docID}.pdf[0] -quality 100 -colorspace RGB temp_files/${docID}.png`,
+                  `magick convert -density 300 -flatten temp_files/${docID}.pdf[0] -colorspace RGB temp_files/${docID}.png`,
                   (error, stdout, stderr) => {
                     if (error) {
                       logger.error(
@@ -282,8 +282,7 @@ router.post("/api/upload_status", (req, res) => {
                             deleteFiles();
                             logger.error("png size > 5MB");
                             res.status(405).send({
-                              status:
-                                "file size exceeds 5MB, cannot parse with textract",
+                              status: "file size exceeds 5MB, cannot parse",
                               docID: docID,
                               docType: req.files[0].mimetype.split("/")[1],
                               docName: req.files[0].originalname.split(".")[0],
