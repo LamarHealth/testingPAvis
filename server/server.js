@@ -237,63 +237,71 @@ router.post("/api/upload_status", (req, res) => {
           });
         };
 
-        fs.writeFile(`temp_files/${docID}.pdf`, docBuffer, (err) => {
-          if (err) logger.error(err);
+        fs.mkdir("temp_files", { recursive: true }, (err) => {
+          if (err) logger.err(err);
           else {
-            exec(
-              `magick convert -density 300 temp_files/${docID}.pdf -quality 100 temp_files/${docID}.png`,
-              (error, stdout, stderr) => {
-                if (error) {
-                  logger.error(
-                    { msg: error.message },
-                    `error convering pdf using image magick`
-                  );
-                  deleteFiles();
-                  return;
-                }
-                if (stderr) {
-                  logger.error(
-                    { stderr },
-                    `STDERR converting pdf using image magick`
-                  );
-                }
-                fs.readFile(`temp_files/${docID}.png`, (err, data) => {
-                  if (err) {
-                    deleteFiles();
-                    logger.error(err);
-                  }
-
-                  // check if > 5MB
-                  fs.stat(`temp_files/${docID}.png`, (err, stats) => {
-                    if (err) {
+            fs.writeFile(`temp_files/${docID}.pdf`, docBuffer, (err) => {
+              if (err) logger.error(err);
+              else {
+                exec(
+                  `magick convert -density 300 temp_files/${docID}.pdf -quality 100 temp_files/${docID}.png`,
+                  (error, stdout, stderr) => {
+                    if (error) {
+                      logger.error(
+                        { msg: error.message },
+                        `error convering pdf using image magick`
+                      );
                       deleteFiles();
-                      logger.error(err);
-                    } else {
-                      const pngSize = stats["size"] / 1000000;
-                      if (pngSize < 5) {
-                        deleteFiles();
-                        uploadToS3TextractAndSendResponse(Buffer.from(data));
-                      } else {
-                        deleteFiles();
-                        logger.error("png size > 5MB");
-                        res.status(405).send({
-                          status:
-                            "file size exceeds 5MB, cannot parse with textract",
-                          docID: docID,
-                          docType: req.files[0].mimetype.split("/")[1],
-                          docClass: docClass,
-                          docName: req.files[0].originalname.split(".")[0],
-                          filePath: "",
-                          keyValuePairs: "NA",
-                        });
-                      }
+                      return;
                     }
-                  });
-                });
+                    if (stderr) {
+                      logger.error(
+                        { stderr },
+                        `STDERR converting pdf using image magick`
+                      );
+                    }
+                    fs.readFile(`temp_files/${docID}.png`, (err, data) => {
+                      if (err) {
+                        deleteFiles();
+                        logger.error(err);
+                      }
+
+                      // check if > 5MB
+                      fs.stat(`temp_files/${docID}.png`, (err, stats) => {
+                        if (err) {
+                          deleteFiles();
+                          logger.error(err);
+                        } else {
+                          const pngSize = stats["size"] / 1000000;
+                          if (pngSize < 5) {
+                            deleteFiles();
+                            uploadToS3TextractAndSendResponse(
+                              Buffer.from(data)
+                            );
+                          } else {
+                            deleteFiles();
+                            logger.error("png size > 5MB");
+                            res.status(405).send({
+                              status:
+                                "file size exceeds 5MB, cannot parse with textract",
+                              docID: docID,
+                              docType: req.files[0].mimetype.split("/")[1],
+                              docClass: docClass,
+                              docName: req.files[0].originalname.split(".")[0],
+                              filePath: "",
+                              keyValuePairs: "NA",
+                            });
+                          }
+                        }
+                      });
+                    });
+                  }
+                );
               }
-            );
+            });
           }
         });
+
         //////// HANDLE PNG //////////
       } else {
         uploadToS3TextractAndSendResponse(docBuffer);
