@@ -95,9 +95,9 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
-    const docType = doc.docType;
     const docID = doc.docID;
-
+    doc.docType = doc.docType === "pdf" ? "png" : doc.docType;
+    const docType = doc.docType;
     setCurrentDocID(docID);
 
     // get image

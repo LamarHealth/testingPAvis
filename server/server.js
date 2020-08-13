@@ -8,6 +8,9 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
+import fs from "fs";
+const { exec } = require("child_process");
+
 import bodyParser from "body-parser";
 import express from "express";
 import cors from "cors";
@@ -43,7 +46,7 @@ const logger = pino({
 const expressLogger = expressPino({ logger });
 
 // can disable this if don't want every request/response logged to console
-app.use(expressLogger);
+// app.use(expressLogger);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -61,162 +64,207 @@ router.post("/api/upload_status", (req, res) => {
   var upload = multer({}).any();
   upload(req, res, () => {
     if (req) {
+      const docName = req.files[0].originalname;
+      const docID = uuidv4();
+      const docBuffer = req.files[0].buffer;
+
       const textract = new Textract();
       const s3 = new S3();
-      var textractParams = {
-        Document: {
-          /* required */
-          Bytes: req.files[0].buffer,
-        },
-        FeatureTypes: [
-          /* required */
-          "FORMS",
-          /* TABLES */
-        ],
-      };
 
-      const docID = uuidv4();
+      //////// UPLOAD FUNCTION //////////
+      const uploadToS3TextractAndSendResponse = (docBuffer) => {
+        var textractParams = {
+          Document: {
+            /* required */
+            Bytes: docBuffer,
+          },
+          FeatureTypes: [
+            /* required */
+            "FORMS",
+            /* TABLES */
+          ],
+        };
 
-      // convert .pdf file extension to .png it's no longer a pdf
-      let pngifiedDocName = req.files[0].originalname.replace(
-        /(.pdf)$/i,
-        ".png"
-      );
+        // convert .pdf file extension to .png it's no longer a pdf
+        let pngifiedDocName = docName.replace(/(.pdf)$/i, ".png");
 
-      var s3params = {
-        Bucket: `doc-classifier-bucket/${docID}`,
-        Key: pngifiedDocName,
-        Body: req.files[0].buffer,
-      };
+        var s3params = {
+          Bucket: `doc-classifier-bucket/${docID}`,
+          Key: pngifiedDocName,
+          Body: docBuffer,
+        };
 
-      let docClass = "";
+        let docClass = "";
 
-      // All docs are uploaded just in case
-      s3.upload(s3params, function (err, data) {
-        textract.analyzeDocument(textractParams, (err, data) => {
-          const keyValuePairs = getKeyValues(data);
-          const interpretedKeys = getInterpretations(keyValuePairs);
+        // All docs are uploaded just in case
+        s3.upload(s3params, function (err, data) {
+          textract.analyzeDocument(textractParams, (err, data) => {
+            const keyValuePairs = getKeyValues(data);
+            const interpretedKeys = getInterpretations(keyValuePairs);
 
-          // helper functions
-          const logError = (msg, error = "") => {
-            logger.error(
-              {
-                docID,
-                pngifiedDocName,
-                route: "/api/upload_status/",
-                type: "POST",
-                error: error,
-              },
-              msg
-            );
-          };
-
-          const sendSuccessfulResponse = () => {
-            res.json({
-              status: "complete",
-              docID: docID,
-              docType: req.files[0].mimetype.split("/")[1],
-              docClass: docClass,
-              docName: req.files[0].originalname.split(".")[0],
-              filePath: "",
-              keyValuePairs,
-              interpretedKeys,
-            });
-
-            const jsonifiedDocName = req.files[0].originalname.replace(
-              /(.(\w)+)$/gi,
-              ".json"
-            );
-
-            let s3params = {
-              Bucket: `doc-classifier-bucket/${docID}`,
-              Key: `rawJSON-${jsonifiedDocName}`,
-              Body: Buffer.from(JSON.stringify(data)),
+            // helper functions
+            const logError = (msg, error = "") => {
+              logger.error(
+                {
+                  docID,
+                  pngifiedDocName,
+                  route: "/api/upload_status/",
+                  type: "POST",
+                  error: error,
+                },
+                msg
+              );
             };
 
-            s3.upload(s3params, (err, data) => {
-              if (err) {
-                logError("rawJSON S3 upload error", err);
-              }
-            });
+            const sendSuccessfulResponse = () => {
+              res.json({
+                status: "complete",
+                docID: docID,
+                docType: req.files[0].mimetype.split("/")[1],
+                docClass: docClass,
+                docName: req.files[0].originalname.split(".")[0],
+                filePath: "",
+                keyValuePairs,
+                interpretedKeys,
+              });
 
-            s3params = {
-              Bucket: `doc-classifier-bucket/${docID}`,
-              Key: `parsedJSON-${jsonifiedDocName}`,
-              Body: Buffer.from(JSON.stringify(keyValuePairs)),
-            };
-
-            s3.upload(s3params, (err, data) => {
-              if (err) {
-                logError("parsedJSON s3 upload error", err);
-              }
-            });
-          };
-
-          const sendError = (errorCode, statusMessage) => {
-            res.status(errorCode).send({
-              status: statusMessage,
-              docID: docID,
-              docType: req.files[0].mimetype.split("/")[1],
-              docClass: docClass,
-              docName: req.files[0].originalname.split(".")[0],
-              filePath: "",
-              keyValuePairs: "NA",
-            });
-          };
-
-          const delayedUpload = (n, maxN) => {
-            if (n > maxN) {
-              logError(
-                `Max tries error: ${n} tries`,
-                `Throttling exception max tries exceeded after ${n} tries. Request failed.`
+              const jsonifiedDocName = req.files[0].originalname.replace(
+                /(.(\w)+)$/gi,
+                ".json"
               );
-              sendError(
-                429,
-                "Throttling exception, max tries exceeded. request failed."
-              );
-            } else {
-              textract.analyzeDocument(textractParams, (err, data) => {
+
+              let s3params = {
+                Bucket: `doc-classifier-bucket/${docID}`,
+                Key: `rawJSON-${jsonifiedDocName}`,
+                Body: Buffer.from(JSON.stringify(data)),
+              };
+
+              s3.upload(s3params, (err, data) => {
                 if (err) {
-                  if (err.code === "ThrottlingException") {
-                    logger.info(
-                      `Throttling exception detected. Trying again x${n + 1}.`
-                    );
-                    return setTimeout(
-                      () => delayedUpload(n + 1, maxN),
-                      Math.pow(2, n)
-                    );
-                  } else {
-                    logError(
-                      "Some other error after a throttling exception",
-                      err
-                    );
-                    sendError(500, "internal server error");
-                  }
-                } else {
-                  logger.info(`throttling exception resolved after ${n} tries`);
-                  sendSuccessfulResponse();
+                  logError("rawJSON S3 upload error", err);
                 }
               });
-            }
-          };
 
-          // handle errors
-          if (err) {
-            logError("S3.upload error", err);
-            // throttling exception
-            if (err.code === "ThrottlingException") {
-              logger.info("S3 throttling exception detected. Trying again.");
-              delayedUpload(1, 15);
+              s3params = {
+                Bucket: `doc-classifier-bucket/${docID}`,
+                Key: `parsedJSON-${jsonifiedDocName}`,
+                Body: Buffer.from(JSON.stringify(keyValuePairs)),
+              };
+
+              s3.upload(s3params, (err, data) => {
+                if (err) {
+                  logError("parsedJSON s3 upload error", err);
+                }
+              });
+            };
+
+            const sendError = (errorCode, statusMessage) => {
+              res.status(errorCode).send({
+                status: statusMessage,
+                docID: docID,
+                docType: req.files[0].mimetype.split("/")[1],
+                docClass: docClass,
+                docName: req.files[0].originalname.split(".")[0],
+                filePath: "",
+                keyValuePairs: "NA",
+              });
+            };
+
+            const delayedUpload = (n, maxN) => {
+              if (n > maxN) {
+                logError(
+                  `Max tries error: ${n} tries`,
+                  `Throttling exception max tries exceeded after ${n} tries. Request failed.`
+                );
+                sendError(
+                  429,
+                  "Throttling exception, max tries exceeded. request failed."
+                );
+              } else {
+                textract.analyzeDocument(textractParams, (err, data) => {
+                  if (err) {
+                    if (err.code === "ThrottlingException") {
+                      logger.info(
+                        `Throttling exception detected. Trying again x${n + 1}.`
+                      );
+                      return setTimeout(
+                        () => delayedUpload(n + 1, maxN),
+                        Math.pow(2, n)
+                      );
+                    } else {
+                      logError(
+                        "Some other error after a throttling exception",
+                        err
+                      );
+                      sendError(500, "internal server error");
+                    }
+                  } else {
+                    logger.info(
+                      `throttling exception resolved after ${n} tries`
+                    );
+                    sendSuccessfulResponse();
+                  }
+                });
+              }
+            };
+
+            // handle errors
+            if (err) {
+              logError("S3.upload error", err);
+              // throttling exception
+              if (err.code === "ThrottlingException") {
+                logger.info("S3 throttling exception detected. Trying again.");
+                delayedUpload(1, 15);
+              } else {
+                sendError(400, "error");
+              }
             } else {
-              sendError(400, "error");
+              // success
+              sendSuccessfulResponse();
             }
-          } else {
-            // success
-            sendSuccessfulResponse();
+          });
+        });
+      };
+
+      //////// HANDLE PDF //////////
+      if (!req.files[0].mimetype.includes("image")) {
+        fs.writeFile(`temp_files/${docID}.pdf`, docBuffer, (err) => {
+          if (err) throw err;
+          else {
+            exec(
+              `magick convert -density 300 temp_files/${docID}.pdf -quality 100 temp_files/${docID}.png`,
+              (error, stdout, stderr) => {
+                if (error) {
+                  logger.error(
+                    { msg: error.message },
+                    `error convering pdf using image magick`
+                  );
+                  return;
+                }
+                if (stderr) {
+                  logger.error(
+                    { stderr },
+                    `STDERR convering pdf using image magick`
+                  );
+                }
+                fs.readFile(`temp_files/${docID}.png`, (err, data) => {
+                  if (err) throw err;
+                  uploadToS3TextractAndSendResponse(Buffer.from(data));
+                  fs.unlink(`temp_files/${docID}.png`, (err) => {
+                    if (err) throw err;
+                  });
+                  fs.unlink(`temp_files/${docID}.pdf`, (err) => {
+                    if (err) throw err;
+                  });
+                });
+              }
+            );
           }
         });
-      });
+        //////// HANDLE PNG //////////
+      } else {
+        uploadToS3TextractAndSendResponse(docBuffer);
+      }
     } else {
       logger.error("Could not process document. Multer error.", req.body);
     }
