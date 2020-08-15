@@ -234,7 +234,8 @@ router.post("/api/upload_status", (req, res) => {
       //////// HANDLE PDF //////////
       if (!req.files[0].mimetype.includes("image")) {
         gm(docBuffer, "DOC_NAME.pdf") // 2nd argument is so that gm() can infer a filetype. DOC_NAME isn't actually a doc name
-          .density(300, 300)
+          .density(600, 600)
+          .enhance()
           .toBuffer("PNG", (err, buffer) => {
             if (err) {
               logger.error(
