@@ -9,7 +9,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 import fs from "fs";
-const { exec } = require("child_process");
+const gm = require("gm");
 
 import bodyParser from "body-parser";
 import express from "express";
@@ -56,11 +56,6 @@ const router = express.Router();
 const staticFiles = express.static(path.join(__dirname, "../../client/build"));
 app.use(staticFiles);
 app.use(cors());
-
-// make sure there is a folder there
-fs.mkdir("temp_files", { recursive: true }, (err) => {
-  if (err) logger.error(err);
-});
 
 // TODO: Run this through Textract
 // var upload = multer({ storage: multer.memoryStorage() }).any();
@@ -238,51 +233,21 @@ router.post("/api/upload_status", (req, res) => {
 
       //////// HANDLE PDF //////////
       if (!req.files[0].mimetype.includes("image")) {
-        const pdfPath = `temp_files/${docID}.pdf`;
-        const pngPath = `temp_files/${docID}.png`;
-
-        const deleteFiles = () => {
-          fs.unlink(pngPath, (err) => {
-            if (err) logger.error(err);
+        gm(docBuffer, "DOC_NAME.pdf")
+          .density(300, 300)
+          .toBuffer("PNG", (err, buffer) => {
+            if (err) {
+              logger.error(
+                "error converting pdf to png using gm/graphicsmagick",
+                { err }
+              );
+              return;
+            } else {
+              logger.info(`${docName}.pdf successfully converted`);
+              uploadToS3TextractAndSendResponse(buffer);
+            }
           });
-          fs.unlink(pdfPath, (err) => {
-            if (err) logger.error(err);
-          });
-        };
 
-        fs.writeFile(pdfPath, docBuffer, async (err) => {
-          if (err) logger.error(err);
-          else {
-            exec(
-              `magick convert -density 300 -flatten ${pdfPath}[0] -colorspace RGB ${pngPath}`,
-              (error, stdout, stderr) => {
-                if (error) {
-                  logger.error(
-                    { msg: error.message },
-                    `error convering pdf using image magick`
-                  );
-                  deleteFiles();
-                  return;
-                }
-                if (stderr) {
-                  logger.error(
-                    { stderr },
-                    `STDERR converting pdf using image magick`
-                  );
-                }
-                fs.readFile(pngPath, (err, data) => {
-                  if (err) {
-                    deleteFiles();
-                    logger.error(err);
-                  } else {
-                    deleteFiles();
-                    uploadToS3TextractAndSendResponse(Buffer.from(data));
-                  }
-                });
-              }
-            );
-          }
-        });
         //////// HANDLE PNG //////////
       } else {
         uploadToS3TextractAndSendResponse(docBuffer);
