@@ -5,6 +5,7 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import styled from "styled-components";
 
 import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
 import Table from "@material-ui/core/Table";
@@ -20,7 +21,13 @@ import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
-import { MODAL_WIDTH, API_PATH } from "../common/constants";
+import {
+  MAIN_MODAL_WIDTH,
+  MAIN_MODAL_OFFSET_X,
+  MAIN_MODAL_OFFSET_Y,
+  API_PATH,
+  MODAL_SHADOW,
+} from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
@@ -31,21 +38,38 @@ import {
   KeyValuesByDoc,
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
-import { ModalContext } from "./RenderModal";
+import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
-  top: 100px;
-  left: ${(window.innerWidth - MODAL_WIDTH) / 2}px;
+  top: ${MAIN_MODAL_OFFSET_Y}px;
+  left: ${MAIN_MODAL_OFFSET_X}px;
   position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   z-index: 2;
   max-height: 500px;
   overflow-x: hidden;
   overflow-y: scroll;
-  width: ${MODAL_WIDTH}px;
+  width: ${MAIN_MODAL_WIDTH}px;
+  border: 1px solid ${colors.MODAL_BORDER};
+  box-shadow: ${MODAL_SHADOW};
 `;
+
+// const CloseButton = styled.button`
+//   float: right;
+//   margin: 1em;
+//   height: 3em;
+//   width: 3em;
+//   background: none;
+//   border: none;
+//   border-radius: 50%;
+//   transition: 0.5s;
+
+//   :hover {
+//     border: 1px solid ${colors.DROPZONE_TEXT_GREY};
+//   }
+// `;
 
 const FillButton = styled.button`
   background-color: ${colors.FILL_BUTTON};
@@ -133,7 +157,7 @@ const TableHeadComponent = ({ targetString }: any) => {
 };
 
 const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
-  const { setMainModalOpen } = useContext(ModalContext);
+  const { setMainModalOpen } = useContext(MainModalContext);
   const {
     selectedDocData,
     setDocData,
@@ -356,7 +380,7 @@ const Message = ({ msg }: any) => {
   );
 };
 
-interface SelectProps {
+export interface SelectProps {
   eventObj: any;
   targetString: string;
 }
@@ -364,6 +388,7 @@ interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
+  const { setMainModalOpen, setMainModalHeight } = useContext(MainModalContext);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -376,6 +401,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const checkKVPairs = (selectedDocData: KeyValuesByDoc) =>
     Object.keys(selectedDocData.keyValuePairs).length > 0;
   let areThereKVPairs;
+
   // handle if doc is added while modal open
   if (selectedDocData === undefined) {
     const newDocData = getKeyValuePairsByDoc();
@@ -387,7 +413,19 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   }
 
   return (
-    <ModalWrapper>
+    <ModalWrapper
+      // set modal height
+      ref={(input: HTMLDivElement) => {
+        // need to cast type to getComputedStyle()
+        const wrapper = input as Element;
+        if (wrapper as Element) {
+          const modalHeight = parseInt(
+            window.getComputedStyle(wrapper).height.replace("px", "")
+          );
+          setMainModalHeight(modalHeight);
+        }
+      }}
+    >
       <ManualSelect eventObj={eventObj}></ManualSelect>
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />

@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "© Copyright Alex Reibman",
   "dependencies": {
     "@babel/cli": "^7.10.3",
     "@babel/core": "^7.10.3",

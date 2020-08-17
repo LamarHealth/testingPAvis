@@ -2,9 +2,11 @@ import React, { useState, useEffect, createContext, useContext } from "react";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 import useImage from "use-image";
-
 import styled from "styled-components";
+import Draggable, { DraggableData } from "react-draggable";
 
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -13,20 +15,40 @@ import Chip from "@material-ui/core/Chip";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
-import { ModalContext } from "./RenderModal";
+import { MainModalContext } from "./RenderModal";
 import WrappedJssComponent from "./ShadowComponent";
 import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
-import { API_PATH } from "../common/constants";
-import { DOC_IMAGE_WIDTH } from "../common/constants";
-import { KONVA_MODAL_MAX_HEIGHT } from "../common/constants";
+import { colors } from "../common/colors";
+import {
+  API_PATH,
+  KONVA_MODAL_OFFSET_X,
+  DOC_IMAGE_WIDTH,
+  KONVA_MODAL_HEIGHT,
+  KONVA_MODAL_OFFSET_Y,
+  KONVA_MODAL_LEFT_BOUND,
+  KONVA_MODAL_TOP_BOUND,
+  KONVA_MODAL_RIGHT_BOUND,
+  KONVA_MODAL_BOTTOM_BOUND,
+  MODAL_SHADOW,
+} from "../common/constants";
 
 const ModalWrapper = styled.div`
-  top: 25px;
+  top: ${KONVA_MODAL_OFFSET_Y}px;
   position: absolute;
-  max-height: ${KONVA_MODAL_MAX_HEIGHT}px;
+  height: ${KONVA_MODAL_HEIGHT}px;
   overflow-y: scroll;
+  border: 1px solid ${colors.MODAL_BORDER};
+  box-shadow: ${MODAL_SHADOW};
+`;
+
+const CloseButton = styled(IconButton)`
+  float: right;
+`;
+
+const DocName = styled(Typography)`
+  margin: 1em;
 `;
 
 const ManualSelectButton = styled(Chip)`
@@ -60,8 +82,13 @@ export const ManualSelect = ({ eventObj }: any) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
-  const { setMainModalOpen } = useContext(ModalContext);
-  const [manualSelectModalOpen, setManualSelectModalOpen] = useState(false);
+  const {
+    setMainModalOpen,
+    konvaModalOpen,
+    setKonvaModalOpen,
+    konvaModalDraggCoords,
+    setKonvaModalDraggCoords,
+  } = useContext(MainModalContext);
   const [errorFetchingImage, setErrorFetchingImage] = useState(false);
   const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
@@ -78,14 +105,14 @@ export const ManualSelect = ({ eventObj }: any) => {
       errorFetchingGeometry
     ) {
       getImageAndGeometryFromServer(selectedDocData).then(() =>
-        setManualSelectModalOpen(true)
+        setKonvaModalOpen(true)
       );
     } else {
-      setManualSelectModalOpen(true);
+      setKonvaModalOpen(true);
     }
   };
-  const id = manualSelectModalOpen ? "docit-manual-select-modal" : undefined;
-  const isDocImageSet = Boolean(docImageURL.overlayPositionOffset);
+  const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
+  const isDocImageSet = Boolean(docImageURL.height);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -121,7 +148,6 @@ export const ManualSelect = ({ eventObj }: any) => {
           let urlObj: any = {
             url: objectURL,
             height: (DOC_IMAGE_WIDTH * this.naturalHeight) / this.naturalWidth,
-            overlayPositionOffset: (window.innerWidth - DOC_IMAGE_WIDTH) / 2,
           };
           setDocImageURL(urlObj);
         };
@@ -174,6 +200,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
+        setKonvaModalOpen(false);
         setMainModalOpen(false);
         eventObj.target.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
@@ -186,11 +213,20 @@ export const ManualSelect = ({ eventObj }: any) => {
     };
   }, [currentSelection]);
 
+  // draggable
+  const handleDragStop = (e: any, data: DraggableData) => {
+    let [x, y] = [data.x, data.y];
+    setKonvaModalDraggCoords({ x, y });
+  };
+
   return (
     <React.Fragment>
-      <Typography variant="h6" style={{ margin: "1em" }}>
+      <CloseButton onClick={() => setMainModalOpen(false)}>
+        <CloseIcon />
+      </CloseButton>
+      <DocName id="doc-name-typography" variant="h6">
         {selectedDocData.docName}
-      </Typography>
+      </DocName>
       <ManualSelectButton
         label="Manual Select"
         variant="outlined"
@@ -203,38 +239,55 @@ export const ManualSelect = ({ eventObj }: any) => {
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
         <Modal
           id={id}
-          open={manualSelectModalOpen}
-          onClose={() => setManualSelectModalOpen(false)}
+          open={konvaModalOpen}
+          onClose={() => setKonvaModalOpen(false)}
           aria-labelledby="manual-select-modal-title"
           aria-describedby="manual-select-modal-descripton"
           BackdropComponent={Backdrop}
           BackdropProps={{
-            timeout: 500,
+            invisible: true,
           }}
           style={{ zIndex: 99999 }}
         >
-          <Fade in={manualSelectModalOpen}>
-            <WrappedJssComponent>
-              <ModalWrapper
-                style={{
-                  left: `${docImageURL.overlayPositionOffset}px`,
-                }}
-              >
-                <KonvaModalContext.Provider
-                  value={{
-                    docImageURL,
-                    currentSelection,
-                    image,
-                    filled,
-                    setFilled,
-                    setCurrentSelection,
-                    currentLinesGeometry,
-                  }}
-                >
-                  <KonvaModal />
-                </KonvaModalContext.Provider>
-              </ModalWrapper>
-            </WrappedJssComponent>
+          <Fade in={konvaModalOpen}>
+            <Draggable
+              position={{
+                x: konvaModalDraggCoords.x,
+                y: konvaModalDraggCoords.y,
+              }}
+              onStop={handleDragStop}
+              bounds={{
+                left: KONVA_MODAL_LEFT_BOUND,
+                top: KONVA_MODAL_TOP_BOUND,
+                right: KONVA_MODAL_RIGHT_BOUND,
+                bottom: KONVA_MODAL_BOTTOM_BOUND,
+              }}
+            >
+              <div>
+                <WrappedJssComponent>
+                  <ModalWrapper
+                    style={{
+                      left: `${KONVA_MODAL_OFFSET_X}px`,
+                    }}
+                  >
+                    <KonvaModalContext.Provider
+                      value={{
+                        docImageURL,
+                        currentSelection,
+                        image,
+                        filled,
+                        setFilled,
+                        setCurrentSelection,
+                        currentLinesGeometry,
+                        setKonvaModalOpen,
+                      }}
+                    >
+                      <KonvaModal />
+                    </KonvaModalContext.Provider>
+                  </ModalWrapper>
+                </WrappedJssComponent>
+              </div>
+            </Draggable>
           </Fade>
         </Modal>
       )}
