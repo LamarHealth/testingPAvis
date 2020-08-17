@@ -165,7 +165,7 @@ const FileStatus = (props: any) => {
           break;
         case 405:
           setUploadStatus(405);
-          console.log("file size exceeds > 5mb, cannot use OCR.");
+          window.alert("file size exceeds > 5mb, cannot use OCR.");
           break;
         case 429:
           setUploadStatus(429);
