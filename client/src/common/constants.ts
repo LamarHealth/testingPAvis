@@ -1,5 +1,5 @@
 export const SIDEBAR_WIDTH = "25em";
-export const PAGE_SCALE = (1.1 * window.innerWidth) / 1440;
+export const PAGE_SCALE = 0.5;
 export const MODAL_SHADOW = "0px 0px 15px 3px rgba(102, 102, 102, 0.15)";
 export const MAIN_MODAL_WIDTH = 700;
 export const MAIN_MODAL_OFFSET_Y = 100;
