@@ -22,10 +22,15 @@ export const KONVA_MODAL_RIGHT_BOUND =
   DOC_IMAGE_WIDTH + KONVA_MODAL_OFFSET_X - 70;
 export const KONVA_MODAL_BOTTOM_BOUND =
   window.innerHeight - KONVA_MODAL_OFFSET_Y - 70;
-export const LOCAL_MODE = process.env.REACT_APP_LOCAL === "local";
+// local
+export const LOCAL_MODE =
+  process.env.REACT_APP_LOCAL === "local" ||
+  process.env.REACT_APP_LOCAL === "liberty";
 export const API_PATH =
   process.env.REACT_APP_LOCAL === "local"
     ? ""
+    : process.env.REACT_APP_LOCAL === "liberty"
+    ? "https://liberty-docit-demo.herokuapp.com"
     : "https://docit-web.herokuapp.com";
 export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;

@@ -7,25 +7,25 @@ interface LibertyInputsDictionary {
 }
 
 export const libertyInputsDictionary = {
-  "CMCarrierBookingRef": "Carrier Booking Ref",
+  CMCarrierBookingRef: "Carrier Booking Ref",
   // exclude forwarder, will already be there according to brandon
-  "CMConsignee": "Consignee",
-  "CMConsigneeName": "Consignee Name",
-  "CMConsigneeEmail": "Consignee Email",
-  "CMConsigneePhone": "Consignee Phone",
-  "CMConsigneeFax": "Consignee Fax",
+  CMConsignee: "Consignee",
+  CMConsigneeName: "Name",
+  CMConsigneeEmail: "Email",
+  CMConsigneePhone: "Phone",
+  CMConsigneeFax: "Fax",
   // exclude POL etc
-  "CMExportRef": "Export References",
-  "CMShipper": "Shipper",
-  "CMShipperName": "Shipper Name",
-  "CMShipperEmail": "Shipper Email",
-  "CMShipperPhone": "Shipper Phone",
-  "CMShipperFax": "Shipper Fax",
-  "CMNotify": "Notify Party",
-  "CMNotifyName": "Notify Party Name",
-  "CMNotifyEmail": "Notify Party Email",
-  "CMNotifyPhone": "Notify Party Phone",
-  "CMNotifyFax": "Notify Party Fax",
+  CMExportRef: "Export References",
+  CMShipper: "Shipper",
+  CMShipperName: "Shipper Name",
+  CMShipperEmail: "Email",
+  CMShipperPhone: "Phone",
+  CMShipperFax: "Fax",
+  CMNotify: "Notify Party",
+  CMNotifyName: "Notify Party",
+  CMNotifyEmail: "Email",
+  CMNotifyPhone: "Phone",
+  CMNotifyFax: "Fax",
 } as LibertyInputsDictionary;
 
 export const assignTargetString = (inputEl: any) => {
