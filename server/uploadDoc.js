@@ -6,11 +6,16 @@ import { getKeyValues, getInterpretations } from "./textractKeyValues";
 
 const config = require("./config");
 
-AWS.config.update({
+const textractConfig = {
   accessKeyId: config.awsAccesskeyID,
   secretAccessKey: config.awsSecretAccessKey,
   region: config.awsRegion,
-});
+};
+const s3Config = {
+  accessKeyId: config.bucketAccessKeyID,
+  secretAccessKey: config.bucketSecretAccessKey,
+  region: config.awsRegion,
+};
 
 export const uploadToS3TextractAndSendResponse = (
   req,
@@ -20,8 +25,34 @@ export const uploadToS3TextractAndSendResponse = (
   docID,
   logger
 ) => {
-  const textract = new Textract();
-  const s3 = new S3();
+  const textract = new Textract(textractConfig);
+  const s3 = new S3(s3Config);
+
+  // helper functions
+  const sendError = (errorCode, statusMessage) => {
+    res.status(errorCode).send({
+      status: statusMessage,
+      docID: docID,
+      docType: req.files[0].mimetype.split("/")[1],
+      docClass: docClass,
+      docName: req.files[0].originalname.split(".")[0],
+      filePath: "",
+      keyValuePairs: "NA",
+    });
+  };
+
+  const logError = (msg, error = "") => {
+    logger.error(
+      {
+        docID,
+        pngifiedDocName,
+        route: "/api/upload_status/",
+        type: "POST",
+        error: error,
+      },
+      msg
+    );
+  };
 
   var textractParams = {
     Document: {
@@ -38,46 +69,23 @@ export const uploadToS3TextractAndSendResponse = (
   // convert .pdf file extension to .png it's no longer a pdf
   let pngifiedDocName = docName.replace(/(.pdf)$/i, ".png");
 
-  const s3params = {
-    Bucket: `doc-classifier-bucket/${docID}`,
+  const s3PngUploadparams = {
+    Bucket: `${config.bucketName}/${docID}`,
     Key: pngifiedDocName,
     Body: docBuffer,
   };
 
   let docClass = "";
 
+  // liberty config
   // All docs are uploaded just in case
-  s3.upload(s3params, function (err, data) {
+  s3.upload(s3PngUploadparams, function (err, data) {
     if (err) {
-      logger.error({ err }, "error uploading to s3");
+      logError("error uploading to s3", err);
+      sendError(500, "error uploading to s3");
     } else {
+      // docit config
       textract.analyzeDocument(textractParams, (err, data) => {
-        // helper functions
-        const sendError = (errorCode, statusMessage) => {
-          res.status(errorCode).send({
-            status: statusMessage,
-            docID: docID,
-            docType: req.files[0].mimetype.split("/")[1],
-            docClass: docClass,
-            docName: req.files[0].originalname.split(".")[0],
-            filePath: "",
-            keyValuePairs: "NA",
-          });
-        };
-
-        const logError = (msg, error = "") => {
-          logger.error(
-            {
-              docID,
-              pngifiedDocName,
-              route: "/api/upload_status/",
-              type: "POST",
-              error: error,
-            },
-            msg
-          );
-        };
-
         let keyValuePairs, interpretedKeys;
         try {
           keyValuePairs = getKeyValues(data);
@@ -105,11 +113,12 @@ export const uploadToS3TextractAndSendResponse = (
           );
 
           const rawJSONs3Params = {
-            Bucket: `doc-classifier-bucket/${docID}`,
+            Bucket: `${config.bucketName}/${docID}`,
             Key: `rawJSON-${jsonifiedDocName}`,
             Body: Buffer.from(JSON.stringify(data)),
           };
 
+          // liberty config
           s3.upload(rawJSONs3Params, (err, data) => {
             if (err) {
               logError("rawJSON S3 upload error", err);
@@ -117,11 +126,11 @@ export const uploadToS3TextractAndSendResponse = (
           });
 
           const parsedJSONs3Params = {
-            Bucket: `doc-classifier-bucket/${docID}`,
+            Bucket: `${config.bucketName}/${docID}`,
             Key: `parsedJSON-${jsonifiedDocName}`,
             Body: Buffer.from(JSON.stringify(keyValuePairs)),
           };
-
+          // liberty config
           s3.upload(parsedJSONs3Params, (err, data) => {
             if (err) {
               logError("parsedJSON s3 upload error", err);
@@ -140,6 +149,7 @@ export const uploadToS3TextractAndSendResponse = (
               "Throttling exception, max tries exceeded. request failed."
             );
           } else {
+            // docit config
             textract.analyzeDocument(textractParams, (err, data) => {
               if (err) {
                 if (err.code === "ThrottlingException") {

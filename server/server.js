@@ -26,11 +26,16 @@ const expressPino = require("express-pino-logger");
 // AWS
 const config = require("./config");
 
-AWS.config.update({
+const textractConfig = {
   accessKeyId: config.awsAccesskeyID,
   secretAccessKey: config.awsSecretAccessKey,
   region: config.awsRegion,
-});
+};
+const s3Config = {
+  accessKeyId: config.bucketAccessKeyID,
+  secretAccessKey: config.bucketSecretAccessKey,
+  region: config.awsRegion,
+};
 
 const app = express();
 
@@ -39,6 +44,7 @@ const logger = pino({
   level: process.env.LOG_LEVEL || "info",
   prettyPrint: process.env.PINO_PRETTY === "true" ? true : false,
 });
+
 const expressLogger = expressPino({ logger });
 
 // can disable this if don't want every request/response logged to console
@@ -111,10 +117,10 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const docName = req.params.docName.trim();
 
-  const s3 = new S3();
+  const s3 = new S3(s3Config);
 
   const s3GetParams = {
-    Bucket: "doc-classifier-bucket",
+    Bucket: config.bucketName,
     Key: `${docID}/${docName}`,
   };
 
@@ -158,13 +164,13 @@ router.get("/api/doc-image/:docID/:docName", (req, res) => {
 router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
   const docID = req.params.docID.trim();
   const rawJSONDocName = `rawJSON-${req.params.docName.trim()}.json`;
-  const s3Key = `${docID}/${rawJSONDocName}`;
+  const docJsonURI = `${docID}/${rawJSONDocName}`;
 
-  const s3 = new S3();
+  const s3 = new S3(s3Config);
 
   const s3rawJSONParams = {
-    Bucket: "doc-classifier-bucket",
-    Key: s3Key,
+    Bucket: config.bucketName,
+    Key: docJsonURI,
   };
 
   s3.getObject(s3rawJSONParams, (error, data) => {
@@ -174,7 +180,7 @@ router.get("/api/lines-geometry/:docID/:docName", (req, res) => {
           docID,
           docName: req.params.docName,
           rawJSONDocName: rawJSONDocName,
-          s3Key,
+          s3Key: docJsonURI,
           route: "/api/lines-geometry/",
           type: "GET",
           s3error: error,
