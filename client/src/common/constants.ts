@@ -28,9 +28,7 @@ export const KONVA_MODAL_RIGHT_BOUND =
 export const KONVA_MODAL_BOTTOM_BOUND =
   window.innerHeight - KONVA_MODAL_OFFSET_Y - 70;
 // If LOCAL_MODE is enabled, then the app will render a mock dashboard for testing
-export const LOCAL_MODE =
-  process.env.REACT_APP_LOCAL === envVars.LOCAL ||
-  process.env.REACT_APP_LOCAL === envVars.LIBERTY;
+export const LOCAL_MODE = process.env.REACT_APP_LOCAL === envVars.LOCAL;
 export const API_PATH =
   process.env.REACT_APP_LOCAL === envVars.LOCAL // App is deployed for local testing
     ? "" // Path will be default localhost
@@ -39,5 +37,6 @@ export const API_PATH =
     : process.env.REACT_APP_LOCAL === envVars.BUILD // Extension is packaged for general usage
     ? "https://docit-web.herokuapp.com"
     : "https://docit-web.herokuapp.com"; // Default to live path
+export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;
 export const ACC_SCORE_SMALL = 7;

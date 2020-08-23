@@ -2,7 +2,9 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "© Copyright Alex Reibman",
+  "copyright": "© Copyright Alex Reibman",
+  "license": "UNLICENSED",
+  "private": true,
   "dependencies": {
     "@babel/cli": "^7.10.3",
     "@babel/core": "^7.10.3",
