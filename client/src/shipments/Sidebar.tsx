@@ -67,7 +67,7 @@ export const Sidebar = () => {
   const [isOpen, setOpen] = useState(false);
 
   // open the sidebar if extension icon clicked
-  if (process.env.REACT_APP_LOCAL !== "local") {
+  if (process.env.REACT_APP_LOCAL === "build") {
     const callback = function (request: any) {
       if (request.message == "open sesame") {
         chrome.runtime.onMessage.removeListener(callback);

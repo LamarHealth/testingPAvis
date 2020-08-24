@@ -124,6 +124,10 @@ const DocCell = (props: DocumentInfo) => {
           "lc substring"
         );
 
+        if (sortedKeyValuePairs[0].distanceFromTarget < 0.5) {
+          return;
+        }
+
         if (sortedKeyValuePairs[0].value !== "") {
           renderAccuracyScore(this, sortedKeyValuePairs[0]);
         }

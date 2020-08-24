@@ -80,6 +80,9 @@ export const getDistancePercentage = (
         longestKeyLength
       );
     case "lc substring":
+      if (targetString.length === 0) {
+        return 0;
+      }
       return (
         getLongestCommonSubstring(
           targetString.toLowerCase(),
