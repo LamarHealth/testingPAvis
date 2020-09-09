@@ -6,7 +6,6 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "./../common/colors";
-import { DOC_IMAGE_WIDTH } from "./../common/constants";
 import { KonvaModalContext } from "./ManualSelect";
 
 // cannot import from SelectModal... likely a shadow dom issue
@@ -41,7 +40,7 @@ const CurrentSelection = styled(Typography)`
 
 const CurrentSelectionContext = createContext({} as any);
 
-const Polygon = ({ lineGeometry, docImageURL }: any) => {
+const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
   const [color, setColor] = useState("transparent");
   const { filled, setFilled, setCurrentSelection } = useContext(
     CurrentSelectionContext
@@ -89,8 +88,8 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
       points={Array.prototype.concat.apply(
         [],
         lineGeometry.Coordinates.map((geometry: any) => [
-          DOC_IMAGE_WIDTH * geometry.X,
-          docImageURL.height * geometry.Y,
+          docImageDimensions.width * geometry.X,
+          docImageDimensions.height * geometry.Y,
         ])
       )}
       closed
@@ -100,11 +99,11 @@ const Polygon = ({ lineGeometry, docImageURL }: any) => {
   );
 };
 
-const Header = ({ currentSelection }: any) => {
+const Header = ({ docImageDimensions, currentSelection }: any) => {
   return (
     <CurrentSelectionWrapper
       style={{
-        width: `${DOC_IMAGE_WIDTH}px`,
+        width: `${docImageDimensions.width}px`,
       }}
     >
       <Typography>
@@ -133,7 +132,6 @@ const Header = ({ currentSelection }: any) => {
 
 export const KonvaModal = () => {
   const {
-    docImageURL,
     currentSelection,
     image,
     filled,
@@ -141,17 +139,24 @@ export const KonvaModal = () => {
     setCurrentSelection,
     currentLinesGeometry,
     setKonvaModalOpen,
+    docImageDimensions,
   } = useContext(KonvaModalContext);
   return (
     <>
       <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
-      <Header docImageURL={docImageURL} currentSelection={currentSelection} />
-      <Stage width={DOC_IMAGE_WIDTH} height={docImageURL.height}>
+      <Header
+        docImageDimensions={docImageDimensions}
+        currentSelection={currentSelection}
+      />
+      <Stage
+        width={docImageDimensions.width}
+        height={docImageDimensions.height}
+      >
         <Layer>
           <KonvaImage
             image={image}
-            width={DOC_IMAGE_WIDTH}
-            height={docImageURL.height}
+            width={docImageDimensions.width}
+            height={docImageDimensions.height}
           />
           <CurrentSelectionContext.Provider
             value={{
@@ -165,7 +170,7 @@ export const KonvaModal = () => {
                 <Polygon
                   key={ndx}
                   lineGeometry={lineGeometry}
-                  docImageURL={docImageURL}
+                  docImageDimensions={docImageDimensions}
                 />
               );
             })}

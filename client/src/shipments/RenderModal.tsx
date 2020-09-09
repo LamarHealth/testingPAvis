@@ -20,6 +20,10 @@ import {
   MAIN_MODAL_LEFT_BOUND,
   MAIN_MODAL_BOTTOM_BOUND,
   MAIN_MODAL_RIGHT_BOUND,
+  KONVA_MODAL_OFFSET_X,
+  KONVA_MODAL_OFFSET_Y,
+  DOC_IMAGE_WIDTH,
+  KONVA_MODAL_HEIGHT,
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
 import { useEffect } from "react";
@@ -41,8 +45,16 @@ export const RenderModal = () => {
     y: 0,
   });
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
-    x: 0,
-    y: 0,
+    x: KONVA_MODAL_OFFSET_X,
+    y: KONVA_MODAL_OFFSET_Y,
+  });
+  const [konvaModalDimensions, setKonvaModalDimensions] = useState({
+    width: DOC_IMAGE_WIDTH,
+    height: KONVA_MODAL_HEIGHT,
+  });
+  const [docImageDimensions, setDocImageDimensions] = useState({
+    width: 0,
+    height: 0,
   });
 
   // handle input el click
@@ -116,6 +128,10 @@ export const RenderModal = () => {
                       setMainModalHeight,
                       konvaModalDraggCoords,
                       setKonvaModalDraggCoords,
+                      konvaModalDimensions,
+                      setKonvaModalDimensions,
+                      docImageDimensions,
+                      setDocImageDimensions,
                     }}
                   >
                     <>
