@@ -110,7 +110,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     }
   };
   const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
-  const isDocImageSet = Boolean(docImageURL.height);
+  const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -143,27 +143,22 @@ export const ManualSelect = ({ eventObj }: any) => {
         const img = new Image();
         img.src = objectURL;
         img.onload = function (this: any) {
-          const isThereAlreadyHeight = docImageDimensions.height !== 0;
           const url = objectURL;
           const heightXWidthMutliplier = this.naturalHeight / this.naturalWidth;
-          let width, height;
-          if (isThereAlreadyHeight) {
-            // check if there is already height and width from a previous resizing
-            width = docImageDimensions.width;
-            height = docImageDimensions.height;
-          } else {
-            // ... if not, use the default sizes
-            width = DOC_IMAGE_WIDTH;
-            height = DOC_IMAGE_WIDTH * heightXWidthMutliplier;
+
+          // if the first time an image is loaded, then set the img dim to a specified default. img dim are updated from resizing.
+          if (docImageDimensions.height === 0) {
+            setDocImageDimensions(() => {
+              const width = DOC_IMAGE_WIDTH;
+              const height = DOC_IMAGE_WIDTH * heightXWidthMutliplier;
+              return { width, height };
+            });
           }
 
-          let urlObj: any = {
+          setDocImageURL({
             url,
             heightXWidthMutliplier,
-            height,
-          };
-
-          setDocImageURL(urlObj);
+          });
         };
         break;
       case 410:
