@@ -1,6 +1,7 @@
 import React, { useState, createContext } from "react";
 
 import $ from "jquery";
+import styled from "styled-components";
 
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
@@ -13,6 +14,8 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { globalSelectedFileState } from "./DocViewer";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
+import { KonvaModal } from "./KonvaModal";
+import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import {
@@ -28,6 +31,13 @@ import {
 import { assignTargetString } from "./libertyInputsDictionary";
 import { useEffect } from "react";
 
+const Container = styled.div`
+  z-index: 900000;
+
+  // need pos relative or else z-index will not work
+  position: relative;
+`;
+
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
@@ -38,12 +48,12 @@ export const RenderModal = () => {
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const id = mainModalOpen ? "docit-main-modal" : undefined;
-  const [konvaModalOpen, setKonvaModalOpen] = useState(false);
   const [mainModalHeight, setMainModalHeight] = useState(250); // est. lower bound for select modal height
   const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
     x: 0,
     y: 0,
   });
+  const [konvaModalOpen, setKonvaModalOpen] = useState(false);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
     y: KONVA_MODAL_OFFSET_Y,
@@ -88,44 +98,31 @@ export const RenderModal = () => {
   return (
     <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && (
-        <Modal
-          id={id}
-          open={mainModalOpen}
-          onClose={() => setMainModalOpen(false)}
-          aria-labelledby="main-modal-title"
-          aria-describedby="main-modal-description"
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            invisible: true,
-          }}
-          disableEnforceFocus
-          disableAutoFocus
-          disableScrollLock
-        >
-          <Fade in={mainModalOpen}>
-            <Draggable
-              disabled={konvaModalOpen ? true : false}
-              onStop={handleDragStop}
-              position={{
-                x: mainModalDraggCoords.x,
-                y: mainModalDraggCoords.y,
-              }}
-              bounds={{
-                left: MAIN_MODAL_LEFT_BOUND,
-                top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
-                right: MAIN_MODAL_RIGHT_BOUND,
-                bottom: MAIN_MODAL_BOTTOM_BOUND,
-              }}
-            >
-              <div>
-                <WrappedJssComponent>
+        <WrappedJssComponent>
+          {mainModalOpen && (
+            <Container>
+              <Draggable
+                disabled={konvaModalOpen ? true : false}
+                onStop={handleDragStop}
+                position={{
+                  x: mainModalDraggCoords.x,
+                  y: mainModalDraggCoords.y,
+                }}
+                bounds={{
+                  left: MAIN_MODAL_LEFT_BOUND,
+                  top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
+                  right: MAIN_MODAL_RIGHT_BOUND,
+                  bottom: MAIN_MODAL_BOTTOM_BOUND,
+                }}
+              >
+                <div>
                   <MainModalContext.Provider
                     value={{
                       mainModalOpen,
                       setMainModalOpen,
+                      setMainModalHeight,
                       konvaModalOpen,
                       setKonvaModalOpen,
-                      setMainModalHeight,
                       konvaModalDraggCoords,
                       setKonvaModalDraggCoords,
                       konvaModalDimensions,
@@ -143,11 +140,12 @@ export const RenderModal = () => {
                       )}
                     </>
                   </MainModalContext.Provider>
-                </WrappedJssComponent>
-              </div>
-            </Draggable>
-          </Fade>
-        </Modal>
+                </div>
+              </Draggable>
+            </Container>
+          )}
+          {konvaModalOpen && <ManualSelect />}
+        </WrappedJssComponent>
       )}
     </ThemeProvider>
   );

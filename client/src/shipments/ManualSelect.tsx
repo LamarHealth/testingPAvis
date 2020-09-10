@@ -12,6 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
 import Chip from "@material-ui/core/Chip";
+import { makeStyles } from "@material-ui/core/styles";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
@@ -27,6 +28,13 @@ import {
   KONVA_MODAL_HEIGHT,
   MODAL_SHADOW,
 } from "../common/constants";
+
+const Container = styled.div`
+  z-index: 9000;
+
+  // need pos relative or else z-index will not work
+  position: relative;
+`;
 
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
@@ -250,9 +258,19 @@ export const ManualSelect = ({ eventObj }: any) => {
     });
   };
 
+  ////////// NEW //////////
+  /////////////////////////
+  /////////////////////////
+
+  const backdropStyles = makeStyles({ root: { display: "none" } });
+
+  /////////////////////////
+  /////////////////////////
+  /////////////////////////
+
   return (
     <React.Fragment>
-      <CloseButton onClick={() => setMainModalOpen(false)}>
+      {/* <CloseButton onClick={() => setMainModalOpen(false)}>
         <CloseIcon />
       </CloseButton>
       <DocName id="doc-name-typography" variant="h6">
@@ -262,54 +280,66 @@ export const ManualSelect = ({ eventObj }: any) => {
         label="Manual Select"
         variant="outlined"
         onClick={modalHandleClick}
-      />
+      /> */}
 
       {(errorFetchingGeometry || errorFetchingImage) && (
         <ErrorLine errorCode={errorCode} msg={errorMessage} />
       )}
-      {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
-        <Modal
-          id={id}
-          open={konvaModalOpen}
-          onClose={() => setKonvaModalOpen(false)}
-          aria-labelledby="manual-select-modal-title"
-          aria-describedby="manual-select-modal-descripton"
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            invisible: true,
-          }}
-          style={{ zIndex: 99999 }}
-        >
-          <Fade in={konvaModalOpen}>
-            <WrappedJssComponent>
-              <StyledRnD
-                position={konvaModalDraggCoords}
-                onDragStop={handleDragStop}
-                bounds="window"
-                size={konvaModalDimensions}
-                onResizeStop={handleResizeStop}
-              >
-                <div>
-                  <KonvaModalContext.Provider
-                    value={{
-                      currentSelection,
-                      image,
-                      filled,
-                      setFilled,
-                      setCurrentSelection,
-                      currentLinesGeometry,
-                      setKonvaModalOpen,
-                      docImageDimensions,
-                    }}
-                  >
-                    <KonvaModal />
-                  </KonvaModalContext.Provider>
-                </div>
-              </StyledRnD>
-            </WrappedJssComponent>
-          </Fade>
-        </Modal>
-      )}
+      {!errorFetchingGeometry &&
+        !errorFetchingImage &&
+        isDocImageSet &&
+        konvaModalOpen && (
+          // <Modal
+          //   id={id}
+          //   open={konvaModalOpen}
+          //   onClose={() => setKonvaModalOpen(false)}
+          //   aria-labelledby="manual-select-modal-title"
+          //   aria-describedby="manual-select-modal-descripton"
+          //   // BackdropComponent={Backdrop}
+          //   BackdropProps={
+          //     {
+          //       // invisible: true,
+          //       // open: false,
+          //     }
+          //   }
+          //   // disableBackdropClick={true}
+          //   // hideBackdrop={true}
+          //   disableAutoFocus={true}
+          //   disableEnforceFocus={true}
+          //   style={{ zIndex: 99999 }}
+          // >
+          // <Fade in={konvaModalOpen}>
+          // <WrappedJssComponent>
+          <Container>
+            <StyledRnD
+              position={konvaModalDraggCoords}
+              onDragStop={handleDragStop}
+              bounds="window"
+              size={konvaModalDimensions}
+              onResizeStop={handleResizeStop}
+            >
+              <div>
+                <KonvaModalContext.Provider
+                  value={{
+                    currentSelection,
+                    image,
+                    filled,
+                    setFilled,
+                    setCurrentSelection,
+                    currentLinesGeometry,
+                    setKonvaModalOpen,
+                    docImageDimensions,
+                  }}
+                >
+                  <KonvaModal />
+                </KonvaModalContext.Provider>
+              </div>
+            </StyledRnD>
+          </Container>
+          // </WrappedJssComponent>
+          // </Fade>
+          // </Modal>
+        )}
     </React.Fragment>
   );
 };

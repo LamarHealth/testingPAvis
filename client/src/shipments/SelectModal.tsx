@@ -47,7 +47,7 @@ const ModalWrapper = styled.div`
   left: ${MAIN_MODAL_OFFSET_X}px;
   position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
-  z-index: 2;
+  z-index: 9;
   max-height: 500px;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -116,6 +116,21 @@ const FlexCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+`;
+
+const CloseButton = styled(IconButton)`
+  float: right;
+`;
+
+const DocName = styled(Typography)`
+  margin: 1em;
+`;
+
+const ManualSelectButton = styled(Chip)`
+  font-weight: bold;
+  background-color: #f9e526;
+  padding: 0.3em 1.3em;
+  margin: 0 0.4em 0.4em 1em;
 `;
 
 const TableHeadContext = createContext({} as any);
@@ -388,7 +403,11 @@ export interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const { setMainModalOpen, setMainModalHeight } = useContext(MainModalContext);
+  const {
+    setMainModalOpen,
+    setMainModalHeight,
+    setKonvaModalOpen,
+  } = useContext(MainModalContext);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -426,7 +445,19 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
         }
       }}
     >
-      <ManualSelect eventObj={eventObj}></ManualSelect>
+      <CloseButton onClick={() => setMainModalOpen(false)}>
+        <CloseIcon />
+      </CloseButton>
+      <DocName id="doc-name-typography" variant="h6">
+        {selectedDocData.docName}
+      </DocName>
+      <ManualSelectButton
+        label="Manual Select"
+        variant="outlined"
+        // onClick={modalHandleClick}
+        onClick={() => setKonvaModalOpen(true)}
+      />
+      {/* <ManualSelect eventObj={eventObj}></ManualSelect> */}
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />
       </Collapse>
