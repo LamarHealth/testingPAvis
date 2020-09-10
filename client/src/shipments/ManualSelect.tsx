@@ -6,18 +6,12 @@ import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Modal from "@material-ui/core/Modal";
 import Typography from "@material-ui/core/Typography";
-import Backdrop from "@material-ui/core/Backdrop";
-import Fade from "@material-ui/core/Fade";
 import Chip from "@material-ui/core/Chip";
-import { makeStyles } from "@material-ui/core/styles";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { MainModalContext } from "./RenderModal";
-import WrappedJssComponent from "./ShadowComponent";
 import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
@@ -30,10 +24,9 @@ import {
 } from "../common/constants";
 
 const Container = styled.div`
-  z-index: 9000;
-
   // need pos relative or else z-index will not work
   position: relative;
+  z-index: 9999;
 `;
 
 const StyledRnD = styled(Rnd)`
@@ -105,20 +98,18 @@ export const ManualSelect = ({ eventObj }: any) => {
   // modal
   const modalHandleClick = () => {
     if (
-      currentDocID === "" ||
-      currentDocID !== globalSelectedFile.get() ||
-      errorFetchingImage ||
-      errorFetchingGeometry
+      konvaModalOpen === true &&
+      (currentDocID === "" ||
+        currentDocID !== globalSelectedFile.get() ||
+        errorFetchingImage ||
+        errorFetchingGeometry)
     ) {
-      getImageAndGeometryFromServer(selectedDocData).then(() =>
-        setKonvaModalOpen(true)
-      );
-    } else {
-      setKonvaModalOpen(true);
+      getImageAndGeometryFromServer(selectedDocData);
     }
   };
   const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
   const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
+  useEffect(modalHandleClick, [konvaModalOpen]);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -258,30 +249,8 @@ export const ManualSelect = ({ eventObj }: any) => {
     });
   };
 
-  ////////// NEW //////////
-  /////////////////////////
-  /////////////////////////
-
-  const backdropStyles = makeStyles({ root: { display: "none" } });
-
-  /////////////////////////
-  /////////////////////////
-  /////////////////////////
-
   return (
     <React.Fragment>
-      {/* <CloseButton onClick={() => setMainModalOpen(false)}>
-        <CloseIcon />
-      </CloseButton>
-      <DocName id="doc-name-typography" variant="h6">
-        {selectedDocData.docName}
-      </DocName>
-      <ManualSelectButton
-        label="Manual Select"
-        variant="outlined"
-        onClick={modalHandleClick}
-      /> */}
-
       {(errorFetchingGeometry || errorFetchingImage) && (
         <ErrorLine errorCode={errorCode} msg={errorMessage} />
       )}
@@ -289,27 +258,6 @@ export const ManualSelect = ({ eventObj }: any) => {
         !errorFetchingImage &&
         isDocImageSet &&
         konvaModalOpen && (
-          // <Modal
-          //   id={id}
-          //   open={konvaModalOpen}
-          //   onClose={() => setKonvaModalOpen(false)}
-          //   aria-labelledby="manual-select-modal-title"
-          //   aria-describedby="manual-select-modal-descripton"
-          //   // BackdropComponent={Backdrop}
-          //   BackdropProps={
-          //     {
-          //       // invisible: true,
-          //       // open: false,
-          //     }
-          //   }
-          //   // disableBackdropClick={true}
-          //   // hideBackdrop={true}
-          //   disableAutoFocus={true}
-          //   disableEnforceFocus={true}
-          //   style={{ zIndex: 99999 }}
-          // >
-          // <Fade in={konvaModalOpen}>
-          // <WrappedJssComponent>
           <Container>
             <StyledRnD
               position={konvaModalDraggCoords}
@@ -336,9 +284,6 @@ export const ManualSelect = ({ eventObj }: any) => {
               </div>
             </StyledRnD>
           </Container>
-          // </WrappedJssComponent>
-          // </Fade>
-          // </Modal>
         )}
     </React.Fragment>
   );

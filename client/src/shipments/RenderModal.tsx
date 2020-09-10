@@ -3,9 +3,6 @@ import React, { useState, createContext } from "react";
 import $ from "jquery";
 import styled from "styled-components";
 
-import Modal from "@material-ui/core/Modal";
-import Backdrop from "@material-ui/core/Backdrop";
-import Fade from "@material-ui/core/Fade";
 import { ThemeProvider } from "@material-ui/core/styles";
 import Draggable, { DraggableData } from "react-draggable";
 
@@ -32,10 +29,9 @@ import { assignTargetString } from "./libertyInputsDictionary";
 import { useEffect } from "react";
 
 const Container = styled.div`
-  z-index: 900000;
-
   // need pos relative or else z-index will not work
   position: relative;
+  z-index: 999;
 `;
 
 export const MainModalContext = createContext({} as any);
@@ -99,38 +95,38 @@ export const RenderModal = () => {
     <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && (
         <WrappedJssComponent>
-          {mainModalOpen && (
-            <Container>
-              <Draggable
-                disabled={konvaModalOpen ? true : false}
-                onStop={handleDragStop}
-                position={{
-                  x: mainModalDraggCoords.x,
-                  y: mainModalDraggCoords.y,
-                }}
-                bounds={{
-                  left: MAIN_MODAL_LEFT_BOUND,
-                  top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
-                  right: MAIN_MODAL_RIGHT_BOUND,
-                  bottom: MAIN_MODAL_BOTTOM_BOUND,
-                }}
-              >
-                <div>
-                  <MainModalContext.Provider
-                    value={{
-                      mainModalOpen,
-                      setMainModalOpen,
-                      setMainModalHeight,
-                      konvaModalOpen,
-                      setKonvaModalOpen,
-                      konvaModalDraggCoords,
-                      setKonvaModalDraggCoords,
-                      konvaModalDimensions,
-                      setKonvaModalDimensions,
-                      docImageDimensions,
-                      setDocImageDimensions,
-                    }}
-                  >
+          <MainModalContext.Provider
+            value={{
+              mainModalOpen,
+              setMainModalOpen,
+              setMainModalHeight,
+              konvaModalOpen,
+              setKonvaModalOpen,
+              konvaModalDraggCoords,
+              setKonvaModalDraggCoords,
+              konvaModalDimensions,
+              setKonvaModalDimensions,
+              docImageDimensions,
+              setDocImageDimensions,
+            }}
+          >
+            {mainModalOpen && (
+              <Container>
+                <Draggable
+                  disabled={konvaModalOpen ? true : false}
+                  onStop={handleDragStop}
+                  position={{
+                    x: mainModalDraggCoords.x,
+                    y: mainModalDraggCoords.y,
+                  }}
+                  bounds={{
+                    left: MAIN_MODAL_LEFT_BOUND,
+                    top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
+                    right: MAIN_MODAL_RIGHT_BOUND,
+                    bottom: MAIN_MODAL_BOTTOM_BOUND,
+                  }}
+                >
+                  <div>
                     <>
                       {eventObj && (
                         <SelectModal
@@ -139,12 +135,12 @@ export const RenderModal = () => {
                         />
                       )}
                     </>
-                  </MainModalContext.Provider>
-                </div>
-              </Draggable>
-            </Container>
-          )}
-          {konvaModalOpen && <ManualSelect />}
+                  </div>
+                </Draggable>
+              </Container>
+            )}
+            {konvaModalOpen && eventObj && <ManualSelect eventObj={eventObj} />}
+          </MainModalContext.Provider>
         </WrappedJssComponent>
       )}
     </ThemeProvider>

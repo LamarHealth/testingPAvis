@@ -28,7 +28,6 @@ import {
   API_PATH,
   MODAL_SHADOW,
 } from "../common/constants";
-import { ManualSelect } from "./ManualSelect";
 import {
   getKeyValuePairsByDoc,
   getEditDistanceAndSort,
@@ -55,21 +54,6 @@ const ModalWrapper = styled.div`
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
 `;
-
-// const CloseButton = styled.button`
-//   float: right;
-//   margin: 1em;
-//   height: 3em;
-//   width: 3em;
-//   background: none;
-//   border: none;
-//   border-radius: 50%;
-//   transition: 0.5s;
-
-//   :hover {
-//     border: 1px solid ${colors.DROPZONE_TEXT_GREY};
-//   }
-// `;
 
 const FillButton = styled.button`
   background-color: ${colors.FILL_BUTTON};
@@ -454,10 +438,8 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
       <ManualSelectButton
         label="Manual Select"
         variant="outlined"
-        // onClick={modalHandleClick}
         onClick={() => setKonvaModalOpen(true)}
       />
-      {/* <ManualSelect eventObj={eventObj}></ManualSelect> */}
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />
       </Collapse>
