@@ -39,12 +39,8 @@ import {
 import { globalSelectedFileState } from "./DocViewer";
 import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
-import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
-  // top: ${MAIN_MODAL_OFFSET_Y}px;
-  // left: ${MAIN_MODAL_OFFSET_X}px;
-  // position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   z-index: 9;
   max-height: 500px;
@@ -115,6 +111,10 @@ const ManualSelectButton = styled(Chip)`
   background-color: #f9e526;
   padding: 0.3em 1.3em;
   margin: 0 0.4em 0.4em 1em;
+`;
+
+const ErrorMessage = styled(Typography)`
+  margin: 1em;
 `;
 
 const TableHeadContext = createContext({} as any);
@@ -379,6 +379,16 @@ const Message = ({ msg }: any) => {
   );
 };
 
+const ErrorLine = (props: { errorCode: number; msg: string }) => {
+  return (
+    <ErrorMessage>
+      <i>
+        <strong>Error {props.errorCode}</strong>: {props.msg}
+      </i>
+    </ErrorMessage>
+  );
+};
+
 export interface SelectProps {
   eventObj: any;
   targetString: string;
@@ -387,7 +397,27 @@ export interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const { setMainModalOpen, setKonvaModalOpen } = useContext(MainModalContext);
+
+  const {
+    setMainModalOpen,
+    setKonvaModalOpen,
+    errorFetchingImage,
+    setErrorFetchingImage,
+    errorFetchingGeometry,
+    setErrorFetchingGeometry,
+    errorMessage,
+    errorCode,
+  } = useContext(MainModalContext);
+
+  const handleModalClose = () => {
+    if (errorFetchingImage || errorFetchingGeometry) {
+      // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
+      setKonvaModalOpen(false);
+      setErrorFetchingImage(false);
+      setErrorFetchingGeometry(false);
+    }
+    setMainModalOpen(false);
+  };
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -413,7 +443,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
 
   return (
     <ModalWrapper>
-      <CloseButton onClick={() => setMainModalOpen(false)}>
+      <CloseButton onClick={handleModalClose}>
         <CloseIcon />
       </CloseButton>
       <DocName id="doc-name-typography" variant="h6">
@@ -424,6 +454,9 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
         variant="outlined"
         onClick={() => setKonvaModalOpen(true)}
       />
+      <Collapse in={errorFetchingGeometry || errorFetchingImage}>
+        <ErrorLine errorCode={errorCode} msg={errorMessage} />
+      </Collapse>
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />
       </Collapse>

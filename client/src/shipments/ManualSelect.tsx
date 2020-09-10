@@ -5,8 +5,6 @@ import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
-import Typography from "@material-ui/core/Typography";
-
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { MainModalContext } from "./RenderModal";
@@ -36,20 +34,6 @@ const StyledRnD = styled(Rnd)`
   box-shadow: ${MODAL_SHADOW};
 `;
 
-export const ErrorMessage = styled(Typography)`
-  margin: 1em;
-`;
-
-const ErrorLine = (props: { errorCode: number; msg: string }) => {
-  return (
-    <ErrorMessage>
-      <i>
-        <strong>Error {props.errorCode}</strong>: {props.msg}
-      </i>
-    </ErrorMessage>
-  );
-};
-
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = ({ eventObj }: any) => {
@@ -70,13 +54,13 @@ export const ManualSelect = ({ eventObj }: any) => {
     setKonvaModalDimensions,
     docImageDimensions,
     setDocImageDimensions,
+    errorFetchingImage,
+    setErrorFetchingImage,
+    errorFetchingGeometry,
+    setErrorFetchingGeometry,
+    setErrorMessage,
+    setErrorCode,
   } = useContext(MainModalContext);
-  const [errorFetchingImage, setErrorFetchingImage] = useState(false);
-  const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(
-    "unable to fetch resources from server. Try again later."
-  );
-  const [errorCode, setErrorCode] = useState(400);
 
   // modal
   const modalHandleClick = () => {
@@ -234,40 +218,34 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   return (
     <React.Fragment>
-      {(errorFetchingGeometry || errorFetchingImage) && (
-        <ErrorLine errorCode={errorCode} msg={errorMessage} />
+      {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
+        <Container>
+          <StyledRnD
+            position={konvaModalDraggCoords}
+            onDragStop={handleDragStop}
+            bounds="window"
+            size={konvaModalDimensions}
+            onResizeStop={handleResizeStop}
+          >
+            <div>
+              <KonvaModalContext.Provider
+                value={{
+                  currentSelection,
+                  image,
+                  filled,
+                  setFilled,
+                  setCurrentSelection,
+                  currentLinesGeometry,
+                  setKonvaModalOpen,
+                  docImageDimensions,
+                }}
+              >
+                <KonvaModal />
+              </KonvaModalContext.Provider>
+            </div>
+          </StyledRnD>
+        </Container>
       )}
-      {!errorFetchingGeometry &&
-        !errorFetchingImage &&
-        isDocImageSet &&
-        konvaModalOpen && (
-          <Container>
-            <StyledRnD
-              position={konvaModalDraggCoords}
-              onDragStop={handleDragStop}
-              bounds="window"
-              size={konvaModalDimensions}
-              onResizeStop={handleResizeStop}
-            >
-              <div>
-                <KonvaModalContext.Provider
-                  value={{
-                    currentSelection,
-                    image,
-                    filled,
-                    setFilled,
-                    setCurrentSelection,
-                    currentLinesGeometry,
-                    setKonvaModalOpen,
-                    docImageDimensions,
-                  }}
-                >
-                  <KonvaModal />
-                </KonvaModalContext.Provider>
-              </div>
-            </StyledRnD>
-          </Container>
-        )}
     </React.Fragment>
   );
 };
