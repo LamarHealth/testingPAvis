@@ -11,7 +11,7 @@ const DidMount = ({ onMount }: any) => {
   return null;
 };
 // @ts-ignore
-const WrappedJssComponent = ({ children }) => {
+const WrappedJssComponent = ({ children, wrapperClassName }: any) => {
   const node = React.useRef(null);
   const [mounted, setMounted] = React.useState(false);
   const [jss, setJss] = useState(null);
@@ -30,24 +30,26 @@ const WrappedJssComponent = ({ children }) => {
   }
   // @ts-ignore
   return (
-    <root.div>
-      <head>
-        <style ref={setRefAndCreateJss}></style>
-      </head>
-      <div ref={node}>
-        <DidMount onMount={() => setMounted(true)} />
-        {mounted && node.current && (
-          <StyleSheetManager // @ts-ignore
-            target={node.current}
-          >
-            {
-              // @ts-ignore
-              jss && <StylesProvider jss={jss}>{children}</StylesProvider>
-            }
-          </StyleSheetManager>
-        )}
-      </div>
-    </root.div>
+    <div className={wrapperClassName}>
+      <root.div>
+        <head>
+          <style ref={setRefAndCreateJss}></style>
+        </head>
+        <div ref={node}>
+          <DidMount onMount={() => setMounted(true)} />
+          {mounted && node.current && (
+            <StyleSheetManager // @ts-ignore
+              target={node.current}
+            >
+              {
+                // @ts-ignore
+                jss && <StylesProvider jss={jss}>{children}</StylesProvider>
+              }
+            </StyleSheetManager>
+          )}
+        </div>
+      </root.div>
+    </div>
   );
 };
 

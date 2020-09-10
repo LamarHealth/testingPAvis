@@ -78,7 +78,7 @@ export const Sidebar = () => {
   }
 
   return (
-    <WrappedJssComponent>
+    <WrappedJssComponent wrapperClassName={"shadow-root-for-sidebar"}>
       <Container open={isOpen}>
         <Column open={isOpen}>
           <DocViewer />

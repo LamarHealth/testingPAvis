@@ -11,7 +11,6 @@ import { useState as useSpecialHookState } from "@hookstate/core";
 import { globalSelectedFileState } from "./DocViewer";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
-import { KonvaModal } from "./KonvaModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
@@ -94,7 +93,7 @@ export const RenderModal = () => {
   return (
     <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && (
-        <WrappedJssComponent>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
           <MainModalContext.Provider
             value={{
               mainModalOpen,
