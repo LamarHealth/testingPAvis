@@ -3,7 +3,7 @@ import React, { useState, useEffect, createContext, useContext } from "react";
 import { useState as useSpecialHookState } from "@hookstate/core";
 import useImage from "use-image";
 import styled from "styled-components";
-import Draggable, { DraggableData } from "react-draggable";
+import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
@@ -23,19 +23,13 @@ import uuidv from "uuid";
 import { colors } from "../common/colors";
 import {
   API_PATH,
-  KONVA_MODAL_OFFSET_X,
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
-  KONVA_MODAL_OFFSET_Y,
-  KONVA_MODAL_LEFT_BOUND,
-  KONVA_MODAL_TOP_BOUND,
-  KONVA_MODAL_RIGHT_BOUND,
-  KONVA_MODAL_BOTTOM_BOUND,
   MODAL_SHADOW,
 } from "../common/constants";
 
-const ModalWrapper = styled.div`
-  top: ${KONVA_MODAL_OFFSET_Y}px;
+const StyledRnD = styled(Rnd)`
+  background: #f0f0f0;
   position: absolute;
   height: ${KONVA_MODAL_HEIGHT}px;
   overflow-y: scroll;
@@ -88,6 +82,10 @@ export const ManualSelect = ({ eventObj }: any) => {
     setKonvaModalOpen,
     konvaModalDraggCoords,
     setKonvaModalDraggCoords,
+    konvaModalDimensions,
+    setKonvaModalDimensions,
+    docImageDimensions,
+    setDocImageDimensions,
   } = useContext(MainModalContext);
   const [errorFetchingImage, setErrorFetchingImage] = useState(false);
   const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
@@ -112,7 +110,7 @@ export const ManualSelect = ({ eventObj }: any) => {
     }
   };
   const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
-  const isDocImageSet = Boolean(docImageURL.height);
+  const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -145,11 +143,22 @@ export const ManualSelect = ({ eventObj }: any) => {
         const img = new Image();
         img.src = objectURL;
         img.onload = function (this: any) {
-          let urlObj: any = {
-            url: objectURL,
-            height: (DOC_IMAGE_WIDTH * this.naturalHeight) / this.naturalWidth,
-          };
-          setDocImageURL(urlObj);
+          const url = objectURL;
+          const heightXWidthMutliplier = this.naturalHeight / this.naturalWidth;
+
+          // if the first time an image is loaded, then set the img dim to a specified default. img dim are updated from resizing.
+          if (docImageDimensions.height === 0) {
+            setDocImageDimensions(() => {
+              const width = DOC_IMAGE_WIDTH;
+              const height = DOC_IMAGE_WIDTH * heightXWidthMutliplier;
+              return { width, height };
+            });
+          }
+
+          setDocImageURL({
+            url,
+            heightXWidthMutliplier,
+          });
         };
         break;
       case 410:
@@ -213,10 +222,32 @@ export const ManualSelect = ({ eventObj }: any) => {
     };
   }, [currentSelection]);
 
-  // draggable
+  // drag & resize
   const handleDragStop = (e: any, data: DraggableData) => {
-    let [x, y] = [data.x, data.y];
+    const [x, y] = [data.x, data.y];
     setKonvaModalDraggCoords({ x, y });
+  };
+
+  const handleResizeStop: RndResizeCallback = (
+    e,
+    dir,
+    refToElement,
+    delta,
+    position
+  ) => {
+    const [width, height] = [
+      parseInt(refToElement.style.width.replace("px", "")),
+      parseInt(refToElement.style.height.replace("px", "")),
+    ];
+    const [x, y] = [position.x, position.y];
+
+    setKonvaModalDimensions({ width, height }); // set new modal dim
+    setKonvaModalDraggCoords({ x, y }); // set coords after drag
+    setDocImageDimensions({
+      // set doc img dim
+      width,
+      height: width * docImageURL.heightXWidthMutliplier,
+    });
   };
 
   return (
@@ -250,44 +281,32 @@ export const ManualSelect = ({ eventObj }: any) => {
           style={{ zIndex: 99999 }}
         >
           <Fade in={konvaModalOpen}>
-            <Draggable
-              position={{
-                x: konvaModalDraggCoords.x,
-                y: konvaModalDraggCoords.y,
-              }}
-              onStop={handleDragStop}
-              bounds={{
-                left: KONVA_MODAL_LEFT_BOUND,
-                top: KONVA_MODAL_TOP_BOUND,
-                right: KONVA_MODAL_RIGHT_BOUND,
-                bottom: KONVA_MODAL_BOTTOM_BOUND,
-              }}
-            >
-              <div>
-                <WrappedJssComponent>
-                  <ModalWrapper
-                    style={{
-                      left: `${KONVA_MODAL_OFFSET_X}px`,
+            <WrappedJssComponent>
+              <StyledRnD
+                position={konvaModalDraggCoords}
+                onDragStop={handleDragStop}
+                bounds="window"
+                size={konvaModalDimensions}
+                onResizeStop={handleResizeStop}
+              >
+                <div>
+                  <KonvaModalContext.Provider
+                    value={{
+                      currentSelection,
+                      image,
+                      filled,
+                      setFilled,
+                      setCurrentSelection,
+                      currentLinesGeometry,
+                      setKonvaModalOpen,
+                      docImageDimensions,
                     }}
                   >
-                    <KonvaModalContext.Provider
-                      value={{
-                        docImageURL,
-                        currentSelection,
-                        image,
-                        filled,
-                        setFilled,
-                        setCurrentSelection,
-                        currentLinesGeometry,
-                        setKonvaModalOpen,
-                      }}
-                    >
-                      <KonvaModal />
-                    </KonvaModalContext.Provider>
-                  </ModalWrapper>
-                </WrappedJssComponent>
-              </div>
-            </Draggable>
+                    <KonvaModal />
+                  </KonvaModalContext.Provider>
+                </div>
+              </StyledRnD>
+            </WrappedJssComponent>
           </Fade>
         </Modal>
       )}
