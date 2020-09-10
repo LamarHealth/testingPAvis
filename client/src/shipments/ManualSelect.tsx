@@ -5,9 +5,7 @@ import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
-import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import Chip from "@material-ui/core/Chip";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
@@ -36,21 +34,6 @@ const StyledRnD = styled(Rnd)`
   overflow-y: scroll;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
-`;
-
-const CloseButton = styled(IconButton)`
-  float: right;
-`;
-
-const DocName = styled(Typography)`
-  margin: 1em;
-`;
-
-const ManualSelectButton = styled(Chip)`
-  font-weight: bold;
-  background-color: #f9e526;
-  padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 1em;
 `;
 
 export const ErrorMessage = styled(Typography)`

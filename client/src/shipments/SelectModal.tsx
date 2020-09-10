@@ -42,9 +42,9 @@ import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
-  top: ${MAIN_MODAL_OFFSET_Y}px;
-  left: ${MAIN_MODAL_OFFSET_X}px;
-  position: absolute;
+  // top: ${MAIN_MODAL_OFFSET_Y}px;
+  // left: ${MAIN_MODAL_OFFSET_X}px;
+  // position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
   z-index: 9;
   max-height: 500px;
@@ -387,11 +387,7 @@ export interface SelectProps {
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const {
-    setMainModalOpen,
-    setMainModalHeight,
-    setKonvaModalOpen,
-  } = useContext(MainModalContext);
+  const { setMainModalOpen, setKonvaModalOpen } = useContext(MainModalContext);
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -416,19 +412,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   }
 
   return (
-    <ModalWrapper
-      // set modal height
-      ref={(input: HTMLDivElement) => {
-        // need to cast type to getComputedStyle()
-        const wrapper = input as Element;
-        if (wrapper as Element) {
-          const modalHeight = parseInt(
-            window.getComputedStyle(wrapper).height.replace("px", "")
-          );
-          setMainModalHeight(modalHeight);
-        }
-      }}
-    >
+    <ModalWrapper>
       <CloseButton onClick={() => setMainModalOpen(false)}>
         <CloseIcon />
       </CloseButton>

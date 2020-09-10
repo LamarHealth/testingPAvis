@@ -4,7 +4,7 @@ import $ from "jquery";
 import styled from "styled-components";
 
 import { ThemeProvider } from "@material-ui/core/styles";
-import Draggable, { DraggableData } from "react-draggable";
+import { Rnd, DraggableData } from "react-rnd";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -15,17 +15,14 @@ import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import {
+  MAIN_MODAL_OFFSET_X,
   MAIN_MODAL_OFFSET_Y,
-  MAIN_MODAL_LEFT_BOUND,
-  MAIN_MODAL_BOTTOM_BOUND,
-  MAIN_MODAL_RIGHT_BOUND,
   KONVA_MODAL_OFFSET_X,
   KONVA_MODAL_OFFSET_Y,
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
-import { useEffect } from "react";
 
 const Container = styled.div`
   // need pos relative or else z-index will not work
@@ -43,10 +40,9 @@ export const RenderModal = () => {
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const id = mainModalOpen ? "docit-main-modal" : undefined;
-  const [mainModalHeight, setMainModalHeight] = useState(250); // est. lower bound for select modal height
   const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
-    x: 0,
-    y: 0,
+    x: MAIN_MODAL_OFFSET_X,
+    y: MAIN_MODAL_OFFSET_Y,
   });
   const [konvaModalOpen, setKonvaModalOpen] = useState(false);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
@@ -71,20 +67,7 @@ export const RenderModal = () => {
     });
   });
 
-  // handle modal height change if it results in pushing modal off screen
-  const handleModalHeightChange = () => {
-    let y = mainModalDraggCoords.y;
-    const minY = -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70;
-    y = y < minY ? minY : y;
-    setMainModalDraggCoords((prev) => {
-      return { ...prev, y };
-    });
-  };
-  useEffect(() => {
-    handleModalHeightChange();
-  }, [mainModalHeight]);
-
-  // set modal coords
+  // set main modal coords
   const handleDragStop = (e: any, data: DraggableData) => {
     let [x, y] = [data.x, data.y];
     setMainModalDraggCoords({ x, y });
@@ -98,7 +81,6 @@ export const RenderModal = () => {
             value={{
               mainModalOpen,
               setMainModalOpen,
-              setMainModalHeight,
               konvaModalOpen,
               setKonvaModalOpen,
               konvaModalDraggCoords,
@@ -111,19 +93,11 @@ export const RenderModal = () => {
           >
             {mainModalOpen && (
               <Container>
-                <Draggable
-                  disabled={konvaModalOpen ? true : false}
-                  onStop={handleDragStop}
-                  position={{
-                    x: mainModalDraggCoords.x,
-                    y: mainModalDraggCoords.y,
-                  }}
-                  bounds={{
-                    left: MAIN_MODAL_LEFT_BOUND,
-                    top: -MAIN_MODAL_OFFSET_Y - mainModalHeight + 70,
-                    right: MAIN_MODAL_RIGHT_BOUND,
-                    bottom: MAIN_MODAL_BOTTOM_BOUND,
-                  }}
+                <Rnd
+                  enableResizing={false}
+                  position={mainModalDraggCoords}
+                  onDragStop={handleDragStop}
+                  bounds="window"
                 >
                   <div>
                     <>
@@ -135,7 +109,7 @@ export const RenderModal = () => {
                       )}
                     </>
                   </div>
-                </Draggable>
+                </Rnd>
               </Container>
             )}
             {konvaModalOpen && eventObj && <ManualSelect eventObj={eventObj} />}
