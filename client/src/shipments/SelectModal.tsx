@@ -21,13 +21,7 @@ import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
-import {
-  MAIN_MODAL_WIDTH,
-  MAIN_MODAL_OFFSET_X,
-  MAIN_MODAL_OFFSET_Y,
-  API_PATH,
-  MODAL_SHADOW,
-} from "../common/constants";
+import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   getEditDistanceAndSort,
@@ -395,7 +389,7 @@ export interface SelectProps {
 }
 
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
-  const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
+  const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
 
   const {
