@@ -59,7 +59,7 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
   return (
     <AccuracyScoreBox className={wrapperClasses.root}>
       <Box>
-        <WrappedJssComponent>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
             {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
           </style>

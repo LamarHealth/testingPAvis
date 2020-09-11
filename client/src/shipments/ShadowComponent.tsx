@@ -3,7 +3,12 @@ import { jssPreset, StylesProvider } from "@material-ui/styles";
 import { create } from "jss";
 import { StyleSheetManager } from "styled-components";
 
-import React, { useState } from "react";
+import React, { useState, ReactNode } from "react";
+
+interface WrappedJssComponentProps {
+  children: ReactNode;
+  wrapperClassName: string;
+}
 
 const DidMount = ({ onMount }: any) => {
   React.useEffect(onMount, []);
@@ -11,7 +16,10 @@ const DidMount = ({ onMount }: any) => {
   return null;
 };
 // @ts-ignore
-const WrappedJssComponent = ({ children, wrapperClassName }: any) => {
+const WrappedJssComponent = ({
+  children,
+  wrapperClassName,
+}: WrappedJssComponentProps) => {
   const node = React.useRef(null);
   const [mounted, setMounted] = React.useState(false);
   const [jss, setJss] = useState(null);
