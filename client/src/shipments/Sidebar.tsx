@@ -1,7 +1,7 @@
 /*global chrome*/
 import React, { useState } from "react";
 import { colors } from "./../common/colors";
-import { SIDEBAR_WIDTH } from "./../common/constants";
+import { SIDEBAR_WIDTH, LOCAL_MODE } from "./../common/constants";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
@@ -67,9 +67,9 @@ export const Sidebar = () => {
   const [isOpen, setOpen] = useState(false);
 
   // open the sidebar if extension icon clicked
-  if (process.env.REACT_APP_LOCAL === "build") {
+  if (!LOCAL_MODE) {
     const callback = function (request: any) {
-      if (request.message == "open sesame") {
+      if (request.message === "open sesame") {
         chrome.runtime.onMessage.removeListener(callback);
         setOpen(!isOpen);
       }

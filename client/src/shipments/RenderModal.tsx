@@ -24,8 +24,8 @@ import {
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
 
+// need pos relative or else z-index will not work
 const Container = styled.div`
-  // need pos relative or else z-index will not work
   position: relative;
   z-index: 999;
 `;

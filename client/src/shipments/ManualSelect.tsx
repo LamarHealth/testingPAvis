@@ -19,8 +19,8 @@ import {
   MODAL_SHADOW,
 } from "../common/constants";
 
+// need pos relative or else z-index will not work
 const Container = styled.div`
-  // need pos relative or else z-index will not work
   position: relative;
   z-index: 9999;
 `;
@@ -74,7 +74,6 @@ export const ManualSelect = ({ eventObj }: any) => {
       getImageAndGeometryFromServer(selectedDocData);
     }
   };
-  const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
   const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
   useEffect(modalHandleClick, [konvaModalOpen]);
 
