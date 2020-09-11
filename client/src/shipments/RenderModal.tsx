@@ -39,7 +39,6 @@ export const RenderModal = () => {
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
-  const id = mainModalOpen ? "docit-main-modal" : undefined;
   const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
     x: MAIN_MODAL_OFFSET_X,
     y: MAIN_MODAL_OFFSET_Y,
