@@ -5,18 +5,9 @@ import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Modal from "@material-ui/core/Modal";
-import Typography from "@material-ui/core/Typography";
-import Backdrop from "@material-ui/core/Backdrop";
-import Fade from "@material-ui/core/Fade";
-import Chip from "@material-ui/core/Chip";
-
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "./DocViewer";
 import { MainModalContext } from "./RenderModal";
-import WrappedJssComponent from "./ShadowComponent";
 import { KonvaModal } from "./KonvaModal";
 
 import uuidv from "uuid";
@@ -28,6 +19,12 @@ import {
   MODAL_SHADOW,
 } from "../common/constants";
 
+// need pos relative or else z-index will not work
+const Container = styled.div`
+  position: relative;
+  z-index: 9999;
+`;
+
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
   position: absolute;
@@ -36,35 +33,6 @@ const StyledRnD = styled(Rnd)`
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
 `;
-
-const CloseButton = styled(IconButton)`
-  float: right;
-`;
-
-const DocName = styled(Typography)`
-  margin: 1em;
-`;
-
-const ManualSelectButton = styled(Chip)`
-  font-weight: bold;
-  background-color: #f9e526;
-  padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 1em;
-`;
-
-export const ErrorMessage = styled(Typography)`
-  margin: 1em;
-`;
-
-const ErrorLine = (props: { errorCode: number; msg: string }) => {
-  return (
-    <ErrorMessage>
-      <i>
-        <strong>Error {props.errorCode}</strong>: {props.msg}
-      </i>
-    </ErrorMessage>
-  );
-};
 
 export const KonvaModalContext = createContext({} as any);
 
@@ -86,31 +54,28 @@ export const ManualSelect = ({ eventObj }: any) => {
     setKonvaModalDimensions,
     docImageDimensions,
     setDocImageDimensions,
+    errorFetchingImage,
+    setErrorFetchingImage,
+    errorFetchingGeometry,
+    setErrorFetchingGeometry,
+    setErrorMessage,
+    setErrorCode,
   } = useContext(MainModalContext);
-  const [errorFetchingImage, setErrorFetchingImage] = useState(false);
-  const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(
-    "unable to fetch resources from server. Try again later."
-  );
-  const [errorCode, setErrorCode] = useState(400);
 
   // modal
   const modalHandleClick = () => {
     if (
-      currentDocID === "" ||
-      currentDocID !== globalSelectedFile.get() ||
-      errorFetchingImage ||
-      errorFetchingGeometry
+      konvaModalOpen === true &&
+      (currentDocID === "" ||
+        currentDocID !== globalSelectedFile.get() ||
+        errorFetchingImage ||
+        errorFetchingGeometry)
     ) {
-      getImageAndGeometryFromServer(selectedDocData).then(() =>
-        setKonvaModalOpen(true)
-      );
-    } else {
-      setKonvaModalOpen(true);
+      getImageAndGeometryFromServer(selectedDocData);
     }
   };
-  const id = konvaModalOpen ? "docit-manual-select-modal" : undefined;
   const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
+  useEffect(modalHandleClick, [konvaModalOpen]);
 
   // geometry
   const docData = getKeyValuePairsByDoc();
@@ -252,63 +217,33 @@ export const ManualSelect = ({ eventObj }: any) => {
 
   return (
     <React.Fragment>
-      <CloseButton onClick={() => setMainModalOpen(false)}>
-        <CloseIcon />
-      </CloseButton>
-      <DocName id="doc-name-typography" variant="h6">
-        {selectedDocData.docName}
-      </DocName>
-      <ManualSelectButton
-        label="Manual Select"
-        variant="outlined"
-        onClick={modalHandleClick}
-      />
-
-      {(errorFetchingGeometry || errorFetchingImage) && (
-        <ErrorLine errorCode={errorCode} msg={errorMessage} />
-      )}
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
-        <Modal
-          id={id}
-          open={konvaModalOpen}
-          onClose={() => setKonvaModalOpen(false)}
-          aria-labelledby="manual-select-modal-title"
-          aria-describedby="manual-select-modal-descripton"
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            invisible: true,
-          }}
-          style={{ zIndex: 99999 }}
-        >
-          <Fade in={konvaModalOpen}>
-            <WrappedJssComponent>
-              <StyledRnD
-                position={konvaModalDraggCoords}
-                onDragStop={handleDragStop}
-                bounds="window"
-                size={konvaModalDimensions}
-                onResizeStop={handleResizeStop}
+        <Container>
+          <StyledRnD
+            position={konvaModalDraggCoords}
+            onDragStop={handleDragStop}
+            bounds="window"
+            size={konvaModalDimensions}
+            onResizeStop={handleResizeStop}
+          >
+            <div>
+              <KonvaModalContext.Provider
+                value={{
+                  currentSelection,
+                  image,
+                  filled,
+                  setFilled,
+                  setCurrentSelection,
+                  currentLinesGeometry,
+                  setKonvaModalOpen,
+                  docImageDimensions,
+                }}
               >
-                <div>
-                  <KonvaModalContext.Provider
-                    value={{
-                      currentSelection,
-                      image,
-                      filled,
-                      setFilled,
-                      setCurrentSelection,
-                      currentLinesGeometry,
-                      setKonvaModalOpen,
-                      docImageDimensions,
-                    }}
-                  >
-                    <KonvaModal />
-                  </KonvaModalContext.Provider>
-                </div>
-              </StyledRnD>
-            </WrappedJssComponent>
-          </Fade>
-        </Modal>
+                <KonvaModal />
+              </KonvaModalContext.Provider>
+            </div>
+          </StyledRnD>
+        </Container>
       )}
     </React.Fragment>
   );

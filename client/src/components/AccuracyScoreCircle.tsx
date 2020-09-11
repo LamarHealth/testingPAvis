@@ -9,10 +9,10 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import uuidv from "uuid";
 
-import { colors } from "./../common/colors";
-import { ACC_SCORE_LARGE } from "./../common/constants";
-import { ACC_SCORE_MEDIUM } from "./../common/constants";
-import { ACC_SCORE_SMALL } from "./../common/constants";
+import { colors } from "../common/colors";
+import { ACC_SCORE_LARGE } from "../common/constants";
+import { ACC_SCORE_MEDIUM } from "../common/constants";
+import { ACC_SCORE_SMALL } from "../common/constants";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -59,7 +59,7 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
   return (
     <AccuracyScoreBox className={wrapperClasses.root}>
       <Box>
-        <WrappedJssComponent>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
             {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
           </style>

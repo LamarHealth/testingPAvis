@@ -21,14 +21,7 @@ import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 import { colors } from "../common/colors";
-import {
-  MAIN_MODAL_WIDTH,
-  MAIN_MODAL_OFFSET_X,
-  MAIN_MODAL_OFFSET_Y,
-  API_PATH,
-  MODAL_SHADOW,
-} from "../common/constants";
-import { ManualSelect } from "./ManualSelect";
+import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   getEditDistanceAndSort,
@@ -40,14 +33,10 @@ import {
 import { globalSelectedFileState } from "./DocViewer";
 import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
-import { ErrorMessage } from "./ManualSelect";
 
 const ModalWrapper = styled.div`
-  top: ${MAIN_MODAL_OFFSET_Y}px;
-  left: ${MAIN_MODAL_OFFSET_X}px;
-  position: absolute;
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
-  z-index: 2;
+  z-index: 9;
   max-height: 500px;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -55,21 +44,6 @@ const ModalWrapper = styled.div`
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
 `;
-
-// const CloseButton = styled.button`
-//   float: right;
-//   margin: 1em;
-//   height: 3em;
-//   width: 3em;
-//   background: none;
-//   border: none;
-//   border-radius: 50%;
-//   transition: 0.5s;
-
-//   :hover {
-//     border: 1px solid ${colors.DROPZONE_TEXT_GREY};
-//   }
-// `;
 
 const FillButton = styled.button`
   background-color: ${colors.FILL_BUTTON};
@@ -116,6 +90,25 @@ const FlexCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+`;
+
+const CloseButton = styled(IconButton)`
+  float: right;
+`;
+
+const DocName = styled(Typography)`
+  margin: 1em;
+`;
+
+const ManualSelectButton = styled(Chip)`
+  font-weight: bold;
+  background-color: #f9e526;
+  padding: 0.3em 1.3em;
+  margin: 0 0.4em 0.4em 1em;
+`;
+
+const ErrorMessage = styled(Typography)`
+  margin: 1em;
 `;
 
 const TableHeadContext = createContext({} as any);
@@ -380,15 +373,45 @@ const Message = ({ msg }: any) => {
   );
 };
 
+const ErrorLine = (props: { errorCode: number; msg: string }) => {
+  return (
+    <ErrorMessage>
+      <i>
+        <strong>Error {props.errorCode}</strong>: {props.msg}
+      </i>
+    </ErrorMessage>
+  );
+};
+
 export interface SelectProps {
   eventObj: any;
   targetString: string;
 }
 
 export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
-  const [removeKVMessage, setRemoveKVMessage] = useState("" as any);
+  const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const { setMainModalOpen, setMainModalHeight } = useContext(MainModalContext);
+
+  const {
+    setMainModalOpen,
+    setKonvaModalOpen,
+    errorFetchingImage,
+    setErrorFetchingImage,
+    errorFetchingGeometry,
+    setErrorFetchingGeometry,
+    errorMessage,
+    errorCode,
+  } = useContext(MainModalContext);
+
+  const handleModalClose = () => {
+    if (errorFetchingImage || errorFetchingGeometry) {
+      // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
+      setKonvaModalOpen(false);
+      setErrorFetchingImage(false);
+      setErrorFetchingGeometry(false);
+    }
+    setMainModalOpen(false);
+  };
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [docData, setDocData] = useState(getKeyValuePairsByDoc());
@@ -413,20 +436,21 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   }
 
   return (
-    <ModalWrapper
-      // set modal height
-      ref={(input: HTMLDivElement) => {
-        // need to cast type to getComputedStyle()
-        const wrapper = input as Element;
-        if (wrapper as Element) {
-          const modalHeight = parseInt(
-            window.getComputedStyle(wrapper).height.replace("px", "")
-          );
-          setMainModalHeight(modalHeight);
-        }
-      }}
-    >
-      <ManualSelect eventObj={eventObj}></ManualSelect>
+    <ModalWrapper>
+      <CloseButton onClick={handleModalClose}>
+        <CloseIcon />
+      </CloseButton>
+      <DocName id="doc-name-typography" variant="h6">
+        {selectedDocData.docName}
+      </DocName>
+      <ManualSelectButton
+        label="Manual Select"
+        variant="outlined"
+        onClick={() => setKonvaModalOpen(true)}
+      />
+      <Collapse in={errorFetchingGeometry || errorFetchingImage}>
+        <ErrorLine errorCode={errorCode} msg={errorMessage} />
+      </Collapse>
       <Collapse in={messageCollapse}>
         <Message msg={removeKVMessage} />
       </Collapse>

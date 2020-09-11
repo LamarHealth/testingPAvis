@@ -15,7 +15,7 @@ import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
 import $ from "jquery";
-import { colors } from "./../common/colors";
+import { colors } from "../common/colors";
 import {
   createState as createSpecialHookState,
   useState as useSpecialHookState,

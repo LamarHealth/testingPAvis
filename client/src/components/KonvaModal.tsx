@@ -5,7 +5,7 @@ import styled from "styled-components";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
-import { colors } from "./../common/colors";
+import { colors } from "../common/colors";
 import { KonvaModalContext } from "./ManualSelect";
 
 // cannot import from SelectModal... likely a shadow dom issue
