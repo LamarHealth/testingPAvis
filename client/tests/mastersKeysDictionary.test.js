@@ -7,7 +7,7 @@ import masters4MatchFields from "./field_matches/masters4.json";
 import masters5MatchFields from "./field_matches/masters5.json";
 import shipDoc2MatchFields from "./field_matches/shippingDoc2.json";
 import { getInterpretations } from "./../../server/textractKeyValues";
-import { getEditDistanceAndSort } from "./../src/shipments/KeyValuePairs";
+import { getEditDistanceAndSort } from "./../src/components/KeyValuePairs";
 
 const comparisonArr = [
   [masters3KeyValuePairs, masters3MatchFields],

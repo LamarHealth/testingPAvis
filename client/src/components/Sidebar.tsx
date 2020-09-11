@@ -1,7 +1,7 @@
 /*global chrome*/
 import React, { useState } from "react";
-import { colors } from "./../common/colors";
-import { SIDEBAR_WIDTH, LOCAL_MODE } from "./../common/constants";
+import { colors } from "../common/colors";
+import { SIDEBAR_WIDTH, LOCAL_MODE } from "../common/constants";
 import styled from "styled-components";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";

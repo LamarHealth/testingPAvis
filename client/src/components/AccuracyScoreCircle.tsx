@@ -9,10 +9,10 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import uuidv from "uuid";
 
-import { colors } from "./../common/colors";
-import { ACC_SCORE_LARGE } from "./../common/constants";
-import { ACC_SCORE_MEDIUM } from "./../common/constants";
-import { ACC_SCORE_SMALL } from "./../common/constants";
+import { colors } from "../common/colors";
+import { ACC_SCORE_LARGE } from "../common/constants";
+import { ACC_SCORE_MEDIUM } from "../common/constants";
+import { ACC_SCORE_SMALL } from "../common/constants";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 

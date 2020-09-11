@@ -4,9 +4,9 @@ import $ from "jquery";
 
 // Load dotenv
 import dotenv from "dotenv";
-import ShipmentsDashboard from "./shipments/ShipmentsDashboard";
-import { Sidebar } from "./shipments/Sidebar";
-import { RenderModal } from "./shipments/RenderModal";
+import ShipmentsDashboard from "./components/ShipmentsDashboard";
+import { Sidebar } from "./components/Sidebar";
+import { RenderModal } from "./components/RenderModal";
 
 import { LOCAL_MODE } from "./common/constants";
 dotenv.config();
