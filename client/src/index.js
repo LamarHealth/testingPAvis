@@ -13,7 +13,7 @@ dotenv.config();
 
 // set the document body to 0 z-index in build, so that our sidebar and modal outrank them
 if (!LOCAL_MODE) {
-  document.body.style.zIndex = 0;
+  document.body.style.zIndex = Z_INDEX_ALLOCATOR.baseIndex;
   document.body.style.position = "relative";
 }
 
