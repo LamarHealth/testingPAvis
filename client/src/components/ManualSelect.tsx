@@ -22,7 +22,7 @@ import {
 // need pos relative or else z-index will not work
 const Container = styled.div`
   position: relative;
-  z-index: 9999;
+  z-index: 99999;
 `;
 
 const StyledRnD = styled(Rnd)`

@@ -27,7 +27,7 @@ import { assignTargetString } from "./libertyInputsDictionary";
 // need pos relative or else z-index will not work
 const Container = styled.div`
   position: relative;
-  z-index: 999;
+  z-index: 9999;
 `;
 
 export const MainModalContext = createContext({} as any);

@@ -132,7 +132,7 @@ const DocCell = (props: DocumentInfo) => {
           renderAccuracyScore(this, sortedKeyValuePairs[0]);
         }
 
-        $(this).attr("value", sortedKeyValuePairs[0]["value"]);
+        $(this).prop("value", sortedKeyValuePairs[0]["value"]);
       });
     });
   };
