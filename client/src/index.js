@@ -8,17 +8,22 @@ import ShipmentsDashboard from "./components/ShipmentsDashboard";
 import { Sidebar } from "./components/Sidebar";
 import { RenderModal } from "./components/RenderModal";
 
-import { LOCAL_MODE } from "./common/constants";
+import { LOCAL_MODE, Z_INDEX_ALLOCATOR } from "./common/constants";
 dotenv.config();
 
-$('<span id="insertion-point"/>').insertBefore(document.body);
+$('<div id="insertion-point"/>').insertAfter(document.body);
 
 ReactDOM.render(
   <>
     <RenderModal />
     <Sidebar />
     {LOCAL_MODE && (
-      <body>
+      <body
+        style={{
+          position: "relative",
+          zIndex: Z_INDEX_ALLOCATOR.body(),
+        }}
+      >
         <ShipmentsDashboard />
       </body>
     )}

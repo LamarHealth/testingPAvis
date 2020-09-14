@@ -5,9 +5,14 @@ import { StyleSheetManager } from "styled-components";
 
 import React, { useState, ReactNode } from "react";
 
+import { Z_INDEX_ALLOCATOR } from "../common/constants";
+
 interface WrappedJssComponentProps {
   children: ReactNode;
-  wrapperClassName: string;
+  wrapperClassName:
+    | "shadow-root-for-sidebar"
+    | "shadow-root-for-modals"
+    | "shadow-root-for-chiclets";
 }
 
 const DidMount = ({ onMount }: any) => {
@@ -36,9 +41,27 @@ const WrappedJssComponent = ({
       setJss(createdJssWithRef);
     }
   }
+
+  // assign z-index programmatically so we don't get 'z-index wars'
+  let wrapperZIndex;
+  switch (wrapperClassName) {
+    case "shadow-root-for-sidebar":
+      wrapperZIndex = Z_INDEX_ALLOCATOR.sidebar();
+      break;
+    case "shadow-root-for-modals":
+      wrapperZIndex = Z_INDEX_ALLOCATOR.modals();
+      break;
+  }
+
   // @ts-ignore
   return (
-    <div className={wrapperClassName}>
+    <div
+      className={wrapperClassName}
+      style={{
+        position: "relative",
+        zIndex: wrapperZIndex,
+      }}
+    >
       <root.div>
         <head>
           <style ref={setRefAndCreateJss}></style>

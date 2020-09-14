@@ -19,12 +19,6 @@ import {
   MODAL_SHADOW,
 } from "../common/constants";
 
-// need pos relative or else z-index will not work
-const Container = styled.div`
-  position: relative;
-  z-index: 99999;
-`;
-
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
   position: absolute;
@@ -218,32 +212,30 @@ export const ManualSelect = ({ eventObj }: any) => {
   return (
     <React.Fragment>
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
-        <Container>
-          <StyledRnD
-            position={konvaModalDraggCoords}
-            onDragStop={handleDragStop}
-            bounds="window"
-            size={konvaModalDimensions}
-            onResizeStop={handleResizeStop}
-          >
-            <div>
-              <KonvaModalContext.Provider
-                value={{
-                  currentSelection,
-                  image,
-                  filled,
-                  setFilled,
-                  setCurrentSelection,
-                  currentLinesGeometry,
-                  setKonvaModalOpen,
-                  docImageDimensions,
-                }}
-              >
-                <KonvaModal />
-              </KonvaModalContext.Provider>
-            </div>
-          </StyledRnD>
-        </Container>
+        <StyledRnD
+          position={konvaModalDraggCoords}
+          onDragStop={handleDragStop}
+          bounds="window"
+          size={konvaModalDimensions}
+          onResizeStop={handleResizeStop}
+        >
+          <div>
+            <KonvaModalContext.Provider
+              value={{
+                currentSelection,
+                image,
+                filled,
+                setFilled,
+                setCurrentSelection,
+                currentLinesGeometry,
+                setKonvaModalOpen,
+                docImageDimensions,
+              }}
+            >
+              <KonvaModal />
+            </KonvaModalContext.Provider>
+          </div>
+        </StyledRnD>
       )}
     </React.Fragment>
   );
