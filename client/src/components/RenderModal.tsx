@@ -8,7 +8,7 @@ import { Rnd, DraggableData } from "react-rnd";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
-import { globalSelectedFileState } from "./DocViewer";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";

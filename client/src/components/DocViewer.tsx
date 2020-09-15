@@ -16,10 +16,8 @@ import Link from "@material-ui/core/Link";
 
 import $ from "jquery";
 import { colors } from "../common/colors";
-import {
-  createState as createSpecialHookState,
-  useState as useSpecialHookState,
-} from "@hookstate/core";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import ButtonsBox from "./ButtonsBox";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
@@ -88,8 +86,6 @@ const FeedbackTypography = styled(Typography)`
   margin: 0.5em auto;
   color: ${colors.DROPZONE_TEXT_GREY};
 `;
-
-export const globalSelectedFileState = createSpecialHookState("");
 
 const DocCell = (props: DocumentInfo) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);

@@ -30,7 +30,7 @@ import {
   deleteKVPairFromLocalStorage,
   KeyValuesByDoc,
 } from "./KeyValuePairs";
-import { globalSelectedFileState } from "./DocViewer";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 

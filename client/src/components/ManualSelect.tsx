@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
-import { globalSelectedFileState } from "./DocViewer";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 
