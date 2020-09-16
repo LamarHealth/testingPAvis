@@ -122,13 +122,16 @@ const DocCell = (props: DocumentInfo) => {
           "lc substring"
         );
 
-        if (sortedKeyValuePairs[0].distanceFromTarget < 0.5) {
+        if (
+          sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
+          sortedKeyValuePairs[0].value === ""
+        ) {
           renderBlankChiclet(this);
-        } else if (sortedKeyValuePairs[0].value !== "") {
+          $(this).prop("value", null);
+        } else {
           renderAccuracyScore(this, sortedKeyValuePairs[0]);
+          $(this).prop("value", sortedKeyValuePairs[0]["value"]);
         }
-
-        $(this).prop("value", sortedKeyValuePairs[0]["value"]);
       });
     });
   };
