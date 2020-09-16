@@ -37,7 +37,7 @@ const StyledRnD = styled(Rnd)`
 
 export const KonvaModalContext = createContext({} as any);
 
-export const ManualSelect = ({ eventObj }: any) => {
+export const ManualSelect = ({ eventTarget }: any) => {
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentDocID, setCurrentDocID] = useState("" as any);
@@ -177,7 +177,7 @@ export const ManualSelect = ({ eventObj }: any) => {
       if (e.keyCode === 13) {
         setKonvaModalOpen(false);
         setMainModalOpen(false);
-        eventObj.target.value = Object.keys(currentSelection)
+        eventTarget.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
       }

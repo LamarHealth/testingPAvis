@@ -33,7 +33,7 @@ const Container = styled.div`
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
-  const [eventObj, setEventObj] = useState(null) as any;
+  const [eventTarget, setEventTarget] = useState(null) as any;
   const [targetString, setTargetString] = useState(undefined as any);
   const areThereDocs =
     JSON.parse(useSpecialHookState(globalDocData).get()).length > 0;
@@ -66,9 +66,12 @@ export const RenderModal = () => {
 
   // handle input el click
   $(document).ready(() => {
-    $("input").click(function (event) {
-      setEventObj(event);
-      setTargetString(assignTargetString($(this)));
+    $("span[id^='docit-accuracy-score-mounter-']").click(function () {
+      const mounterID = this.id.replace("docit-accuracy-score-mounter-", "");
+      const eventTarget = $(`input.has-docit-mounter-${mounterID}`).get()[0];
+
+      setEventTarget(eventTarget);
+      setTargetString(assignTargetString(eventTarget));
       setMainModalOpen(true);
     });
   });
@@ -115,9 +118,9 @@ export const RenderModal = () => {
                 >
                   <div>
                     <>
-                      {eventObj && (
+                      {eventTarget && (
                         <SelectModal
-                          eventObj={eventObj}
+                          eventTarget={eventTarget}
                           targetString={targetString}
                         />
                       )}
@@ -126,7 +129,9 @@ export const RenderModal = () => {
                 </Rnd>
               </Container>
             )}
-            {konvaModalOpen && eventObj && <ManualSelect eventObj={eventObj} />}
+            {konvaModalOpen && eventTarget && (
+              <ManualSelect eventTarget={eventTarget} />
+            )}
           </MainModalContext.Provider>
         </WrappedJssComponent>
       )}

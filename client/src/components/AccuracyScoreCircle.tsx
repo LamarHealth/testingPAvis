@@ -82,10 +82,37 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
   );
 };
 
-export const renderAccuracyScore = (
-  target: any,
-  keyValue: KeyValuesWithDistance
-) => {
+const BlankChiclet = ({ inputHeight }: any) => {
+  const wrapperClasses = wrapperFlexStyles();
+  const size =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM
+      : ACC_SCORE_SMALL;
+
+  return (
+    <AccuracyScoreBox className={wrapperClasses.root}>
+      <Box>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
+          <style>
+            {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
+          </style>
+          <Typography
+            variant="caption"
+            component="div"
+            color="textSecondary"
+            style={{ marginLeft: `${size}px`, marginRight: `${size}px` }}
+          >
+            {"?"}
+          </Typography>
+        </WrappedJssComponent>
+      </Box>
+    </AccuracyScoreBox>
+  );
+};
+
+const setMounter = (target: any) => {
   const inputStyle = window.getComputedStyle(target);
   const inputZIndex = target.style.zIndex;
   const positionedParent = target.offsetParent;
@@ -149,6 +176,18 @@ export const renderAccuracyScore = (
 
   positionedParent.appendChild(mounter);
 
+  return mounter;
+};
+
+export const renderAccuracyScore = (
+  target: any,
+  keyValue: KeyValuesWithDistance
+) => {
+  const mounter = setMounter(target);
+  const inputHeight = parseInt(
+    window.getComputedStyle(target).height.replace("px", "")
+  );
+
   ReactDOM.render(
     <AccuracyScoreEl
       //@ts-ignore
@@ -157,4 +196,13 @@ export const renderAccuracyScore = (
     />,
     mounter
   );
+};
+
+export const renderBlankChiclet = (target: any) => {
+  const mounter = setMounter(target);
+  const inputHeight = parseInt(
+    window.getComputedStyle(target).height.replace("px", "")
+  );
+
+  ReactDOM.render(<BlankChiclet inputHeight={inputHeight} />, mounter);
 };

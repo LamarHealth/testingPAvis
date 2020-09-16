@@ -18,10 +18,10 @@ import $ from "jquery";
 import { colors } from "../common/colors";
 import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { globalDocData } from "../contexts/DocData";
-import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import ButtonsBox from "./ButtonsBox";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
 import {
   assignTargetString,
   handleFreightTerms,
@@ -123,10 +123,8 @@ const DocCell = (props: DocumentInfo) => {
         );
 
         if (sortedKeyValuePairs[0].distanceFromTarget < 0.5) {
-          return;
-        }
-
-        if (sortedKeyValuePairs[0].value !== "") {
+          renderBlankChiclet(this);
+        } else if (sortedKeyValuePairs[0].value !== "") {
           renderAccuracyScore(this, sortedKeyValuePairs[0]);
         }
 

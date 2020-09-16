@@ -156,7 +156,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     selectedDocData,
     setRemoveKVMessage,
     setMessageCollapse,
-    eventObj,
+    eventTarget,
     targetString,
   } = useContext(TableContext);
   const docData = useSpecialHookState(globalDocData);
@@ -165,9 +165,9 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const keyValue = props.keyValue;
 
   const fillButtonHandler = () => {
-    eventObj.target.value = keyValue["value"];
+    eventTarget.value = keyValue["value"];
     setMainModalOpen(false);
-    renderAccuracyScore(eventObj.target, keyValue);
+    renderAccuracyScore(eventTarget, keyValue);
   };
   const reportKVPair = async (remove: boolean = false) => {
     if (remove) {
@@ -385,11 +385,11 @@ const ErrorLine = (props: { errorCode: number; msg: string }) => {
 };
 
 export interface SelectProps {
-  eventObj: any;
+  eventTarget: any;
   targetString: string;
 }
 
-export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
+export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
 
@@ -448,7 +448,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
             // setDocData,
             setRemoveKVMessage,
             setMessageCollapse,
-            eventObj,
+            eventTarget,
           }}
         >
           <TableComponent />
