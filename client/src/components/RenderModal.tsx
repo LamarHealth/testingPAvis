@@ -78,7 +78,7 @@ export const RenderModal = () => {
 
   return (
     <ThemeProvider theme={DEFAULT}>
-      {areThereDocs && isDocSelected && (
+      {areThereDocs && isDocSelected && eventTarget && (
         <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
           <MainModalContext.Provider
             value={{
@@ -111,19 +111,15 @@ export const RenderModal = () => {
               >
                 <div>
                   <>
-                    {eventTarget && (
-                      <SelectModal
-                        eventTarget={eventTarget}
-                        targetString={targetString}
-                      />
-                    )}
+                    <SelectModal
+                      eventTarget={eventTarget}
+                      targetString={targetString}
+                    />
                   </>
                 </div>
               </Rnd>
             )}
-            {konvaModalOpen && eventTarget && (
-              <ManualSelect eventTarget={eventTarget} />
-            )}
+            {konvaModalOpen && <ManualSelect eventTarget={eventTarget} />}
           </MainModalContext.Provider>
         </WrappedJssComponent>
       )}
