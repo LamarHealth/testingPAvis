@@ -34,6 +34,7 @@ import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { globalDocData } from "../contexts/DocData";
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
@@ -392,7 +393,7 @@ export interface SelectProps {
 export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const {
     setMainModalOpen,
     setKonvaModalOpen,
@@ -412,6 +413,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       setErrorFetchingGeometry(false);
     }
     setMainModalOpen(false);
+    selectedChiclet.set("");
   };
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);

@@ -9,10 +9,13 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import uuidv from "uuid";
 
+import { useState as useSpecialHookState } from "@hookstate/core";
+
 import { colors } from "../common/colors";
 import { ACC_SCORE_LARGE } from "../common/constants";
 import { ACC_SCORE_MEDIUM } from "../common/constants";
 import { ACC_SCORE_SMALL } from "../common/constants";
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -39,7 +42,8 @@ const greenCircleStyles = makeStyles({ root: { color: "green" } });
 const yellowCircleStyles = makeStyles({ root: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ root: { color: "red" } });
 
-const AccuracyScoreEl = ({ value, inputHeight }: any) => {
+const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const wrapperClasses = wrapperFlexStyles();
 
   const colorClasses =
@@ -57,7 +61,13 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
       : ACC_SCORE_SMALL;
 
   return (
-    <AccuracyScoreBox className={wrapperClasses.root}>
+    <AccuracyScoreBox
+      className={wrapperClasses.root}
+      onClick={() => selectedChiclet.set(`${mounterID}`)}
+      style={
+        selectedChiclet.get() === mounterID ? { border: "1px solid black" } : {}
+      }
+    >
       <Box>
         <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
@@ -82,7 +92,8 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
   );
 };
 
-const BlankChiclet = ({ inputHeight }: any) => {
+const BlankChiclet = ({ inputHeight, mounterID }: any) => {
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const wrapperClasses = wrapperFlexStyles();
   const size =
     inputHeight >= 30
@@ -92,7 +103,13 @@ const BlankChiclet = ({ inputHeight }: any) => {
       : ACC_SCORE_SMALL;
 
   return (
-    <AccuracyScoreBox className={wrapperClasses.root}>
+    <AccuracyScoreBox
+      className={wrapperClasses.root}
+      onClick={() => selectedChiclet.set(`${mounterID}`)}
+      style={
+        selectedChiclet.get() === mounterID ? { border: "1px solid black" } : {}
+      }
+    >
       <Box>
         <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
@@ -176,14 +193,14 @@ const setMounter = (target: any) => {
 
   positionedParent.appendChild(mounter);
 
-  return mounter;
+  return { mounter, mounterID };
 };
 
 export const renderAccuracyScore = (
   target: any,
   keyValue: KeyValuesWithDistance
 ) => {
-  const mounter = setMounter(target);
+  const { mounter, mounterID } = setMounter(target);
   const inputHeight = parseInt(
     window.getComputedStyle(target).height.replace("px", "")
   );
@@ -193,16 +210,20 @@ export const renderAccuracyScore = (
       //@ts-ignore
       value={keyValue.distanceFromTarget * 100}
       inputHeight={inputHeight}
+      mounterID={mounterID}
     />,
     mounter
   );
 };
 
 export const renderBlankChiclet = (target: any) => {
-  const mounter = setMounter(target);
+  const { mounter, mounterID } = setMounter(target);
   const inputHeight = parseInt(
     window.getComputedStyle(target).height.replace("px", "")
   );
 
-  ReactDOM.render(<BlankChiclet inputHeight={inputHeight} />, mounter);
+  ReactDOM.render(
+    <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
+    mounter
+  );
 };
