@@ -5,8 +5,9 @@ import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
-import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
+import { KeyValuesByDoc } from "./KeyValuePairs";
 import { globalSelectedFileState } from "../contexts/SelectedFile";
+import { globalDocData } from "../contexts/DocData";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 
@@ -44,6 +45,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
+  const docData = useSpecialHookState(globalDocData);
   const {
     setMainModalOpen,
     konvaModalOpen,
@@ -78,9 +80,8 @@ export const ManualSelect = ({ eventObj }: any) => {
   useEffect(modalHandleClick, [konvaModalOpen]);
 
   // geometry
-  const docData = getKeyValuePairsByDoc();
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
+  const selectedDocData = JSON.parse(docData.get()).filter(
+    (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
   )[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {

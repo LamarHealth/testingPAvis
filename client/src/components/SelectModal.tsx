@@ -33,6 +33,7 @@ import {
 import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { globalDocData } from "../contexts/DocData";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
@@ -153,12 +154,12 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const { setMainModalOpen } = useContext(MainModalContext);
   const {
     selectedDocData,
-    setDocData,
     setRemoveKVMessage,
     setMessageCollapse,
     eventObj,
     targetString,
   } = useContext(TableContext);
+  const docData = useSpecialHookState(globalDocData);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
@@ -177,7 +178,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
       );
     }
 
-    setDocData(getKeyValuePairsByDoc());
+    docData.set(JSON.stringify(getKeyValuePairsByDoc()));
     setHardCollapse(true);
     setSoftCollapse(false);
 
@@ -414,26 +415,11 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
   };
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const filterDocData = (docData: KeyValuesByDoc[]) =>
-    docData.filter(
-      (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
-    )[0];
-  const selectedDocData = filterDocData(docData);
-
-  const checkKVPairs = (selectedDocData: KeyValuesByDoc) =>
-    Object.keys(selectedDocData.keyValuePairs).length > 0;
-  let areThereKVPairs;
-
-  // handle if doc is added while modal open
-  if (selectedDocData === undefined) {
-    const newDocData = getKeyValuePairsByDoc();
-    // need to set both separately, because react setState() is async
-    setDocData(newDocData);
-    areThereKVPairs = checkKVPairs(filterDocData(newDocData));
-  } else {
-    areThereKVPairs = checkKVPairs(selectedDocData);
-  }
+  const docData = useSpecialHookState(globalDocData);
+  const selectedDocData = JSON.parse(docData.get()).filter(
+    (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
+  )[0];
+  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
 
   return (
     <ModalWrapper>
@@ -459,7 +445,7 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
           value={{
             targetString,
             selectedDocData,
-            setDocData,
+            // setDocData,
             setRemoveKVMessage,
             setMessageCollapse,
             eventObj,

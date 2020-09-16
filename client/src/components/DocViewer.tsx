@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import { getEditDistanceAndSort, getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -17,7 +17,8 @@ import Link from "@material-ui/core/Link";
 import $ from "jquery";
 import { colors } from "../common/colors";
 import { globalSelectedFileState } from "../contexts/SelectedFile";
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { globalDocData } from "../contexts/DocData";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import ButtonsBox from "./ButtonsBox";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
@@ -89,11 +90,12 @@ const FeedbackTypography = styled(Typography)`
 
 const DocCell = (props: DocumentInfo) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const docData = useSpecialHookState(globalDocData);
 
   const populateForms = () => {
     $(document).ready(() => {
-      const keyValuePairs = getKeyValuePairsByDoc().filter(
-        (doc) => doc.docID === props.docID
+      const keyValuePairs = JSON.parse(docData.get()).filter(
+        (doc: KeyValuesByDoc) => doc.docID === props.docID
       )[0];
 
       $("select").each(function () {

@@ -9,7 +9,6 @@ import { Rnd, DraggableData } from "react-rnd";
 import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { globalSelectedFileState } from "../contexts/SelectedFile";
-import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
@@ -23,6 +22,7 @@ import {
   KONVA_MODAL_HEIGHT,
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
+import { globalDocData } from "../contexts/DocData";
 
 // need pos relative or else z-index will not work
 const Container = styled.div`
@@ -35,7 +35,8 @@ export const MainModalContext = createContext({} as any);
 export const RenderModal = () => {
   const [eventObj, setEventObj] = useState(null) as any;
   const [targetString, setTargetString] = useState(undefined as any);
-  const areThereDocs = getKeyValuePairsByDoc().length > 0;
+  const areThereDocs =
+    JSON.parse(useSpecialHookState(globalDocData).get()).length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const [mainModalOpen, setMainModalOpen] = useState(false);
