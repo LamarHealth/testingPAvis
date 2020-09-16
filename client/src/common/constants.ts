@@ -19,6 +19,18 @@ export const DOC_IMAGE_WIDTH = window.innerWidth * (2 / 3);
 export const KONVA_MODAL_HEIGHT = window.innerHeight * (6 / 7);
 export const KONVA_MODAL_OFFSET_Y = 25;
 export const KONVA_MODAL_OFFSET_X = (window.innerWidth - DOC_IMAGE_WIDTH) / 2;
+export const Z_INDEX_ALLOCATOR = {
+  baseIndex: 0,
+  body: function () {
+    return this.baseIndex + 0;
+  },
+  sidebar: function () {
+    return this.baseIndex + 1;
+  },
+  modals: function () {
+    return this.baseIndex + 2;
+  },
+};
 
 // If LOCAL_MODE is enabled, then the app will render a mock dashboard for testing
 export const LOCAL_MODE = process.env.REACT_APP_LOCAL === envVars.LOCAL;

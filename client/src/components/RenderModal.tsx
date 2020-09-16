@@ -24,12 +24,6 @@ import {
 import { assignTargetString } from "./libertyInputsDictionary";
 import { globalDocData } from "../contexts/DocData";
 
-// need pos relative or else z-index will not work
-const Container = styled.div`
-  position: relative;
-  z-index: 9999;
-`;
-
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
@@ -109,25 +103,23 @@ export const RenderModal = () => {
             }}
           >
             {mainModalOpen && (
-              <Container>
-                <Rnd
-                  enableResizing={false}
-                  position={mainModalDraggCoords}
-                  onDragStop={handleDragStop}
-                  bounds="window"
-                >
-                  <div>
-                    <>
-                      {eventTarget && (
-                        <SelectModal
-                          eventTarget={eventTarget}
-                          targetString={targetString}
-                        />
-                      )}
-                    </>
-                  </div>
-                </Rnd>
-              </Container>
+              <Rnd
+                enableResizing={false}
+                position={mainModalDraggCoords}
+                onDragStop={handleDragStop}
+                bounds="window"
+              >
+                <div>
+                  <>
+                    {eventTarget && (
+                      <SelectModal
+                        eventTarget={eventTarget}
+                        targetString={targetString}
+                      />
+                    )}
+                  </>
+                </div>
+              </Rnd>
             )}
             {konvaModalOpen && eventTarget && (
               <ManualSelect eventTarget={eventTarget} />
