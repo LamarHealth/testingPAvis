@@ -40,7 +40,7 @@ import {
 } from "./KeyValuePairs";
 import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
 import { globalDocData } from "../contexts/DocData";
 import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
@@ -505,6 +505,8 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
         // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
         //@ts-ignore
         renderAccuracyScore(eventTarget, unalteredKeyValue);
+      } else {
+        renderBlankChiclet(eventTarget);
       }
     }
   };
