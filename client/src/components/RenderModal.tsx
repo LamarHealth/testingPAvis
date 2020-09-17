@@ -15,8 +15,6 @@ import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import {
   MAIN_MODAL_WIDTH,
-  MAIN_MODAL_OFFSET_X,
-  MAIN_MODAL_OFFSET_Y,
   KONVA_MODAL_OFFSET_X,
   KONVA_MODAL_OFFSET_Y,
   DOC_IMAGE_WIDTH,

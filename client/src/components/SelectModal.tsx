@@ -37,7 +37,7 @@ import { globalDocData } from "../contexts/DocData";
 import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const ModalWrapper = styled.div`
-  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
+  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
   z-index: 9;
   max-height: 500px;
   overflow-x: hidden;
@@ -257,18 +257,29 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   );
 };
 
+const TableRowContext = createContext({} as any);
+
 const TableRowComponent = (props: {
   keyValue: KeyValuesWithDistance;
   bestMatch: string;
   i: number;
 }) => {
   const keyValue = props.keyValue;
+  const index = props.i;
+  const { selectedRow, setSelectedRow } = useContext(TableRowContext);
+
+  const handleRowClick = () => {
+    selectedRow === index ? setSelectedRow(null) : setSelectedRow(index);
+  };
 
   return (
     <TableRow
-      key={props.i}
-      className={
-        keyValue["key"] === props.bestMatch ? "closest-match-row" : "table-row"
+      key={index}
+      onClick={handleRowClick}
+      style={
+        selectedRow === index
+          ? { backgroundColor: `${colors.ACCURACY_SCORE_LIGHTBLUE}` }
+          : { backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND}` }
       }
     >
       <TableCell>
@@ -346,6 +357,9 @@ const TableComponent = () => {
     }
   };
 
+  // selected row
+  const [selectedRow, setSelectedRow] = useState(null as null | number);
+
   return (
     <Table>
       <TableHeadContext.Provider
@@ -359,9 +373,15 @@ const TableComponent = () => {
         <TableHeadComponent targetString={targetString} />
       </TableHeadContext.Provider>
       <TableBody>
-        {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
-          <TableRowComponent keyValue={keyValue} bestMatch={bestMatch} i={i} />
-        ))}
+        <TableRowContext.Provider value={{ selectedRow, setSelectedRow }}>
+          {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+            <TableRowComponent
+              keyValue={keyValue}
+              bestMatch={bestMatch}
+              i={i}
+            />
+          ))}
+        </TableRowContext.Provider>
       </TableBody>
     </Table>
   );
@@ -452,7 +472,6 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
           value={{
             targetString,
             selectedDocData,
-            // setDocData,
             setRemoveKVMessage,
             setMessageCollapse,
             eventTarget,

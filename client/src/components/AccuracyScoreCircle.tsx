@@ -38,9 +38,9 @@ const wrapperFlexStyles = makeStyles((theme) => ({
   },
 }));
 
-const greenCircleStyles = makeStyles({ root: { color: "green" } });
-const yellowCircleStyles = makeStyles({ root: { color: "goldenrod" } });
-const redCircleStyles = makeStyles({ root: { color: "red" } });
+const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
+const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
+const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
 const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
   const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
@@ -48,10 +48,10 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
 
   const colorClasses =
     value < 50
-      ? redCircleStyles().root
+      ? redCircleStyles()
       : value < 80
-      ? yellowCircleStyles().root
-      : greenCircleStyles().root;
+      ? yellowCircleStyles()
+      : greenCircleStyles();
 
   const size =
     inputHeight >= 30
@@ -86,7 +86,7 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
         color={"primary"}
         size={`${size}px`}
         thickness={10}
-        classes={{ colorPrimary: colorClasses }}
+        classes={colorClasses}
       />
     </AccuracyScoreBox>
   );
