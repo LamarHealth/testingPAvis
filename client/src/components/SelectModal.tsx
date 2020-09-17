@@ -1,4 +1,10 @@
-import React, { useState, createContext, useContext, useEffect } from "react";
+import React, {
+  useState,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -20,6 +26,7 @@ import Collapse from "@material-ui/core/Collapse";
 import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import VisibilityIcon from "@material-ui/icons/Visibility";
+import TextField from "@material-ui/core/TextField";
 
 import { colors } from "../common/colors";
 import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
@@ -103,11 +110,16 @@ const DocName = styled(Typography)`
   margin: 1em;
 `;
 
-const ManualSelectButton = styled(Chip)`
+const TextInputContainer = styled.div`
+  width: 100%;
+  padding: 0 16px 16px 16px;
+  box-sizing: border-box;
+`;
+
+const BigButton = styled(Chip)`
   font-weight: bold;
-  background-color: #f9e526;
   padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 1em;
+  margin: 0 0.4em 0.4em 16px;
 `;
 
 const ErrorMessage = styled(Typography)`
@@ -163,6 +175,7 @@ const ButtonsCell = (props: {
     setMessageCollapse,
     eventTarget,
     targetString,
+    setUnalteredKeyValue,
   } = useContext(TableContext);
   const docData = useSpecialHookState(globalDocData);
   const [softCollapse, setSoftCollapse] = useState(false);
@@ -171,10 +184,20 @@ const ButtonsCell = (props: {
   const isSelected = props.isSelected;
 
   const fillButtonHandler = () => {
-    eventTarget.value = keyValue["value"];
-    setKvpTableAnchorEl(null);
-    renderAccuracyScore(eventTarget, keyValue);
+    // renderAccuracyScore(eventTarget, keyValue);
+
+    // fill the kvp table input
+    const shadowWrapper: any = document.querySelector(
+      ".shadow-root-for-modals"
+    );
+    const shadowRoot: any = shadowWrapper.children[0].shadowRoot;
+    const inputEl: any = shadowRoot.getElementById("kvp-table-fill-text-input");
+    inputEl.value = keyValue["value"];
+
+    // let the parent component know what the original string is
+    setUnalteredKeyValue(keyValue);
   };
+
   const reportKVPair = async (remove: boolean = false) => {
     if (remove) {
       deleteKVPairFromLocalStorage(
@@ -437,6 +460,14 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
     errorMessage,
     errorCode,
   } = useContext(MainModalContext);
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const docData = useSpecialHookState(globalDocData);
+  const selectedDocData = JSON.parse(docData.get()).filter(
+    (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
+  )[0];
+  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+  const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
+  const textFieldRef = useRef(null);
 
   const handleModalClose = () => {
     if (errorFetchingImage || errorFetchingGeometry) {
@@ -454,12 +485,29 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
     setKvpTableAnchorEl(null);
   };
 
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const docData = useSpecialHookState(globalDocData);
-  const selectedDocData = JSON.parse(docData.get()).filter(
-    (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
-  )[0];
-  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+  const handleSubmit = () => {
+    if (textFieldRef === null) {
+      console.log("error: textFieldRef null");
+      return;
+    } else {
+      //@ts-ignore
+      const inputEl: any = textFieldRef.current.querySelector(
+        "#kvp-table-fill-text-input"
+      );
+      const currentEditedValue = inputEl.value;
+      eventTarget.value = currentEditedValue; // fill input w edited val
+      setKvpTableAnchorEl(null); // close the modal
+      selectedChiclet.set("");
+
+      // only render accuracy score if value was not edited.
+      //@ts-ignore
+      if (unalteredKeyValue.value === currentEditedValue) {
+        // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
+        //@ts-ignore
+        renderAccuracyScore(eventTarget, unalteredKeyValue);
+      }
+    }
+  };
 
   return (
     <ModalWrapper>
@@ -469,10 +517,26 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       <DocName id="doc-name-typography" variant="h6">
         {selectedDocData.docName}
       </DocName>
-      <ManualSelectButton
+      <TextInputContainer>
+        <TextField
+          variant="outlined"
+          fullWidth
+          placeholder={targetString}
+          id={"kvp-table-fill-text-input"}
+          ref={textFieldRef}
+        />
+      </TextInputContainer>
+      <BigButton
         label="Manual Select"
         variant="outlined"
         onClick={handleManualSelectButtonClick}
+        style={{ backgroundColor: `${colors.MANUAL_SELECT_BUTTON_YELLOW}` }}
+      />
+      <BigButton
+        label="Submit"
+        variant="outlined"
+        onClick={handleSubmit}
+        style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
       />
       <Collapse in={errorFetchingGeometry || errorFetchingImage}>
         <ErrorLine errorCode={errorCode} msg={errorMessage} />
@@ -488,6 +552,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
             setRemoveKVMessage,
             setMessageCollapse,
             eventTarget,
+            setUnalteredKeyValue,
           }}
         >
           <TableComponent />

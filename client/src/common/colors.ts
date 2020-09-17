@@ -18,6 +18,7 @@ export const colors = {
   FILL_BUTTON: "#22c062",
   MODAL_BORDER: "rgba(224, 224, 224, 1)",
   CLOSEST_MATCH_ROW: "hsla(72, 69%, 74%, 0.4)",
+  MANUAL_SELECT_BUTTON_YELLOW: "#f9e526",
   MANUAL_SELECT_HEADER: "hsla(72, 50%, 87%, 1)",
   MANUAL_SELECT_RECT_STROKE: "hsla(104, 74%, 33%, 1)",
   MANUAL_SELECT_RECT_FILL: "hsla(104, 74%, 33%, 0.3)",
