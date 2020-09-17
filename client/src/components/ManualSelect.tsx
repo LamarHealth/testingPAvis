@@ -11,6 +11,7 @@ import { globalDocData } from "../contexts/DocData";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
+import { renderBlankChiclet } from "./AccuracyScoreCircle";
 
 import uuidv from "uuid";
 import { colors } from "../common/colors";
@@ -176,6 +177,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
         setKonvaModalOpen(false);
         setKvpTableAnchorEl(null);
         selectedChiclet.set("");
+        renderBlankChiclet(eventTarget);
         eventTarget.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
