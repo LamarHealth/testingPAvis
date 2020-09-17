@@ -10,6 +10,7 @@ import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { globalDocData } from "../contexts/DocData";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
+import WrappedJssComponent from "./ShadowComponent";
 
 import uuidv from "uuid";
 import { colors } from "../common/colors";
@@ -19,6 +20,7 @@ import {
   KONVA_MODAL_HEIGHT,
   MODAL_SHADOW,
 } from "../common/constants";
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
@@ -37,11 +39,13 @@ export const ManualSelect = ({ eventTarget }: any) => {
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
   const docData = useSpecialHookState(globalDocData);
   const {
-    setMainModalOpen,
+    // setMainModalOpen,
+    setKvpTableAnchorEl,
     konvaModalOpen,
     setKonvaModalOpen,
     konvaModalDraggCoords,
@@ -170,7 +174,8 @@ export const ManualSelect = ({ eventTarget }: any) => {
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
         setKonvaModalOpen(false);
-        setMainModalOpen(false);
+        setKvpTableAnchorEl(null);
+        selectedChiclet.set("");
         eventTarget.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
@@ -213,30 +218,32 @@ export const ManualSelect = ({ eventTarget }: any) => {
   return (
     <React.Fragment>
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
-        <StyledRnD
-          position={konvaModalDraggCoords}
-          onDragStop={handleDragStop}
-          bounds="window"
-          size={konvaModalDimensions}
-          onResizeStop={handleResizeStop}
-        >
-          <div>
-            <KonvaModalContext.Provider
-              value={{
-                currentSelection,
-                image,
-                filled,
-                setFilled,
-                setCurrentSelection,
-                currentLinesGeometry,
-                setKonvaModalOpen,
-                docImageDimensions,
-              }}
-            >
-              <KonvaModal />
-            </KonvaModalContext.Provider>
-          </div>
-        </StyledRnD>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
+          <StyledRnD
+            position={konvaModalDraggCoords}
+            onDragStop={handleDragStop}
+            bounds="window"
+            size={konvaModalDimensions}
+            onResizeStop={handleResizeStop}
+          >
+            <div>
+              <KonvaModalContext.Provider
+                value={{
+                  currentSelection,
+                  image,
+                  filled,
+                  setFilled,
+                  setCurrentSelection,
+                  currentLinesGeometry,
+                  setKonvaModalOpen,
+                  docImageDimensions,
+                }}
+              >
+                <KonvaModal />
+              </KonvaModalContext.Provider>
+            </div>
+          </StyledRnD>
+        </WrappedJssComponent>
       )}
     </React.Fragment>
   );

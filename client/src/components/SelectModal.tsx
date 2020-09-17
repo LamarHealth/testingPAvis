@@ -152,7 +152,7 @@ const TableHeadComponent = ({ targetString }: any) => {
 };
 
 const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
-  const { setMainModalOpen } = useContext(MainModalContext);
+  const { setKvpTableAnchorEl } = useContext(MainModalContext);
   const {
     selectedDocData,
     setRemoveKVMessage,
@@ -167,7 +167,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
 
   const fillButtonHandler = () => {
     eventTarget.value = keyValue["value"];
-    setMainModalOpen(false);
+    setKvpTableAnchorEl(null);
     renderAccuracyScore(eventTarget, keyValue);
   };
   const reportKVPair = async (remove: boolean = false) => {
@@ -395,7 +395,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const [messageCollapse, setMessageCollapse] = useState(false);
   const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const {
-    setMainModalOpen,
+    setKvpTableAnchorEl,
     setKonvaModalOpen,
     errorFetchingImage,
     setErrorFetchingImage,
@@ -412,8 +412,13 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       setErrorFetchingImage(false);
       setErrorFetchingGeometry(false);
     }
-    setMainModalOpen(false);
+    setKvpTableAnchorEl(null);
     selectedChiclet.set("");
+  };
+
+  const handleManualSelectButtonClick = () => {
+    setKonvaModalOpen(true);
+    setKvpTableAnchorEl(null);
   };
 
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
@@ -434,7 +439,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       <ManualSelectButton
         label="Manual Select"
         variant="outlined"
-        onClick={() => setKonvaModalOpen(true)}
+        onClick={handleManualSelectButtonClick}
       />
       <Collapse in={errorFetchingGeometry || errorFetchingImage}>
         <ErrorLine errorCode={errorCode} msg={errorMessage} />

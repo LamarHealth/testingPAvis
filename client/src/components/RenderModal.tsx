@@ -4,7 +4,7 @@ import $ from "jquery";
 import styled from "styled-components";
 
 import { ThemeProvider } from "@material-ui/core/styles";
-import { Rnd, DraggableData } from "react-rnd";
+import Popover from "@material-ui/core/Popover";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -14,6 +14,7 @@ import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import {
+  MAIN_MODAL_WIDTH,
   MAIN_MODAL_OFFSET_X,
   MAIN_MODAL_OFFSET_Y,
   KONVA_MODAL_OFFSET_X,
@@ -24,6 +25,10 @@ import {
 import { assignTargetString } from "./libertyInputsDictionary";
 import { globalDocData } from "../contexts/DocData";
 
+const Container = styled.div`
+  width: ${MAIN_MODAL_WIDTH}px;
+`;
+
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
@@ -33,11 +38,11 @@ export const RenderModal = () => {
     JSON.parse(useSpecialHookState(globalDocData).get()).length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
-  const [mainModalOpen, setMainModalOpen] = useState(false);
-  const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
-    x: MAIN_MODAL_OFFSET_X,
-    y: MAIN_MODAL_OFFSET_Y,
-  });
+  const [kvpTableAnchorEl, setKvpTableAnchorEl] = useState(
+    null as null | HTMLElement
+  );
+  const kvpTableOpen = Boolean(kvpTableAnchorEl);
+  const id = kvpTableOpen ? "kvp-table-popover" : undefined;
   const [konvaModalOpen, setKonvaModalOpen] = useState(false);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
@@ -66,62 +71,88 @@ export const RenderModal = () => {
 
       setEventTarget(eventTarget);
       setTargetString(assignTargetString(eventTarget));
-      setMainModalOpen(true);
+      setKvpTableAnchorEl(eventTarget);
     });
   });
-
-  // set main modal coords
-  const handleDragStop = (e: any, data: DraggableData) => {
-    let [x, y] = [data.x, data.y];
-    setMainModalDraggCoords({ x, y });
-  };
 
   return (
     <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && eventTarget && (
-        <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
-          <MainModalContext.Provider
-            value={{
-              mainModalOpen,
-              setMainModalOpen,
-              konvaModalOpen,
-              setKonvaModalOpen,
-              konvaModalDraggCoords,
-              setKonvaModalDraggCoords,
-              konvaModalDimensions,
-              setKonvaModalDimensions,
-              docImageDimensions,
-              setDocImageDimensions,
-              errorFetchingImage,
-              setErrorFetchingImage,
-              errorFetchingGeometry,
-              setErrorFetchingGeometry,
-              errorMessage,
-              setErrorMessage,
-              errorCode,
-              setErrorCode,
+        <>
+          <Popover
+            id={id}
+            open={kvpTableOpen}
+            anchorEl={kvpTableAnchorEl}
+            onClose={() => setKvpTableAnchorEl(null)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
             }}
           >
-            {mainModalOpen && (
-              <Rnd
-                enableResizing={false}
-                position={mainModalDraggCoords}
-                onDragStop={handleDragStop}
-                bounds="window"
-              >
-                <div>
-                  <>
-                    <SelectModal
-                      eventTarget={eventTarget}
-                      targetString={targetString}
-                    />
-                  </>
-                </div>
-              </Rnd>
-            )}
-            {konvaModalOpen && <ManualSelect eventTarget={eventTarget} />}
-          </MainModalContext.Provider>
-        </WrappedJssComponent>
+            <Container>
+              <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
+                <MainModalContext.Provider
+                  value={{
+                    kvpTableAnchorEl,
+                    setKvpTableAnchorEl,
+                    konvaModalOpen,
+                    setKonvaModalOpen,
+                    konvaModalDraggCoords,
+                    setKonvaModalDraggCoords,
+                    konvaModalDimensions,
+                    setKonvaModalDimensions,
+                    docImageDimensions,
+                    setDocImageDimensions,
+                    errorFetchingImage,
+                    setErrorFetchingImage,
+                    errorFetchingGeometry,
+                    setErrorFetchingGeometry,
+                    errorMessage,
+                    setErrorMessage,
+                    errorCode,
+                    setErrorCode,
+                  }}
+                >
+                  <SelectModal
+                    eventTarget={eventTarget}
+                    targetString={targetString}
+                  />
+                </MainModalContext.Provider>
+              </WrappedJssComponent>
+            </Container>
+          </Popover>
+
+          {konvaModalOpen && (
+            <MainModalContext.Provider
+              value={{
+                kvpTableAnchorEl,
+                setKvpTableAnchorEl,
+                konvaModalOpen,
+                setKonvaModalOpen,
+                konvaModalDraggCoords,
+                setKonvaModalDraggCoords,
+                konvaModalDimensions,
+                setKonvaModalDimensions,
+                docImageDimensions,
+                setDocImageDimensions,
+                errorFetchingImage,
+                setErrorFetchingImage,
+                errorFetchingGeometry,
+                setErrorFetchingGeometry,
+                errorMessage,
+                setErrorMessage,
+                errorCode,
+                setErrorCode,
+              }}
+            >
+              <ManualSelect eventTarget={eventTarget} />
+            </MainModalContext.Provider>
+          )}
+        </>
       )}
     </ThemeProvider>
   );
