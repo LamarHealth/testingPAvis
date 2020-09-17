@@ -19,6 +19,7 @@ import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import Collapse from "@material-ui/core/Collapse";
 import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 
 import { colors } from "../common/colors";
 import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
@@ -151,7 +152,10 @@ const TableHeadComponent = ({ targetString }: any) => {
   );
 };
 
-const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
+const ButtonsCell = (props: {
+  keyValue: KeyValuesWithDistance;
+  isSelected: Boolean;
+}) => {
   const { setKvpTableAnchorEl } = useContext(MainModalContext);
   const {
     selectedDocData,
@@ -164,6 +168,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
+  const isSelected = props.isSelected;
 
   const fillButtonHandler = () => {
     eventTarget.value = keyValue["value"];
@@ -228,6 +233,13 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     <>
       <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
         <FlexCell>
+          <IconButton
+            style={
+              isSelected ? { visibility: "visible" } : { visibility: "hidden" }
+            }
+          >
+            <VisibilityIcon />
+          </IconButton>
           <FillButton onClick={fillButtonHandler}>Fill</FillButton>
           <IconButton onClick={() => setSoftCollapse(true)}>
             <HighlightOffIcon />
@@ -267,6 +279,7 @@ const TableRowComponent = (props: {
   const keyValue = props.keyValue;
   const index = props.i;
   const { selectedRow, setSelectedRow } = useContext(TableRowContext);
+  const isSelected = selectedRow === index ? true : false;
 
   const handleRowClick = () => {
     selectedRow === index ? setSelectedRow(null) : setSelectedRow(index);
@@ -277,7 +290,7 @@ const TableRowComponent = (props: {
       key={index}
       onClick={handleRowClick}
       style={
-        selectedRow === index
+        isSelected
           ? { backgroundColor: `${colors.ACCURACY_SCORE_LIGHTBLUE}` }
           : { backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND}` }
       }
@@ -307,7 +320,7 @@ const TableRowComponent = (props: {
         <Typography>{keyValue["value"]}</Typography>
       </TableCell>
       <TableCell>
-        <ButtonsCell keyValue={keyValue} />
+        <ButtonsCell keyValue={keyValue} isSelected={isSelected} />
       </TableCell>
     </TableRow>
   );
