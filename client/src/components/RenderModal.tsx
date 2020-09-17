@@ -24,6 +24,7 @@ import {
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
 import { globalDocData } from "../contexts/DocData";
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
@@ -38,6 +39,7 @@ export const RenderModal = () => {
     JSON.parse(useSpecialHookState(globalDocData).get()).length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const [kvpTableAnchorEl, setKvpTableAnchorEl] = useState(
     null as null | HTMLElement
   );
@@ -63,7 +65,7 @@ export const RenderModal = () => {
   );
   const [errorCode, setErrorCode] = useState(400);
 
-  // handle input el click
+  // handle chiclet click
   $(document).ready(() => {
     $("span[id^='docit-accuracy-score-mounter-']").click(function () {
       const mounterID = this.id.replace("docit-accuracy-score-mounter-", "");
@@ -75,6 +77,12 @@ export const RenderModal = () => {
     });
   });
 
+  // handle popover click away
+  const popoverClose = () => {
+    setKvpTableAnchorEl(null);
+    selectedChiclet.set("");
+  };
+
   return (
     <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && eventTarget && (
@@ -83,7 +91,7 @@ export const RenderModal = () => {
             id={id}
             open={kvpTableOpen}
             anchorEl={kvpTableAnchorEl}
-            onClose={() => setKvpTableAnchorEl(null)}
+            onClose={popoverClose}
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "right",
