@@ -221,6 +221,9 @@ const ButtonsCell = (props: {
 
     // let the parent component know what the original string is
     setUnalteredKeyValue(keyValue);
+
+    // focus on the text editor
+    inputEl.focus();
   };
 
   const reportKVPair = async (remove: boolean = false) => {
