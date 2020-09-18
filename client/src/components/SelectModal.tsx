@@ -55,6 +55,14 @@ const ModalWrapper = styled.div`
   box-shadow: ${MODAL_SHADOW};
 `;
 
+const StickyWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+  padding-bottom: 10px;
+`;
+
 const StyledTableCellLeft = styled(TableCell)`
   padding: 5px 5px 5px 10px;
 `;
@@ -123,7 +131,7 @@ const CloseButton = styled(IconButton)`
 `;
 
 const DocName = styled(Typography)`
-  margin: 10px 10px 0 10px;
+  padding: 10px 10px 0 10px;
 `;
 
 const TextInputContainer = styled.div`
@@ -144,7 +152,7 @@ const ErrorMessage = styled(Typography)`
 
 const TableHeadContext = createContext({} as any);
 
-const TableHeadComponent = ({ targetString }: any) => {
+const TableHeadComponent = () => {
   const {
     matchArrow,
     matchScoreSortHandler,
@@ -425,7 +433,7 @@ const TableComponent = () => {
           alphabeticSortHandler,
         }}
       >
-        <TableHeadComponent targetString={targetString} />
+        <TableHeadComponent />
       </TableHeadContext.Provider>
       <TableBody>
         <TableRowContext.Provider value={{ selectedRow, setSelectedRow }}>
@@ -535,40 +543,43 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
 
   return (
     <ModalWrapper>
-      <CloseButton onClick={handleModalClose}>
-        <CloseIcon />
-      </CloseButton>
-      <DocName id="doc-name-typography" variant="h6">
-        {selectedDocData.docName}
-      </DocName>
-      <TextInputContainer>
-        <TextField
+      <StickyWrapper>
+        <CloseButton onClick={handleModalClose}>
+          <CloseIcon />
+        </CloseButton>
+        <DocName id="doc-name-typography" variant="h6">
+          {selectedDocData.docName}
+        </DocName>
+        <TextInputContainer>
+          <TextField
+            variant="outlined"
+            fullWidth
+            placeholder={targetString}
+            id={"kvp-table-fill-text-input"}
+            ref={textFieldRef}
+            margin="dense"
+          />
+        </TextInputContainer>
+        <BigButton
+          label="Manual Select"
           variant="outlined"
-          fullWidth
-          placeholder={targetString}
-          id={"kvp-table-fill-text-input"}
-          ref={textFieldRef}
-          margin="dense"
+          onClick={handleManualSelectButtonClick}
+          style={{ backgroundColor: `${colors.MANUAL_SELECT_BUTTON_YELLOW}` }}
         />
-      </TextInputContainer>
-      <BigButton
-        label="Manual Select"
-        variant="outlined"
-        onClick={handleManualSelectButtonClick}
-        style={{ backgroundColor: `${colors.MANUAL_SELECT_BUTTON_YELLOW}` }}
-      />
-      <BigButton
-        label="Submit"
-        variant="outlined"
-        onClick={handleSubmit}
-        style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
-      />
-      <Collapse in={errorFetchingGeometry || errorFetchingImage}>
-        <ErrorLine errorCode={errorCode} msg={errorMessage} />
-      </Collapse>
-      <Collapse in={messageCollapse}>
-        <Message msg={removeKVMessage} />
-      </Collapse>
+        <BigButton
+          label="Submit"
+          variant="outlined"
+          onClick={handleSubmit}
+          style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
+        />
+        <Collapse in={errorFetchingGeometry || errorFetchingImage}>
+          <ErrorLine errorCode={errorCode} msg={errorMessage} />
+        </Collapse>
+        <Collapse in={messageCollapse}>
+          <Message msg={removeKVMessage} />
+        </Collapse>
+      </StickyWrapper>
+
       {areThereKVPairs ? (
         <TableContext.Provider
           value={{
