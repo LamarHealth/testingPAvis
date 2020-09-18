@@ -47,12 +47,28 @@ import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
   z-index: 9;
-  max-height: 500px;
+  max-height: 380px;
   overflow-x: hidden;
   overflow-y: scroll;
   width: ${MAIN_MODAL_WIDTH}px;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
+`;
+
+const StyledTableCellLeft = styled(TableCell)`
+  padding: 5px 5px 5px 10px;
+`;
+
+const StyledTableCellMiddle = styled(TableCell)`
+  padding: 5px;
+`;
+
+const StyledTableCellRight = styled(TableCell)`
+  padding: 5px 10px 5px 5px;
+`;
+
+const StyledTableHeadCell = styled(TableCell)`
+  padding: 10px;
 `;
 
 const FillButton = styled.button`
@@ -112,14 +128,14 @@ const DocName = styled(Typography)`
 
 const TextInputContainer = styled.div`
   width: 100%;
-  padding: 0 16px 16px 16px;
+  padding: 0 10px 10px 10px;
   box-sizing: border-box;
 `;
 
 const BigButton = styled(Chip)`
   font-weight: bold;
   padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 16px;
+  margin: 0 10px;
 `;
 
 const ErrorMessage = styled(Typography)`
@@ -138,28 +154,32 @@ const TableHeadComponent = ({ targetString }: any) => {
 
   return (
     <TableHead>
-      <TableCell>
+      <StyledTableHeadCell>
         <FlexCell>
-          <Typography variant="subtitle1">Match Score</Typography>
+          <Typography variant="subtitle1" noWrap>
+            Match Score
+          </Typography>
           <StyledIconButton onClick={matchScoreSortHandler}>
             {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
           </StyledIconButton>
         </FlexCell>
-      </TableCell>
-      <TableCell>
+      </StyledTableHeadCell>
+      <StyledTableHeadCell>
         <FlexCell>
-          <Typography variant="subtitle1">
-            Field Name: <i>{targetString}</i>
+          <Typography variant="subtitle1" noWrap>
+            Field Name
           </Typography>
           <StyledIconButton onClick={alphabeticSortHandler}>
             {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
           </StyledIconButton>
         </FlexCell>
-      </TableCell>
-      <TableCell>
-        <Typography variant="subtitle1">Field Value</Typography>
-      </TableCell>
-      <TableCell />
+      </StyledTableHeadCell>
+      <StyledTableHeadCell>
+        <Typography variant="subtitle1" noWrap>
+          Field Value
+        </Typography>
+      </StyledTableHeadCell>
+      <StyledTableHeadCell />
     </TableHead>
   );
 };
@@ -168,7 +188,6 @@ const ButtonsCell = (props: {
   keyValue: KeyValuesWithDistance;
   isSelected: Boolean;
 }) => {
-  const { setKvpTableAnchorEl } = useContext(MainModalContext);
   const {
     selectedDocData,
     setRemoveKVMessage,
@@ -318,7 +337,7 @@ const TableRowComponent = (props: {
           : { backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND}` }
       }
     >
-      <TableCell>
+      <StyledTableCellLeft>
         <LinearProgress
           variant={"determinate"}
           value={keyValue["distanceFromTarget"] * 100}
@@ -330,21 +349,21 @@ const TableRowComponent = (props: {
             </Typography>
           </ClosestMatch>
         )}
-      </TableCell>
-      <TableCell>
+      </StyledTableCellLeft>
+      <StyledTableCellMiddle>
         <Typography>{keyValue["key"]}</Typography>
         {keyValue.interpretedFrom && (
           <Typography variant="caption">
             <i>Interpreted from: {keyValue["interpretedFrom"]}</i>
           </Typography>
         )}
-      </TableCell>
-      <TableCell>
+      </StyledTableCellMiddle>
+      <StyledTableCellMiddle>
         <Typography>{keyValue["value"]}</Typography>
-      </TableCell>
-      <TableCell>
+      </StyledTableCellMiddle>
+      <StyledTableCellRight>
         <ButtonsCell keyValue={keyValue} isSelected={isSelected} />
-      </TableCell>
+      </StyledTableCellRight>
     </TableRow>
   );
 };
