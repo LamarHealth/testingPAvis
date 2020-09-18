@@ -1,7 +1,3 @@
-import React from "react";
-import {
-  createState as createSpecialHookState,
-  useState as useSpecialHookState,
-} from "@hookstate/core";
+import { createState as createSpecialHookState } from "@hookstate/core";
 
 export const globalSelectedFileState = createSpecialHookState("");

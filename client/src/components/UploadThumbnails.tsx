@@ -14,7 +14,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 
 import Typography from "@material-ui/core/Typography";
 
-import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
+import { useState as useSpecialHookState } from "@hookstate/core";
 
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";

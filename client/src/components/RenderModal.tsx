@@ -22,7 +22,6 @@ import {
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
 import { globalDocData } from "../contexts/DocData";
-import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
@@ -37,7 +36,6 @@ export const RenderModal = () => {
     useSpecialHookState(globalDocData).attach(Downgraded).get().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
-  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const [kvpTableAnchorEl, setKvpTableAnchorEl] = useState(
     null as null | HTMLElement
   );
