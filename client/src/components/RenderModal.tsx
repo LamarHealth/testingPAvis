@@ -85,6 +85,7 @@ export const RenderModal = () => {
             anchorEl={kvpTableAnchorEl}
             keepMounted
             placement={"bottom-end"}
+            container={() => document.getElementById("insertion-point")}
           >
             <Container>
               <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>

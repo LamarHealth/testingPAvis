@@ -24,11 +24,14 @@ export const Z_INDEX_ALLOCATOR = {
   body: function () {
     return this.baseIndex + 0;
   },
-  sidebar: function () {
+  insertionPoint: function () {
     return this.baseIndex + 1;
   },
-  modals: function () {
+  sidebar: function () {
     return this.baseIndex + 2;
+  },
+  modals: function () {
+    return this.baseIndex + 3;
   },
 };
 

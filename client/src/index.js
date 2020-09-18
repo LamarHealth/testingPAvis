@@ -17,7 +17,12 @@ if (!LOCAL_MODE) {
   document.body.style.position = "relative";
 }
 
-$('<div id="insertion-point"/>').insertBefore(document.body);
+const insertionPoint = document.createElement("div");
+insertionPoint.id = "insertion-point";
+insertionPoint.style.position = "relative";
+insertionPoint.style.zIndex = Z_INDEX_ALLOCATOR.insertionPoint();
+
+$(insertionPoint).insertBefore(document.body);
 
 ReactDOM.render(
   <>
