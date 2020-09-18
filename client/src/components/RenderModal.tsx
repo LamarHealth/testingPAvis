@@ -86,6 +86,10 @@ export const RenderModal = () => {
             keepMounted
             placement={"bottom-end"}
             container={() => document.getElementById("insertion-point")}
+            modifiers={{
+              preventOverflow: { enabled: false, boundariesElement: "window" },
+              flip: { enabled: true },
+            }}
           >
             <Container>
               <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
