@@ -500,8 +500,11 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       selectedChiclet.set("");
 
       // only render accuracy score if value was not edited.
-      //@ts-ignore
-      if (unalteredKeyValue.value === currentEditedValue) {
+      if (
+        unalteredKeyValue !== null &&
+        //@ts-ignore
+        unalteredKeyValue.value === currentEditedValue
+      ) {
         // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
         //@ts-ignore
         renderAccuracyScore(eventTarget, unalteredKeyValue);
