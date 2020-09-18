@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import { getEditDistanceAndSort, getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 
 import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -16,13 +16,12 @@ import Link from "@material-ui/core/Link";
 
 import $ from "jquery";
 import { colors } from "../common/colors";
-import {
-  createState as createSpecialHookState,
-  useState as useSpecialHookState,
-} from "@hookstate/core";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
+import { globalDocData } from "../contexts/DocData";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import ButtonsBox from "./ButtonsBox";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
 import {
   assignTargetString,
   handleFreightTerms,
@@ -89,16 +88,16 @@ const FeedbackTypography = styled(Typography)`
   color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
-export const globalSelectedFileState = createSpecialHookState("");
-
 const DocCell = (props: DocumentInfo) => {
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const docData = useSpecialHookState(globalDocData);
 
   const populateForms = () => {
     $(document).ready(() => {
-      const keyValuePairs = getKeyValuePairsByDoc().filter(
-        (doc) => doc.docID === props.docID
-      )[0];
+      const keyValuePairs = docData
+        .attach(Downgraded)
+        .get()
+        .filter((doc: KeyValuesByDoc) => doc.docID === props.docID)[0];
 
       $("select").each(function () {
         handleFreightTerms(this, keyValuePairs);
@@ -124,15 +123,16 @@ const DocCell = (props: DocumentInfo) => {
           "lc substring"
         );
 
-        if (sortedKeyValuePairs[0].distanceFromTarget < 0.5) {
-          return;
-        }
-
-        if (sortedKeyValuePairs[0].value !== "") {
+        if (
+          sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
+          sortedKeyValuePairs[0].value === ""
+        ) {
+          renderBlankChiclet(this);
+          $(this).prop("value", null);
+        } else {
           renderAccuracyScore(this, sortedKeyValuePairs[0]);
+          $(this).prop("value", sortedKeyValuePairs[0]["value"]);
         }
-
-        $(this).prop("value", sortedKeyValuePairs[0]["value"]);
       });
     });
   };

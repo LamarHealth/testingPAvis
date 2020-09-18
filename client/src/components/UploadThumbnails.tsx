@@ -14,10 +14,14 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 
 import Typography from "@material-ui/core/Typography";
 
+import { useState as useSpecialHookState } from "@hookstate/core";
+
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
 import { PAGE_SCALE, API_PATH } from "../common/constants";
+import { globalDocData } from "../contexts/DocData";
+import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -105,6 +109,10 @@ const updateLocalStorage = (documentInfo: any) => {
     : [];
   updatedList.push(documentInfo);
   localStorage.setItem("docList", JSON.stringify(updatedList));
+
+  return new Promise((resolve) => {
+    resolve();
+  });
 };
 
 const FileStatus = (props: any) => {
@@ -117,6 +125,8 @@ const FileStatus = (props: any) => {
     props.fileWithPreview.preview
   );
   const index = props.fileWithPreview.index;
+
+  const docData = useSpecialHookState(globalDocData);
 
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
@@ -161,7 +171,10 @@ const FileStatus = (props: any) => {
             type: "append",
             documentInfo: await result.json(),
           };
-          updateLocalStorage(postSuccessResponse.documentInfo);
+          updateLocalStorage(postSuccessResponse.documentInfo).then(() => {
+            // update loc stor then set the global var to reflect that
+            docData.set(getKeyValuePairsByDoc());
+          });
           fileInfoContext.fileDispatch(postSuccessResponse);
           setUploadStatus(200);
           break;

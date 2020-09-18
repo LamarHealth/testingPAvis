@@ -8,17 +8,33 @@ import ShipmentsDashboard from "./components/ShipmentsDashboard";
 import { Sidebar } from "./components/Sidebar";
 import { RenderModal } from "./components/RenderModal";
 
-import { LOCAL_MODE } from "./common/constants";
+import { LOCAL_MODE, Z_INDEX_ALLOCATOR } from "./common/constants";
 dotenv.config();
 
-$('<span id="insertion-point"/>').insertBefore(document.body);
+// set the document body to 0 z-index in build, so that our sidebar and modal outrank them
+if (!LOCAL_MODE) {
+  document.body.style.zIndex = Z_INDEX_ALLOCATOR.baseIndex;
+  document.body.style.position = "relative";
+}
+
+const insertionPoint = document.createElement("div");
+insertionPoint.id = "insertion-point";
+insertionPoint.style.position = "relative";
+insertionPoint.style.zIndex = Z_INDEX_ALLOCATOR.insertionPoint();
+
+$(insertionPoint).insertBefore(document.body);
 
 ReactDOM.render(
   <>
     <RenderModal />
     <Sidebar />
     {LOCAL_MODE && (
-      <body>
+      <body
+        style={{
+          position: "relative",
+          zIndex: Z_INDEX_ALLOCATOR.body(),
+        }}
+      >
         <ShipmentsDashboard />
       </body>
     )}

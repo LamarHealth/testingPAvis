@@ -4,45 +4,43 @@ import $ from "jquery";
 import styled from "styled-components";
 
 import { ThemeProvider } from "@material-ui/core/styles";
-import { Rnd, DraggableData } from "react-rnd";
+import Popper from "@material-ui/core/Popper";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
-import { globalSelectedFileState } from "./DocViewer";
-import { getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
 import { DEFAULT } from "../common/themes";
 import {
-  MAIN_MODAL_OFFSET_X,
-  MAIN_MODAL_OFFSET_Y,
+  MAIN_MODAL_WIDTH,
   KONVA_MODAL_OFFSET_X,
   KONVA_MODAL_OFFSET_Y,
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
+import { globalDocData } from "../contexts/DocData";
 
-// need pos relative or else z-index will not work
 const Container = styled.div`
-  position: relative;
-  z-index: 9999;
+  width: ${MAIN_MODAL_WIDTH}px;
 `;
 
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
-  const [eventObj, setEventObj] = useState(null) as any;
+  const [eventTarget, setEventTarget] = useState(null) as any;
   const [targetString, setTargetString] = useState(undefined as any);
-  const areThereDocs = getKeyValuePairsByDoc().length > 0;
+  const areThereDocs =
+    useSpecialHookState(globalDocData).attach(Downgraded).get().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
-  const [mainModalOpen, setMainModalOpen] = useState(false);
-  const [mainModalDraggCoords, setMainModalDraggCoords] = useState({
-    x: MAIN_MODAL_OFFSET_X,
-    y: MAIN_MODAL_OFFSET_Y,
-  });
+  const [kvpTableAnchorEl, setKvpTableAnchorEl] = useState(
+    null as null | HTMLElement
+  );
+  const kvpTableOpen = Boolean(kvpTableAnchorEl);
+  const id = kvpTableOpen ? "kvp-table-popover" : undefined;
   const [konvaModalOpen, setKonvaModalOpen] = useState(false);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
@@ -63,71 +61,95 @@ export const RenderModal = () => {
   );
   const [errorCode, setErrorCode] = useState(400);
 
-  // handle input el click
+  // handle chiclet click
   $(document).ready(() => {
-    $("input").click(function (event) {
-      setEventObj(event);
-      setTargetString(assignTargetString($(this)));
-      setMainModalOpen(true);
+    $("span[id^='docit-accuracy-score-mounter-']").click(function () {
+      const mounterID = this.id.replace("docit-accuracy-score-mounter-", "");
+      const eventTarget = $(`input.has-docit-mounter-${mounterID}`).get()[0];
+
+      setEventTarget(eventTarget);
+      setTargetString(assignTargetString(eventTarget));
+      setKvpTableAnchorEl(eventTarget);
     });
   });
 
-  // set main modal coords
-  const handleDragStop = (e: any, data: DraggableData) => {
-    let [x, y] = [data.x, data.y];
-    setMainModalDraggCoords({ x, y });
-  };
-
   return (
     <ThemeProvider theme={DEFAULT}>
-      {areThereDocs && isDocSelected && (
-        <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
-          <MainModalContext.Provider
-            value={{
-              mainModalOpen,
-              setMainModalOpen,
-              konvaModalOpen,
-              setKonvaModalOpen,
-              konvaModalDraggCoords,
-              setKonvaModalDraggCoords,
-              konvaModalDimensions,
-              setKonvaModalDimensions,
-              docImageDimensions,
-              setDocImageDimensions,
-              errorFetchingImage,
-              setErrorFetchingImage,
-              errorFetchingGeometry,
-              setErrorFetchingGeometry,
-              errorMessage,
-              setErrorMessage,
-              errorCode,
-              setErrorCode,
+      {areThereDocs && isDocSelected && eventTarget && (
+        <>
+          <Popper
+            id={id}
+            open={kvpTableOpen}
+            anchorEl={kvpTableAnchorEl}
+            keepMounted
+            placement={"bottom-end"}
+            container={() => document.getElementById("insertion-point")}
+            modifiers={{
+              preventOverflow: { enabled: false, boundariesElement: "window" },
+              flip: { enabled: true },
+              hide: { enabled: false },
             }}
           >
-            {mainModalOpen && (
-              <Container>
-                <Rnd
-                  enableResizing={false}
-                  position={mainModalDraggCoords}
-                  onDragStop={handleDragStop}
-                  bounds="window"
+            <Container>
+              <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
+                <MainModalContext.Provider
+                  value={{
+                    kvpTableAnchorEl,
+                    setKvpTableAnchorEl,
+                    konvaModalOpen,
+                    setKonvaModalOpen,
+                    konvaModalDraggCoords,
+                    setKonvaModalDraggCoords,
+                    konvaModalDimensions,
+                    setKonvaModalDimensions,
+                    docImageDimensions,
+                    setDocImageDimensions,
+                    errorFetchingImage,
+                    setErrorFetchingImage,
+                    errorFetchingGeometry,
+                    setErrorFetchingGeometry,
+                    errorMessage,
+                    setErrorMessage,
+                    errorCode,
+                    setErrorCode,
+                  }}
                 >
-                  <div>
-                    <>
-                      {eventObj && (
-                        <SelectModal
-                          eventObj={eventObj}
-                          targetString={targetString}
-                        />
-                      )}
-                    </>
-                  </div>
-                </Rnd>
-              </Container>
-            )}
-            {konvaModalOpen && eventObj && <ManualSelect eventObj={eventObj} />}
-          </MainModalContext.Provider>
-        </WrappedJssComponent>
+                  <SelectModal
+                    eventTarget={eventTarget}
+                    targetString={targetString}
+                  />
+                </MainModalContext.Provider>
+              </WrappedJssComponent>
+            </Container>
+          </Popper>
+
+          {konvaModalOpen && (
+            <MainModalContext.Provider
+              value={{
+                kvpTableAnchorEl,
+                setKvpTableAnchorEl,
+                konvaModalOpen,
+                setKonvaModalOpen,
+                konvaModalDraggCoords,
+                setKonvaModalDraggCoords,
+                konvaModalDimensions,
+                setKonvaModalDimensions,
+                docImageDimensions,
+                setDocImageDimensions,
+                errorFetchingImage,
+                setErrorFetchingImage,
+                errorFetchingGeometry,
+                setErrorFetchingGeometry,
+                errorMessage,
+                setErrorMessage,
+                errorCode,
+                setErrorCode,
+              }}
+            >
+              <ManualSelect eventTarget={eventTarget} />
+            </MainModalContext.Provider>
+          )}
+        </>
       )}
     </ThemeProvider>
   );

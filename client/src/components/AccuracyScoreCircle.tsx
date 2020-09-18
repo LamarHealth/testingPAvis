@@ -9,10 +9,13 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import uuidv from "uuid";
 
+import { useState as useSpecialHookState } from "@hookstate/core";
+
 import { colors } from "../common/colors";
 import { ACC_SCORE_LARGE } from "../common/constants";
 import { ACC_SCORE_MEDIUM } from "../common/constants";
 import { ACC_SCORE_SMALL } from "../common/constants";
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -35,19 +38,20 @@ const wrapperFlexStyles = makeStyles((theme) => ({
   },
 }));
 
-const greenCircleStyles = makeStyles({ root: { color: "green" } });
-const yellowCircleStyles = makeStyles({ root: { color: "goldenrod" } });
-const redCircleStyles = makeStyles({ root: { color: "red" } });
+const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
+const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
+const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
-const AccuracyScoreEl = ({ value, inputHeight }: any) => {
+const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const wrapperClasses = wrapperFlexStyles();
 
   const colorClasses =
     value < 50
-      ? redCircleStyles().root
+      ? redCircleStyles()
       : value < 80
-      ? yellowCircleStyles().root
-      : greenCircleStyles().root;
+      ? yellowCircleStyles()
+      : greenCircleStyles();
 
   const size =
     inputHeight >= 30
@@ -57,7 +61,13 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
       : ACC_SCORE_SMALL;
 
   return (
-    <AccuracyScoreBox className={wrapperClasses.root}>
+    <AccuracyScoreBox
+      className={wrapperClasses.root}
+      onClick={() => selectedChiclet.set(`${mounterID}`)}
+      style={
+        selectedChiclet.get() === mounterID ? { border: "1px solid black" } : {}
+      }
+    >
       <Box>
         <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
@@ -76,16 +86,50 @@ const AccuracyScoreEl = ({ value, inputHeight }: any) => {
         color={"primary"}
         size={`${size}px`}
         thickness={10}
-        classes={{ colorPrimary: colorClasses }}
+        classes={colorClasses}
       />
     </AccuracyScoreBox>
   );
 };
 
-export const renderAccuracyScore = (
-  target: any,
-  keyValue: KeyValuesWithDistance
-) => {
+const BlankChiclet = ({ inputHeight, mounterID }: any) => {
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
+  const wrapperClasses = wrapperFlexStyles();
+  const size =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM
+      : ACC_SCORE_SMALL;
+
+  return (
+    <AccuracyScoreBox
+      className={wrapperClasses.root}
+      onClick={() => selectedChiclet.set(`${mounterID}`)}
+      style={
+        selectedChiclet.get() === mounterID ? { border: "1px solid black" } : {}
+      }
+    >
+      <Box>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
+          <style>
+            {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
+          </style>
+          <Typography
+            variant="caption"
+            component="div"
+            color="textSecondary"
+            style={{ marginLeft: `${size}px`, marginRight: `${size}px` }}
+          >
+            {"?"}
+          </Typography>
+        </WrappedJssComponent>
+      </Box>
+    </AccuracyScoreBox>
+  );
+};
+
+const setMounter = (target: any) => {
   const inputStyle = window.getComputedStyle(target);
   const inputZIndex = target.style.zIndex;
   const positionedParent = target.offsetParent;
@@ -149,12 +193,37 @@ export const renderAccuracyScore = (
 
   positionedParent.appendChild(mounter);
 
+  return { mounter, mounterID };
+};
+
+export const renderAccuracyScore = (
+  target: any,
+  keyValue: KeyValuesWithDistance
+) => {
+  const { mounter, mounterID } = setMounter(target);
+  const inputHeight = parseInt(
+    window.getComputedStyle(target).height.replace("px", "")
+  );
+
   ReactDOM.render(
     <AccuracyScoreEl
       //@ts-ignore
       value={keyValue.distanceFromTarget * 100}
       inputHeight={inputHeight}
+      mounterID={mounterID}
     />,
+    mounter
+  );
+};
+
+export const renderBlankChiclet = (target: any) => {
+  const { mounter, mounterID } = setMounter(target);
+  const inputHeight = parseInt(
+    window.getComputedStyle(target).height.replace("px", "")
+  );
+
+  ReactDOM.render(
+    <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
     mounter
   );
 };

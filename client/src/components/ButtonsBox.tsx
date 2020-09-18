@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 
+import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { useState as useSpecialHookState } from "@hookstate/core";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
@@ -11,11 +12,7 @@ import Button from "@material-ui/core/Button";
 import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
 
-import {
-  FileContext,
-  globalSelectedFileState,
-  DocumentInfo,
-} from "./DocViewer";
+import { FileContext, DocumentInfo } from "./DocViewer";
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);

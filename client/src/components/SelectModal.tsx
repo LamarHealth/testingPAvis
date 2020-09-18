@@ -1,6 +1,12 @@
-import React, { useState, createContext, useContext, useEffect } from "react";
+import React, {
+  useState,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import styled from "styled-components";
 
@@ -19,6 +25,8 @@ import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import Collapse from "@material-ui/core/Collapse";
 import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import TextField from "@material-ui/core/TextField";
 
 import { colors } from "../common/colors";
 import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
@@ -30,19 +38,46 @@ import {
   deleteKVPairFromLocalStorage,
   KeyValuesByDoc,
 } from "./KeyValuePairs";
-import { globalSelectedFileState } from "./DocViewer";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
+import { globalDocData } from "../contexts/DocData";
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const ModalWrapper = styled.div`
-  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND_GREEN};
+  background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
   z-index: 9;
-  max-height: 500px;
+  max-height: 380px;
   overflow-x: hidden;
   overflow-y: scroll;
   width: ${MAIN_MODAL_WIDTH}px;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
+`;
+
+const StickyWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+  padding-bottom: 10px;
+  border-bottom: 1px solid ${colors.KVP_TABLE_BORDER};
+`;
+
+const StyledTableCellLeft = styled(TableCell)`
+  padding: 5px 5px 5px 10px;
+`;
+
+const StyledTableCellMiddle = styled(TableCell)`
+  padding: 5px;
+`;
+
+const StyledTableCellRight = styled(TableCell)`
+  padding: 5px 10px 5px 5px;
+`;
+
+const StyledTableHeadCell = styled(TableCell)`
+  padding: 10px;
 `;
 
 const FillButton = styled.button`
@@ -97,14 +132,19 @@ const CloseButton = styled(IconButton)`
 `;
 
 const DocName = styled(Typography)`
-  margin: 1em;
+  padding: 10px 10px 0 10px;
 `;
 
-const ManualSelectButton = styled(Chip)`
+const TextInputContainer = styled.div`
+  width: 100%;
+  padding: 0 10px 10px 10px;
+  box-sizing: border-box;
+`;
+
+const BigButton = styled(Chip)`
   font-weight: bold;
-  background-color: #f9e526;
   padding: 0.3em 1.3em;
-  margin: 0 0.4em 0.4em 1em;
+  margin: 0 10px;
 `;
 
 const ErrorMessage = styled(Typography)`
@@ -113,7 +153,7 @@ const ErrorMessage = styled(Typography)`
 
 const TableHeadContext = createContext({} as any);
 
-const TableHeadComponent = ({ targetString }: any) => {
+const TableHeadComponent = () => {
   const {
     matchArrow,
     matchScoreSortHandler,
@@ -123,51 +163,69 @@ const TableHeadComponent = ({ targetString }: any) => {
 
   return (
     <TableHead>
-      <TableCell>
+      <StyledTableHeadCell>
         <FlexCell>
-          <Typography variant="subtitle1">Match Score</Typography>
+          <Typography variant="subtitle1" noWrap>
+            Match Score
+          </Typography>
           <StyledIconButton onClick={matchScoreSortHandler}>
             {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
           </StyledIconButton>
         </FlexCell>
-      </TableCell>
-      <TableCell>
+      </StyledTableHeadCell>
+      <StyledTableHeadCell>
         <FlexCell>
-          <Typography variant="subtitle1">
-            Field Name: <i>{targetString}</i>
+          <Typography variant="subtitle1" noWrap>
+            Field Name
           </Typography>
           <StyledIconButton onClick={alphabeticSortHandler}>
             {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
           </StyledIconButton>
         </FlexCell>
-      </TableCell>
-      <TableCell>
-        <Typography variant="subtitle1">Field Value</Typography>
-      </TableCell>
-      <TableCell />
+      </StyledTableHeadCell>
+      <StyledTableHeadCell>
+        <Typography variant="subtitle1" noWrap>
+          Field Value
+        </Typography>
+      </StyledTableHeadCell>
+      <StyledTableHeadCell />
     </TableHead>
   );
 };
 
-const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
-  const { setMainModalOpen } = useContext(MainModalContext);
+const ButtonsCell = (props: {
+  keyValue: KeyValuesWithDistance;
+  isSelected: Boolean;
+}) => {
   const {
     selectedDocData,
-    setDocData,
     setRemoveKVMessage,
     setMessageCollapse,
-    eventObj,
     targetString,
+    setUnalteredKeyValue,
   } = useContext(TableContext);
+  const docData = useSpecialHookState(globalDocData);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
+  const isSelected = props.isSelected;
 
   const fillButtonHandler = () => {
-    eventObj.target.value = keyValue["value"];
-    setMainModalOpen(false);
-    renderAccuracyScore(eventObj.target, keyValue);
+    // fill the kvp table input
+    const shadowWrapper: any = document.querySelector(
+      ".shadow-root-for-modals"
+    );
+    const shadowRoot: any = shadowWrapper.children[0].shadowRoot;
+    const inputEl: any = shadowRoot.getElementById("kvp-table-fill-text-input");
+    inputEl.value = keyValue["value"];
+
+    // let the parent component know what the original string is
+    setUnalteredKeyValue(keyValue);
+
+    // focus on the text editor
+    inputEl.focus();
   };
+
   const reportKVPair = async (remove: boolean = false) => {
     if (remove) {
       deleteKVPairFromLocalStorage(
@@ -177,7 +235,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
       );
     }
 
-    setDocData(getKeyValuePairsByDoc());
+    docData.set(getKeyValuePairsByDoc());
     setHardCollapse(true);
     setSoftCollapse(false);
 
@@ -226,6 +284,13 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
     <>
       <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
         <FlexCell>
+          <IconButton
+            style={
+              isSelected ? { visibility: "visible" } : { visibility: "hidden" }
+            }
+          >
+            <VisibilityIcon />
+          </IconButton>
           <FillButton onClick={fillButtonHandler}>Fill</FillButton>
           <IconButton onClick={() => setSoftCollapse(true)}>
             <HighlightOffIcon />
@@ -255,21 +320,33 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   );
 };
 
+const TableRowContext = createContext({} as any);
+
 const TableRowComponent = (props: {
   keyValue: KeyValuesWithDistance;
   bestMatch: string;
   i: number;
 }) => {
   const keyValue = props.keyValue;
+  const index = props.i;
+  const { selectedRow, setSelectedRow } = useContext(TableRowContext);
+  const isSelected = selectedRow === index ? true : false;
+
+  const handleRowClick = () => {
+    selectedRow === index ? setSelectedRow(null) : setSelectedRow(index);
+  };
 
   return (
     <TableRow
-      key={props.i}
-      className={
-        keyValue["key"] === props.bestMatch ? "closest-match-row" : "table-row"
+      key={index}
+      onClick={handleRowClick}
+      style={
+        isSelected
+          ? { backgroundColor: `${colors.ACCURACY_SCORE_LIGHTBLUE}` }
+          : { backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND}` }
       }
     >
-      <TableCell>
+      <StyledTableCellLeft>
         <LinearProgress
           variant={"determinate"}
           value={keyValue["distanceFromTarget"] * 100}
@@ -281,21 +358,21 @@ const TableRowComponent = (props: {
             </Typography>
           </ClosestMatch>
         )}
-      </TableCell>
-      <TableCell>
+      </StyledTableCellLeft>
+      <StyledTableCellMiddle>
         <Typography>{keyValue["key"]}</Typography>
         {keyValue.interpretedFrom && (
           <Typography variant="caption">
             <i>Interpreted from: {keyValue["interpretedFrom"]}</i>
           </Typography>
         )}
-      </TableCell>
-      <TableCell>
+      </StyledTableCellMiddle>
+      <StyledTableCellMiddle>
         <Typography>{keyValue["value"]}</Typography>
-      </TableCell>
-      <TableCell>
-        <ButtonsCell keyValue={keyValue} />
-      </TableCell>
+      </StyledTableCellMiddle>
+      <StyledTableCellRight>
+        <ButtonsCell keyValue={keyValue} isSelected={isSelected} />
+      </StyledTableCellRight>
     </TableRow>
   );
 };
@@ -344,6 +421,9 @@ const TableComponent = () => {
     }
   };
 
+  // selected row
+  const [selectedRow, setSelectedRow] = useState(null as null | number);
+
   return (
     <Table>
       <TableHeadContext.Provider
@@ -354,12 +434,18 @@ const TableComponent = () => {
           alphabeticSortHandler,
         }}
       >
-        <TableHeadComponent targetString={targetString} />
+        <TableHeadComponent />
       </TableHeadContext.Provider>
       <TableBody>
-        {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
-          <TableRowComponent keyValue={keyValue} bestMatch={bestMatch} i={i} />
-        ))}
+        <TableRowContext.Provider value={{ selectedRow, setSelectedRow }}>
+          {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+            <TableRowComponent
+              keyValue={keyValue}
+              bestMatch={bestMatch}
+              i={i}
+            />
+          ))}
+        </TableRowContext.Provider>
       </TableBody>
     </Table>
   );
@@ -384,16 +470,16 @@ const ErrorLine = (props: { errorCode: number; msg: string }) => {
 };
 
 export interface SelectProps {
-  eventObj: any;
+  eventTarget: any;
   targetString: string;
 }
 
-export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
+export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const {
-    setMainModalOpen,
+    setKvpTableAnchorEl,
     setKonvaModalOpen,
     errorFetchingImage,
     setErrorFetchingImage,
@@ -402,6 +488,25 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
     errorMessage,
     errorCode,
   } = useContext(MainModalContext);
+  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const docData = useSpecialHookState(globalDocData);
+  const selectedDocData = docData
+    .attach(Downgraded)
+    .get()
+    .filter((doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get())[0];
+  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+  const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
+  const textFieldRef = useRef(null);
+
+  const findKvpTableInputEl = () => {
+    if (textFieldRef === null) {
+      console.log("error: textFieldRef null");
+      return;
+    } else {
+      //@ts-ignore
+      return textFieldRef.current.querySelector("#kvp-table-fill-text-input");
+    }
+  };
 
   const handleModalClose = () => {
     if (errorFetchingImage || errorFetchingGeometry) {
@@ -410,59 +515,88 @@ export const SelectModal = ({ eventObj, targetString }: SelectProps) => {
       setErrorFetchingImage(false);
       setErrorFetchingGeometry(false);
     }
-    setMainModalOpen(false);
+    setKvpTableAnchorEl(null); // close modal
+    selectedChiclet.set(""); // remove chiclet border
+    findKvpTableInputEl().value = ""; // clear the text editor
   };
 
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const [docData, setDocData] = useState(getKeyValuePairsByDoc());
-  const filterDocData = (docData: KeyValuesByDoc[]) =>
-    docData.filter(
-      (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
-    )[0];
-  const selectedDocData = filterDocData(docData);
+  const handleManualSelectButtonClick = () => {
+    setKonvaModalOpen(true);
+    setKvpTableAnchorEl(null);
+  };
 
-  const checkKVPairs = (selectedDocData: KeyValuesByDoc) =>
-    Object.keys(selectedDocData.keyValuePairs).length > 0;
-  let areThereKVPairs;
+  const handleSubmit = () => {
+    const inputEl = findKvpTableInputEl();
+    const currentEditedValue = inputEl.value;
+    eventTarget.value = currentEditedValue; // fill input w edited val
+    setKvpTableAnchorEl(null); // close the modal
+    selectedChiclet.set(""); // remove chiclet border
 
-  // handle if doc is added while modal open
-  if (selectedDocData === undefined) {
-    const newDocData = getKeyValuePairsByDoc();
-    // need to set both separately, because react setState() is async
-    setDocData(newDocData);
-    areThereKVPairs = checkKVPairs(filterDocData(newDocData));
-  } else {
-    areThereKVPairs = checkKVPairs(selectedDocData);
-  }
+    // only render accuracy score if value was not edited.
+    if (
+      unalteredKeyValue !== null &&
+      //@ts-ignore
+      unalteredKeyValue.value === currentEditedValue
+    ) {
+      // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
+      //@ts-ignore
+      renderAccuracyScore(eventTarget, unalteredKeyValue);
+    } else {
+      renderBlankChiclet(eventTarget);
+    }
+
+    inputEl.value = ""; // clear the text editor
+  };
 
   return (
     <ModalWrapper>
-      <CloseButton onClick={handleModalClose}>
-        <CloseIcon />
-      </CloseButton>
-      <DocName id="doc-name-typography" variant="h6">
-        {selectedDocData.docName}
-      </DocName>
-      <ManualSelectButton
-        label="Manual Select"
-        variant="outlined"
-        onClick={() => setKonvaModalOpen(true)}
-      />
-      <Collapse in={errorFetchingGeometry || errorFetchingImage}>
-        <ErrorLine errorCode={errorCode} msg={errorMessage} />
-      </Collapse>
-      <Collapse in={messageCollapse}>
-        <Message msg={removeKVMessage} />
-      </Collapse>
+      <StickyWrapper>
+        <CloseButton onClick={handleModalClose}>
+          <CloseIcon />
+        </CloseButton>
+        <DocName id="doc-name-typography" variant="subtitle1">
+          {selectedDocData.docName}
+        </DocName>
+        <TextInputContainer>
+          <TextField
+            variant="outlined"
+            fullWidth
+            placeholder={targetString}
+            id={"kvp-table-fill-text-input"}
+            ref={textFieldRef}
+            margin="dense"
+            style={{ margin: 0 }}
+          />
+        </TextInputContainer>
+        <BigButton
+          label="Manual Select"
+          variant="outlined"
+          onClick={handleManualSelectButtonClick}
+          style={{ backgroundColor: `${colors.MANUAL_SELECT_BUTTON_YELLOW}` }}
+        />
+        <BigButton
+          label="Submit"
+          variant="outlined"
+          onClick={handleSubmit}
+          style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
+        />
+        <Collapse in={errorFetchingGeometry || errorFetchingImage}>
+          <ErrorLine errorCode={errorCode} msg={errorMessage} />
+        </Collapse>
+        <Collapse in={messageCollapse}>
+          <Message msg={removeKVMessage} />
+        </Collapse>
+      </StickyWrapper>
+
       {areThereKVPairs ? (
         <TableContext.Provider
           value={{
             targetString,
             selectedDocData,
-            setDocData,
             setRemoveKVMessage,
             setMessageCollapse,
-            eventObj,
+            eventTarget,
+            setUnalteredKeyValue,
           }}
         >
           <TableComponent />

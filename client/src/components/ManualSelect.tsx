@@ -1,14 +1,17 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
-import { getKeyValuePairsByDoc, KeyValuesByDoc } from "./KeyValuePairs";
-import { globalSelectedFileState } from "./DocViewer";
+import { KeyValuesByDoc } from "./KeyValuePairs";
+import { globalSelectedFileState } from "../contexts/SelectedFile";
+import { globalDocData } from "../contexts/DocData";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
+import WrappedJssComponent from "./ShadowComponent";
+import { renderBlankChiclet } from "./AccuracyScoreCircle";
 
 import uuidv from "uuid";
 import { colors } from "../common/colors";
@@ -18,12 +21,7 @@ import {
   KONVA_MODAL_HEIGHT,
   MODAL_SHADOW,
 } from "../common/constants";
-
-// need pos relative or else z-index will not work
-const Container = styled.div`
-  position: relative;
-  z-index: 99999;
-`;
+import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
@@ -36,16 +34,19 @@ const StyledRnD = styled(Rnd)`
 
 export const KonvaModalContext = createContext({} as any);
 
-export const ManualSelect = ({ eventObj }: any) => {
+export const ManualSelect = ({ eventTarget }: any) => {
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
+  const docData = useSpecialHookState(globalDocData);
   const {
-    setMainModalOpen,
+    // setMainModalOpen,
+    setKvpTableAnchorEl,
     konvaModalOpen,
     setKonvaModalOpen,
     konvaModalDraggCoords,
@@ -78,10 +79,10 @@ export const ManualSelect = ({ eventObj }: any) => {
   useEffect(modalHandleClick, [konvaModalOpen]);
 
   // geometry
-  const docData = getKeyValuePairsByDoc();
-  const selectedDocData = docData.filter(
-    (doc) => doc.docID === globalSelectedFile.get()
-  )[0];
+  const selectedDocData = docData
+    .attach(Downgraded)
+    .get()
+    .filter((doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get())[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
@@ -175,8 +176,10 @@ export const ManualSelect = ({ eventObj }: any) => {
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
         setKonvaModalOpen(false);
-        setMainModalOpen(false);
-        eventObj.target.value = Object.keys(currentSelection)
+        setKvpTableAnchorEl(null);
+        selectedChiclet.set("");
+        renderBlankChiclet(eventTarget);
+        eventTarget.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
       }
@@ -218,7 +221,7 @@ export const ManualSelect = ({ eventObj }: any) => {
   return (
     <React.Fragment>
       {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
-        <Container>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
           <StyledRnD
             position={konvaModalDraggCoords}
             onDragStop={handleDragStop}
@@ -243,7 +246,7 @@ export const ManualSelect = ({ eventObj }: any) => {
               </KonvaModalContext.Provider>
             </div>
           </StyledRnD>
-        </Container>
+        </WrappedJssComponent>
       )}
     </React.Fragment>
   );
