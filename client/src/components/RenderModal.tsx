@@ -89,6 +89,7 @@ export const RenderModal = () => {
             modifiers={{
               preventOverflow: { enabled: false, boundariesElement: "window" },
               flip: { enabled: true },
+              hide: { enabled: false },
             }}
           >
             <Container>
