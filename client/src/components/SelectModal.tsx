@@ -201,7 +201,6 @@ const ButtonsCell = (props: {
     selectedDocData,
     setRemoveKVMessage,
     setMessageCollapse,
-    eventTarget,
     targetString,
     setUnalteredKeyValue,
   } = useContext(TableContext);
@@ -495,6 +494,16 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
   const textFieldRef = useRef(null);
 
+  const findKvpTableInputEl = () => {
+    if (textFieldRef === null) {
+      console.log("error: textFieldRef null");
+      return;
+    } else {
+      //@ts-ignore
+      return textFieldRef.current.querySelector("#kvp-table-fill-text-input");
+    }
+  };
+
   const handleModalClose = () => {
     if (errorFetchingImage || errorFetchingGeometry) {
       // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
@@ -502,8 +511,9 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       setErrorFetchingImage(false);
       setErrorFetchingGeometry(false);
     }
-    setKvpTableAnchorEl(null);
-    selectedChiclet.set("");
+    setKvpTableAnchorEl(null); // close modal
+    selectedChiclet.set(""); // remove chiclet border
+    findKvpTableInputEl().value = ""; // clear the text editor
   };
 
   const handleManualSelectButtonClick = () => {
@@ -512,32 +522,26 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   };
 
   const handleSubmit = () => {
-    if (textFieldRef === null) {
-      console.log("error: textFieldRef null");
-      return;
-    } else {
-      //@ts-ignore
-      const inputEl: any = textFieldRef.current.querySelector(
-        "#kvp-table-fill-text-input"
-      );
-      const currentEditedValue = inputEl.value;
-      eventTarget.value = currentEditedValue; // fill input w edited val
-      setKvpTableAnchorEl(null); // close the modal
-      selectedChiclet.set("");
+    const inputEl = findKvpTableInputEl();
+    const currentEditedValue = inputEl.value;
+    eventTarget.value = currentEditedValue; // fill input w edited val
+    setKvpTableAnchorEl(null); // close the modal
+    selectedChiclet.set(""); // remove chiclet border
 
-      // only render accuracy score if value was not edited.
-      if (
-        unalteredKeyValue !== null &&
-        //@ts-ignore
-        unalteredKeyValue.value === currentEditedValue
-      ) {
-        // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
-        //@ts-ignore
-        renderAccuracyScore(eventTarget, unalteredKeyValue);
-      } else {
-        renderBlankChiclet(eventTarget);
-      }
+    // only render accuracy score if value was not edited.
+    if (
+      unalteredKeyValue !== null &&
+      //@ts-ignore
+      unalteredKeyValue.value === currentEditedValue
+    ) {
+      // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
+      //@ts-ignore
+      renderAccuracyScore(eventTarget, unalteredKeyValue);
+    } else {
+      renderBlankChiclet(eventTarget);
     }
+
+    inputEl.value = ""; // clear the text editor
   };
 
   return (
