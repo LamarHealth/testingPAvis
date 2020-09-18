@@ -18,7 +18,7 @@ import $ from "jquery";
 import { colors } from "../common/colors";
 import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { globalDocData } from "../contexts/DocData";
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import ButtonsBox from "./ButtonsBox";
 import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
@@ -94,9 +94,10 @@ const DocCell = (props: DocumentInfo) => {
 
   const populateForms = () => {
     $(document).ready(() => {
-      const keyValuePairs = JSON.parse(docData.get()).filter(
-        (doc: KeyValuesByDoc) => doc.docID === props.docID
-      )[0];
+      const keyValuePairs = docData
+        .attach(Downgraded)
+        .get()
+        .filter((doc: KeyValuesByDoc) => doc.docID === props.docID)[0];
 
       $("select").each(function () {
         handleFreightTerms(this, keyValuePairs);

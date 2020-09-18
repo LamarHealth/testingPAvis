@@ -14,7 +14,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 
 import Typography from "@material-ui/core/Typography";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
@@ -110,8 +110,8 @@ const updateLocalStorage = (documentInfo: any) => {
   updatedList.push(documentInfo);
   localStorage.setItem("docList", JSON.stringify(updatedList));
 
-  return new Promise((resolve, reject) => {
-    resolve("done setting new doc to local storage");
+  return new Promise((resolve) => {
+    resolve();
   });
 };
 
@@ -173,7 +173,7 @@ const FileStatus = (props: any) => {
           };
           updateLocalStorage(postSuccessResponse.documentInfo).then(() => {
             // update loc stor then set the global var to reflect that
-            docData.set(JSON.stringify(getKeyValuePairsByDoc()));
+            docData.set(getKeyValuePairsByDoc());
           });
           fileInfoContext.fileDispatch(postSuccessResponse);
           setUploadStatus(200);

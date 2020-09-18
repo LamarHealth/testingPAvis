@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { ThemeProvider } from "@material-ui/core/styles";
 import Popper from "@material-ui/core/Popper";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { SelectModal } from "./SelectModal";
@@ -34,7 +34,7 @@ export const RenderModal = () => {
   const [eventTarget, setEventTarget] = useState(null) as any;
   const [targetString, setTargetString] = useState(undefined as any);
   const areThereDocs =
-    JSON.parse(useSpecialHookState(globalDocData).get()).length > 0;
+    useSpecialHookState(globalDocData).attach(Downgraded).get().length > 0;
   const isDocSelected =
     useSpecialHookState(globalSelectedFileState).get() !== "";
   const selectedChiclet = useSpecialHookState(globalSelectedChiclet);

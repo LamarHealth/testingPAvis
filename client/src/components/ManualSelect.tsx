@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
@@ -79,9 +79,10 @@ export const ManualSelect = ({ eventTarget }: any) => {
   useEffect(modalHandleClick, [konvaModalOpen]);
 
   // geometry
-  const selectedDocData = JSON.parse(docData.get()).filter(
-    (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
-  )[0];
+  const selectedDocData = docData
+    .attach(Downgraded)
+    .get()
+    .filter((doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get())[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;

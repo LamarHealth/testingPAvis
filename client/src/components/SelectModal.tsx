@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 
 import styled from "styled-components";
 
@@ -235,7 +235,7 @@ const ButtonsCell = (props: {
       );
     }
 
-    docData.set(JSON.stringify(getKeyValuePairsByDoc()));
+    docData.set(getKeyValuePairsByDoc());
     setHardCollapse(true);
     setSoftCollapse(false);
 
@@ -490,9 +490,10 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   } = useContext(MainModalContext);
   const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
   const docData = useSpecialHookState(globalDocData);
-  const selectedDocData = JSON.parse(docData.get()).filter(
-    (doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get()
-  )[0];
+  const selectedDocData = docData
+    .attach(Downgraded)
+    .get()
+    .filter((doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get())[0];
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
   const textFieldRef = useRef(null);
