@@ -61,6 +61,7 @@ const StickyWrapper = styled.div`
   background-color: white;
   z-index: 1;
   padding-bottom: 10px;
+  border-bottom: 1px solid ${colors.KVP_TABLE_BORDER};
 `;
 
 const StyledTableCellLeft = styled(TableCell)`
@@ -547,7 +548,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
         <CloseButton onClick={handleModalClose}>
           <CloseIcon />
         </CloseButton>
-        <DocName id="doc-name-typography" variant="h6">
+        <DocName id="doc-name-typography" variant="subtitle1">
           {selectedDocData.docName}
         </DocName>
         <TextInputContainer>
@@ -558,6 +559,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
             id={"kvp-table-fill-text-input"}
             ref={textFieldRef}
             margin="dense"
+            style={{ margin: 0 }}
           />
         </TextInputContainer>
         <BigButton
