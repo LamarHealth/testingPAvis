@@ -123,7 +123,7 @@ const CloseButton = styled(IconButton)`
 `;
 
 const DocName = styled(Typography)`
-  margin: 1em;
+  margin: 10px 10px 0 10px;
 `;
 
 const TextInputContainer = styled.div`
@@ -548,6 +548,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
           placeholder={targetString}
           id={"kvp-table-fill-text-input"}
           ref={textFieldRef}
+          margin="dense"
         />
       </TextInputContainer>
       <BigButton
