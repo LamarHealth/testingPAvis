@@ -4,7 +4,7 @@ import $ from "jquery";
 import styled from "styled-components";
 
 import { ThemeProvider } from "@material-ui/core/styles";
-import Popover from "@material-ui/core/Popover";
+import Popper from "@material-ui/core/Popper";
 
 import { useState as useSpecialHookState } from "@hookstate/core";
 
@@ -75,29 +75,26 @@ export const RenderModal = () => {
     });
   });
 
-  // handle popover click away
-  const popoverClose = () => {
-    setKvpTableAnchorEl(null);
-    selectedChiclet.set("");
-  };
-
   return (
     <ThemeProvider theme={DEFAULT}>
       {areThereDocs && isDocSelected && eventTarget && (
         <>
-          <Popover
+          <Popper
             id={id}
             open={kvpTableOpen}
             anchorEl={kvpTableAnchorEl}
-            onClose={popoverClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
+            keepMounted
+            placement={"bottom-end"}
+            // these keep the popover in the viewport, but seem to be a causing a bit more lag
+            // modifiers={{
+            //   flip: {
+            //     enabled: true,
+            //   },
+            //   preventOverflow: {
+            //     enabled: true,
+            //     boundariesElement: "viewport",
+            //   },
+            // }}
           >
             <Container>
               <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
@@ -130,7 +127,7 @@ export const RenderModal = () => {
                 </MainModalContext.Provider>
               </WrappedJssComponent>
             </Container>
-          </Popover>
+          </Popper>
 
           {konvaModalOpen && (
             <MainModalContext.Provider
