@@ -212,8 +212,6 @@ const ButtonsCell = (props: {
   const isSelected = props.isSelected;
 
   const fillButtonHandler = () => {
-    // renderAccuracyScore(eventTarget, keyValue);
-
     // fill the kvp table input
     const shadowWrapper: any = document.querySelector(
       ".shadow-root-for-modals"
