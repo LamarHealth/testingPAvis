@@ -86,15 +86,15 @@ export const RenderModal = () => {
             keepMounted
             placement={"bottom-end"}
             // these keep the popover in the viewport, but seem to be a causing a bit more lag
-            // modifiers={{
-            //   flip: {
-            //     enabled: true,
-            //   },
-            //   preventOverflow: {
-            //     enabled: true,
-            //     boundariesElement: "viewport",
-            //   },
-            // }}
+            modifiers={{
+              flip: {
+                enabled: true,
+              },
+              preventOverflow: {
+                enabled: true,
+                boundariesElement: "viewport",
+              },
+            }}
           >
             <Container>
               <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
