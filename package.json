@@ -32,6 +32,7 @@
     "react-frame-component": "^4.1.2",
     "react-shadow": "^18.2.4",
     "typescript": "^3.7.5",
-    "yarn": "^1.22.4"
+    "yarn": "^1.22.4",
+    "zustand": "^3.1.2"
   }
 }
