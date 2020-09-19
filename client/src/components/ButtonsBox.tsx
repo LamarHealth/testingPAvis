@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 
-import { globalSelectedFileState } from "../contexts/SelectedFile";
-import { useState as useSpecialHookState } from "@hookstate/core";
+import { useStore } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -16,10 +15,10 @@ import { FileContext, DocumentInfo } from "./DocViewer";
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
+  const setSelectedFile = useStore((state) => state.setSelectedFile);
 
   const handleDelete = () => {
-    globalSelectedFile.set("");
+    setSelectedFile("");
     fileInfoContext.fileDispatch({
       type: "remove",
       documentInfo: props.docInfo,

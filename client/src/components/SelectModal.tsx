@@ -6,8 +6,6 @@ import React, {
   useRef,
 } from "react";
 
-import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
-
 import styled from "styled-components";
 
 import IconButton from "@material-ui/core/IconButton";
@@ -38,11 +36,9 @@ import {
   deleteKVPairFromLocalStorage,
   KeyValuesByDoc,
 } from "./KeyValuePairs";
-import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
-import { globalDocData } from "../contexts/DocData";
-import { globalSelectedChiclet } from "../contexts/ChicletSelection";
+import { useStore } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -204,7 +200,7 @@ const ButtonsCell = (props: {
     targetString,
     setUnalteredKeyValue,
   } = useContext(TableContext);
-  const docData = useSpecialHookState(globalDocData);
+  const setDocData = useStore((state) => state.setDocData);
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
@@ -235,7 +231,7 @@ const ButtonsCell = (props: {
       );
     }
 
-    docData.set(getKeyValuePairsByDoc());
+    setDocData(getKeyValuePairsByDoc());
     setHardCollapse(true);
     setSoftCollapse(false);
 
@@ -477,7 +473,7 @@ export interface SelectProps {
 export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
+  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const {
     setKvpTableAnchorEl,
     setKonvaModalOpen,
@@ -488,12 +484,11 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
     errorMessage,
     errorCode,
   } = useContext(MainModalContext);
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const docData = useSpecialHookState(globalDocData);
-  const selectedDocData = docData
-    .attach(Downgraded)
-    .get()
-    .filter((doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get())[0];
+  const selectedFile = useStore((state) => state.selectedFile);
+  const docData = useStore((state) => state.docData);
+  const selectedDocData = docData.filter(
+    (doc: KeyValuesByDoc) => doc.docID === selectedFile
+  )[0];
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
   const textFieldRef = useRef(null);
@@ -516,7 +511,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       setErrorFetchingGeometry(false);
     }
     setKvpTableAnchorEl(null); // close modal
-    selectedChiclet.set(""); // remove chiclet border
+    setSelectedChiclet(""); // remove chiclet border
     findKvpTableInputEl().value = ""; // clear the text editor
   };
 
@@ -530,7 +525,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
     const currentEditedValue = inputEl.value;
     eventTarget.value = currentEditedValue; // fill input w edited val
     setKvpTableAnchorEl(null); // close the modal
-    selectedChiclet.set(""); // remove chiclet border
+    setSelectedChiclet(""); // remove chiclet border
 
     // only render accuracy score if value was not edited.
     if (
