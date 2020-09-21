@@ -38,6 +38,8 @@ export const RenderAutocomplete = () => {
     ? Object.entries(selectedDocData.keyValuePairs)
         .map((entry) => entry[1])
         .concat(selectedDocData.lines)
+        .filter((value) => value !== "")
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sorting
     : undefined;
   const areThereFilteredEntries = isDocSelected
     ? //@ts-ignore
@@ -125,7 +127,6 @@ export const RenderAutocomplete = () => {
                       {
                         //@ts-ignore
                         allLinesAndValues // cannot suppress this ts error!!! even tho will not render if isDocSelected is false, or areThereFilteredEntries is false, still says maybe undef. ts cannot infer from chains of reasoning!!!
-                          .filter((value) => value !== "")
                           .filter((value) =>
                             value.toLowerCase().includes(filter.toLowerCase())
                           )
