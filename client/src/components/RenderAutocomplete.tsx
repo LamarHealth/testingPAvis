@@ -114,7 +114,14 @@ export const RenderAutocomplete = () => {
               <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
                 <ClickAwayListener onClickAway={handleClose}>
                   {areThereFilteredEntries ? (
-                    <MenuList tabIndex={0}>
+                    <MenuList
+                      tabIndex={0}
+                      style={
+                        anchor
+                          ? { width: window.getComputedStyle(anchor).width }
+                          : {}
+                      }
+                    >
                       {
                         //@ts-ignore
                         allLinesAndValues // cannot suppress this ts error!!! even tho will not render if isDocSelected is false, or areThereFilteredEntries is false, still says maybe undef. ts cannot infer from chains of reasoning!!!
@@ -135,6 +142,7 @@ export const RenderAutocomplete = () => {
                                 key={i}
                                 tabIndex={0}
                                 onClick={handleClick}
+                                style={{ whiteSpace: "normal" }} // for text wrapping
                               >
                                 {value}
                               </MenuItem>
