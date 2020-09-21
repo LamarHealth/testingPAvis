@@ -13,6 +13,7 @@ export interface KeyValuesByDoc {
   docID: string;
   keyValuePairs: KeyValues;
   interpretedKeys: KeyValues;
+  lines: string[];
 }
 
 // interface returned from getEditDistanceAndSort()
@@ -33,12 +34,14 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
     const docID = doc.docID;
     const keyValuePairs = doc.keyValuePairs;
     const interpretedKeys = doc.interpretedKeys;
+    const lines = doc.lines;
     const docObj = {
       docName,
       docType,
       docID,
       keyValuePairs,
       interpretedKeys,
+      lines,
     };
     docDataByDoc.push(docObj);
   });

@@ -2,7 +2,11 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 import AWS, { Textract, S3 } from "aws-sdk";
-import { getKeyValues, getInterpretations } from "./textractKeyValues";
+import {
+  getKeyValues,
+  getInterpretations,
+  getLinesOnly,
+} from "./textractKeyValues";
 
 const config = require("./config");
 
@@ -80,16 +84,19 @@ export const uploadToS3TextractAndSendResponse = (
   // liberty config
   // All docs are uploaded just in case
   s3.upload(s3PngUploadparams, function (err, data) {
+    logger.info(`${docName} uploaded to s3`);
     if (err) {
       logError("error uploading to s3", err);
       sendError(500, "error uploading to s3");
     } else {
       // docit config
       textract.analyzeDocument(textractParams, (err, data) => {
-        let keyValuePairs, interpretedKeys;
+        logger.info(`${docName} analyzed by textract`);
+        let keyValuePairs, interpretedKeys, lines;
         try {
           keyValuePairs = getKeyValues(data);
           interpretedKeys = getInterpretations(keyValuePairs);
+          lines = getLinesOnly(data);
           logger.info("successfully parsed textract");
         } catch (err) {
           logError("error parsing textract data, ", err);
@@ -105,6 +112,7 @@ export const uploadToS3TextractAndSendResponse = (
             filePath: "",
             keyValuePairs,
             interpretedKeys,
+            lines,
           });
 
           const jsonifiedDocName = req.files[0].originalname.replace(

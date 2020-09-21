@@ -64,6 +64,18 @@ export const getLinesGeometry = (response) => {
   return kvs;
 };
 
+export const getLinesOnly = (response) => {
+  // get the text blocks
+  const blocks = response["Blocks"];
+  const lines = blocks.filter((block) => block["BlockType"] === "LINE");
+  const linesArray = lines.reduce((acc, lineBlock) => {
+    acc.push(lineBlock["Text"]);
+    return acc;
+  }, []);
+
+  return linesArray;
+};
+
 export const findValueBlock = (keyBlock, valueMap) => {
   let valueBlock;
   keyBlock["Relationships"].forEach((relationship) => {
