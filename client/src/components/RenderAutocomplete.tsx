@@ -16,7 +16,7 @@ import { colors } from "../common/colors";
 import WrappedJssComponent from "./ShadowComponent";
 
 const Container = styled.div`
-  max-height: 400px;
+  max-height: 280px;
   overflow-y: scroll;
   background-color: white;
   border: 1px solid ${colors.KVP_TABLE_BORDER};
