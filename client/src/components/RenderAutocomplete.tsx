@@ -54,14 +54,22 @@ export const RenderAutocomplete = () => {
   });
 
   // listen for menu tabbing
+  const findActiveElInShadowRoot = () => {
+    const container = document.querySelector(
+      "#container-for-autocomplete-dropdown"
+    );
+    const shadowRoot = container?.children[0].children[0].shadowRoot;
+    const menuList = shadowRoot?.querySelector("ul") as HTMLElement;
+    const activeElementInShadowRoot = shadowRoot?.activeElement;
+    return { activeElementInShadowRoot, menuList };
+  };
+
   useEffect(() => {
     function keydownListener(event: any) {
-      const container = document.querySelector(
-        "#container-for-autocomplete-dropdown"
-      );
-      const shadowRoot = container?.children[0].children[0].shadowRoot;
-      const menuList = shadowRoot?.querySelector("ul") as HTMLElement;
-      const activeElementInShadowRoot = shadowRoot?.activeElement;
+      const {
+        activeElementInShadowRoot,
+        menuList,
+      } = findActiveElInShadowRoot();
 
       if (
         !anchor ||
@@ -71,7 +79,7 @@ export const RenderAutocomplete = () => {
       )
         return;
       else {
-        // only want to focus on the menu the first tab, subsequent tabs will iterate through the menu list
+        // only want to focus on the menu with the first tab, subsequent tabs will iterate through the menu list
         menuList?.focus();
       }
     }
