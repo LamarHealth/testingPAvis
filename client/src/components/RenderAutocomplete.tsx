@@ -123,32 +123,29 @@ export const RenderAutocomplete = () => {
                           : {}
                       }
                     >
-                      {
-                        //@ts-ignore
-                        allLinesAndValues // cannot suppress this ts error!!! even tho will not render if isDocSelected is false, or areThereFilteredEntries is false, still says maybe undef. ts cannot infer from chains of reasoning!!!
-                          .filter((value) =>
-                            value.toLowerCase().includes(filter.toLowerCase())
-                          )
-                          .map((value, i) => {
-                            const handleClick = () => {
-                              if (anchor) {
-                                anchor.value = value;
-                                setAnchor(null);
-                              }
-                            };
+                      {allLinesAndValues
+                        .filter((value: string) =>
+                          value.toLowerCase().includes(filter.toLowerCase())
+                        )
+                        .map((value, i) => {
+                          const handleClick = () => {
+                            if (anchor) {
+                              anchor.value = value;
+                              setAnchor(null);
+                            }
+                          };
 
-                            return (
-                              <MenuItem
-                                key={i}
-                                tabIndex={0}
-                                onClick={handleClick}
-                                style={{ whiteSpace: "normal" }} // for text wrapping
-                              >
-                                {value}
-                              </MenuItem>
-                            );
-                          })
-                      }
+                          return (
+                            <MenuItem
+                              key={i}
+                              tabIndex={0}
+                              onClick={handleClick}
+                              style={{ whiteSpace: "normal" }} // for text wrapping
+                            >
+                              {value}
+                            </MenuItem>
+                          );
+                        })}
                     </MenuList>
                   ) : (
                     <MenuList>
