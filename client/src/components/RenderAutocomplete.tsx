@@ -40,12 +40,11 @@ export const RenderAutocomplete = () => {
         .concat(selectedDocData.lines)
         .filter((value) => value !== "")
         .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sorting
-    : undefined;
+    : [];
   const areThereFilteredEntries = isDocSelected
-    ? //@ts-ignore
-      allLinesAndValues.filter((
-        value // cannot suppress this ts error!!! even tho will be false if isDocSelected is false, it still says that allLinesAndValues maybe undefined. ts cannot infer from chains of reasoning!!!
-      ) => value.toLowerCase().includes(filter.toLowerCase())).length > 0
+    ? allLinesAndValues.filter((value: string) =>
+        value.toLowerCase().includes(filter.toLowerCase())
+      ).length > 0
     : false;
 
   // handle input typing
