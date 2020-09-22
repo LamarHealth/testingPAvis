@@ -6,6 +6,7 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
+import { useStore } from "../contexts/ZustandStore";
 import { KonvaModalContext } from "./ManualSelect";
 
 // cannot import from SelectModal... likely a shadow dom issue
@@ -138,9 +139,10 @@ export const KonvaModal = () => {
     setFilled,
     setCurrentSelection,
     currentLinesGeometry,
-    setKonvaModalOpen,
     docImageDimensions,
   } = useContext(KonvaModalContext);
+  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+
   return (
     <>
       <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>

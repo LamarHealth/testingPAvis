@@ -36,7 +36,7 @@ export const RenderModal = () => {
   );
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
-  const [konvaModalOpen, setKonvaModalOpen] = useState(false);
+  const konvaModalOpen = useStore((state) => state.konvaModalOpen);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
     y: KONVA_MODAL_OFFSET_Y,
@@ -91,8 +91,6 @@ export const RenderModal = () => {
                   value={{
                     kvpTableAnchorEl,
                     setKvpTableAnchorEl,
-                    konvaModalOpen,
-                    setKonvaModalOpen,
                     konvaModalDraggCoords,
                     setKonvaModalDraggCoords,
                     konvaModalDimensions,
@@ -123,8 +121,6 @@ export const RenderModal = () => {
               value={{
                 kvpTableAnchorEl,
                 setKvpTableAnchorEl,
-                konvaModalOpen,
-                setKonvaModalOpen,
                 konvaModalDraggCoords,
                 setKonvaModalDraggCoords,
                 konvaModalDimensions,

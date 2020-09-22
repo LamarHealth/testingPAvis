@@ -43,8 +43,6 @@ export const ManualSelect = ({ eventTarget }: any) => {
   const docData = useStore((state) => state.docData);
   const {
     setKvpTableAnchorEl,
-    konvaModalOpen,
-    setKonvaModalOpen,
     konvaModalDraggCoords,
     setKonvaModalDraggCoords,
     konvaModalDimensions,
@@ -58,6 +56,8 @@ export const ManualSelect = ({ eventTarget }: any) => {
     setErrorMessage,
     setErrorCode,
   } = useContext(MainModalContext);
+  const konvaModalOpen = useStore((state) => state.konvaModalOpen);
+  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
 
   // modal
   const modalHandleClick = () => {
@@ -233,7 +233,6 @@ export const ManualSelect = ({ eventTarget }: any) => {
                   setFilled,
                   setCurrentSelection,
                   currentLinesGeometry,
-                  setKonvaModalOpen,
                   docImageDimensions,
                 }}
               >
