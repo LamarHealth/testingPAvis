@@ -83,26 +83,24 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
 const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialog] = useState<"delete" | "download">();
+  const setSelectedFile = useStore((state) => state.setSelectedFile);
+  const docData = useStore((state) => state.docData);
 
-  // click handlers
+  // click away
   const handleClickAway = () => {
     setDialogOpen(false);
   };
+  // delete click
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setDialogOpen(true);
     setDialog("delete");
   };
-
+  // download click
   const handleDownloadClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setDialogOpen(true);
     setDialog("download");
   };
-
-  //
-  const selectedFile = useStore((state) => state.selectedFile);
-  const setSelectedFile = useStore((state) => state.setSelectedFile);
-  const docData = useStore((state) => state.docData);
-
+  // populate forms click
   const populateForms = () => {
     $(document).ready(() => {
       const keyValuePairs = docData.filter(
