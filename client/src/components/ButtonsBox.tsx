@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 
+import $ from "jquery";
 import { useStore } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
@@ -10,8 +11,15 @@ import Collapse from "@material-ui/core/Collapse";
 import Button from "@material-ui/core/Button";
 import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
+import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo } from "./DocViewer";
+import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
+import {
+  handleFreightTerms,
+  assignTargetString,
+} from "./libertyInputsDictionary";
+import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
@@ -76,6 +84,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialog] = useState<"delete" | "download">();
 
+  // click handlers
   const handleClickAway = () => {
     setDialogOpen(false);
   };
@@ -89,8 +98,66 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
     setDialog("download");
   };
 
+  //
+  const selectedFile = useStore((state) => state.selectedFile);
+  const setSelectedFile = useStore((state) => state.setSelectedFile);
+  const docData = useStore((state) => state.docData);
+
+  const populateForms = () => {
+    $(document).ready(() => {
+      const keyValuePairs = docData.filter(
+        (doc: KeyValuesByDoc) => doc.docID === props.docInfo.docID
+      )[0];
+
+      $("select").each(function () {
+        handleFreightTerms(this, keyValuePairs);
+      });
+
+      $("input").each(function () {
+        const targetString = assignTargetString(this);
+
+        if (typeof targetString === "undefined") {
+          return;
+        }
+
+        const areThereKVPairs =
+          Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
+
+        if (!areThereKVPairs) {
+          return;
+        }
+
+        const sortedKeyValuePairs = getEditDistanceAndSort(
+          keyValuePairs,
+          targetString,
+          "lc substring"
+        );
+
+        if (
+          sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
+          sortedKeyValuePairs[0].value === ""
+        ) {
+          renderBlankChiclet(this);
+          $(this).prop("value", null);
+        } else {
+          renderAccuracyScore(this, sortedKeyValuePairs[0]);
+          $(this).prop("value", sortedKeyValuePairs[0]["value"]);
+        }
+      });
+    });
+  };
+
   return (
     <>
+      <Chip
+        label="Complete Forms on Page"
+        onClick={() => {
+          populateForms();
+          setSelectedFile(props.docInfo.docID.toString());
+        }}
+        variant="outlined"
+        style={{ marginRight: "0.5em" }}
+      />
       <IconButton onClick={handleDeleteClick}>
         <DeleteIcon />
       </IconButton>
