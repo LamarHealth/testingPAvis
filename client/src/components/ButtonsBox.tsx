@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 
 import $ from "jquery";
+import styled from "styled-components";
 import { useStore } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
@@ -20,6 +21,36 @@ import {
   assignTargetString,
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
+
+const ButtonsBoxWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const ChipWrapper = styled.div`
+  flex-basis: auto;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ButtonsWrapper = styled.div`
+  flex-basis: auto;
+  flex-grow: 2;
+  display: flex;
+  justify-content: center;
+  margin-left: 2em;
+  align-items: center;
+`;
+
+const FlexIconButton = styled(IconButton)`
+  flex-basis: auto;
+  flex-grow: 1;
+  padding: 0;
+  min-height: 2.5em;
+  max-height: 2.5em;
+  min-width: 2.5em;
+  max-width: 2.5em;
+`;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
@@ -147,21 +178,28 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
 
   return (
     <>
-      <Chip
-        label="Complete Forms on Page"
-        onClick={() => {
-          populateForms();
-          setSelectedFile(props.docInfo.docID.toString());
-        }}
-        variant="outlined"
-        style={{ marginRight: "0.5em" }}
-      />
-      <IconButton onClick={handleDeleteClick}>
-        <DeleteIcon />
-      </IconButton>
-      <IconButton onClick={handleDownloadClick}>
-        <GetAppIcon />
-      </IconButton>
+      <ButtonsBoxWrapper>
+        <ChipWrapper>
+          <Chip
+            label="Complete Forms on Page"
+            onClick={() => {
+              populateForms();
+              setSelectedFile(props.docInfo.docID.toString());
+            }}
+            variant="outlined"
+            style={{ marginBottom: "0.5em" }}
+          />
+          <Chip label="View PDF" variant="outlined" />
+        </ChipWrapper>
+        <ButtonsWrapper>
+          <FlexIconButton onClick={handleDeleteClick}>
+            <DeleteIcon />
+          </FlexIconButton>
+          <FlexIconButton onClick={handleDownloadClick}>
+            <GetAppIcon />
+          </FlexIconButton>
+        </ButtonsWrapper>
+      </ButtonsBoxWrapper>
       <ClickAwayListener
         mouseEvent="onMouseDown"
         touchEvent="onTouchStart"
