@@ -116,21 +116,31 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   const [dialogType, setDialog] = useState<"delete" | "download">();
   const setSelectedFile = useStore((state) => state.setSelectedFile);
   const docData = useStore((state) => state.docData);
+  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
 
   // click away
   const handleClickAway = () => {
     setDialogOpen(false);
   };
+
   // delete click
-  const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteClick = () => {
     setDialogOpen(true);
     setDialog("delete");
   };
+
   // download click
-  const handleDownloadClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDownloadClick = () => {
     setDialogOpen(true);
     setDialog("download");
   };
+
+  // view pdf click
+  const handleViewPdfClick = () => {
+    setSelectedFile(props.docInfo.docID.toString());
+    setKonvaModalOpen(true);
+  };
+
   // populate forms click
   const populateForms = () => {
     $(document).ready(() => {
@@ -189,7 +199,11 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
             variant="outlined"
             style={{ marginBottom: "0.5em" }}
           />
-          <Chip label="View PDF" variant="outlined" />
+          <Chip
+            label="View PDF"
+            variant="outlined"
+            onClick={handleViewPdfClick}
+          />
         </ChipWrapper>
         <ButtonsWrapper>
           <FlexIconButton onClick={handleDeleteClick}>

@@ -58,6 +58,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
   } = useContext(MainModalContext);
   const konvaModalOpen = useStore((state) => state.konvaModalOpen);
   const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+  const [errorLine, setErrorLine] = useState(null as null | string);
 
   // modal
   const modalHandleClick = () => {
@@ -72,7 +73,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
     }
   };
   const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
-  useEffect(modalHandleClick, [konvaModalOpen]);
+  useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
 
   // geometry
   const selectedDocData = docData.filter(
@@ -170,20 +171,24 @@ export const ManualSelect = ({ eventTarget }: any) => {
     // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        setKonvaModalOpen(false);
-        setKvpTableAnchorEl(null);
-        setSelectedChiclet("");
-        renderBlankChiclet(eventTarget);
-        eventTarget.value = Object.keys(currentSelection)
-          .map((key) => currentSelection[key])
-          .join(" ");
+        if (eventTarget) {
+          setKonvaModalOpen(false);
+          setKvpTableAnchorEl(null);
+          setSelectedChiclet("");
+          renderBlankChiclet(eventTarget);
+          eventTarget.value = Object.keys(currentSelection)
+            .map((key) => currentSelection[key])
+            .join(" ");
+        } else {
+          setErrorLine("Please select a text input to fill");
+        }
       }
     }
     document.addEventListener("keydown", keydownListener);
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [currentSelection]);
+  }, [currentSelection, eventTarget]);
 
   // drag & resize
   const handleDragStop = (e: any, data: DraggableData) => {
@@ -234,6 +239,8 @@ export const ManualSelect = ({ eventTarget }: any) => {
                   setCurrentSelection,
                   currentLinesGeometry,
                   docImageDimensions,
+                  errorLine,
+                  setErrorLine,
                 }}
               >
                 <KonvaModal />

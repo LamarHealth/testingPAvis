@@ -101,6 +101,7 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
 };
 
 const Header = ({ docImageDimensions, currentSelection }: any) => {
+  const { errorLine } = useContext(KonvaModalContext);
   return (
     <CurrentSelectionWrapper
       style={{
@@ -126,6 +127,13 @@ const Header = ({ docImageDimensions, currentSelection }: any) => {
             )}
           </CurrentSelection>
         </div>
+      )}
+      {errorLine && (
+        <Typography>
+          <Box fontStyle="italic" color={"red"}>
+            {errorLine}
+          </Box>
+        </Typography>
       )}
     </CurrentSelectionWrapper>
   );
