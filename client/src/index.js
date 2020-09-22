@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import ShipmentsDashboard from "./components/ShipmentsDashboard";
 import { Sidebar } from "./components/Sidebar";
 import { RenderModal } from "./components/RenderModal";
+import { RenderAutocomplete } from "./components/RenderAutocomplete";
 
 import { LOCAL_MODE, Z_INDEX_ALLOCATOR } from "./common/constants";
 dotenv.config();
@@ -27,6 +28,7 @@ $(insertionPoint).insertBefore(document.body);
 ReactDOM.render(
   <>
     <RenderModal />
+    <RenderAutocomplete />
     <Sidebar />
     {LOCAL_MODE && (
       <body

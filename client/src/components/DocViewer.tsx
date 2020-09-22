@@ -16,9 +16,7 @@ import Link from "@material-ui/core/Link";
 
 import $ from "jquery";
 import { colors } from "../common/colors";
-import { globalSelectedFileState } from "../contexts/SelectedFile";
-import { globalDocData } from "../contexts/DocData";
-import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
+import { useStore } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
 import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
@@ -89,15 +87,15 @@ const FeedbackTypography = styled(Typography)`
 `;
 
 const DocCell = (props: DocumentInfo) => {
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const docData = useSpecialHookState(globalDocData);
+  const selectedFile = useStore((state) => state.selectedFile);
+  const setSelectedFile = useStore((state) => state.setSelectedFile);
+  const docData = useStore((state) => state.docData);
 
   const populateForms = () => {
     $(document).ready(() => {
-      const keyValuePairs = docData
-        .attach(Downgraded)
-        .get()
-        .filter((doc: KeyValuesByDoc) => doc.docID === props.docID)[0];
+      const keyValuePairs = docData.filter(
+        (doc: KeyValuesByDoc) => doc.docID === props.docID
+      )[0];
 
       $("select").each(function () {
         handleFreightTerms(this, keyValuePairs);
@@ -138,16 +136,16 @@ const DocCell = (props: DocumentInfo) => {
   };
 
   const setSelected = () => {
-    globalSelectedFile.get() === props.docID
-      ? globalSelectedFile.set("")
-      : globalSelectedFile.set(`${props.docID}`);
+    selectedFile === props.docID
+      ? setSelectedFile("")
+      : setSelectedFile(props.docID.toString()); // toString() converts 'String' wrapper type to primitive 'string' type
   };
 
   return (
     <Box>
       <CardContent>
         <span onClick={setSelected}>
-          {globalSelectedFile.get() === props.docID ? (
+          {selectedFile === props.docID ? (
             <Type
               variant="subtitle1"
               style={{
@@ -169,7 +167,7 @@ const DocCell = (props: DocumentInfo) => {
           label="Complete Forms on Page"
           onClick={() => {
             populateForms();
-            globalSelectedFile.set(`${props.docID}`);
+            setSelectedFile(props.docID.toString());
           }}
           variant="outlined"
           style={{ marginRight: "0.5em" }}
@@ -250,8 +248,8 @@ const DocViewer = () => {
         {fileList.documents.map((doc: DocumentInfo) => {
           return (
             <CSSTransition
-              // React transition groups need a unique key that doesn't get re-indexed upon render. Template literals to convert js type 'String' to ts type 'string'
-              key={`${doc.docID}`}
+              // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'
+              key={doc.docID.toString()}
               classNames="doccell"
               timeout={{ enter: 500, exit: 300 }}
               onEnter={() => setNumDocs(numDocs + 1)}
@@ -264,7 +262,7 @@ const DocViewer = () => {
                 docClass={doc.docClass}
                 docID={doc.docID}
                 keyValuePairs={doc.keyValuePairs}
-                key={`${doc.docID}`}
+                key={doc.docID.toString()}
               />
             </CSSTransition>
           );

@@ -6,9 +6,6 @@ import styled from "styled-components";
 import { ThemeProvider } from "@material-ui/core/styles";
 import Popper from "@material-ui/core/Popper";
 
-import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
-
-import { globalSelectedFileState } from "../contexts/SelectedFile";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
@@ -21,7 +18,7 @@ import {
   KONVA_MODAL_HEIGHT,
 } from "../common/constants";
 import { assignTargetString } from "./libertyInputsDictionary";
-import { globalDocData } from "../contexts/DocData";
+import { useStore } from "../contexts/ZustandStore";
 
 const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
@@ -32,10 +29,8 @@ export const MainModalContext = createContext({} as any);
 export const RenderModal = () => {
   const [eventTarget, setEventTarget] = useState(null) as any;
   const [targetString, setTargetString] = useState(undefined as any);
-  const areThereDocs =
-    useSpecialHookState(globalDocData).attach(Downgraded).get().length > 0;
-  const isDocSelected =
-    useSpecialHookState(globalSelectedFileState).get() !== "";
+  const areThereDocs = useStore((state) => state.docData).length > 0;
+  const isDocSelected = useStore((state) => state.selectedFile) !== "";
   const [kvpTableAnchorEl, setKvpTableAnchorEl] = useState(
     null as null | HTMLElement
   );

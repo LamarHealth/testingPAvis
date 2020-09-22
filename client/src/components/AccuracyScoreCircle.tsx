@@ -9,13 +9,11 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import uuidv from "uuid";
 
-import { useState as useSpecialHookState } from "@hookstate/core";
-
 import { colors } from "../common/colors";
 import { ACC_SCORE_LARGE } from "../common/constants";
 import { ACC_SCORE_MEDIUM } from "../common/constants";
 import { ACC_SCORE_SMALL } from "../common/constants";
-import { globalSelectedChiclet } from "../contexts/ChicletSelection";
+import { useStore } from "../contexts/ZustandStore";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -43,7 +41,8 @@ const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
 const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
-  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
+  const selectedChiclet = useStore((state) => state.selectedChiclet);
+  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const wrapperClasses = wrapperFlexStyles();
 
   const colorClasses =
@@ -63,10 +62,8 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
   return (
     <AccuracyScoreBox
       className={wrapperClasses.root}
-      onClick={() => selectedChiclet.set(`${mounterID}`)}
-      style={
-        selectedChiclet.get() === mounterID ? { border: "1px solid black" } : {}
-      }
+      onClick={() => setSelectedChiclet(mounterID)}
+      style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
     >
       <Box>
         <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
@@ -93,7 +90,8 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
 };
 
 const BlankChiclet = ({ inputHeight, mounterID }: any) => {
-  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
+  const selectedChiclet = useStore((state) => state.selectedChiclet);
+  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const wrapperClasses = wrapperFlexStyles();
   const size =
     inputHeight >= 30
@@ -105,10 +103,8 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
   return (
     <AccuracyScoreBox
       className={wrapperClasses.root}
-      onClick={() => selectedChiclet.set(`${mounterID}`)}
-      style={
-        selectedChiclet.get() === mounterID ? { border: "1px solid black" } : {}
-      }
+      onClick={() => setSelectedChiclet(mounterID)}
+      style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
     >
       <Box>
         <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>

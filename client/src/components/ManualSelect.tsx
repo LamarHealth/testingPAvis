@@ -1,13 +1,11 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 
-import { useState as useSpecialHookState, Downgraded } from "@hookstate/core";
 import useImage from "use-image";
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { globalSelectedFileState } from "../contexts/SelectedFile";
-import { globalDocData } from "../contexts/DocData";
+import { useStore } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
@@ -21,7 +19,6 @@ import {
   KONVA_MODAL_HEIGHT,
   MODAL_SHADOW,
 } from "../common/constants";
-import { globalSelectedChiclet } from "../contexts/ChicletSelection";
 
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
@@ -39,13 +36,12 @@ export const ManualSelect = ({ eventTarget }: any) => {
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
-  const globalSelectedFile = useSpecialHookState(globalSelectedFileState);
-  const selectedChiclet = useSpecialHookState(globalSelectedChiclet);
+  const selectedFile = useStore((state) => state.selectedFile);
+  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
-  const docData = useSpecialHookState(globalDocData);
+  const docData = useStore((state) => state.docData);
   const {
-    // setMainModalOpen,
     setKvpTableAnchorEl,
     konvaModalOpen,
     setKonvaModalOpen,
@@ -68,7 +64,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
     if (
       konvaModalOpen === true &&
       (currentDocID === "" ||
-        currentDocID !== globalSelectedFile.get() ||
+        currentDocID !== selectedFile ||
         errorFetchingImage ||
         errorFetchingGeometry)
     ) {
@@ -79,10 +75,9 @@ export const ManualSelect = ({ eventTarget }: any) => {
   useEffect(modalHandleClick, [konvaModalOpen]);
 
   // geometry
-  const selectedDocData = docData
-    .attach(Downgraded)
-    .get()
-    .filter((doc: KeyValuesByDoc) => doc.docID === globalSelectedFile.get())[0];
+  const selectedDocData = docData.filter(
+    (doc: KeyValuesByDoc) => doc.docID === selectedFile
+  )[0];
 
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
@@ -177,7 +172,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
       if (e.keyCode === 13) {
         setKonvaModalOpen(false);
         setKvpTableAnchorEl(null);
-        selectedChiclet.set("");
+        setSelectedChiclet("");
         renderBlankChiclet(eventTarget);
         eventTarget.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
