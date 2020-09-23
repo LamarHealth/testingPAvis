@@ -194,6 +194,11 @@ export const ManualSelect = ({ eventTarget }: any) => {
     };
   }, [currentSelection, eventTarget]);
 
+  // clear entries on doc switch
+  useEffect(() => {
+    setCurrentSelection({});
+  }, [selectedFile]);
+
   // drag & resize
   const handleDragStop = (e: any, data: DraggableData) => {
     const [x, y] = [data.x, data.y];
