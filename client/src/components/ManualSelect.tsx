@@ -56,6 +56,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
   } = useContext(MainModalContext);
   const konvaModalOpen = useStore((state) => state.konvaModalOpen);
   const [errorLine, setErrorLine] = useState(null as null | string);
+  const autocompleteAnchor = useStore((state) => state.autocompleteAnchor);
 
   // modal
   const modalHandleClick = () => {
@@ -185,14 +186,17 @@ export const ManualSelect = ({ eventTarget }: any) => {
   useEffect(() => {
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        handleSubmitAndClear();
+        if (!autocompleteAnchor) {
+          // don't fire if autocomplete is open
+          handleSubmitAndClear();
+        }
       }
     }
     document.addEventListener("keydown", keydownListener);
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [currentSelection, eventTarget]);
+  }, [currentSelection, eventTarget, autocompleteAnchor]);
 
   // clear entries on doc switch
   useEffect(() => {

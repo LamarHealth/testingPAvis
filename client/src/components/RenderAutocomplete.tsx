@@ -26,8 +26,11 @@ export const RenderAutocomplete = () => {
   const docData = useStore((state) => state.docData);
   const selectedFile = useStore((state) => state.selectedFile);
   const [filter, setFilter] = useState("" as string);
-  const [anchor, setAnchor] = useState(null as null | HTMLInputElement);
-  const open = Boolean(anchor);
+  const autocompleteAnchor = useStore((state) => state.autocompleteAnchor);
+  const setAutocompleteAnchor = useStore(
+    (state) => state.setAutocompleteAnchor
+  );
+  const open = Boolean(autocompleteAnchor);
 
   // doc data
   const selectedDocData = docData.filter(
@@ -52,7 +55,7 @@ export const RenderAutocomplete = () => {
     $("input").on("input", function () {
       const inputEl = this as HTMLInputElement;
       setFilter(inputEl.value);
-      setAnchor(inputEl);
+      setAutocompleteAnchor(inputEl);
     });
   });
 
@@ -75,7 +78,7 @@ export const RenderAutocomplete = () => {
       } = findActiveElInShadowRoot();
 
       if (
-        !anchor ||
+        !autocompleteAnchor ||
         event.code !== "Tab" ||
         (activeElementInShadowRoot &&
           activeElementInShadowRoot.nodeName === "LI") // even tho we focus() on the menuList, which is <ul>, mui puts the focus on the first <li> in the list
@@ -90,14 +93,14 @@ export const RenderAutocomplete = () => {
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [anchor]);
+  }, [autocompleteAnchor]);
 
   // handle click away
   const handleClose = (event: any) => {
-    if (anchor && event.target === anchor) {
+    if (autocompleteAnchor && event.target === autocompleteAnchor) {
       return;
     } else {
-      setAnchor(null);
+      setAutocompleteAnchor(null);
     }
   };
 
@@ -106,7 +109,7 @@ export const RenderAutocomplete = () => {
       {isDocSelected && (
         <ThemeProvider theme={DEFAULT}>
           <Popper
-            anchorEl={anchor}
+            anchorEl={autocompleteAnchor}
             open={open}
             container={() => document.getElementById("insertion-point")}
             placement={"bottom-start"}
@@ -118,8 +121,11 @@ export const RenderAutocomplete = () => {
                     <MenuList
                       tabIndex={0}
                       style={
-                        anchor
-                          ? { width: window.getComputedStyle(anchor).width }
+                        autocompleteAnchor
+                          ? {
+                              width: window.getComputedStyle(autocompleteAnchor)
+                                .width,
+                            }
                           : {}
                       }
                     >
@@ -129,9 +135,9 @@ export const RenderAutocomplete = () => {
                         )
                         .map((value, i) => {
                           const handleClick = () => {
-                            if (anchor) {
-                              anchor.value = value;
-                              setAnchor(null);
+                            if (autocompleteAnchor) {
+                              autocompleteAnchor.value = value;
+                              setAutocompleteAnchor(null);
                             }
                           };
 
