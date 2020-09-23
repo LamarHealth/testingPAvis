@@ -37,12 +37,10 @@ export const ManualSelect = ({ eventTarget }: any) => {
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const selectedFile = useStore((state) => state.selectedFile);
-  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
   const docData = useStore((state) => state.docData);
   const {
-    setKvpTableAnchorEl,
     konvaModalDraggCoords,
     setKonvaModalDraggCoords,
     konvaModalDimensions,
@@ -57,7 +55,6 @@ export const ManualSelect = ({ eventTarget }: any) => {
     setErrorCode,
   } = useContext(MainModalContext);
   const konvaModalOpen = useStore((state) => state.konvaModalOpen);
-  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
   const [errorLine, setErrorLine] = useState(null as null | string);
 
   // modal
@@ -172,13 +169,13 @@ export const ManualSelect = ({ eventTarget }: any) => {
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
         if (eventTarget) {
-          setKonvaModalOpen(false);
-          setKvpTableAnchorEl(null);
-          setSelectedChiclet("");
           renderBlankChiclet(eventTarget);
           eventTarget.value = Object.keys(currentSelection)
             .map((key) => currentSelection[key])
             .join(" ");
+          setErrorLine(null);
+          setCurrentSelection({});
+          setFilled({});
         } else {
           setErrorLine("Please select a text input to fill");
         }
