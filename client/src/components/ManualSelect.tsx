@@ -166,13 +166,17 @@ export const ManualSelect = ({ eventTarget }: any) => {
   // submit button / enter
   const handleSubmitAndClear = () => {
     if (eventTarget) {
-      renderBlankChiclet(eventTarget);
-      eventTarget.value = Object.keys(currentSelection)
-        .map((key) => currentSelection[key])
-        .join(" ");
-      setErrorLine(null);
-      setCurrentSelection({});
-      setFilled({});
+      if (Object.keys(currentSelection).length !== 0) {
+        renderBlankChiclet(eventTarget);
+        eventTarget.value = Object.keys(currentSelection)
+          .map((key) => currentSelection[key])
+          .join(" ");
+        setErrorLine(null);
+        setCurrentSelection({});
+        setFilled({});
+      } else {
+        setErrorLine("Nothing to enter");
+      }
     } else {
       setErrorLine("Please select a text input to fill");
     }
