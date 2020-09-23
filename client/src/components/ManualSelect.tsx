@@ -163,22 +163,25 @@ export const ManualSelect = ({ eventTarget }: any) => {
     }
   };
 
-  // return key listener
+  // submit button / enter
+  const handleSubmitAndClear = () => {
+    if (eventTarget) {
+      renderBlankChiclet(eventTarget);
+      eventTarget.value = Object.keys(currentSelection)
+        .map((key) => currentSelection[key])
+        .join(" ");
+      setErrorLine(null);
+      setCurrentSelection({});
+      setFilled({});
+    } else {
+      setErrorLine("Please select a text input to fill");
+    }
+  };
+
   useEffect(() => {
-    // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
-        if (eventTarget) {
-          renderBlankChiclet(eventTarget);
-          eventTarget.value = Object.keys(currentSelection)
-            .map((key) => currentSelection[key])
-            .join(" ");
-          setErrorLine(null);
-          setCurrentSelection({});
-          setFilled({});
-        } else {
-          setErrorLine("Please select a text input to fill");
-        }
+        handleSubmitAndClear();
       }
     }
     document.addEventListener("keydown", keydownListener);
@@ -238,6 +241,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
                   docImageDimensions,
                   errorLine,
                   setErrorLine,
+                  handleSubmitAndClear,
                 }}
               >
                 <KonvaModal />
