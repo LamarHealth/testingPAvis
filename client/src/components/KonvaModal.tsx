@@ -6,6 +6,7 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
+import { useStore } from "../contexts/ZustandStore";
 import { KonvaModalContext } from "./ManualSelect";
 
 // cannot import from SelectModal... likely a shadow dom issue
@@ -24,6 +25,38 @@ const CloseButton = styled.button`
   }
 `;
 
+const FillButton = styled.button`
+  background-color: ${colors.FILL_BUTTON};
+  color: white;
+  margin: 1em 0 1em 2em;
+  border: 1px solid white;
+  border-radius: 5px;
+  max-width: 6em;
+  min-width: 6em;
+  max-height: 2em;
+  min-height: 2em;
+  font-weight: bold;
+  :hover {
+    opacity: 0.5;
+  }
+  flex-basis: auto;
+  flex-grow: 0;
+
+  // mui font styles
+  font-size: 1rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+`;
+
+const FlexContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+`;
+
 const CurrentSelectionWrapper = styled.div`
   padding: 1em 2em;
   background-color: ${colors.MANUAL_SELECT_HEADER};
@@ -36,6 +69,8 @@ const CurrentSelection = styled(Typography)`
   padding: 1em;
   border-radius: 5px;
   border: 0.5px solid ${colors.FONT_BLUE};
+  flex-basis: auto;
+  flex-grow: 10;
 `;
 
 const CurrentSelectionContext = createContext({} as any);
@@ -100,6 +135,7 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
 };
 
 const Header = ({ docImageDimensions, currentSelection }: any) => {
+  const { errorLine, handleSubmitAndClear } = useContext(KonvaModalContext);
   return (
     <CurrentSelectionWrapper
       style={{
@@ -119,12 +155,22 @@ const Header = ({ docImageDimensions, currentSelection }: any) => {
               <strong>Current Selection:</strong>
             </Box>
           </Typography>
-          <CurrentSelection>
-            {Object.keys(currentSelection).map(
-              (key) => currentSelection[key] + " "
-            )}
-          </CurrentSelection>
+          <FlexContainer>
+            <CurrentSelection>
+              {Object.keys(currentSelection).map(
+                (key) => currentSelection[key] + " "
+              )}
+            </CurrentSelection>
+            <FillButton onClick={handleSubmitAndClear}>Submit</FillButton>
+          </FlexContainer>
         </div>
+      )}
+      {errorLine && (
+        <Typography>
+          <Box fontStyle="italic" color={`${colors.RED}`}>
+            {errorLine}
+          </Box>
+        </Typography>
       )}
     </CurrentSelectionWrapper>
   );
@@ -138,9 +184,10 @@ export const KonvaModal = () => {
     setFilled,
     setCurrentSelection,
     currentLinesGeometry,
-    setKonvaModalOpen,
     docImageDimensions,
   } = useContext(KonvaModalContext);
+  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+
   return (
     <>
       <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>

@@ -3,9 +3,7 @@ import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 
-import Chip from "@material-ui/core/Chip";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import { green } from "@material-ui/core/colors";
@@ -14,16 +12,10 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
-import $ from "jquery";
 import { colors } from "../common/colors";
 import { useStore } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
-import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
-import {
-  assignTargetString,
-  handleFreightTerms,
-} from "./libertyInputsDictionary";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -89,51 +81,6 @@ const FeedbackTypography = styled(Typography)`
 const DocCell = (props: DocumentInfo) => {
   const selectedFile = useStore((state) => state.selectedFile);
   const setSelectedFile = useStore((state) => state.setSelectedFile);
-  const docData = useStore((state) => state.docData);
-
-  const populateForms = () => {
-    $(document).ready(() => {
-      const keyValuePairs = docData.filter(
-        (doc: KeyValuesByDoc) => doc.docID === props.docID
-      )[0];
-
-      $("select").each(function () {
-        handleFreightTerms(this, keyValuePairs);
-      });
-
-      $("input").each(function () {
-        const targetString = assignTargetString(this);
-
-        if (typeof targetString === "undefined") {
-          return;
-        }
-
-        const areThereKVPairs =
-          Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
-
-        if (!areThereKVPairs) {
-          return;
-        }
-
-        const sortedKeyValuePairs = getEditDistanceAndSort(
-          keyValuePairs,
-          targetString,
-          "lc substring"
-        );
-
-        if (
-          sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
-          sortedKeyValuePairs[0].value === ""
-        ) {
-          renderBlankChiclet(this);
-          $(this).prop("value", null);
-        } else {
-          renderAccuracyScore(this, sortedKeyValuePairs[0]);
-          $(this).prop("value", sortedKeyValuePairs[0]["value"]);
-        }
-      });
-    });
-  };
 
   const setSelected = () => {
     selectedFile === props.docID
@@ -163,15 +110,6 @@ const DocCell = (props: DocumentInfo) => {
             Format: {props.docType}
           </Type>
         </span>
-        <Chip
-          label="Complete Forms on Page"
-          onClick={() => {
-            populateForms();
-            setSelectedFile(props.docID.toString());
-          }}
-          variant="outlined"
-          style={{ marginRight: "0.5em" }}
-        />
         <ButtonsBox docInfo={props} />
       </CardContent>
     </Box>

@@ -37,14 +37,10 @@ export const ManualSelect = ({ eventTarget }: any) => {
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const selectedFile = useStore((state) => state.selectedFile);
-  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
   const docData = useStore((state) => state.docData);
   const {
-    setKvpTableAnchorEl,
-    konvaModalOpen,
-    setKonvaModalOpen,
     konvaModalDraggCoords,
     setKonvaModalDraggCoords,
     konvaModalDimensions,
@@ -58,6 +54,9 @@ export const ManualSelect = ({ eventTarget }: any) => {
     setErrorMessage,
     setErrorCode,
   } = useContext(MainModalContext);
+  const konvaModalOpen = useStore((state) => state.konvaModalOpen);
+  const [errorLine, setErrorLine] = useState(null as null | string);
+  const autocompleteAnchor = useStore((state) => state.autocompleteAnchor);
 
   // modal
   const modalHandleClick = () => {
@@ -72,7 +71,7 @@ export const ManualSelect = ({ eventTarget }: any) => {
     }
   };
   const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
-  useEffect(modalHandleClick, [konvaModalOpen]);
+  useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
 
   // geometry
   const selectedDocData = docData.filter(
@@ -165,25 +164,44 @@ export const ManualSelect = ({ eventTarget }: any) => {
     }
   };
 
-  // return key listener
-  useEffect(() => {
-    // needs to be inside useEffect so can reference the same instance of the callback function so can remove on cleanup
-    function keydownListener(e: any) {
-      if (e.keyCode === 13) {
-        setKonvaModalOpen(false);
-        setKvpTableAnchorEl(null);
-        setSelectedChiclet("");
+  // submit button / enter
+  const handleSubmitAndClear = () => {
+    if (eventTarget) {
+      if (Object.keys(currentSelection).length !== 0) {
         renderBlankChiclet(eventTarget);
         eventTarget.value = Object.keys(currentSelection)
           .map((key) => currentSelection[key])
           .join(" ");
+        setErrorLine(null);
+        setCurrentSelection({});
+        setFilled({});
+      } else {
+        setErrorLine("Nothing to enter");
+      }
+    } else {
+      setErrorLine("Please select a text input to fill");
+    }
+  };
+
+  useEffect(() => {
+    function keydownListener(e: any) {
+      if (e.keyCode === 13) {
+        if (!autocompleteAnchor) {
+          // don't fire if autocomplete is open
+          handleSubmitAndClear();
+        }
       }
     }
     document.addEventListener("keydown", keydownListener);
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [currentSelection]);
+  }, [currentSelection, eventTarget, autocompleteAnchor]);
+
+  // clear entries on doc switch
+  useEffect(() => {
+    setCurrentSelection({});
+  }, [selectedFile]);
 
   // drag & resize
   const handleDragStop = (e: any, data: DraggableData) => {
@@ -233,8 +251,10 @@ export const ManualSelect = ({ eventTarget }: any) => {
                   setFilled,
                   setCurrentSelection,
                   currentLinesGeometry,
-                  setKonvaModalOpen,
                   docImageDimensions,
+                  errorLine,
+                  setErrorLine,
+                  handleSubmitAndClear,
                 }}
               >
                 <KonvaModal />

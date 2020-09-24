@@ -476,7 +476,6 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
   const {
     setKvpTableAnchorEl,
-    setKonvaModalOpen,
     errorFetchingImage,
     setErrorFetchingImage,
     errorFetchingGeometry,
@@ -484,6 +483,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
     errorMessage,
     errorCode,
   } = useContext(MainModalContext);
+  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
   const selectedFile = useStore((state) => state.selectedFile);
   const docData = useStore((state) => state.docData);
   const selectedDocData = docData.filter(

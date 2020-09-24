@@ -36,7 +36,7 @@ export const RenderModal = () => {
   );
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
-  const [konvaModalOpen, setKonvaModalOpen] = useState(false);
+  const konvaModalOpen = useStore((state) => state.konvaModalOpen);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
     y: KONVA_MODAL_OFFSET_Y,
@@ -56,8 +56,8 @@ export const RenderModal = () => {
   );
   const [errorCode, setErrorCode] = useState(400);
 
-  // handle chiclet click
   $(document).ready(() => {
+    // handle chiclet click
     $("span[id^='docit-accuracy-score-mounter-']").click(function () {
       const mounterID = this.id.replace("docit-accuracy-score-mounter-", "");
       const eventTarget = $(`input.has-docit-mounter-${mounterID}`).get()[0];
@@ -66,65 +66,73 @@ export const RenderModal = () => {
       setTargetString(assignTargetString(eventTarget));
       setKvpTableAnchorEl(eventTarget);
     });
+
+    // handle input el click
+    $("input").click(function () {
+      setEventTarget(this); // for sidebar 'View PDF' button: cannot fill text input from KonvaModal without an eventTarget
+    });
   });
 
   return (
     <ThemeProvider theme={DEFAULT}>
-      {areThereDocs && isDocSelected && eventTarget && (
+      {areThereDocs && isDocSelected && (
         <>
-          <Popper
-            id={id}
-            open={kvpTableOpen}
-            anchorEl={kvpTableAnchorEl}
-            keepMounted
-            placement={"bottom-end"}
-            container={() => document.getElementById("insertion-point")}
-            modifiers={{
-              preventOverflow: { enabled: false, boundariesElement: "window" },
-              flip: { enabled: true },
-              hide: { enabled: false },
-            }}
-          >
-            <Container>
-              <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
-                <MainModalContext.Provider
-                  value={{
-                    kvpTableAnchorEl,
-                    setKvpTableAnchorEl,
-                    konvaModalOpen,
-                    setKonvaModalOpen,
-                    konvaModalDraggCoords,
-                    setKonvaModalDraggCoords,
-                    konvaModalDimensions,
-                    setKonvaModalDimensions,
-                    docImageDimensions,
-                    setDocImageDimensions,
-                    errorFetchingImage,
-                    setErrorFetchingImage,
-                    errorFetchingGeometry,
-                    setErrorFetchingGeometry,
-                    errorMessage,
-                    setErrorMessage,
-                    errorCode,
-                    setErrorCode,
-                  }}
+          {eventTarget && (
+            <Popper
+              id={id}
+              open={kvpTableOpen}
+              anchorEl={kvpTableAnchorEl}
+              keepMounted
+              placement={"bottom-end"}
+              container={() => document.getElementById("insertion-point")}
+              modifiers={{
+                preventOverflow: {
+                  enabled: false,
+                  boundariesElement: "window",
+                },
+                flip: { enabled: true },
+                hide: { enabled: false },
+              }}
+            >
+              <Container>
+                <WrappedJssComponent
+                  wrapperClassName={"shadow-root-for-modals"}
                 >
-                  <SelectModal
-                    eventTarget={eventTarget}
-                    targetString={targetString}
-                  />
-                </MainModalContext.Provider>
-              </WrappedJssComponent>
-            </Container>
-          </Popper>
+                  <MainModalContext.Provider
+                    value={{
+                      kvpTableAnchorEl,
+                      setKvpTableAnchorEl,
+                      konvaModalDraggCoords,
+                      setKonvaModalDraggCoords,
+                      konvaModalDimensions,
+                      setKonvaModalDimensions,
+                      docImageDimensions,
+                      setDocImageDimensions,
+                      errorFetchingImage,
+                      setErrorFetchingImage,
+                      errorFetchingGeometry,
+                      setErrorFetchingGeometry,
+                      errorMessage,
+                      setErrorMessage,
+                      errorCode,
+                      setErrorCode,
+                    }}
+                  >
+                    <SelectModal
+                      eventTarget={eventTarget}
+                      targetString={targetString}
+                    />
+                  </MainModalContext.Provider>
+                </WrappedJssComponent>
+              </Container>
+            </Popper>
+          )}
 
           {konvaModalOpen && (
             <MainModalContext.Provider
               value={{
                 kvpTableAnchorEl,
                 setKvpTableAnchorEl,
-                konvaModalOpen,
-                setKonvaModalOpen,
                 konvaModalDraggCoords,
                 setKonvaModalDraggCoords,
                 konvaModalDimensions,
