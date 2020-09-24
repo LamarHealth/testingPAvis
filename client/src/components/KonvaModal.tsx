@@ -167,7 +167,7 @@ const Header = ({ docImageDimensions, currentSelection }: any) => {
       )}
       {errorLine && (
         <Typography>
-          <Box fontStyle="italic" color={"red"}>
+          <Box fontStyle="italic" color={`${colors.RED}`}>
             {errorLine}
           </Box>
         </Typography>
