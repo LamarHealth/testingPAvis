@@ -31,15 +31,7 @@ const StyledRnD = styled(Rnd)`
 
 export const KonvaModalContext = createContext({} as any);
 
-export const ManualSelect = ({ eventTarget }: any) => {
-  const [docImageURL, setDocImageURL] = useState({} as any);
-  const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
-  const [currentDocID, setCurrentDocID] = useState("" as any);
-  const [currentSelection, setCurrentSelection] = useState({} as any);
-  const selectedFile = useStore((state) => state.selectedFile);
-  const [image] = useImage(docImageURL.url);
-  const [filled, setFilled] = useState({} as any);
-  const docData = useStore((state) => state.docData);
+export const ManualSelect = () => {
   const {
     konvaModalDraggCoords,
     setKonvaModalDraggCoords,
@@ -54,9 +46,26 @@ export const ManualSelect = ({ eventTarget }: any) => {
     setErrorMessage,
     setErrorCode,
   } = useContext(MainModalContext);
-  const konvaModalOpen = useStore((state) => state.konvaModalOpen);
+  const [
+    eventTarget,
+    selectedFile,
+    docData,
+    konvaModalOpen,
+    autocompleteAnchor,
+  ] = [
+    useStore((state) => state.eventTarget),
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.docData),
+    useStore((state) => state.konvaModalOpen),
+    useStore((state) => state.autocompleteAnchor),
+  ];
+  const [docImageURL, setDocImageURL] = useState({} as any);
+  const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
+  const [currentDocID, setCurrentDocID] = useState("" as any);
+  const [currentSelection, setCurrentSelection] = useState({} as any);
+  const [image] = useImage(docImageURL.url);
+  const [filled, setFilled] = useState({} as any);
   const [errorLine, setErrorLine] = useState(null as null | string);
-  const autocompleteAnchor = useStore((state) => state.autocompleteAnchor);
 
   // modal
   const modalHandleClick = () => {

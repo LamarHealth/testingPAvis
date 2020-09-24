@@ -15,6 +15,7 @@ import { ACC_SCORE_MEDIUM } from "../common/constants";
 import { ACC_SCORE_SMALL } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { KeyValuesWithDistance } from "./KeyValuePairs";
+import { assignTargetString } from "./libertyInputsDictionary";
 import WrappedJssComponent from "./ShadowComponent";
 
 const AccuracyScoreBox = styled.div`
@@ -41,8 +42,20 @@ const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
 const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
-  const selectedChiclet = useStore((state) => state.selectedChiclet);
-  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
+  const [
+    selectedChiclet,
+    setSelectedChiclet,
+    setEventTarget,
+    setTargetString,
+    setKvpTableAnchorEl,
+  ] = [
+    useStore((state) => state.selectedChiclet),
+    useStore((state) => state.setSelectedChiclet),
+    useStore((state) => state.setEventTarget),
+    useStore((state) => state.setTargetString),
+    useStore((state) => state.setKvpTableAnchorEl),
+  ];
+
   const wrapperClasses = wrapperFlexStyles();
 
   const colorClasses =
@@ -59,10 +72,20 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
       ? ACC_SCORE_MEDIUM
       : ACC_SCORE_SMALL;
 
+  const handleClick = () => {
+    setSelectedChiclet(mounterID);
+    const eventTarget = document.querySelector(
+      `input.has-docit-mounter-${mounterID}`
+    ) as HTMLInputElement;
+    setEventTarget(eventTarget);
+    setTargetString(assignTargetString(eventTarget));
+    setKvpTableAnchorEl(eventTarget);
+  };
+
   return (
     <AccuracyScoreBox
       className={wrapperClasses.root}
-      onClick={() => setSelectedChiclet(mounterID)}
+      onClick={handleClick}
       style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
     >
       <Box>
@@ -90,9 +113,22 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
 };
 
 const BlankChiclet = ({ inputHeight, mounterID }: any) => {
-  const selectedChiclet = useStore((state) => state.selectedChiclet);
-  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
+  const [
+    selectedChiclet,
+    setSelectedChiclet,
+    setEventTarget,
+    setTargetString,
+    setKvpTableAnchorEl,
+  ] = [
+    useStore((state) => state.selectedChiclet),
+    useStore((state) => state.setSelectedChiclet),
+    useStore((state) => state.setEventTarget),
+    useStore((state) => state.setTargetString),
+    useStore((state) => state.setKvpTableAnchorEl),
+  ];
+
   const wrapperClasses = wrapperFlexStyles();
+
   const size =
     inputHeight >= 30
       ? ACC_SCORE_LARGE
@@ -100,10 +136,20 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
       ? ACC_SCORE_MEDIUM
       : ACC_SCORE_SMALL;
 
+  const handleClick = () => {
+    setSelectedChiclet(mounterID);
+    const eventTarget = document.querySelector(
+      `input.has-docit-mounter-${mounterID}`
+    ) as HTMLInputElement;
+    setEventTarget(eventTarget);
+    setTargetString(assignTargetString(eventTarget));
+    setKvpTableAnchorEl(eventTarget);
+  };
+
   return (
     <AccuracyScoreBox
       className={wrapperClasses.root}
-      onClick={() => setSelectedChiclet(mounterID)}
+      onClick={handleClick}
       style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
     >
       <Box>
@@ -139,12 +185,14 @@ const setMounter = (target: any) => {
       target.className
     )[0];
     const oldMounterID = oldMounterClassName.replace("has-docit-mounter-", "");
-    target.classList.remove(oldMounterClassName);
-    document
-      .getElementById(`docit-accuracy-score-mounter-${oldMounterID}`)
-      ?.remove();
+    const oldMounter = document.getElementById(
+      `docit-accuracy-score-mounter-${oldMounterID}`
+    ) as HTMLElement;
 
-    window.removeEventListener("resize", positionMounter);
+    ReactDOM.unmountComponentAtNode(oldMounter); // unmount React component from old mounter
+    target.classList.remove(oldMounterClassName); // remove old class name from targeted inputEl
+    oldMounter.remove(); // remove mounter from DOM
+    window.removeEventListener("resize", positionMounter); // remove resize listener
   }
 
   // add the new mounter

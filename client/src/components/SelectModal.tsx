@@ -197,10 +197,12 @@ const ButtonsCell = (props: {
     selectedDocData,
     setRemoveKVMessage,
     setMessageCollapse,
-    targetString,
     setUnalteredKeyValue,
   } = useContext(TableContext);
-  const setDocData = useStore((state) => state.setDocData);
+  const [targetString, setDocData] = [
+    useStore((state) => state.targetString),
+    useStore((state) => state.setDocData),
+  ];
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
@@ -376,7 +378,8 @@ const TableRowComponent = (props: {
 const TableContext = createContext({} as any);
 
 const TableComponent = () => {
-  const { targetString, selectedDocData } = useContext(TableContext);
+  const { selectedDocData } = useContext(TableContext);
+  const targetString = useStore((state) => state.targetString);
   const sortedKeyValuePairs = getEditDistanceAndSort(
     selectedDocData,
     targetString,
@@ -465,17 +468,11 @@ const ErrorLine = (props: { errorCode: number; msg: string }) => {
   );
 };
 
-export interface SelectProps {
-  eventTarget: any;
-  targetString: string;
-}
-
-export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
+export const SelectModal = () => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-  const setSelectedChiclet = useStore((state) => state.setSelectedChiclet);
+
   const {
-    setKvpTableAnchorEl,
     errorFetchingImage,
     setErrorFetchingImage,
     errorFetchingGeometry,
@@ -483,9 +480,23 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
     errorMessage,
     errorCode,
   } = useContext(MainModalContext);
-  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
-  const selectedFile = useStore((state) => state.selectedFile);
-  const docData = useStore((state) => state.docData);
+  const [
+    selectedFile,
+    docData,
+    targetString,
+    eventTarget,
+    setKonvaModalOpen,
+    setSelectedChiclet,
+    setKvpTableAnchorEl,
+  ] = [
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.docData),
+    useStore((state) => state.targetString),
+    useStore((state) => state.eventTarget),
+    useStore((state) => state.setKonvaModalOpen),
+    useStore((state) => state.setSelectedChiclet),
+    useStore((state) => state.setKvpTableAnchorEl),
+  ];
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
@@ -523,7 +534,7 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
   const handleSubmit = () => {
     const inputEl = findKvpTableInputEl();
     const currentEditedValue = inputEl.value;
-    eventTarget.value = currentEditedValue; // fill input w edited val
+    eventTarget && (eventTarget.value = currentEditedValue); // fill input w edited val
     setKvpTableAnchorEl(null); // close the modal
     setSelectedChiclet(""); // remove chiclet border
 
@@ -586,11 +597,9 @@ export const SelectModal = ({ eventTarget, targetString }: SelectProps) => {
       {areThereKVPairs ? (
         <TableContext.Provider
           value={{
-            targetString,
             selectedDocData,
             setRemoveKVMessage,
             setMessageCollapse,
-            eventTarget,
             setUnalteredKeyValue,
           }}
         >

@@ -114,9 +114,11 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
 const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialog] = useState<"delete" | "download">();
-  const setSelectedFile = useStore((state) => state.setSelectedFile);
-  const docData = useStore((state) => state.docData);
-  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+  const [docData, setSelectedFile, setKonvaModalOpen] = [
+    useStore((state) => state.docData),
+    useStore((state) => state.setSelectedFile),
+    useStore((state) => state.setKonvaModalOpen),
+  ];
 
   // click away
   const handleClickAway = () => {

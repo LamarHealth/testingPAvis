@@ -23,13 +23,13 @@ const Container = styled.div`
 `;
 
 export const RenderAutocomplete = () => {
-  const docData = useStore((state) => state.docData);
-  const selectedFile = useStore((state) => state.selectedFile);
+  const [docData, selectedFile, autocompleteAnchor, setAutocompleteAnchor] = [
+    useStore((state) => state.docData),
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.autocompleteAnchor),
+    useStore((state) => state.setAutocompleteAnchor),
+  ];
   const [filter, setFilter] = useState("" as string);
-  const autocompleteAnchor = useStore((state) => state.autocompleteAnchor);
-  const setAutocompleteAnchor = useStore(
-    (state) => state.setAutocompleteAnchor
-  );
   const open = Boolean(autocompleteAnchor);
 
   // doc data

@@ -28,7 +28,7 @@ export const libertyInputsDictionary = {
   CMNotifyFax: "Fax",
 } as LibertyInputsDictionary;
 
-export const assignTargetString = (inputEl: any) => {
+export const assignTargetString = (inputEl: any): string => {
   let targetString;
   const placeholderText = $(inputEl).attr("placeholder");
   if (placeholderText) {
@@ -37,6 +37,8 @@ export const assignTargetString = (inputEl: any) => {
     const inputID = $(inputEl).attr("id");
     if (inputID && libertyInputsDictionary[inputID]) {
       targetString = libertyInputsDictionary[inputID];
+    } else {
+      targetString = "";
     }
   }
   return targetString;
