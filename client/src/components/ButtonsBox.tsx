@@ -15,6 +15,7 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo } from "./DocViewer";
+import { colors } from "./../common/colors";
 import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
 import {
   handleFreightTerms,
@@ -50,6 +51,12 @@ const FlexIconButton = styled(IconButton)`
   max-height: 2.5em;
   min-width: 2.5em;
   max-width: 2.5em;
+`;
+
+const ErrorMessageWrapper = styled.div`
+  margin: 1em 0;
+  padding: 0.5em;
+  background-color: ${colors.ERROR_BACKGROUND_RED};
 `;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
@@ -111,13 +118,31 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
   );
 };
 
+const ErrorMessage = () => {
+  const [errorMessage, errorCode] = [
+    useStore((state) => state.errorMessage),
+    useStore((state) => state.errorCode),
+  ];
+
+  return (
+    <ErrorMessageWrapper>
+      <Typography>
+        <i>
+          <strong>Error {errorCode}</strong>: {errorMessage}
+        </i>
+      </Typography>
+    </ErrorMessageWrapper>
+  );
+};
+
 const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialog] = useState<"delete" | "download">();
-  const [docData, setSelectedFile, setKonvaModalOpen] = [
+  const [docData, setSelectedFile, setKonvaModalOpen, errorFiles] = [
     useStore((state) => state.docData),
     useStore((state) => state.setSelectedFile),
     useStore((state) => state.setKonvaModalOpen),
+    useStore((state) => state.errorFiles),
   ];
 
   // click away
@@ -188,8 +213,15 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
     });
   };
 
+  // error handling
+  const someErrorGettingThisFile =
+    errorFiles[props.docInfo.docID.toString()] &&
+    (errorFiles[props.docInfo.docID.toString()].image ||
+      errorFiles[props.docInfo.docID.toString()].geometry);
+
   return (
     <>
+      {someErrorGettingThisFile && <ErrorMessage />}
       <ButtonsBoxWrapper>
         <ChipWrapper>
           <Chip
@@ -205,6 +237,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
             label="View PDF"
             variant="outlined"
             onClick={handleViewPdfClick}
+            disabled={someErrorGettingThisFile}
           />
         </ChipWrapper>
         <ButtonsWrapper>

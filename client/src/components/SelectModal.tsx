@@ -471,15 +471,6 @@ const ErrorLine = (props: { errorCode: number; msg: string }) => {
 export const SelectModal = () => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-
-  const {
-    errorFetchingImage,
-    setErrorFetchingImage,
-    errorFetchingGeometry,
-    setErrorFetchingGeometry,
-    errorMessage,
-    errorCode,
-  } = useContext(MainModalContext);
   const [
     selectedFile,
     docData,
@@ -488,6 +479,12 @@ export const SelectModal = () => {
     setKonvaModalOpen,
     setSelectedChiclet,
     setKvpTableAnchorEl,
+    errorFetchingImage,
+    setErrorFetchingImage,
+    errorFetchingGeometry,
+    setErrorFetchingGeometry,
+    errorMessage,
+    errorCode,
   ] = [
     useStore((state) => state.selectedFile),
     useStore((state) => state.docData),
@@ -496,6 +493,12 @@ export const SelectModal = () => {
     useStore((state) => state.setKonvaModalOpen),
     useStore((state) => state.setSelectedChiclet),
     useStore((state) => state.setKvpTableAnchorEl),
+    useStore((state) => state.errorFetchingImage),
+    useStore((state) => state.setErrorFetchingImage),
+    useStore((state) => state.errorFetchingGeometry),
+    useStore((state) => state.setErrorFetchingGeometry),
+    useStore((state) => state.errorMessage),
+    useStore((state) => state.errorCode),
   ];
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile

@@ -57,12 +57,6 @@ export const RenderModal = () => {
     width: 0,
     height: 0,
   });
-  const [errorFetchingImage, setErrorFetchingImage] = useState(false);
-  const [errorFetchingGeometry, setErrorFetchingGeometry] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(
-    "unable to fetch resources from server. Try again later."
-  );
-  const [errorCode, setErrorCode] = useState(400);
 
   // handle input el click
   useEffect(() => {
@@ -113,14 +107,6 @@ export const RenderModal = () => {
                       setKonvaModalDimensions,
                       docImageDimensions,
                       setDocImageDimensions,
-                      errorFetchingImage,
-                      setErrorFetchingImage,
-                      errorFetchingGeometry,
-                      setErrorFetchingGeometry,
-                      errorMessage,
-                      setErrorMessage,
-                      errorCode,
-                      setErrorCode,
                     }}
                   >
                     <SelectModal />
@@ -139,14 +125,6 @@ export const RenderModal = () => {
                 setKonvaModalDimensions,
                 docImageDimensions,
                 setDocImageDimensions,
-                errorFetchingImage,
-                setErrorFetchingImage,
-                errorFetchingGeometry,
-                setErrorFetchingGeometry,
-                errorMessage,
-                setErrorMessage,
-                errorCode,
-                setErrorCode,
               }}
             >
               <ManualSelect />

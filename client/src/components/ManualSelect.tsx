@@ -39,12 +39,6 @@ export const ManualSelect = () => {
     setKonvaModalDimensions,
     docImageDimensions,
     setDocImageDimensions,
-    errorFetchingImage,
-    setErrorFetchingImage,
-    errorFetchingGeometry,
-    setErrorFetchingGeometry,
-    setErrorMessage,
-    setErrorCode,
   } = useContext(MainModalContext);
   const [
     eventTarget,
@@ -52,12 +46,28 @@ export const ManualSelect = () => {
     docData,
     konvaModalOpen,
     autocompleteAnchor,
+    errorFetchingImage,
+    setErrorFetchingImage,
+    errorFetchingGeometry,
+    setErrorFetchingGeometry,
+    setErrorMessage,
+    setErrorCode,
+    errorFiles,
+    setErrorFiles,
   ] = [
     useStore((state) => state.eventTarget),
     useStore((state) => state.selectedFile),
     useStore((state) => state.docData),
     useStore((state) => state.konvaModalOpen),
     useStore((state) => state.autocompleteAnchor),
+    useStore((state) => state.errorFetchingImage),
+    useStore((state) => state.setErrorFetchingImage),
+    useStore((state) => state.errorFetchingGeometry),
+    useStore((state) => state.setErrorFetchingGeometry),
+    useStore((state) => state.setErrorMessage),
+    useStore((state) => state.setErrorCode),
+    useStore((state) => state.errorFiles),
+    useStore((state) => state.setErrorFiles),
   ];
   const [docImageURL, setDocImageURL] = useState({} as any);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
@@ -82,7 +92,7 @@ export const ManualSelect = () => {
   const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
   useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
 
-  // geometry
+  // data from server
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
@@ -106,6 +116,7 @@ export const ManualSelect = () => {
     switch (docImageResponse.status) {
       case 200:
         setErrorFetchingImage(false);
+        setErrorFiles({ [docID]: { image: false } });
         const blob = await docImageResponse.blob();
         const objectURL = await URL.createObjectURL(blob);
 
@@ -132,12 +143,14 @@ export const ManualSelect = () => {
         break;
       case 410:
         setErrorFetchingImage(true);
+        setErrorFiles({ [docID]: { image: true } });
         setErrorCode(docImageResponse.status);
         const statusMessage = (await docImageResponse.json()).status;
         setErrorMessage(statusMessage);
         break;
       default:
         setErrorFetchingImage(true);
+        setErrorFiles({ [docID]: { image: true } });
         setErrorCode(docImageResponse.status);
     }
 
@@ -153,6 +166,7 @@ export const ManualSelect = () => {
     switch (linesGeometryResponse.status) {
       case 200:
         setErrorFetchingGeometry(false);
+        setErrorFiles({ [docID]: { geometry: false } });
         const linesGeometry = (
           await linesGeometryResponse.json()
         ).linesGeometry.map((lineGeometry: any) => {
@@ -163,12 +177,14 @@ export const ManualSelect = () => {
         break;
       case 410:
         setErrorFetchingGeometry(true);
+        setErrorFiles({ [docID]: { geometry: true } });
         setErrorCode(linesGeometryResponse.status);
         const statusMessage = (await linesGeometryResponse.json()).status;
         setErrorMessage(statusMessage);
         break;
       default:
         setErrorFetchingGeometry(true);
+        setErrorFiles({ [docID]: { geometry: true } });
         setErrorCode(linesGeometryResponse.status);
     }
   };
