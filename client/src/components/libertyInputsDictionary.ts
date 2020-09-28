@@ -70,10 +70,11 @@ export const handleFreightTerms = (
 };
 
 export const getLibertyModalMutationsObserver = (callback: () => void) => {
-  return new MutationObserver(function (mutationsList: any, observer: any) {
+  return new MutationObserver(function (mutationsList: MutationRecord[]) {
     for (let mutation of mutationsList) {
       // triggered when the 'Create Masters' modal opens and closes
-      if (mutation.target.className.includes("modal-backdrop")) {
+      const changed = mutation.target as HTMLElement;
+      if (changed.className.includes("modal-backdrop")) {
         callback(); // trigger callback on modal open/close
       }
     }
