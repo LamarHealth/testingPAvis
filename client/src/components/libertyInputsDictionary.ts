@@ -61,10 +61,10 @@ export const handleFreightTerms = (
 
     if (valIsSufficiently("collect")) {
       $(selectEl).val(2);
-      renderAccuracyScore(selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
     } else if (valIsSufficiently("prepaid")) {
       $(selectEl).val(1);
-      renderAccuracyScore(selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
     }
   }
 };

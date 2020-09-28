@@ -37,7 +37,7 @@ import {
   KeyValuesByDoc,
 } from "./KeyValuePairs";
 import { MainModalContext } from "./RenderModal";
-import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
+import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { useStore } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
@@ -546,9 +546,9 @@ export const SelectModal = () => {
     ) {
       // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
       //@ts-ignore
-      renderAccuracyScore(eventTarget, unalteredKeyValue);
+      renderAccuracyScore("value", eventTarget, unalteredKeyValue);
     } else {
-      renderBlankChiclet(eventTarget);
+      renderAccuracyScore("blank", eventTarget);
     }
 
     inputEl.value = ""; // clear the text editor
