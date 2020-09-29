@@ -65,7 +65,7 @@ export const ManualSelect = () => {
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
-  const image = useImage(docImageURL.url as string);
+  const [image] = useImage(docImageURL.url as string);
   const [filled, setFilled] = useState({} as any);
   const [errorLine, setErrorLine] = useState(null as null | string);
 
