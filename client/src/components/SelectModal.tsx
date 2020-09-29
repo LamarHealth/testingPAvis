@@ -538,7 +538,6 @@ export const SelectModal = () => {
 
   const handleManualSelectButtonClick = () => {
     setKonvaModalOpen(true);
-    setKvpTableAnchorEl(null);
   };
 
   const handleSubmit = () => {
@@ -596,11 +595,7 @@ export const SelectModal = () => {
           onClick={handleSubmit}
           style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
         />
-        {someErrorGettingThisFile && (
-          <Collapse in={someErrorGettingThisFile}>
-            <ErrorLine />
-          </Collapse>
-        )}
+        {someErrorGettingThisFile && <ErrorLine />}
         <Collapse in={messageCollapse}>
           <Message msg={removeKVMessage} />
         </Collapse>

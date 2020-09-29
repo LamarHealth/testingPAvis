@@ -45,6 +45,7 @@ export const ManualSelect = () => {
     selectedFile,
     docData,
     konvaModalOpen,
+    setKvpTableAnchorEl,
     autocompleteAnchor,
     errorFiles,
     setErrorFiles,
@@ -53,6 +54,7 @@ export const ManualSelect = () => {
     useStore((state) => state.selectedFile),
     useStore((state) => state.docData),
     useStore((state) => state.konvaModalOpen),
+    useStore((state) => state.setKvpTableAnchorEl),
     useStore((state) => state.autocompleteAnchor),
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
@@ -69,7 +71,7 @@ export const ManualSelect = () => {
     errorFiles[selectedFile] &&
     (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry);
 
-  // modal
+  // modal open
   const modalHandleClick = () => {
     if (
       konvaModalOpen === true &&
@@ -80,8 +82,9 @@ export const ManualSelect = () => {
       getImageAndGeometryFromServer(selectedDocData);
     }
   };
-  const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
   useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
+  const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
+  !someErrorGettingThisFile && isDocImageSet && setKvpTableAnchorEl(null); // important... close kvp table only when konva modal is displayed
 
   // data from server
   const selectedDocData = docData.filter(
