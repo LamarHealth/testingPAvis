@@ -7,7 +7,7 @@ import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
 import { useStore } from "../contexts/ZustandStore";
-import { KonvaModalContext } from "./ManualSelect";
+import { KonvaModalContext, LinesGeometry } from "./ManualSelect";
 
 // cannot import from SelectModal... likely a shadow dom issue
 const CloseButton = styled.button`
@@ -212,15 +212,17 @@ export const KonvaModal = () => {
               setCurrentSelection,
             }}
           >
-            {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
-              return (
-                <Polygon
-                  key={ndx}
-                  lineGeometry={lineGeometry}
-                  docImageDimensions={docImageDimensions}
-                />
-              );
-            })}
+            {currentLinesGeometry.map(
+              (lineGeometry: LinesGeometry, ndx: number) => {
+                return (
+                  <Polygon
+                    key={ndx}
+                    lineGeometry={lineGeometry}
+                    docImageDimensions={docImageDimensions}
+                  />
+                );
+              }
+            )}
           </CurrentSelectionContext.Provider>
         </Layer>
       </Stage>

@@ -29,6 +29,12 @@ const StyledRnD = styled(Rnd)`
   box-shadow: ${MODAL_SHADOW};
 `;
 
+export interface LinesGeometry {
+  Coordinates: { X: number; Y: number }[];
+  ID: string;
+  Text: string;
+}
+
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = () => {
@@ -62,7 +68,9 @@ export const ManualSelect = () => {
   const [docImageURL, setDocImageURL] = useState(
     {} as { heightXWidthMutliplier?: number; url?: string }
   );
-  const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
+  const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
+    [] as LinesGeometry[]
+  );
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
   const [image] = useImage(docImageURL.url as string);
