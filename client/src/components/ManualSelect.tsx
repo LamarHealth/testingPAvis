@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
@@ -91,25 +91,20 @@ export const ManualSelect = () => {
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
-
-  const someErrorGettingThisFile =
-    errorFiles[selectedFile] &&
-    (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry);
+  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
 
   // modal open
   const modalHandleClick = () => {
     if (
       konvaModalOpen === true &&
-      (currentDocID === "" ||
-        currentDocID !== selectedFile ||
-        someErrorGettingThisFile)
+      (currentDocID === "" || currentDocID !== selectedFile || errorGettingFile)
     ) {
       getImageAndGeometryFromServer(selectedDocData);
     }
   };
   useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
   const isDocImageSet = Boolean(docImageURL.heightXWidthMultiplier);
-  !someErrorGettingThisFile && isDocImageSet && setKvpTableAnchorEl(null); // important... close kvp table only when konva modal is displayed
+  !errorGettingFile && isDocImageSet && setKvpTableAnchorEl(null); // important... close kvp table only when konva modal is displayed
 
   // data from server
   const selectedDocData = docData.filter(
@@ -287,7 +282,7 @@ export const ManualSelect = () => {
 
   return (
     <React.Fragment>
-      {!someErrorGettingThisFile && isDocImageSet && (
+      {!errorGettingFile && isDocImageSet && (
         <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
           <StyledRnD
             position={konvaModalDraggCoords}

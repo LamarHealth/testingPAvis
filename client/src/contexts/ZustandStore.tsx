@@ -5,7 +5,7 @@ import {
   KeyValuesByDoc,
 } from "../components/KeyValuePairs";
 
-interface ErrorFile {
+export interface ErrorFile {
   [key: string]: {
     image?: boolean;
     geometry?: boolean;
@@ -75,3 +75,13 @@ export const useStore = create<State>((set) => ({
     });
   },
 }));
+
+export const findErrorGettingFile = (
+  errorFiles: ErrorFile,
+  selectedFile: string
+) => {
+  return Boolean(
+    errorFiles[selectedFile] &&
+      (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry)
+  );
+};

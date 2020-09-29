@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 
 import $ from "jquery";
 import styled from "styled-components";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -146,6 +146,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
     useStore((state) => state.errorFiles),
   ];
   const docID = props.docInfo.docID.toString();
+  const errorGettingFile = findErrorGettingFile(errorFiles, docID);
 
   // click away
   const handleClickAway = () => {
@@ -215,14 +216,9 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
     });
   };
 
-  // error handling
-  const someErrorGettingThisFile =
-    errorFiles[docID] &&
-    (errorFiles[docID].image || errorFiles[docID].geometry);
-
   return (
     <>
-      {someErrorGettingThisFile && <ErrorMessage docID={docID} />}
+      {errorGettingFile && <ErrorMessage docID={docID} />}
       <ButtonsBoxWrapper>
         <ChipWrapper>
           <Chip
@@ -238,7 +234,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
             label="View PDF"
             variant="outlined"
             onClick={handleViewPdfClick}
-            disabled={someErrorGettingThisFile}
+            disabled={errorGettingFile}
           />
         </ChipWrapper>
         <ButtonsWrapper>

@@ -42,7 +42,7 @@ import {
   KeyValuesByDoc,
 } from "./KeyValuePairs";
 import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -511,9 +511,7 @@ export const SelectModal = () => {
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
   const textFieldRef = useRef(null);
 
-  const someErrorGettingThisFile =
-    errorFiles[selectedFile] &&
-    (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry);
+  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
 
   const findKvpTableInputEl = () => {
     if (textFieldRef === null) {
@@ -526,7 +524,7 @@ export const SelectModal = () => {
   };
 
   const handleModalClose = () => {
-    if (someErrorGettingThisFile) {
+    if (errorGettingFile) {
       // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
       setKonvaModalOpen(false);
       setErrorFiles({ [selectedFile]: { image: false, geometry: false } });
@@ -595,7 +593,7 @@ export const SelectModal = () => {
           onClick={handleSubmit}
           style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
         />
-        {someErrorGettingThisFile && <ErrorLine />}
+        {errorGettingFile && <ErrorLine />}
         <Collapse in={messageCollapse}>
           <Message msg={removeKVMessage} />
         </Collapse>
