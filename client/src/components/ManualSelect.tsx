@@ -247,6 +247,12 @@ export const ManualSelect = () => {
     };
   }, [currentSelection, eventTarget, autocompleteAnchor]);
 
+  // clear button
+  const handleClear = () => {
+    setCurrentSelection({});
+    setFilled({});
+  };
+
   // clear entries on doc switch
   useEffect(() => {
     setCurrentSelection({});
@@ -304,6 +310,7 @@ export const ManualSelect = () => {
                   errorLine,
                   setErrorLine,
                   handleSubmitAndClear,
+                  handleClear,
                 }}
               >
                 <KonvaModal />

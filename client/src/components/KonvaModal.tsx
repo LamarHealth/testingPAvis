@@ -32,10 +32,9 @@ const CloseButton = styled.button`
   }
 `;
 
-const FillButton = styled.button`
-  background-color: ${colors.FILL_BUTTON};
+const BigButton = styled.button`
   color: white;
-  margin: 1em 0 1em 2em;
+  margin: 1em 0 1em 1.5em;
   border: 1px solid white;
   border-radius: 5px;
   max-width: 6em;
@@ -161,7 +160,9 @@ const Header = ({
   docImageDimensions: DocImageDimensions;
   currentSelection: CurrentSelection;
 }) => {
-  const { errorLine, handleSubmitAndClear } = useContext(KonvaModalContext);
+  const { errorLine, handleSubmitAndClear, handleClear } = useContext(
+    KonvaModalContext
+  );
   return (
     <CurrentSelectionWrapper
       style={{
@@ -187,7 +188,18 @@ const Header = ({
                 (key) => currentSelection[key] + " "
               )}
             </CurrentSelectionTypography>
-            <FillButton onClick={handleSubmitAndClear}>Submit</FillButton>
+            <BigButton
+              onClick={handleClear}
+              style={{ backgroundColor: `${colors.RED}` }}
+            >
+              Clear
+            </BigButton>
+            <BigButton
+              onClick={handleSubmitAndClear}
+              style={{ backgroundColor: `${colors.FILL_BUTTON}` }}
+            >
+              Submit
+            </BigButton>
           </FlexContainer>
         </div>
       )}
