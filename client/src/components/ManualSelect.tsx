@@ -59,11 +59,13 @@ export const ManualSelect = () => {
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
-  const [docImageURL, setDocImageURL] = useState({} as any);
+  const [docImageURL, setDocImageURL] = useState(
+    {} as { heightXWidthMutliplier?: number; url?: string }
+  );
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
   const [currentDocID, setCurrentDocID] = useState("" as any);
   const [currentSelection, setCurrentSelection] = useState({} as any);
-  const [image] = useImage(docImageURL.url);
+  const image = useImage(docImageURL.url as string);
   const [filled, setFilled] = useState({} as any);
   const [errorLine, setErrorLine] = useState(null as null | string);
 
@@ -256,7 +258,7 @@ export const ManualSelect = () => {
     setDocImageDimensions({
       // set doc img dim
       width,
-      height: width * docImageURL.heightXWidthMutliplier,
+      height: width * (docImageURL.heightXWidthMutliplier as number),
     });
   };
 
