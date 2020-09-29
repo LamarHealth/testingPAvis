@@ -44,6 +44,10 @@ export interface CurrentSelection {
   [lineID: string]: string;
 }
 
+export interface Filled {
+  [lineID: string]: boolean;
+}
+
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = () => {
@@ -85,7 +89,7 @@ export const ManualSelect = () => {
     {} as CurrentSelection
   );
   const [image] = useImage(docImageURL.url);
-  const [filled, setFilled] = useState({} as any);
+  const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
 
   const someErrorGettingThisFile =

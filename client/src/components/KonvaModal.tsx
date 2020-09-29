@@ -11,6 +11,7 @@ import {
   KonvaModalContext,
   LinesGeometry,
   CurrentSelection,
+  Filled,
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
 
@@ -95,13 +96,13 @@ const Polygon = ({
 
   const fillAndSetCurrentSelection = () => {
     if (!isFilled) {
-      setCurrentSelection((prevCurrentSelection: any) => {
+      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
         return {
           ...prevCurrentSelection,
           [lineGeometry.ID]: lineGeometry.Text,
         };
       });
-      setFilled((otherFilleds: any) => {
+      setFilled((otherFilleds: Filled) => {
         return {
           ...otherFilleds,
           [lineGeometry.ID]: true,
@@ -109,11 +110,11 @@ const Polygon = ({
       });
     }
     if (isFilled) {
-      setCurrentSelection((prevCurrentSelection: any) => {
+      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
         delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
       });
-      setFilled((otherFilleds: any) => {
+      setFilled((otherFilleds: Filled) => {
         return {
           ...otherFilleds,
           [lineGeometry.ID]: false,
@@ -133,7 +134,7 @@ const Polygon = ({
       }}
       points={Array.prototype.concat.apply(
         [],
-        lineGeometry.Coordinates.map((geometry: any) => [
+        lineGeometry.Coordinates.map((geometry) => [
           docImageDimensions.width * geometry.X,
           docImageDimensions.height * geometry.Y,
         ])
