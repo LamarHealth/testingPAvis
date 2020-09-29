@@ -82,9 +82,7 @@ export const ManualSelect = () => {
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
   );
-  const [currentDocID, setCurrentDocID] = useState(
-    undefined as string | undefined
-  );
+  const [currentDocID, setCurrentDocID] = useState(null as string | null);
   const [currentSelection, setCurrentSelection] = useState(
     {} as CurrentSelection
   );
@@ -97,7 +95,9 @@ export const ManualSelect = () => {
   const modalHandleClick = () => {
     if (
       konvaModalOpen === true &&
-      (currentDocID === "" || currentDocID !== selectedFile || errorGettingFile)
+      (currentDocID === null ||
+        currentDocID !== selectedFile ||
+        errorGettingFile)
     ) {
       getImageAndGeometryFromServer(selectedDocData);
     }
