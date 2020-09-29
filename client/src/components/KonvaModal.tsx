@@ -7,7 +7,12 @@ import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
 import { useStore } from "../contexts/ZustandStore";
-import { KonvaModalContext, LinesGeometry } from "./ManualSelect";
+import {
+  KonvaModalContext,
+  LinesGeometry,
+  CurrentSelection,
+} from "./ManualSelect";
+import { DocImageDimensions } from "./RenderModal";
 
 // cannot import from SelectModal... likely a shadow dom issue
 const CloseButton = styled.button`
@@ -63,7 +68,7 @@ const CurrentSelectionWrapper = styled.div`
   box-sizing: border-box;
 `;
 
-const CurrentSelection = styled(Typography)`
+const CurrentSelectionTypography = styled(Typography)`
   margin: 0;
   background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
   padding: 1em;
@@ -75,7 +80,13 @@ const CurrentSelection = styled(Typography)`
 
 const CurrentSelectionContext = createContext({} as any);
 
-const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
+const Polygon = ({
+  lineGeometry,
+  docImageDimensions,
+}: {
+  lineGeometry: LinesGeometry;
+  docImageDimensions: DocImageDimensions;
+}) => {
   const [color, setColor] = useState("transparent");
   const { filled, setFilled, setCurrentSelection } = useContext(
     CurrentSelectionContext
@@ -134,7 +145,13 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
   );
 };
 
-const Header = ({ docImageDimensions, currentSelection }: any) => {
+const Header = ({
+  docImageDimensions,
+  currentSelection,
+}: {
+  docImageDimensions: DocImageDimensions;
+  currentSelection: CurrentSelection;
+}) => {
   const { errorLine, handleSubmitAndClear } = useContext(KonvaModalContext);
   return (
     <CurrentSelectionWrapper
@@ -156,11 +173,11 @@ const Header = ({ docImageDimensions, currentSelection }: any) => {
             </Box>
           </Typography>
           <FlexContainer>
-            <CurrentSelection>
+            <CurrentSelectionTypography>
               {Object.keys(currentSelection).map(
                 (key) => currentSelection[key] + " "
               )}
-            </CurrentSelection>
+            </CurrentSelectionTypography>
             <FillButton onClick={handleSubmitAndClear}>Submit</FillButton>
           </FlexContainer>
         </div>

@@ -23,6 +23,11 @@ const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
 `;
 
+export interface DocImageDimensions {
+  width: number;
+  height: number;
+}
+
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
@@ -56,7 +61,7 @@ export const RenderModal = () => {
   const [docImageDimensions, setDocImageDimensions] = useState({
     width: 0,
     height: 0,
-  });
+  } as DocImageDimensions);
 
   // handle input el click
   useEffect(() => {

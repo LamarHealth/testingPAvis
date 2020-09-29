@@ -35,6 +35,15 @@ export interface LinesGeometry {
   Text: string;
 }
 
+interface DocImageURL {
+  heightXWidthMultiplier: number;
+  url: string;
+}
+
+export interface CurrentSelection {
+  [lineID: string]: string;
+}
+
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = () => {
@@ -65,15 +74,17 @@ export const ManualSelect = () => {
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
-  const [docImageURL, setDocImageURL] = useState(
-    {} as { heightXWidthMutliplier?: number; url?: string }
-  );
+  const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
   );
-  const [currentDocID, setCurrentDocID] = useState("" as any);
-  const [currentSelection, setCurrentSelection] = useState({} as any);
-  const [image] = useImage(docImageURL.url as string);
+  const [currentDocID, setCurrentDocID] = useState(
+    undefined as string | undefined
+  );
+  const [currentSelection, setCurrentSelection] = useState(
+    {} as CurrentSelection
+  );
+  const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as any);
   const [errorLine, setErrorLine] = useState(null as null | string);
 
@@ -93,7 +104,7 @@ export const ManualSelect = () => {
     }
   };
   useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
-  const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
+  const isDocImageSet = Boolean(docImageURL.heightXWidthMultiplier);
   !someErrorGettingThisFile && isDocImageSet && setKvpTableAnchorEl(null); // important... close kvp table only when konva modal is displayed
 
   // data from server
@@ -127,20 +138,20 @@ export const ManualSelect = () => {
         img.src = objectURL;
         img.onload = function (this: any) {
           const url = objectURL;
-          const heightXWidthMutliplier = this.naturalHeight / this.naturalWidth;
+          const heightXWidthMultiplier = this.naturalHeight / this.naturalWidth;
 
           // if the first time an image is loaded, then set the img dim to a specified default. img dim are updated from resizing.
           if (docImageDimensions.height === 0) {
             setDocImageDimensions(() => {
               const width = DOC_IMAGE_WIDTH;
-              const height = DOC_IMAGE_WIDTH * heightXWidthMutliplier;
+              const height = DOC_IMAGE_WIDTH * heightXWidthMultiplier;
               return { width, height };
             });
           }
 
           setDocImageURL({
             url,
-            heightXWidthMutliplier,
+            heightXWidthMultiplier,
           });
         };
         break;
@@ -266,7 +277,7 @@ export const ManualSelect = () => {
     setDocImageDimensions({
       // set doc img dim
       width,
-      height: width * (docImageURL.heightXWidthMutliplier as number),
+      height: width * docImageURL.heightXWidthMultiplier,
     });
   };
 
