@@ -6,6 +6,7 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
+import { KONVA_MODAL_STICKY_HEADER_SHADOW } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import {
   KonvaModalContext,
@@ -77,6 +78,13 @@ const CurrentSelectionTypography = styled(Typography)`
   border: 0.5px solid ${colors.FONT_BLUE};
   flex-basis: auto;
   flex-grow: 10;
+`;
+
+const StickyHeaderWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: ${KONVA_MODAL_STICKY_HEADER_SHADOW};
 `;
 
 const CurrentSelectionContext = createContext({} as any);
@@ -208,11 +216,13 @@ export const KonvaModal = () => {
 
   return (
     <>
-      <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
-      <Header
-        docImageDimensions={docImageDimensions}
-        currentSelection={currentSelection}
-      />
+      <StickyHeaderWrapper>
+        <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
+        <Header
+          docImageDimensions={docImageDimensions}
+          currentSelection={currentSelection}
+        />
+      </StickyHeaderWrapper>
       <Stage
         width={docImageDimensions.width}
         height={docImageDimensions.height}
