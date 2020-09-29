@@ -5,13 +5,14 @@ import {
   KeyValuesByDoc,
 } from "../components/KeyValuePairs";
 
+/** e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} } */
 export interface ErrorFile {
   [key: string]: {
     image?: boolean;
     geometry?: boolean;
     errorMessage?: string;
     errorCode?: number;
-  }; // e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} }
+  };
 }
 
 type State = {
