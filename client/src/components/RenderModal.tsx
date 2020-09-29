@@ -65,8 +65,8 @@ export const RenderModal = () => {
 
   // handle input el click
   useEffect(() => {
-    const handleInputClick = (event: any) => {
-      setEventTarget(event.target);
+    const handleInputClick = (event: MouseEvent) => {
+      setEventTarget(event.target as HTMLInputElement);
     };
     const inputEls = document.querySelectorAll("input");
     inputEls.forEach((inputEl) =>
