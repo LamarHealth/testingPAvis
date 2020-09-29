@@ -120,7 +120,7 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
 };
 
 const ErrorMessage = ({ docID }: { docID: string }) => {
-  const [errorFiles] = [useStore((state) => state.errorFiles)];
+  const errorFiles = useStore((state) => state.errorFiles);
   const errorMsg = errorFiles[docID].errorMessage
     ? errorFiles[docID].errorMessage
     : DEFAULT_ERROR_MESSAGE;
@@ -129,7 +129,7 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
     <ErrorMessageWrapper>
       <Typography>
         <i>
-          <strong>Error {errorFiles[docID].errorCode}</strong>: {errorMsg}
+          <strong>Error</strong>: {errorMsg}
         </i>
       </Typography>
     </ErrorMessageWrapper>

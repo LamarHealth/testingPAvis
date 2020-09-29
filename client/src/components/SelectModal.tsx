@@ -474,7 +474,7 @@ const ErrorLine = () => {
   return (
     <ErrorMessage>
       <i>
-        <strong>Error {errorFiles[selectedFile].errorCode}</strong>: {errorMsg}
+        <strong>Error</strong>: {errorMsg}
       </i>
     </ErrorMessage>
   );
