@@ -22,7 +22,7 @@ import {
   handleFreightTerms,
   assignTargetString,
 } from "./libertyInputsDictionary";
-import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
+import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 const ButtonsBoxWrapper = styled.div`
   display: flex;
@@ -206,10 +206,10 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
           sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
           sortedKeyValuePairs[0].value === ""
         ) {
-          renderBlankChiclet(this);
+          renderAccuracyScore("blank", this);
           $(this).prop("value", null);
         } else {
-          renderAccuracyScore(this, sortedKeyValuePairs[0]);
+          renderAccuracyScore("value", this, sortedKeyValuePairs[0]);
           $(this).prop("value", sortedKeyValuePairs[0]["value"]);
         }
       });

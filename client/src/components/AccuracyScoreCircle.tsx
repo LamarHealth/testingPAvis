@@ -241,33 +241,37 @@ const setMounter = (target: any) => {
 };
 
 export const renderAccuracyScore = (
+  valueOrBlank: "value" | "blank",
   target: any,
-  keyValue: KeyValuesWithDistance
+  keyValue?: KeyValuesWithDistance
 ) => {
-  const { mounter, mounterID } = setMounter(target);
-  const inputHeight = parseInt(
-    window.getComputedStyle(target).height.replace("px", "")
-  );
+  if (target.offsetParent) {
+    const { mounter, mounterID } = setMounter(target);
+    const inputHeight = parseInt(
+      window.getComputedStyle(target).height.replace("px", "")
+    );
 
-  ReactDOM.render(
-    <AccuracyScoreEl
-      //@ts-ignore
-      value={keyValue.distanceFromTarget * 100}
-      inputHeight={inputHeight}
-      mounterID={mounterID}
-    />,
-    mounter
-  );
-};
-
-export const renderBlankChiclet = (target: any) => {
-  const { mounter, mounterID } = setMounter(target);
-  const inputHeight = parseInt(
-    window.getComputedStyle(target).height.replace("px", "")
-  );
-
-  ReactDOM.render(
-    <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
-    mounter
-  );
+    if (valueOrBlank === "value") {
+      ReactDOM.render(
+        <AccuracyScoreEl
+          //@ts-ignore
+          value={keyValue.distanceFromTarget * 100}
+          inputHeight={inputHeight}
+          mounterID={mounterID}
+        />,
+        mounter
+      );
+    }
+    if (valueOrBlank === "blank") {
+      ReactDOM.render(
+        <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
+        mounter
+      );
+    }
+  } else {
+    console.log(
+      "error: cannot render chiclet, no positioned parent for target: ",
+      target
+    );
+  }
 };

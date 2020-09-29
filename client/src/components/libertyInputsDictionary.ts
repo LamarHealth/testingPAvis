@@ -61,10 +61,22 @@ export const handleFreightTerms = (
 
     if (valIsSufficiently("collect")) {
       $(selectEl).val(2);
-      renderAccuracyScore(selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
     } else if (valIsSufficiently("prepaid")) {
       $(selectEl).val(1);
-      renderAccuracyScore(selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
     }
   }
+};
+
+export const getLibertyModalMutationsObserver = (callback: () => void) => {
+  return new MutationObserver(function (mutationsList: MutationRecord[]) {
+    for (let mutation of mutationsList) {
+      // triggered when the 'Create Masters' modal opens and closes
+      const changed = mutation.target as HTMLElement;
+      if (changed.className.includes("modal-backdrop")) {
+        callback(); // trigger callback on modal open/close
+      }
+    }
+  });
 };
