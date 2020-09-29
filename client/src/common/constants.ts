@@ -34,6 +34,8 @@ export const Z_INDEX_ALLOCATOR = {
     return this.baseIndex + 3;
   },
 };
+export const DEFAULT_ERROR_MESSAGE =
+  "Unable to fetch resources from server. Try again later.";
 
 // If LOCAL_MODE is enabled, then the app will render a mock dashboard for testing
 export const LOCAL_MODE = process.env.REACT_APP_LOCAL === envVars.LOCAL;

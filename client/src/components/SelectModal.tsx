@@ -27,7 +27,12 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import TextField from "@material-ui/core/TextField";
 
 import { colors } from "../common/colors";
-import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
+import {
+  MAIN_MODAL_WIDTH,
+  API_PATH,
+  MODAL_SHADOW,
+  DEFAULT_ERROR_MESSAGE,
+} from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   getEditDistanceAndSort,
@@ -36,7 +41,6 @@ import {
   deleteKVPairFromLocalStorage,
   KeyValuesByDoc,
 } from "./KeyValuePairs";
-import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore, renderBlankChiclet } from "./AccuracyScoreCircle";
 import { useStore } from "../contexts/ZustandStore";
 
@@ -458,11 +462,19 @@ const Message = ({ msg }: any) => {
   );
 };
 
-const ErrorLine = (props: { errorCode: number; msg: string }) => {
+const ErrorLine = () => {
+  const [selectedFile, errorFiles] = [
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.errorFiles),
+  ];
+  const errorMsg = errorFiles[selectedFile].errorMessage
+    ? errorFiles[selectedFile].errorMessage
+    : DEFAULT_ERROR_MESSAGE;
+
   return (
     <ErrorMessage>
       <i>
-        <strong>Error {props.errorCode}</strong>: {props.msg}
+        <strong>Error {errorFiles[selectedFile].errorCode}</strong>: {errorMsg}
       </i>
     </ErrorMessage>
   );
@@ -479,12 +491,8 @@ export const SelectModal = () => {
     setKonvaModalOpen,
     setSelectedChiclet,
     setKvpTableAnchorEl,
-    errorFetchingImage,
-    setErrorFetchingImage,
-    errorFetchingGeometry,
-    setErrorFetchingGeometry,
-    errorMessage,
-    errorCode,
+    errorFiles,
+    setErrorFiles,
   ] = [
     useStore((state) => state.selectedFile),
     useStore((state) => state.docData),
@@ -493,12 +501,8 @@ export const SelectModal = () => {
     useStore((state) => state.setKonvaModalOpen),
     useStore((state) => state.setSelectedChiclet),
     useStore((state) => state.setKvpTableAnchorEl),
-    useStore((state) => state.errorFetchingImage),
-    useStore((state) => state.setErrorFetchingImage),
-    useStore((state) => state.errorFetchingGeometry),
-    useStore((state) => state.setErrorFetchingGeometry),
-    useStore((state) => state.errorMessage),
-    useStore((state) => state.errorCode),
+    useStore((state) => state.errorFiles),
+    useStore((state) => state.setErrorFiles),
   ];
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
@@ -506,6 +510,10 @@ export const SelectModal = () => {
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
   const textFieldRef = useRef(null);
+
+  const someErrorGettingThisFile =
+    errorFiles[selectedFile] &&
+    (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry);
 
   const findKvpTableInputEl = () => {
     if (textFieldRef === null) {
@@ -518,11 +526,10 @@ export const SelectModal = () => {
   };
 
   const handleModalClose = () => {
-    if (errorFetchingImage || errorFetchingGeometry) {
+    if (someErrorGettingThisFile) {
       // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
       setKonvaModalOpen(false);
-      setErrorFetchingImage(false);
-      setErrorFetchingGeometry(false);
+      setErrorFiles({ [selectedFile]: { image: false, geometry: false } });
     }
     setKvpTableAnchorEl(null); // close modal
     setSelectedChiclet(""); // remove chiclet border
@@ -589,9 +596,11 @@ export const SelectModal = () => {
           onClick={handleSubmit}
           style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
         />
-        <Collapse in={errorFetchingGeometry || errorFetchingImage}>
-          <ErrorLine errorCode={errorCode} msg={errorMessage} />
-        </Collapse>
+        {someErrorGettingThisFile && (
+          <Collapse in={someErrorGettingThisFile}>
+            <ErrorLine />
+          </Collapse>
+        )}
         <Collapse in={messageCollapse}>
           <Message msg={removeKVMessage} />
         </Collapse>

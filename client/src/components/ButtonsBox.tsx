@@ -15,6 +15,7 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo } from "./DocViewer";
+import { DEFAULT_ERROR_MESSAGE } from "./../common/constants";
 import { colors } from "./../common/colors";
 import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
 import {
@@ -118,17 +119,17 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
   );
 };
 
-const ErrorMessage = () => {
-  const [errorMessage, errorCode] = [
-    useStore((state) => state.errorMessage),
-    useStore((state) => state.errorCode),
-  ];
+const ErrorMessage = ({ docID }: { docID: string }) => {
+  const [errorFiles] = [useStore((state) => state.errorFiles)];
+  const errorMsg = errorFiles[docID].errorMessage
+    ? errorFiles[docID].errorMessage
+    : DEFAULT_ERROR_MESSAGE;
 
   return (
     <ErrorMessageWrapper>
       <Typography>
         <i>
-          <strong>Error {errorCode}</strong>: {errorMessage}
+          <strong>Error {errorFiles[docID].errorCode}</strong>: {errorMsg}
         </i>
       </Typography>
     </ErrorMessageWrapper>
@@ -144,6 +145,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
     useStore((state) => state.setKonvaModalOpen),
     useStore((state) => state.errorFiles),
   ];
+  const docID = props.docInfo.docID.toString();
 
   // click away
   const handleClickAway = () => {
@@ -215,13 +217,12 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
 
   // error handling
   const someErrorGettingThisFile =
-    errorFiles[props.docInfo.docID.toString()] &&
-    (errorFiles[props.docInfo.docID.toString()].image ||
-      errorFiles[props.docInfo.docID.toString()].geometry);
+    errorFiles[docID] &&
+    (errorFiles[docID].image || errorFiles[docID].geometry);
 
   return (
     <>
-      {someErrorGettingThisFile && <ErrorMessage />}
+      {someErrorGettingThisFile && <ErrorMessage docID={docID} />}
       <ButtonsBoxWrapper>
         <ChipWrapper>
           <Chip

@@ -46,12 +46,6 @@ export const ManualSelect = () => {
     docData,
     konvaModalOpen,
     autocompleteAnchor,
-    errorFetchingImage,
-    setErrorFetchingImage,
-    errorFetchingGeometry,
-    setErrorFetchingGeometry,
-    setErrorMessage,
-    setErrorCode,
     errorFiles,
     setErrorFiles,
   ] = [
@@ -60,12 +54,6 @@ export const ManualSelect = () => {
     useStore((state) => state.docData),
     useStore((state) => state.konvaModalOpen),
     useStore((state) => state.autocompleteAnchor),
-    useStore((state) => state.errorFetchingImage),
-    useStore((state) => state.setErrorFetchingImage),
-    useStore((state) => state.errorFetchingGeometry),
-    useStore((state) => state.setErrorFetchingGeometry),
-    useStore((state) => state.setErrorMessage),
-    useStore((state) => state.setErrorCode),
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
@@ -77,14 +65,17 @@ export const ManualSelect = () => {
   const [filled, setFilled] = useState({} as any);
   const [errorLine, setErrorLine] = useState(null as null | string);
 
+  const someErrorGettingThisFile =
+    errorFiles[selectedFile] &&
+    (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry);
+
   // modal
   const modalHandleClick = () => {
     if (
       konvaModalOpen === true &&
       (currentDocID === "" ||
         currentDocID !== selectedFile ||
-        errorFetchingImage ||
-        errorFetchingGeometry)
+        someErrorGettingThisFile)
     ) {
       getImageAndGeometryFromServer(selectedDocData);
     }
@@ -115,7 +106,6 @@ export const ManualSelect = () => {
 
     switch (docImageResponse.status) {
       case 200:
-        setErrorFetchingImage(false);
         setErrorFiles({ [docID]: { image: false } });
         const blob = await docImageResponse.blob();
         const objectURL = await URL.createObjectURL(blob);
@@ -142,16 +132,22 @@ export const ManualSelect = () => {
         };
         break;
       case 410:
-        setErrorFetchingImage(true);
-        setErrorFiles({ [docID]: { image: true } });
-        setErrorCode(docImageResponse.status);
         const statusMessage = (await docImageResponse.json()).status;
-        setErrorMessage(statusMessage);
+        setErrorFiles({
+          [docID]: {
+            image: true,
+            errorMessage: statusMessage,
+            errorCode: docImageResponse.status,
+          },
+        });
         break;
       default:
-        setErrorFetchingImage(true);
-        setErrorFiles({ [docID]: { image: true } });
-        setErrorCode(docImageResponse.status);
+        setErrorFiles({
+          [docID]: {
+            image: true,
+            errorCode: docImageResponse.status,
+          },
+        });
     }
 
     // get geometry
@@ -165,7 +161,6 @@ export const ManualSelect = () => {
 
     switch (linesGeometryResponse.status) {
       case 200:
-        setErrorFetchingGeometry(false);
         setErrorFiles({ [docID]: { geometry: false } });
         const linesGeometry = (
           await linesGeometryResponse.json()
@@ -176,16 +171,22 @@ export const ManualSelect = () => {
         setCurrentLinesGeometry(linesGeometry);
         break;
       case 410:
-        setErrorFetchingGeometry(true);
-        setErrorFiles({ [docID]: { geometry: true } });
-        setErrorCode(linesGeometryResponse.status);
         const statusMessage = (await linesGeometryResponse.json()).status;
-        setErrorMessage(statusMessage);
+        setErrorFiles({
+          [docID]: {
+            geometry: true,
+            errorMessage: statusMessage,
+            errorCode: linesGeometryResponse.status,
+          },
+        });
         break;
       default:
-        setErrorFetchingGeometry(true);
-        setErrorFiles({ [docID]: { geometry: true } });
-        setErrorCode(linesGeometryResponse.status);
+        setErrorFiles({
+          [docID]: {
+            geometry: true,
+            errorCode: linesGeometryResponse.status,
+          },
+        });
     }
   };
 
@@ -258,7 +259,7 @@ export const ManualSelect = () => {
 
   return (
     <React.Fragment>
-      {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
+      {!someErrorGettingThisFile && isDocImageSet && (
         <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
           <StyledRnD
             position={konvaModalDraggCoords}
