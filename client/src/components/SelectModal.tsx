@@ -503,7 +503,9 @@ export const SelectModal = () => {
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
-  const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
+  const [unalteredKeyValue, setUnalteredKeyValue] = useState(
+    null as KeyValuesWithDistance | null
+  );
   const inputRef = useRef(null as HTMLInputElement | null);
   const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
 
@@ -533,11 +535,8 @@ export const SelectModal = () => {
       // only render accuracy score if value was not edited.
       if (
         unalteredKeyValue !== null &&
-        //@ts-ignore
         unalteredKeyValue.value === inputEl.value
       ) {
-        // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
-        //@ts-ignore
         renderAccuracyScore("value", eventTarget, unalteredKeyValue);
       } else {
         renderAccuracyScore("blank", eventTarget);
