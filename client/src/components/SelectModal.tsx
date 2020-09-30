@@ -202,6 +202,7 @@ const ButtonsCell = (props: {
     setRemoveKVMessage,
     setMessageCollapse,
     setUnalteredKeyValue,
+    inputRef,
   } = useContext(TableContext);
   const [targetString, setDocData] = [
     useStore((state) => state.targetString),
@@ -213,19 +214,13 @@ const ButtonsCell = (props: {
   const isSelected = props.isSelected;
 
   const fillButtonHandler = () => {
-    // fill the kvp table input
-    const shadowWrapper: any = document.querySelector(
-      ".shadow-root-for-modals"
-    );
-    const shadowRoot: any = shadowWrapper.children[0].shadowRoot;
-    const inputEl: any = shadowRoot.getElementById("kvp-table-fill-text-input");
-    inputEl.value = keyValue["value"];
-
-    // let the parent component know what the original string is
-    setUnalteredKeyValue(keyValue);
-
-    // focus on the text editor
-    inputEl.focus();
+    if (inputRef.current) {
+      inputRef.current.value = keyValue["value"]; // fill the kvp table input
+      setUnalteredKeyValue(keyValue); // let the parent component know what the original string is
+      inputRef.current.focus(); // focus on the text editor
+    } else {
+      console.log("error: kvp table inputRef is null in ButtonsBox");
+    }
   };
 
   const reportKVPair = async (remove: boolean = false) => {
@@ -509,19 +504,8 @@ export const SelectModal = () => {
   )[0];
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
-  const textFieldRef = useRef(null);
-
+  const inputRef = useRef(null as HTMLInputElement | null);
   const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
-
-  const findKvpTableInputEl = () => {
-    if (textFieldRef === null) {
-      console.log("error: textFieldRef null");
-      return;
-    } else {
-      //@ts-ignore
-      return textFieldRef.current.querySelector("#kvp-table-fill-text-input");
-    }
-  };
 
   const handleModalClose = () => {
     if (errorGettingFile) {
@@ -531,7 +515,8 @@ export const SelectModal = () => {
     }
     setKvpTableAnchorEl(null); // close modal
     setSelectedChiclet(""); // remove chiclet border
-    findKvpTableInputEl().value = ""; // clear the text editor
+    //@ts-ignore
+    inputRef.current && (inputRef.current.value = ""); // clear the text editor
   };
 
   const handleManualSelectButtonClick = () => {
@@ -539,26 +524,28 @@ export const SelectModal = () => {
   };
 
   const handleSubmit = () => {
-    const inputEl = findKvpTableInputEl();
-    const currentEditedValue = inputEl.value;
-    eventTarget && (eventTarget.value = currentEditedValue); // fill input w edited val
-    setKvpTableAnchorEl(null); // close the modal
-    setSelectedChiclet(""); // remove chiclet border
+    if (inputRef.current) {
+      const inputEl = inputRef.current as HTMLInputElement;
+      eventTarget && (eventTarget.value = inputEl.value); // fill input w edited val
+      setKvpTableAnchorEl(null); // close the modal
+      setSelectedChiclet(""); // remove chiclet border
 
-    // only render accuracy score if value was not edited.
-    if (
-      unalteredKeyValue !== null &&
-      //@ts-ignore
-      unalteredKeyValue.value === currentEditedValue
-    ) {
-      // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
-      //@ts-ignore
-      renderAccuracyScore("value", eventTarget, unalteredKeyValue);
+      // only render accuracy score if value was not edited.
+      if (
+        unalteredKeyValue !== null &&
+        //@ts-ignore
+        unalteredKeyValue.value === inputEl.value
+      ) {
+        // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
+        //@ts-ignore
+        renderAccuracyScore("value", eventTarget, unalteredKeyValue);
+      } else {
+        renderAccuracyScore("blank", eventTarget);
+      }
+      inputEl.value = ""; // clear the text editor
     } else {
-      renderAccuracyScore("blank", eventTarget);
+      console.log("error: kvp table inputRef.current is null");
     }
-
-    inputEl.value = ""; // clear the text editor
   };
 
   return (
@@ -575,8 +562,7 @@ export const SelectModal = () => {
             variant="outlined"
             fullWidth
             placeholder={targetString}
-            id={"kvp-table-fill-text-input"}
-            ref={textFieldRef}
+            inputRef={inputRef}
             margin="dense"
             style={{ margin: 0 }}
           />
@@ -606,6 +592,7 @@ export const SelectModal = () => {
             setRemoveKVMessage,
             setMessageCollapse,
             setUnalteredKeyValue,
+            inputRef,
           }}
         >
           <TableComponent />
