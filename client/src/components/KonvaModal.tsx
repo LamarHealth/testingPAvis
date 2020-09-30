@@ -100,6 +100,7 @@ const Polygon = ({
     CurrentSelectionContext
   );
   const isFilled = filled[lineGeometry.ID] ? true : false;
+  const [isMouseDown, setIsMouseDown] = useState(false as boolean);
 
   const fillAndSetCurrentSelection = () => {
     if (!isFilled) {
@@ -147,8 +148,16 @@ const Polygon = ({
         ])
       )}
       closed
-      fill={isFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
+      fill={
+        isMouseDown
+          ? colors.MANUAL_SELECT_RECT_FILL_MOUSEDOWN
+          : isFilled
+          ? colors.MANUAL_SELECT_RECT_FILL
+          : color
+      }
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
+      onMouseDown={() => setIsMouseDown(true)}
+      onMouseUp={() => setIsMouseDown(false)}
     />
   );
 };
