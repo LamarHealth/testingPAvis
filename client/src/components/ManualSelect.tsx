@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
@@ -89,7 +89,7 @@ export const ManualSelect = () => {
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
-  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
+  const errorGettingFile = checkFileError(errorFiles, selectedFile);
 
   // modal open
   const modalHandleClick = () => {

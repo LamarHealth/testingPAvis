@@ -15,9 +15,11 @@ export interface ErrorFile {
   };
 }
 
+type Uuid = string | null;
+
 type State = {
-  selectedFile: string;
-  selectedChiclet: string;
+  selectedFile: Uuid;
+  selectedChiclet: Uuid;
   docData: KeyValuesByDoc[];
   konvaModalOpen: boolean;
   autocompleteAnchor: null | HTMLInputElement;
@@ -25,8 +27,8 @@ type State = {
   targetString: string;
   kvpTableAnchorEl: null | HTMLInputElement;
   errorFiles: ErrorFile; // not just one error file, but an object of error files
-  setSelectedFile: (selectedFile: string) => void;
-  setSelectedChiclet: (selectedChiclet: string) => void;
+  setSelectedFile: (selectedFile: Uuid) => void;
+  setSelectedChiclet: (selectedChiclet: Uuid) => void;
   setDocData: (docData: KeyValuesByDoc[]) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
   setAutocompleteAnchor: (
@@ -39,8 +41,8 @@ type State = {
 };
 
 export const useStore = create<State>((set) => ({
-  selectedFile: "",
-  selectedChiclet: "",
+  selectedFile: null,
+  selectedChiclet: null,
   docData: getKeyValuePairsByDoc(),
   konvaModalOpen: false,
   autocompleteAnchor: null,
@@ -77,12 +79,10 @@ export const useStore = create<State>((set) => ({
   },
 }));
 
-export const findErrorGettingFile = (
-  errorFiles: ErrorFile,
-  selectedFile: string
-) => {
+export const checkFileError = (errorFiles: ErrorFile, selectedFile: Uuid) => {
   return Boolean(
-    errorFiles[selectedFile] &&
+    selectedFile &&
+      errorFiles[selectedFile] &&
       (errorFiles[selectedFile].image || errorFiles[selectedFile].geometry)
   );
 };

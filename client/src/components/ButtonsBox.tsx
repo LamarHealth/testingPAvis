@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 
 import $ from "jquery";
 import styled from "styled-components";
-import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -65,7 +65,7 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const setSelectedFile = useStore((state) => state.setSelectedFile);
 
   const handleDelete = () => {
-    setSelectedFile("");
+    setSelectedFile(null);
     fileInfoContext.fileDispatch({
       type: "remove",
       documentInfo: props.docInfo,
@@ -146,7 +146,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
     useStore((state) => state.errorFiles),
   ];
   const docID = props.docInfo.docID.toString();
-  const errorGettingFile = findErrorGettingFile(errorFiles, docID);
+  const errorGettingFile = checkFileError(errorFiles, docID);
 
   // click away
   const handleClickAway = () => {
