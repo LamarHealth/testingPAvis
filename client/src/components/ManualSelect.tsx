@@ -29,6 +29,12 @@ const StyledRnD = styled(Rnd)`
   box-shadow: ${MODAL_SHADOW};
 `;
 
+const resizeHandleStylesPayload = {
+  topBottom: { height: "15px", zIndex: 1 },
+  corner: { height: "30px", width: "30px", zIndex: 1 },
+  sides: { width: "15px", zIndex: 1 },
+};
+
 export interface LinesGeometry {
   Coordinates: { X: number; Y: number }[];
   ID: string;
@@ -296,6 +302,16 @@ export const ManualSelect = () => {
             bounds="window"
             size={konvaModalDimensions}
             onResizeStop={handleResizeStop}
+            resizeHandleStyles={{
+              bottom: resizeHandleStylesPayload.topBottom,
+              bottomLeft: resizeHandleStylesPayload.corner,
+              bottomRight: resizeHandleStylesPayload.corner,
+              left: resizeHandleStylesPayload.sides,
+              right: resizeHandleStylesPayload.sides,
+              top: resizeHandleStylesPayload.topBottom,
+              topLeft: resizeHandleStylesPayload.corner,
+              topRight: resizeHandleStylesPayload.corner,
+            }}
           >
             <div>
               <KonvaModalContext.Provider
