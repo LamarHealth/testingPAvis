@@ -312,6 +312,7 @@ export const ManualSelect = () => {
               topLeft: resizeHandleStylesPayload.corner,
               topRight: resizeHandleStylesPayload.corner,
             }}
+            cancel={".konvajs-content"}
           >
             <div>
               <KonvaModalContext.Provider
