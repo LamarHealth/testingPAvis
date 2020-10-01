@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useRef } from "react";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import styled from "styled-components";
 
@@ -11,10 +11,11 @@ import { useStore } from "../contexts/ZustandStore";
 import {
   KonvaModalContext,
   LinesGeometry,
-  CurrentSelection,
+  LinesSelection,
   Filled,
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
+import { useEffect } from "react";
 
 // cannot import from SelectModal... likely a shadow dom issue
 const CloseButton = styled.button`
@@ -47,13 +48,6 @@ const BigButton = styled.button`
   }
   flex-basis: auto;
   flex-grow: 0;
-
-  // mui font styles
-  font-size: 1rem;
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-  font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0.00938em;
 `;
 
 const FlexContainer = styled.div`
@@ -63,20 +57,51 @@ const FlexContainer = styled.div`
   width: 100%;
 `;
 
-const CurrentSelectionWrapper = styled.div`
+const HeaderWrapper = styled.div`
   padding: 1em 2em;
   background-color: ${colors.MANUAL_SELECT_HEADER};
   box-sizing: border-box;
+
+  // mui font styles
+  font-size: 1rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  input {
+    font-size: 1rem;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+  }
+  p {
+    margin: 0;
+  }
 `;
 
-const CurrentSelectionTypography = styled(Typography)`
-  margin: 0;
-  background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
-  padding: 1em;
-  border-radius: 5px;
-  border: 0.5px solid ${colors.FONT_BLUE};
+// const CurrentSelectionTypography = styled(Typography)`
+//   margin: 0;
+//   background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
+//   padding: 1em;
+//   border-radius: 5px;
+//   border: 0.5px solid ${colors.FONT_BLUE};
+//   flex-basis: auto;
+//   flex-grow: 10;
+// `;
+
+const CurrentSelectionWrapper = styled.div`
   flex-basis: auto;
   flex-grow: 10;
+`;
+
+const CurrentSelectionDiv = styled.div`
+  padding: 0.75em;
+  border-radius: 5px;
+  border: 0.5px solid ${colors.FONT_BLUE};
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
 `;
 
 const StickyHeaderWrapper = styled.div`
@@ -84,6 +109,10 @@ const StickyHeaderWrapper = styled.div`
   top: 0;
   z-index: 1;
   box-shadow: ${KONVA_MODAL_STICKY_HEADER_SHADOW};
+`;
+
+const CursorPointerWrapper = styled.div`
+  cursor: pointer;
 `;
 
 const CurrentSelectionContext = createContext({} as any);
@@ -96,7 +125,7 @@ const Polygon = ({
   docImageDimensions: DocImageDimensions;
 }) => {
   const [color, setColor] = useState("transparent");
-  const { filled, setFilled, setCurrentSelection } = useContext(
+  const { filled, setFilled, setLinesSelection } = useContext(
     CurrentSelectionContext
   );
   const isFilled = filled[lineGeometry.ID] ? true : false;
@@ -104,10 +133,10 @@ const Polygon = ({
 
   const fillAndSetCurrentSelection = () => {
     if (!isFilled) {
-      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
+      setLinesSelection((prevLinesSelection: LinesSelection) => {
         return {
-          ...prevCurrentSelection,
-          [lineGeometry.ID]: lineGeometry.Text,
+          ...prevLinesSelection,
+          [lineGeometry.ID]: { line: lineGeometry.Text },
         };
       });
       setFilled((otherFilleds: Filled) => {
@@ -118,9 +147,9 @@ const Polygon = ({
       });
     }
     if (isFilled) {
-      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
-        delete prevCurrentSelection[lineGeometry.ID];
-        return { ...prevCurrentSelection };
+      setLinesSelection((prevLinesSelection: LinesSelection) => {
+        delete prevLinesSelection[lineGeometry.ID];
+        return { ...prevLinesSelection };
       });
       setFilled((otherFilleds: Filled) => {
         return {
@@ -162,18 +191,104 @@ const Polygon = ({
   );
 };
 
+const EditableSpan = ({ content }: { content: string }) => {
+  return <span contentEditable>{content}</span>;
+};
+
 const Header = ({
   docImageDimensions,
-  currentSelection,
+  linesSelection,
+  setLinesSelection,
 }: {
   docImageDimensions: DocImageDimensions;
-  currentSelection: CurrentSelection;
+  linesSelection: LinesSelection;
+  setLinesSelection: any;
 }) => {
   const { errorLine, handleSubmitAndClear, handleClear } = useContext(
     KonvaModalContext
   );
+  const editableDivRef = useRef(null as HTMLDivElement | null);
+  const [editedText, setEditedText] = useState(undefined as string | undefined);
+
+  // update editable on linesSelection change
+  useEffect(() => {
+    if (editableDivRef.current) {
+      // const selectedLines = Object.entries(linesSelection)
+      //   // .filter((entry) => !entry[1].edited)
+      //   .map((entry) => {
+      //     return `<span contentEditable="true">${entry[1].line}</span>`;
+      //   })
+      //   .join(" ");
+      // editableDivRef.current.innerHTML = selectedLines;
+      // console.log("linesSelection, ", linesSelection);
+      // console.log("editedText, ", editedText);
+    }
+  }, [linesSelection]);
+
+  // listen for changes to editable
+  useEffect(() => {
+    if (editableDivRef.current) {
+      const node = editableDivRef.current as Node;
+      const config = {
+        // attributes: true,
+        // childList: true,
+        subtree: true,
+        characterData: true,
+        characterDataOldValue: true,
+      };
+      const callback = function (
+        mutationsList: MutationRecord[],
+        observer: MutationObserver
+      ) {
+        // const editedText = editableDivRef.current?.innerText as string;
+        // console.log("editedText, ", editedText);
+        // for (const mutation of mutationsList) {
+        //   if (mutation.type === "characterData") {
+        //     // Object.entries(linesSelection).forEach((entry) => {
+        //     //   if (!editedText.includes(entry[1].line)) {
+        //     //     setLinesSelection((prevLinesSelection: LinesSelection) => {
+        //     //       return {
+        //     //         ...prevLinesSelection,
+        //     //         [entry[0]]: {
+        //     //           ...prevLinesSelection[entry[0]],
+        //     //           edited: true,
+        //     //         },
+        //     //       };
+        //     //     });
+        //     //   }
+        //     // });
+        //   }
+        // }
+        // let edited = false;
+        // mutationsList.forEach(
+        //   (mutation) => mutation.type === "characterData" && (edited = true)
+        // );
+        // if (edited) {
+        //   const currentEditedText = editableDivRef.current?.innerText as string;
+        //   setEditedText(currentEditedText);
+        //   Object.entries(linesSelection).forEach((entry) => {
+        //     if (!currentEditedText.includes(entry[1].line)) {
+        //       setLinesSelection((prevLinesSelection: LinesSelection) => {
+        //         return {
+        //           ...prevLinesSelection,
+        //           [entry[0]]: {
+        //             ...prevLinesSelection[entry[0]],
+        //             edited: true,
+        //           },
+        //         };
+        //       });
+        //     }
+        //   });
+        // }
+      };
+      const observer = new MutationObserver(callback);
+      observer.observe(node, config);
+      return () => observer.disconnect();
+    }
+  });
+
   return (
-    <CurrentSelectionWrapper
+    <HeaderWrapper
       style={{
         width: `${docImageDimensions.width}px`,
       }}
@@ -184,7 +299,7 @@ const Header = ({
           <b>Return</b> key to fill.
         </Box>
       </Typography>
-      {Object.keys(currentSelection).length > 0 && (
+      {Object.keys(linesSelection).length > 0 && (
         <div>
           <Typography>
             <Box fontStyle="fontWeightBold">
@@ -192,11 +307,23 @@ const Header = ({
             </Box>
           </Typography>
           <FlexContainer>
-            <CurrentSelectionTypography>
-              {Object.keys(currentSelection).map(
-                (key) => currentSelection[key] + " "
+            {/* <CurrentSelectionTypography>
+              {Object.keys(linesSelection).map(
+                (key) => linesSelection[key] + " "
               )}
-            </CurrentSelectionTypography>
+            </CurrentSelectionTypography> */}
+            <CurrentSelectionWrapper>
+              <CurrentSelectionDiv
+                ref={editableDivRef}
+                contentEditable
+                role={"textbox"}
+              >
+                {Object.entries(linesSelection).map((entry) => (
+                  <EditableSpan content={entry[1].line + " "} />
+                ))}
+              </CurrentSelectionDiv>
+            </CurrentSelectionWrapper>
+
             <BigButton
               onClick={handleClear}
               style={{ backgroundColor: `${colors.RED}` }}
@@ -219,17 +346,17 @@ const Header = ({
           </Box>
         </Typography>
       )}
-    </CurrentSelectionWrapper>
+    </HeaderWrapper>
   );
 };
 
 export const KonvaModal = () => {
   const {
-    currentSelection,
+    linesSelection,
     image,
     filled,
     setFilled,
-    setCurrentSelection,
+    setLinesSelection,
     currentLinesGeometry,
     docImageDimensions,
   } = useContext(KonvaModalContext);
@@ -241,40 +368,43 @@ export const KonvaModal = () => {
         <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
         <Header
           docImageDimensions={docImageDimensions}
-          currentSelection={currentSelection}
+          linesSelection={linesSelection}
+          setLinesSelection={setLinesSelection}
         />
       </StickyHeaderWrapper>
-      <Stage
-        width={docImageDimensions.width}
-        height={docImageDimensions.height}
-      >
-        <Layer>
-          <KonvaImage
-            image={image}
-            width={docImageDimensions.width}
-            height={docImageDimensions.height}
-          />
-          <CurrentSelectionContext.Provider
-            value={{
-              filled,
-              setFilled,
-              setCurrentSelection,
-            }}
-          >
-            {currentLinesGeometry.map(
-              (lineGeometry: LinesGeometry, ndx: number) => {
-                return (
-                  <Polygon
-                    key={ndx}
-                    lineGeometry={lineGeometry}
-                    docImageDimensions={docImageDimensions}
-                  />
-                );
-              }
-            )}
-          </CurrentSelectionContext.Provider>
-        </Layer>
-      </Stage>
+      <CursorPointerWrapper>
+        <Stage
+          width={docImageDimensions.width}
+          height={docImageDimensions.height}
+        >
+          <Layer>
+            <KonvaImage
+              image={image}
+              width={docImageDimensions.width}
+              height={docImageDimensions.height}
+            />
+            <CurrentSelectionContext.Provider
+              value={{
+                filled,
+                setFilled,
+                setLinesSelection,
+              }}
+            >
+              {currentLinesGeometry.map(
+                (lineGeometry: LinesGeometry, ndx: number) => {
+                  return (
+                    <Polygon
+                      key={ndx}
+                      lineGeometry={lineGeometry}
+                      docImageDimensions={docImageDimensions}
+                    />
+                  );
+                }
+              )}
+            </CurrentSelectionContext.Provider>
+          </Layer>
+        </Stage>
+      </CursorPointerWrapper>
     </>
   );
 };

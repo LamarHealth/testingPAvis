@@ -46,8 +46,8 @@ interface DocImageURL {
   url: string;
 }
 
-export interface CurrentSelection {
-  [lineID: string]: string;
+export interface LinesSelection {
+  [lineID: string]: { line: string; edited?: boolean };
 }
 
 export interface Filled {
@@ -91,9 +91,7 @@ export const ManualSelect = () => {
   const [currentDocID, setCurrentDocID] = useState(
     undefined as string | undefined
   );
-  const [currentSelection, setCurrentSelection] = useState(
-    {} as CurrentSelection
-  );
+  const [linesSelection, setLinesSelection] = useState({} as LinesSelection);
   const [image] = useImage(docImageURL.url);
   const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
@@ -222,13 +220,13 @@ export const ManualSelect = () => {
   // submit button / enter
   const handleSubmitAndClear = () => {
     if (eventTarget) {
-      if (Object.keys(currentSelection).length !== 0) {
+      if (Object.keys(linesSelection).length !== 0) {
         renderAccuracyScore("blank", eventTarget);
-        eventTarget.value = Object.keys(currentSelection)
-          .map((key) => currentSelection[key])
+        eventTarget.value = Object.keys(linesSelection)
+          .map((key) => linesSelection[key])
           .join(" ");
         setErrorLine(null);
-        setCurrentSelection({});
+        setLinesSelection({});
         setFilled({});
       } else {
         setErrorLine("Nothing to enter");
@@ -251,17 +249,17 @@ export const ManualSelect = () => {
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [currentSelection, eventTarget, autocompleteAnchor]);
+  }, [linesSelection, eventTarget, autocompleteAnchor]);
 
   // clear button
   const handleClear = () => {
-    setCurrentSelection({});
+    setLinesSelection({});
     setFilled({});
   };
 
   // clear entries on doc switch
   useEffect(() => {
-    setCurrentSelection({});
+    setLinesSelection({});
   }, [selectedFile]);
 
   // drag & resize
@@ -317,11 +315,11 @@ export const ManualSelect = () => {
             <div>
               <KonvaModalContext.Provider
                 value={{
-                  currentSelection,
+                  linesSelection,
                   image,
                   filled,
                   setFilled,
-                  setCurrentSelection,
+                  setLinesSelection,
                   currentLinesGeometry,
                   docImageDimensions,
                   errorLine,
