@@ -14,6 +14,7 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import { DEFAULT } from "../common/themes";
 import { colors } from "../common/colors";
 import WrappedJssComponent from "./ShadowComponent";
+import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
 
 const Container = styled.div`
   max-height: 280px;
@@ -23,13 +24,13 @@ const Container = styled.div`
 `;
 
 export const RenderAutocomplete = () => {
-  const docData = useStore((state) => state.docData);
-  const selectedFile = useStore((state) => state.selectedFile);
+  const [docData, selectedFile, autocompleteAnchor, setAutocompleteAnchor] = [
+    useStore((state) => state.docData),
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.autocompleteAnchor),
+    useStore((state) => state.setAutocompleteAnchor),
+  ];
   const [filter, setFilter] = useState("" as string);
-  const autocompleteAnchor = useStore((state) => state.autocompleteAnchor);
-  const setAutocompleteAnchor = useStore(
-    (state) => state.setAutocompleteAnchor
-  );
   const open = Boolean(autocompleteAnchor);
 
   // doc data
@@ -51,12 +52,26 @@ export const RenderAutocomplete = () => {
     : false;
 
   // handle input typing
-  $(document).ready(() => {
-    $("input").on("input", function () {
-      const inputEl = this as HTMLInputElement;
-      setFilter(inputEl.value);
-      setAutocompleteAnchor(inputEl);
+  const listenForInputTypying = () => {
+    $(document).ready(() => {
+      $("input").on("input", function () {
+        const inputEl = this as HTMLInputElement;
+        setFilter(inputEl.value);
+        setAutocompleteAnchor(inputEl);
+      });
     });
+  };
+  useEffect(listenForInputTypying, []); // add listener on first render only; subsequent adds, see below
+
+  // listen for liberty modal open (specific for liberty site)
+  useEffect(() => {
+    const observer = getLibertyModalMutationsObserver(listenForInputTypying);
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
   });
 
   // listen for menu tabbing

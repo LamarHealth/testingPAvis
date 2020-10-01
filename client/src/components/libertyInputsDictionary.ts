@@ -28,7 +28,7 @@ export const libertyInputsDictionary = {
   CMNotifyFax: "Fax",
 } as LibertyInputsDictionary;
 
-export const assignTargetString = (inputEl: any) => {
+export const assignTargetString = (inputEl: any): string => {
   let targetString;
   const placeholderText = $(inputEl).attr("placeholder");
   if (placeholderText) {
@@ -37,6 +37,8 @@ export const assignTargetString = (inputEl: any) => {
     const inputID = $(inputEl).attr("id");
     if (inputID && libertyInputsDictionary[inputID]) {
       targetString = libertyInputsDictionary[inputID];
+    } else {
+      targetString = "";
     }
   }
   return targetString;
@@ -59,10 +61,22 @@ export const handleFreightTerms = (
 
     if (valIsSufficiently("collect")) {
       $(selectEl).val(2);
-      renderAccuracyScore(selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
     } else if (valIsSufficiently("prepaid")) {
       $(selectEl).val(1);
-      renderAccuracyScore(selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
     }
   }
+};
+
+export const getLibertyModalMutationsObserver = (callback: () => void) => {
+  return new MutationObserver(function (mutationsList: MutationRecord[]) {
+    for (let mutation of mutationsList) {
+      // triggered when the 'Create Masters' modal opens and closes
+      const changed = mutation.target as HTMLElement;
+      if (changed.className.includes("modal-backdrop")) {
+        callback(); // trigger callback on modal open/close
+      }
+    }
+  });
 };

@@ -1,6 +1,5 @@
 import React, { useState, createContext } from "react";
 
-import $ from "jquery";
 import styled from "styled-components";
 
 import { ThemeProvider } from "@material-ui/core/styles";
@@ -17,8 +16,8 @@ import {
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
 } from "../common/constants";
-import { assignTargetString } from "./libertyInputsDictionary";
 import { useStore } from "../contexts/ZustandStore";
+import { useEffect } from "react";
 
 const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
@@ -27,16 +26,25 @@ const Container = styled.div`
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
-  const [eventTarget, setEventTarget] = useState(null) as any;
-  const [targetString, setTargetString] = useState(undefined as any);
-  const areThereDocs = useStore((state) => state.docData).length > 0;
-  const isDocSelected = useStore((state) => state.selectedFile) !== "";
-  const [kvpTableAnchorEl, setKvpTableAnchorEl] = useState(
-    null as null | HTMLElement
-  );
+  const [
+    docData,
+    selectedFile,
+    konvaModalOpen,
+    eventTarget,
+    setEventTarget,
+    kvpTableAnchorEl,
+  ] = [
+    useStore((state) => state.docData),
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.konvaModalOpen),
+    useStore((state) => state.eventTarget),
+    useStore((state) => state.setEventTarget),
+    useStore((state) => state.kvpTableAnchorEl),
+  ];
+  const areThereDocs = docData.length > 0;
+  const isDocSelected = selectedFile !== "";
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
-  const konvaModalOpen = useStore((state) => state.konvaModalOpen);
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
     y: KONVA_MODAL_OFFSET_Y,
@@ -56,21 +64,20 @@ export const RenderModal = () => {
   );
   const [errorCode, setErrorCode] = useState(400);
 
-  $(document).ready(() => {
-    // handle chiclet click
-    $("span[id^='docit-accuracy-score-mounter-']").click(function () {
-      const mounterID = this.id.replace("docit-accuracy-score-mounter-", "");
-      const eventTarget = $(`input.has-docit-mounter-${mounterID}`).get()[0];
-
-      setEventTarget(eventTarget);
-      setTargetString(assignTargetString(eventTarget));
-      setKvpTableAnchorEl(eventTarget);
-    });
-
-    // handle input el click
-    $("input").click(function () {
-      setEventTarget(this); // for sidebar 'View PDF' button: cannot fill text input from KonvaModal without an eventTarget
-    });
+  // handle input el click
+  useEffect(() => {
+    const handleInputClick = (event: any) => {
+      setEventTarget(event.target);
+    };
+    const inputEls = document.querySelectorAll("input");
+    inputEls.forEach((inputEl) =>
+      inputEl.addEventListener("click", handleInputClick)
+    );
+    return () => {
+      inputEls.forEach((inputEl) =>
+        inputEl.removeEventListener("click", handleInputClick)
+      );
+    };
   });
 
   return (
@@ -100,8 +107,6 @@ export const RenderModal = () => {
                 >
                   <MainModalContext.Provider
                     value={{
-                      kvpTableAnchorEl,
-                      setKvpTableAnchorEl,
                       konvaModalDraggCoords,
                       setKonvaModalDraggCoords,
                       konvaModalDimensions,
@@ -118,10 +123,7 @@ export const RenderModal = () => {
                       setErrorCode,
                     }}
                   >
-                    <SelectModal
-                      eventTarget={eventTarget}
-                      targetString={targetString}
-                    />
+                    <SelectModal />
                   </MainModalContext.Provider>
                 </WrappedJssComponent>
               </Container>
@@ -131,8 +133,6 @@ export const RenderModal = () => {
           {konvaModalOpen && (
             <MainModalContext.Provider
               value={{
-                kvpTableAnchorEl,
-                setKvpTableAnchorEl,
                 konvaModalDraggCoords,
                 setKonvaModalDraggCoords,
                 konvaModalDimensions,
@@ -149,7 +149,7 @@ export const RenderModal = () => {
                 setErrorCode,
               }}
             >
-              <ManualSelect eventTarget={eventTarget} />
+              <ManualSelect />
             </MainModalContext.Provider>
           )}
         </>

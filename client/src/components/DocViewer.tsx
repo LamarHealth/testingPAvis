@@ -79,8 +79,10 @@ const FeedbackTypography = styled(Typography)`
 `;
 
 const DocCell = (props: DocumentInfo) => {
-  const selectedFile = useStore((state) => state.selectedFile);
-  const setSelectedFile = useStore((state) => state.setSelectedFile);
+  const [selectedFile, setSelectedFile] = [
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.setSelectedFile),
+  ];
 
   const setSelected = () => {
     selectedFile === props.docID
