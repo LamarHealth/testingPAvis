@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
@@ -29,6 +29,25 @@ const StyledRnD = styled(Rnd)`
   box-shadow: ${MODAL_SHADOW};
 `;
 
+export interface LinesGeometry {
+  Coordinates: { X: number; Y: number }[];
+  ID: string;
+  Text: string;
+}
+
+interface DocImageURL {
+  heightXWidthMultiplier: number;
+  url: string;
+}
+
+export interface CurrentSelection {
+  [lineID: string]: string;
+}
+
+export interface Filled {
+  [lineID: string]: boolean;
+}
+
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = () => {
@@ -39,50 +58,55 @@ export const ManualSelect = () => {
     setKonvaModalDimensions,
     docImageDimensions,
     setDocImageDimensions,
-    errorFetchingImage,
-    setErrorFetchingImage,
-    errorFetchingGeometry,
-    setErrorFetchingGeometry,
-    setErrorMessage,
-    setErrorCode,
   } = useContext(MainModalContext);
   const [
     eventTarget,
     selectedFile,
     docData,
     konvaModalOpen,
+    setKvpTableAnchorEl,
     autocompleteAnchor,
+    errorFiles,
+    setErrorFiles,
   ] = [
     useStore((state) => state.eventTarget),
     useStore((state) => state.selectedFile),
     useStore((state) => state.docData),
     useStore((state) => state.konvaModalOpen),
+    useStore((state) => state.setKvpTableAnchorEl),
     useStore((state) => state.autocompleteAnchor),
+    useStore((state) => state.errorFiles),
+    useStore((state) => state.setErrorFiles),
   ];
-  const [docImageURL, setDocImageURL] = useState({} as any);
-  const [currentLinesGeometry, setCurrentLinesGeometry] = useState([] as any);
-  const [currentDocID, setCurrentDocID] = useState("" as any);
-  const [currentSelection, setCurrentSelection] = useState({} as any);
+  const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
+  const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
+    [] as LinesGeometry[]
+  );
+  const [currentDocID, setCurrentDocID] = useState(null as string | null);
+  const [currentSelection, setCurrentSelection] = useState(
+    {} as CurrentSelection
+  );
   const [image] = useImage(docImageURL.url);
-  const [filled, setFilled] = useState({} as any);
+  const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
+  const errorGettingFile = checkFileError(errorFiles, selectedFile);
 
-  // modal
+  // modal open
   const modalHandleClick = () => {
     if (
       konvaModalOpen === true &&
-      (currentDocID === "" ||
+      (currentDocID === null ||
         currentDocID !== selectedFile ||
-        errorFetchingImage ||
-        errorFetchingGeometry)
+        errorGettingFile)
     ) {
       getImageAndGeometryFromServer(selectedDocData);
     }
   };
-  const isDocImageSet = Boolean(docImageURL.heightXWidthMutliplier);
   useEffect(modalHandleClick, [konvaModalOpen, selectedFile]);
+  const isDocImageSet = Boolean(docImageURL.heightXWidthMultiplier);
+  !errorGettingFile && isDocImageSet && setKvpTableAnchorEl(null); // important... close kvp table only when konva modal is displayed
 
-  // geometry
+  // data from server
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
@@ -105,7 +129,7 @@ export const ManualSelect = () => {
 
     switch (docImageResponse.status) {
       case 200:
-        setErrorFetchingImage(false);
+        setErrorFiles({ [docID]: { image: false } });
         const blob = await docImageResponse.blob();
         const objectURL = await URL.createObjectURL(blob);
 
@@ -113,32 +137,40 @@ export const ManualSelect = () => {
         img.src = objectURL;
         img.onload = function (this: any) {
           const url = objectURL;
-          const heightXWidthMutliplier = this.naturalHeight / this.naturalWidth;
+          const heightXWidthMultiplier = this.naturalHeight / this.naturalWidth;
 
           // if the first time an image is loaded, then set the img dim to a specified default. img dim are updated from resizing.
           if (docImageDimensions.height === 0) {
             setDocImageDimensions(() => {
               const width = DOC_IMAGE_WIDTH;
-              const height = DOC_IMAGE_WIDTH * heightXWidthMutliplier;
+              const height = DOC_IMAGE_WIDTH * heightXWidthMultiplier;
               return { width, height };
             });
           }
 
           setDocImageURL({
             url,
-            heightXWidthMutliplier,
+            heightXWidthMultiplier,
           });
         };
         break;
       case 410:
-        setErrorFetchingImage(true);
-        setErrorCode(docImageResponse.status);
         const statusMessage = (await docImageResponse.json()).status;
-        setErrorMessage(statusMessage);
+        setErrorFiles({
+          [docID]: {
+            image: true,
+            errorMessage: statusMessage,
+            errorCode: docImageResponse.status,
+          },
+        });
         break;
       default:
-        setErrorFetchingImage(true);
-        setErrorCode(docImageResponse.status);
+        setErrorFiles({
+          [docID]: {
+            image: true,
+            errorCode: docImageResponse.status,
+          },
+        });
     }
 
     // get geometry
@@ -152,7 +184,7 @@ export const ManualSelect = () => {
 
     switch (linesGeometryResponse.status) {
       case 200:
-        setErrorFetchingGeometry(false);
+        setErrorFiles({ [docID]: { geometry: false } });
         const linesGeometry = (
           await linesGeometryResponse.json()
         ).linesGeometry.map((lineGeometry: any) => {
@@ -162,14 +194,22 @@ export const ManualSelect = () => {
         setCurrentLinesGeometry(linesGeometry);
         break;
       case 410:
-        setErrorFetchingGeometry(true);
-        setErrorCode(linesGeometryResponse.status);
         const statusMessage = (await linesGeometryResponse.json()).status;
-        setErrorMessage(statusMessage);
+        setErrorFiles({
+          [docID]: {
+            geometry: true,
+            errorMessage: statusMessage,
+            errorCode: linesGeometryResponse.status,
+          },
+        });
         break;
       default:
-        setErrorFetchingGeometry(true);
-        setErrorCode(linesGeometryResponse.status);
+        setErrorFiles({
+          [docID]: {
+            geometry: true,
+            errorCode: linesGeometryResponse.status,
+          },
+        });
     }
   };
 
@@ -236,13 +276,13 @@ export const ManualSelect = () => {
     setDocImageDimensions({
       // set doc img dim
       width,
-      height: width * docImageURL.heightXWidthMutliplier,
+      height: width * docImageURL.heightXWidthMultiplier,
     });
   };
 
   return (
     <React.Fragment>
-      {!errorFetchingGeometry && !errorFetchingImage && isDocImageSet && (
+      {!errorGettingFile && isDocImageSet && (
         <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
           <StyledRnD
             position={konvaModalDraggCoords}

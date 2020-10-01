@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 
 import $ from "jquery";
 import styled from "styled-components";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -15,6 +15,8 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo } from "./DocViewer";
+import { DEFAULT_ERROR_MESSAGE } from "./../common/constants";
+import { colors } from "./../common/colors";
 import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
 import {
   handleFreightTerms,
@@ -52,12 +54,18 @@ const FlexIconButton = styled(IconButton)`
   max-width: 2.5em;
 `;
 
+const ErrorMessageWrapper = styled.div`
+  margin: 1em 0;
+  padding: 0.5em;
+  background-color: ${colors.ERROR_BACKGROUND_RED};
+`;
+
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
   const setSelectedFile = useStore((state) => state.setSelectedFile);
 
   const handleDelete = () => {
-    setSelectedFile("");
+    setSelectedFile(null);
     fileInfoContext.fileDispatch({
       type: "remove",
       documentInfo: props.docInfo,
@@ -111,14 +119,34 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
   );
 };
 
+const ErrorMessage = ({ docID }: { docID: string }) => {
+  const errorFiles = useStore((state) => state.errorFiles);
+  const errorMsg = errorFiles[docID].errorMessage
+    ? errorFiles[docID].errorMessage
+    : DEFAULT_ERROR_MESSAGE;
+
+  return (
+    <ErrorMessageWrapper>
+      <Typography>
+        <i>
+          <strong>Error</strong>: {errorMsg}
+        </i>
+      </Typography>
+    </ErrorMessageWrapper>
+  );
+};
+
 const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialog] = useState<"delete" | "download">();
-  const [docData, setSelectedFile, setKonvaModalOpen] = [
+  const [docData, setSelectedFile, setKonvaModalOpen, errorFiles] = [
     useStore((state) => state.docData),
     useStore((state) => state.setSelectedFile),
     useStore((state) => state.setKonvaModalOpen),
+    useStore((state) => state.errorFiles),
   ];
+  const docID = props.docInfo.docID.toString();
+  const errorGettingFile = checkFileError(errorFiles, docID);
 
   // click away
   const handleClickAway = () => {
@@ -190,6 +218,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
 
   return (
     <>
+      {errorGettingFile && <ErrorMessage docID={docID} />}
       <ButtonsBoxWrapper>
         <ChipWrapper>
           <Chip
@@ -205,6 +234,7 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
             label="View PDF"
             variant="outlined"
             onClick={handleViewPdfClick}
+            disabled={errorGettingFile}
           />
         </ChipWrapper>
         <ButtonsWrapper>

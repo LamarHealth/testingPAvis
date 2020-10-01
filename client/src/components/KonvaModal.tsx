@@ -7,7 +7,13 @@ import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
 import { useStore } from "../contexts/ZustandStore";
-import { KonvaModalContext } from "./ManualSelect";
+import {
+  KonvaModalContext,
+  LinesGeometry,
+  CurrentSelection,
+  Filled,
+} from "./ManualSelect";
+import { DocImageDimensions } from "./RenderModal";
 
 // cannot import from SelectModal... likely a shadow dom issue
 const CloseButton = styled.button`
@@ -63,7 +69,7 @@ const CurrentSelectionWrapper = styled.div`
   box-sizing: border-box;
 `;
 
-const CurrentSelection = styled(Typography)`
+const CurrentSelectionTypography = styled(Typography)`
   margin: 0;
   background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
   padding: 1em;
@@ -75,7 +81,13 @@ const CurrentSelection = styled(Typography)`
 
 const CurrentSelectionContext = createContext({} as any);
 
-const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
+const Polygon = ({
+  lineGeometry,
+  docImageDimensions,
+}: {
+  lineGeometry: LinesGeometry;
+  docImageDimensions: DocImageDimensions;
+}) => {
   const [color, setColor] = useState("transparent");
   const { filled, setFilled, setCurrentSelection } = useContext(
     CurrentSelectionContext
@@ -84,13 +96,13 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
 
   const fillAndSetCurrentSelection = () => {
     if (!isFilled) {
-      setCurrentSelection((prevCurrentSelection: any) => {
+      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
         return {
           ...prevCurrentSelection,
           [lineGeometry.ID]: lineGeometry.Text,
         };
       });
-      setFilled((otherFilleds: any) => {
+      setFilled((otherFilleds: Filled) => {
         return {
           ...otherFilleds,
           [lineGeometry.ID]: true,
@@ -98,11 +110,11 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
       });
     }
     if (isFilled) {
-      setCurrentSelection((prevCurrentSelection: any) => {
+      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
         delete prevCurrentSelection[lineGeometry.ID];
         return { ...prevCurrentSelection };
       });
-      setFilled((otherFilleds: any) => {
+      setFilled((otherFilleds: Filled) => {
         return {
           ...otherFilleds,
           [lineGeometry.ID]: false,
@@ -122,7 +134,7 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
       }}
       points={Array.prototype.concat.apply(
         [],
-        lineGeometry.Coordinates.map((geometry: any) => [
+        lineGeometry.Coordinates.map((geometry) => [
           docImageDimensions.width * geometry.X,
           docImageDimensions.height * geometry.Y,
         ])
@@ -134,7 +146,13 @@ const Polygon = ({ lineGeometry, docImageDimensions }: any) => {
   );
 };
 
-const Header = ({ docImageDimensions, currentSelection }: any) => {
+const Header = ({
+  docImageDimensions,
+  currentSelection,
+}: {
+  docImageDimensions: DocImageDimensions;
+  currentSelection: CurrentSelection;
+}) => {
   const { errorLine, handleSubmitAndClear } = useContext(KonvaModalContext);
   return (
     <CurrentSelectionWrapper
@@ -156,11 +174,11 @@ const Header = ({ docImageDimensions, currentSelection }: any) => {
             </Box>
           </Typography>
           <FlexContainer>
-            <CurrentSelection>
+            <CurrentSelectionTypography>
               {Object.keys(currentSelection).map(
                 (key) => currentSelection[key] + " "
               )}
-            </CurrentSelection>
+            </CurrentSelectionTypography>
             <FillButton onClick={handleSubmitAndClear}>Submit</FillButton>
           </FlexContainer>
         </div>
@@ -212,15 +230,17 @@ export const KonvaModal = () => {
               setCurrentSelection,
             }}
           >
-            {currentLinesGeometry.map((lineGeometry: any, ndx: number) => {
-              return (
-                <Polygon
-                  key={ndx}
-                  lineGeometry={lineGeometry}
-                  docImageDimensions={docImageDimensions}
-                />
-              );
-            })}
+            {currentLinesGeometry.map(
+              (lineGeometry: LinesGeometry, ndx: number) => {
+                return (
+                  <Polygon
+                    key={ndx}
+                    lineGeometry={lineGeometry}
+                    docImageDimensions={docImageDimensions}
+                  />
+                );
+              }
+            )}
           </CurrentSelectionContext.Provider>
         </Layer>
       </Stage>

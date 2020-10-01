@@ -27,4 +27,5 @@ export const colors = {
   MANUAL_SELECT_POPOVER_BACKDROP: "hsla(0, 0%, 0%, 0.4)",
   CURRENT_SELECTION_LIGHTBLUE: "hsla(204, 33%, 94%, 1)",
   ACCURACY_SCORE_LIGHTBLUE: "hsl(195,100%,90%)",
+  ERROR_BACKGROUND_RED: "rgb(244, 175, 173)",
 };

@@ -27,7 +27,12 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import TextField from "@material-ui/core/TextField";
 
 import { colors } from "../common/colors";
-import { MAIN_MODAL_WIDTH, API_PATH, MODAL_SHADOW } from "../common/constants";
+import {
+  MAIN_MODAL_WIDTH,
+  API_PATH,
+  MODAL_SHADOW,
+  DEFAULT_ERROR_MESSAGE,
+} from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   getEditDistanceAndSort,
@@ -36,9 +41,8 @@ import {
   deleteKVPairFromLocalStorage,
   KeyValuesByDoc,
 } from "./KeyValuePairs";
-import { MainModalContext } from "./RenderModal";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -458,11 +462,21 @@ const Message = ({ msg }: any) => {
   );
 };
 
-const ErrorLine = (props: { errorCode: number; msg: string }) => {
+const ErrorLine = () => {
+  const [selectedFile, errorFiles] = [
+    useStore((state) => state.selectedFile),
+    useStore((state) => state.errorFiles),
+  ];
+  const errorMsg =
+    selectedFile &&
+    (errorFiles[selectedFile].errorMessage
+      ? errorFiles[selectedFile].errorMessage
+      : DEFAULT_ERROR_MESSAGE);
+
   return (
     <ErrorMessage>
       <i>
-        <strong>Error {props.errorCode}</strong>: {props.msg}
+        <strong>Error</strong>: {errorMsg}
       </i>
     </ErrorMessage>
   );
@@ -471,15 +485,6 @@ const ErrorLine = (props: { errorCode: number; msg: string }) => {
 export const SelectModal = () => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
-
-  const {
-    errorFetchingImage,
-    setErrorFetchingImage,
-    errorFetchingGeometry,
-    setErrorFetchingGeometry,
-    errorMessage,
-    errorCode,
-  } = useContext(MainModalContext);
   const [
     selectedFile,
     docData,
@@ -488,6 +493,8 @@ export const SelectModal = () => {
     setKonvaModalOpen,
     setSelectedChiclet,
     setKvpTableAnchorEl,
+    errorFiles,
+    setErrorFiles,
   ] = [
     useStore((state) => state.selectedFile),
     useStore((state) => state.docData),
@@ -496,6 +503,8 @@ export const SelectModal = () => {
     useStore((state) => state.setKonvaModalOpen),
     useStore((state) => state.setSelectedChiclet),
     useStore((state) => state.setKvpTableAnchorEl),
+    useStore((state) => state.errorFiles),
+    useStore((state) => state.setErrorFiles),
   ];
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
@@ -503,6 +512,7 @@ export const SelectModal = () => {
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
   const textFieldRef = useRef(null);
+  const errorGettingFile = checkFileError(errorFiles, selectedFile);
 
   const findKvpTableInputEl = () => {
     if (textFieldRef === null) {
@@ -515,20 +525,20 @@ export const SelectModal = () => {
   };
 
   const handleModalClose = () => {
-    if (errorFetchingImage || errorFetchingGeometry) {
+    if (errorGettingFile) {
       // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
       setKonvaModalOpen(false);
-      setErrorFetchingImage(false);
-      setErrorFetchingGeometry(false);
+      selectedFile // make sure selectedFile isn't null
+        ? setErrorFiles({ [selectedFile]: { image: false, geometry: false } })
+        : console.log("error: selectedFile null");
     }
     setKvpTableAnchorEl(null); // close modal
-    setSelectedChiclet(""); // remove chiclet border
+    setSelectedChiclet(null); // remove chiclet border
     findKvpTableInputEl().value = ""; // clear the text editor
   };
 
   const handleManualSelectButtonClick = () => {
     setKonvaModalOpen(true);
-    setKvpTableAnchorEl(null);
   };
 
   const handleSubmit = () => {
@@ -536,7 +546,7 @@ export const SelectModal = () => {
     const currentEditedValue = inputEl.value;
     eventTarget && (eventTarget.value = currentEditedValue); // fill input w edited val
     setKvpTableAnchorEl(null); // close the modal
-    setSelectedChiclet(""); // remove chiclet border
+    setSelectedChiclet(null); // remove chiclet border
 
     // only render accuracy score if value was not edited.
     if (
@@ -586,9 +596,7 @@ export const SelectModal = () => {
           onClick={handleSubmit}
           style={{ backgroundColor: `${colors.FILL_BUTTON}`, color: "white" }}
         />
-        <Collapse in={errorFetchingGeometry || errorFetchingImage}>
-          <ErrorLine errorCode={errorCode} msg={errorMessage} />
-        </Collapse>
+        {errorGettingFile && <ErrorLine />}
         <Collapse in={messageCollapse}>
           <Message msg={removeKVMessage} />
         </Collapse>
