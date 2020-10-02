@@ -19,7 +19,6 @@ import {
   KonvaModalContext,
   LinesGeometry,
   LinesSelection,
-  // Filled,
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
 
@@ -86,16 +85,6 @@ const HeaderWrapper = styled.div`
   }
 `;
 
-// const CurrentSelectionTypography = styled(Typography)`
-//   margin: 0;
-//   background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
-//   padding: 1em;
-//   border-radius: 5px;
-//   border: 0.5px solid ${colors.FONT_BLUE};
-//   flex-basis: auto;
-//   flex-grow: 10;
-// `;
-
 const CurrentSelectionWrapper = styled.div`
   flex-basis: auto;
   flex-grow: 10;
@@ -140,17 +129,11 @@ const Polygon = ({
   docImageDimensions: DocImageDimensions;
 }) => {
   const [color, setColor] = useState("transparent");
-  const {
-    // filled, setFilled,
-    linesSelection,
-    setLinesSelection,
-    // reactEditableRef,
-  } = useContext(CurrentSelectionContext);
+  const { linesSelection, setLinesSelection } = useContext(
+    CurrentSelectionContext
+  );
   const isFilled = linesSelection[lineGeometry.ID] ? true : false;
   const [isMouseDown, setIsMouseDown] = useState(false as boolean);
-
-  // console.log("filled, ", filled);
-  // console.log("linesSelection, ", linesSelection);
 
   const fillAndSetCurrentSelection = () => {
     if (!isFilled) {
@@ -160,28 +143,14 @@ const Polygon = ({
           [lineGeometry.ID]: lineGeometry.Text,
         };
       });
-      // setFilled((otherFilleds: Filled) => {
-      //   return {
-      //     ...otherFilleds,
-      //     [lineGeometry.ID]: true,
-      //   };
-      // });
-      // reactEditableRef.current.focus();
     }
     if (isFilled) {
       setLinesSelection((prevLinesSelection: LinesSelection) => {
         delete prevLinesSelection[lineGeometry.ID];
         return {
           ...prevLinesSelection,
-          // [lineGeometry.ID]: null,
         };
       });
-      // setFilled((otherFilleds: Filled) => {
-      //   return {
-      //     ...otherFilleds,
-      //     [lineGeometry.ID]: false,
-      //   };
-      // });
     }
   };
 
@@ -224,42 +193,20 @@ const Header = ({
   const { errorLine, handleSubmitAndClear, handleClear } = useContext(
     KonvaModalContext
   );
-  const {
-    linesSelection,
-    setLinesSelection,
-    // reactEditableRef
-  } = useContext(HeaderContext);
-  // const editableDivRef = useRef(null as HTMLDivElement | null);
-  // const [editedText, setEditedText] = useState(undefined as string | undefined);
+  const { linesSelection, setLinesSelection } = useContext(HeaderContext);
+  const [eventTarget, autocompleteAnchor] = [
+    useStore((state) => state.eventTarget),
+    useStore((state) => state.autocompleteAnchor),
+  ];
   const text = useRef("");
   const [renderMe, setRenderMe] = useState(false as boolean);
-  let localScopedLines = {};
-
-  // const stringLines = Object.entries(linesSelection)
-  //   .map((entry) => `<span>${entry[1] + " "}</span>`)
-  //   .join("");
-  // console.log(stringLines);
+  const editableRef = useRef(null as HTMLElement | null);
+  let localScopedLines = linesSelection;
 
   useEffect(() => {
-    // const linesIdsArray = Object.keys(linesSelection).map((key) => key);
-    // const editedText = text.current;
-    // const el = document.createElement("div");
-    // el.innerHTML = editedText;
-    // //@ts-ignore
-    // const editedTextAsArray = [...el.getElementsByTagName("span")];
-    // // console.log("editedText, ", editedText);
-    // console.log("editedTextAsArray, ", editedTextAsArray);
-    // const sanitizedEditedText = editedTextAsArray.filter(
-    //   (span) => !linesIdsArray.includes(span.id)
-    // );
-    // console.log("sanitizedEditedText, ", sanitizedEditedText);
-
-    const stringLines =
-      // editedText +
-      Object.entries(linesSelection)
-        // .filter((entry) => !editedText.includes(entry[0]))
-        .map((entry) => `<span id=${entry[0]}>${entry[1] + " "}</span>`)
-        .join("");
+    const stringLines = Object.entries(linesSelection)
+      .map((entry) => `<span id=${entry[0]}>${entry[1] + " "}</span>`)
+      .join("");
     text.current = stringLines;
     setRenderMe(!renderMe); // seems like a hack, and it kinda is, but only because we have to use useRef instead of useState... see the react-contenteditable docs. if we could just setState, we wouldn't need to manually activate a render...
   }, [linesSelection]);
@@ -267,136 +214,40 @@ const Header = ({
   const handleEditableChange = (event: any) => {
     console.log("event, ", event);
     if (event.type === "input") {
-      const editedText = event.target.value;
-      // console.log("editedText, ", editedText);
       const el = document.createElement("div");
-      el.innerHTML = editedText;
+      el.innerHTML = event.target.value;
       //@ts-ignore
       const editedTextAsArray = [...el.getElementsByTagName("span")];
-      // console.log("editedTextAsArray, ", editedTextAsArray);
       const newLines = editedTextAsArray.map((span) => {
         return [span.id, span.innerText];
       });
-      console.log("newLines, ", newLines);
+
       let payload = {} as any;
       newLines.forEach((line) => {
         payload[line[0]] = line[1];
       });
-      // setLocalScopedLines((prevLinesSelection: LinesSelection) => {
-      //   const payload = {
-      //     ...prevLinesSelection,
-      //   };
-      //   newLines.forEach((line) => {
-      //     payload[line[0]] = line[1];
-      //   });
-      //   console.log("payload, ", payload);
-      //   return {
-      //     ...payload,
-      //   };
-      // });
       localScopedLines = payload;
-      // if (editedText === "" || editedText === "<br>") {
-      //   setLinesSelection({});
-      // }
-      // text.current = event.target.value;
     }
   };
 
   const handleEditableBlur = (event: any) => {
-    console.log("blur, ", event);
     setLinesSelection(localScopedLines);
   };
 
-  // listen for changes to editable
-  // useEffect(() => {
-  //   if (editableDivRef.current) {
-  //     const node = editableDivRef.current as Node;
-  //     const config = {
-  //       attributes: true,
-  //       childList: true,
-  //       subtree: true,
-  //       characterData: true,
-  //       characterDataOldValue: true,
-  //     };
-  //     const callback = function (
-  //       mutationsList: MutationRecord[],
-  //       observer: MutationObserver
-  //     ) {
-  //       // const editedText = editableDivRef.current?.innerText as string;
-  //       // console.log("editedText, ", editedText);
-  //       // for (const mutation of mutationsList) {
-  //       //   if (mutation.type === "characterData") {
-  //       //     // Object.entries(linesSelection).forEach((entry) => {
-  //       //     //   if (!editedText.includes(entry[1].line)) {
-  //       //     //     setLinesSelection((prevLinesSelection: LinesSelection) => {
-  //       //     //       return {
-  //       //     //         ...prevLinesSelection,
-  //       //     //         [entry[0]]: {
-  //       //     //           ...prevLinesSelection[entry[0]],
-  //       //     //           edited: true,
-  //       //     //         },
-  //       //     //       };
-  //       //     //     });
-  //       //     //   }
-  //       //     // });
-  //       //   }
-  //       // }
-  //       let edited = false;
-  //       mutationsList.forEach(
-  //         (mutation) =>
-  //           (mutation.type === "characterData" ||
-  //             mutation.type === "childList") &&
-  //           (edited = true)
-  //       );
-  //       if (edited) {
-  //         const spanCollection = editableDivRef.current
-  //           ?.children as HTMLCollection;
-  //         //@ts-ignore
-  //         const spanIDs = [...spanCollection] // to make an array
-  //           .filter((el: any) => el.nodeName === "SPAN")
-  //           .map((el) => el.id.replace("line-", ""));
-
-  //         // console.log("spanIDs, ", spanIDs);
-  //         // console.log("linesSelection, ", linesSelection);
-
-  //         // Object.entries(linesSelection).forEach((entry) => {
-  //         //   if (!spanIDs.includes(entry[0])) {
-  //         //     setLinesSelection((prevLinesSelection: LinesSelection) => {
-  //         //       delete prevLinesSelection[entry[0]];
-  //         //       return { ...prevLinesSelection };
-  //         //     });
-  //         //   }
-  //         // });
-
-  //         const currentEditedText = editableDivRef.current?.innerText;
-
-  //         // console.log(currentEditedText === "" || currentEditedText === "\n");
-
-  //         // if (currentEditedText === "" || currentEditedText === "\n") {
-  //         //   setLinesSelection({});
-  //         // }
-
-  //         // setEditedText(currentEditedText);
-  //         // Object.entries(linesSelection).forEach((entry) => {
-  //         //   if (!currentEditedText.includes(entry[1].line)) {
-  //         //     setLinesSelection((prevLinesSelection: LinesSelection) => {
-  //         //       return {
-  //         //         ...prevLinesSelection,
-  //         //         [entry[0]]: {
-  //         //           ...prevLinesSelection[entry[0]],
-  //         //           edited: true,
-  //         //         },
-  //         //       };
-  //         //     });
-  //         //   }
-  //         // });
-  //       }
-  //     };
-  //     const observer = new MutationObserver(callback);
-  //     observer.observe(node, config);
-  //     return () => observer.disconnect();
-  //   }
-  // });
+  useEffect(() => {
+    function keydownListener(e: any) {
+      if (e.keyCode === 13) {
+        if (!autocompleteAnchor) {
+          // don't fire if autocomplete is open
+          handleSubmitAndClear();
+        }
+      }
+    }
+    document.addEventListener("keydown", keydownListener);
+    return () => {
+      document.removeEventListener("keydown", keydownListener);
+    };
+  }, [eventTarget, autocompleteAnchor]);
 
   return (
     <HeaderWrapper
@@ -419,20 +270,11 @@ const Header = ({
           </Typography>
           <FlexContainer>
             <CurrentSelectionWrapper>
-              {/* <CurrentSelectionDiv
-                contentEditable
-                role={"textbox"}
-                ref={editableDivRef}
-              >
-                {Object.entries(linesSelection).map((entry) => {
-                  return <span id={`line-${entry[0]}`}>{entry[1] + " "}</span>;
-                })}
-              </CurrentSelectionDiv> */}
               <StyledContentEditable
                 html={text.current}
                 onChange={handleEditableChange}
-                // innerRef={reactEditableRef}
                 onBlur={handleEditableBlur}
+                innerRef={editableRef}
               />
             </CurrentSelectionWrapper>
 
@@ -467,17 +309,12 @@ const HeaderContext = createContext({} as any);
 export const KonvaModal = () => {
   const {
     image,
-    // filled,
-    // setFilled,
     linesSelection,
     setLinesSelection,
     currentLinesGeometry,
     docImageDimensions,
   } = useContext(KonvaModalContext);
   const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
-  // const reactEditableRef = useRef(null as HTMLDivElement | null);
-
-  // console.log("KonvaModal linesSelection, ", linesSelection);
 
   return (
     <>
@@ -487,7 +324,6 @@ export const KonvaModal = () => {
           value={{
             linesSelection,
             setLinesSelection,
-            // reactEditableRef
           }}
         >
           <Header docImageDimensions={docImageDimensions} />
@@ -506,11 +342,8 @@ export const KonvaModal = () => {
             />
             <CurrentSelectionContext.Provider
               value={{
-                // filled,
-                // setFilled,
                 linesSelection,
                 setLinesSelection,
-                // reactEditableRef,
               }}
             >
               {currentLinesGeometry.map(

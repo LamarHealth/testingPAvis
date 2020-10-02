@@ -236,20 +236,20 @@ export const ManualSelect = () => {
     }
   };
 
-  useEffect(() => {
-    function keydownListener(e: any) {
-      if (e.keyCode === 13) {
-        if (!autocompleteAnchor) {
-          // don't fire if autocomplete is open
-          handleSubmitAndClear();
-        }
-      }
-    }
-    document.addEventListener("keydown", keydownListener);
-    return () => {
-      document.removeEventListener("keydown", keydownListener);
-    };
-  }, [linesSelection, eventTarget, autocompleteAnchor]);
+  // useEffect(() => {
+  //   function keydownListener(e: any) {
+  //     if (e.keyCode === 13) {
+  //       if (!autocompleteAnchor) {
+  //         // don't fire if autocomplete is open
+  //         handleSubmitAndClear();
+  //       }
+  //     }
+  //   }
+  //   document.addEventListener("keydown", keydownListener);
+  //   return () => {
+  //     document.removeEventListener("keydown", keydownListener);
+  //   };
+  // }, [linesSelection, eventTarget, autocompleteAnchor]);
 
   // clear button
   const handleClear = () => {
