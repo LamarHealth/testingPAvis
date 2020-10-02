@@ -47,12 +47,12 @@ interface DocImageURL {
 }
 
 export interface LinesSelection {
-  [lineID: string]: { line: string; edited?: boolean };
+  [lineID: string]: string;
 }
 
-export interface Filled {
-  [lineID: string]: boolean;
-}
+// export interface Filled {
+//   [lineID: string]: boolean;
+// }
 
 export const KonvaModalContext = createContext({} as any);
 
@@ -93,7 +93,7 @@ export const ManualSelect = () => {
   );
   const [linesSelection, setLinesSelection] = useState({} as LinesSelection);
   const [image] = useImage(docImageURL.url);
-  const [filled, setFilled] = useState({} as Filled);
+  // const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
   const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
 
@@ -227,7 +227,7 @@ export const ManualSelect = () => {
           .join(" ");
         setErrorLine(null);
         setLinesSelection({});
-        setFilled({});
+        // setFilled({});
       } else {
         setErrorLine("Nothing to enter");
       }
@@ -254,7 +254,7 @@ export const ManualSelect = () => {
   // clear button
   const handleClear = () => {
     setLinesSelection({});
-    setFilled({});
+    // setFilled({});
   };
 
   // clear entries on doc switch
@@ -315,10 +315,10 @@ export const ManualSelect = () => {
             <div>
               <KonvaModalContext.Provider
                 value={{
-                  linesSelection,
                   image,
-                  filled,
-                  setFilled,
+                  // filled,
+                  // setFilled,
+                  linesSelection,
                   setLinesSelection,
                   currentLinesGeometry,
                   docImageDimensions,
