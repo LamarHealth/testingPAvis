@@ -234,20 +234,20 @@ const Header = ({
     setLinesSelection(localScopedLines);
   };
 
-  useEffect(() => {
-    function keydownListener(e: any) {
-      if (e.keyCode === 13) {
-        if (!autocompleteAnchor) {
-          // don't fire if autocomplete is open
-          handleSubmitAndClear();
-        }
-      }
-    }
-    document.addEventListener("keydown", keydownListener);
-    return () => {
-      document.removeEventListener("keydown", keydownListener);
-    };
-  }, [eventTarget, autocompleteAnchor]);
+  // useEffect(() => {
+  //   function keydownListener(e: any) {
+  //     if (e.keyCode === 13) {
+  //       if (!autocompleteAnchor) {
+  //         // don't fire if autocomplete is open
+  //         handleSubmitAndClear();
+  //       }
+  //     }
+  //   }
+  //   document.addEventListener("keydown", keydownListener);
+  //   return () => {
+  //     document.removeEventListener("keydown", keydownListener);
+  //   };
+  // }, [eventTarget, autocompleteAnchor]);
 
   return (
     <HeaderWrapper

@@ -146,9 +146,10 @@ export const ManualSelect = () => {
           // if the first time an image is loaded, then set the img dim to a specified default. img dim are updated from resizing.
           if (docImageDimensions.height === 0) {
             setDocImageDimensions(() => {
-              const width = DOC_IMAGE_WIDTH;
-              const height = DOC_IMAGE_WIDTH * heightXWidthMultiplier;
-              return { width, height };
+              return {
+                width: DOC_IMAGE_WIDTH,
+                height: DOC_IMAGE_WIDTH * heightXWidthMultiplier,
+              };
             });
           }
 
