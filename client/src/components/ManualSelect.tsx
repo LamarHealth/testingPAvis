@@ -1,45 +1,16 @@
-import React, {
-  useState,
-  useEffect,
-  createContext,
-  useContext,
-  useRef,
-} from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
 import useImage from "use-image";
-import styled from "styled-components";
-import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
-import { KonvaModal } from "./KonvaModal";
+import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 import uuidv from "uuid";
-import { colors } from "../common/colors";
-import {
-  API_PATH,
-  DOC_IMAGE_WIDTH,
-  KONVA_MODAL_HEIGHT,
-  MODAL_SHADOW,
-} from "../common/constants";
-
-const StyledRnD = styled(Rnd)`
-  background: #f0f0f0;
-  position: absolute;
-  height: ${KONVA_MODAL_HEIGHT}px;
-  overflow-y: scroll;
-  border: 1px solid ${colors.MODAL_BORDER};
-  box-shadow: ${MODAL_SHADOW};
-`;
-
-const resizeHandleStylesPayload = {
-  topBottom: { height: "15px", zIndex: 1 },
-  corner: { height: "30px", width: "30px", zIndex: 1 },
-  sides: { width: "15px", zIndex: 1 },
-};
+import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";
 
 export interface LinesGeometry {
   Coordinates: { X: number; Y: number }[];
@@ -59,14 +30,9 @@ export interface LinesSelection {
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = () => {
-  const {
-    konvaModalDraggCoords,
-    setKonvaModalDraggCoords,
-    konvaModalDimensions,
-    setKonvaModalDimensions,
-    docImageDimensions,
-    setDocImageDimensions,
-  } = useContext(MainModalContext);
+  const { docImageDimensions, setDocImageDimensions } = useContext(
+    MainModalContext
+  );
   const [
     eventTarget,
     selectedFile,
@@ -265,76 +231,28 @@ export const ManualSelect = () => {
     setInputVal("");
   }, [selectedFile]);
 
-  // drag & resize
-  const handleDragStop = (e: any, data: DraggableData) => {
-    const [x, y] = [data.x, data.y];
-    setKonvaModalDraggCoords({ x, y });
-  };
-
-  const handleResizeStop: RndResizeCallback = (
-    e,
-    dir,
-    refToElement,
-    delta,
-    position
-  ) => {
-    const [width, height] = [
-      parseInt(refToElement.style.width.replace("px", "")),
-      parseInt(refToElement.style.height.replace("px", "")),
-    ];
-    const [x, y] = [position.x, position.y];
-
-    setKonvaModalDimensions({ width, height }); // set new modal dim
-    setKonvaModalDraggCoords({ x, y }); // set coords after drag
-    setDocImageDimensions({
-      // set doc img dim
-      width,
-      height: width * docImageURL.heightXWidthMultiplier,
-    });
-  };
-
   return (
     <React.Fragment>
       {!errorGettingFile && isDocImageSet && (
         <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
-          <StyledRnD
-            position={konvaModalDraggCoords}
-            onDragStop={handleDragStop}
-            bounds="window"
-            size={konvaModalDimensions}
-            onResizeStop={handleResizeStop}
-            resizeHandleStyles={{
-              bottom: resizeHandleStylesPayload.topBottom,
-              bottomLeft: resizeHandleStylesPayload.corner,
-              bottomRight: resizeHandleStylesPayload.corner,
-              left: resizeHandleStylesPayload.sides,
-              right: resizeHandleStylesPayload.sides,
-              top: resizeHandleStylesPayload.topBottom,
-              topLeft: resizeHandleStylesPayload.corner,
-              topRight: resizeHandleStylesPayload.corner,
+          <KonvaModalContext.Provider
+            value={{
+              image,
+              inputVal,
+              setInputVal,
+              linesSelection,
+              setLinesSelection,
+              currentLinesGeometry,
+              docImageDimensions,
+              docImageURL,
+              errorLine,
+              setErrorLine,
+              handleSubmitAndClear,
+              handleClear,
             }}
-            cancel={".docit-no-drag"}
           >
-            <div>
-              <KonvaModalContext.Provider
-                value={{
-                  image,
-                  inputVal,
-                  setInputVal,
-                  linesSelection,
-                  setLinesSelection,
-                  currentLinesGeometry,
-                  docImageDimensions,
-                  errorLine,
-                  setErrorLine,
-                  handleSubmitAndClear,
-                  handleClear,
-                }}
-              >
-                <KonvaModal />
-              </KonvaModalContext.Provider>
-            </div>
-          </StyledRnD>
+            <RndComponent />
+          </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}
     </React.Fragment>
