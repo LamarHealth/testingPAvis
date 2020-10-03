@@ -294,6 +294,7 @@ const Header = ({
         <FlexContainer>
           <CurrentSelectionWrapper>
             <StyledInput
+              className={"docit-no-drag"}
               value={inputVal}
               onChange={handleInputChange}
               ref={inputElRef}
@@ -355,7 +356,7 @@ export const KonvaModal = () => {
           <Header docImageDimensions={docImageDimensions} />
         </HeaderContext.Provider>
       </StickyHeaderWrapper>
-      <CursorPointerWrapper>
+      <CursorPointerWrapper className={"docit-no-drag"}>
         <Stage
           width={docImageDimensions.width}
           height={docImageDimensions.height}
