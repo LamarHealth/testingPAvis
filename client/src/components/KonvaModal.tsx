@@ -64,7 +64,8 @@ const FlexContainer = styled.div`
 
 const HeaderWrapper = styled.div`
   padding: 1em 2em;
-  background-color: ${colors.MANUAL_SELECT_HEADER};
+  background-color: ${colors.WHITE};
+  border-bottom: 1px solid ${colors.KVP_TABLE_BORDER};
   box-sizing: border-box;
 
   // mui font styles
