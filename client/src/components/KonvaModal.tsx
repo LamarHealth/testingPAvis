@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import styled from "styled-components";
-import ContentEditable from "react-contenteditable";
 
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
@@ -91,24 +90,6 @@ const CurrentSelectionWrapper = styled.div`
   flex-grow: 10;
 `;
 
-const CurrentSelectionDiv = styled.div`
-  padding: 0.75em;
-  border-radius: 5px;
-  border: 0.5px solid ${colors.FONT_BLUE};
-  width: 100%;
-  box-sizing: border-box;
-  cursor: text;
-`;
-
-const StyledContentEditable = styled(ContentEditable)`
-  padding: 0.75em;
-  border-radius: 5px;
-  border: 0.5px solid ${colors.FONT_BLUE};
-  width: 100%;
-  box-sizing: border-box;
-  cursor: text;
-`;
-
 const StyledInput = styled.input`
   padding: 0.75em;
   border-radius: 5px;
@@ -139,29 +120,20 @@ const Polygon = ({
   docImageDimensions: DocImageDimensions;
 }) => {
   const [color, setColor] = useState("transparent");
-  const { linesSelection, setLinesSelection, inputElRef } = useContext(
+  const { inputElRef, linesSelection, linesSelectionDispatch } = useContext(
     CurrentSelectionContext
   );
   const isFilled = linesSelection[lineGeometry.ID] ? true : false;
   const [isMouseDown, setIsMouseDown] = useState(false as boolean);
 
   const fillAndSetCurrentSelection = () => {
+    const line = { [lineGeometry.ID]: lineGeometry.Text };
     if (!isFilled) {
-      setLinesSelection((prevLinesSelection: LinesSelection) => {
-        return {
-          ...prevLinesSelection,
-          [lineGeometry.ID]: lineGeometry.Text,
-        };
-      });
+      linesSelectionDispatch({ type: "select", line });
       inputElRef.current && inputElRef.current.focus(); // focus on input after selecting
     }
     if (isFilled) {
-      setLinesSelection((prevLinesSelection: LinesSelection) => {
-        delete prevLinesSelection[lineGeometry.ID];
-        return {
-          ...prevLinesSelection,
-        };
-      });
+      linesSelectionDispatch({ type: "deselect", line });
     }
   };
 
@@ -196,6 +168,15 @@ const Polygon = ({
   );
 };
 
+function findMissingLine(
+  linesSelectionToCheck: LinesSelection,
+  linesSelectionToCheckAgainst: LinesSelection
+) {
+  return Object.entries(linesSelectionToCheck).filter(
+    (line) => !linesSelectionToCheckAgainst[line[0]]
+  )[0][1];
+}
+
 function usePreviousLinesSelection(value: LinesSelection) {
   const ref = useRef(undefined as LinesSelection | undefined);
   useEffect(() => {
@@ -213,11 +194,11 @@ const Header = ({
     KonvaModalContext
   );
   const {
-    linesSelection,
-    setLinesSelection,
     inputVal,
     setInputVal,
     inputElRef,
+    linesSelection,
+    linesSelectionDispatch,
   } = useContext(HeaderContext);
   const prevLinesSelection = usePreviousLinesSelection(
     linesSelection as LinesSelection
@@ -230,16 +211,15 @@ const Header = ({
     Object.entries(linesSelection)
       .filter((line) => !newVal.includes(line[1]))
       .forEach((line) => {
-        setLinesSelection((prevLinesSelection: LinesSelection) => {
-          delete prevLinesSelection[line[0]];
-          return { ...prevLinesSelection };
+        linesSelectionDispatch({
+          type: "deselect",
+          line: { [line[0]]: line[1] },
         });
       });
     // set new input val
     setInputVal(newVal);
   };
 
-  // handle line selection / deselection
   useEffect(() => {
     // make sure not undef
     if (prevLinesSelection) {
@@ -248,9 +228,7 @@ const Header = ({
 
       // if line added, simply append
       if (prevLinesSelectionLength < linesSelectionLength) {
-        const newLine = Object.entries(linesSelection).filter(
-          (line) => !prevLinesSelection[line[0]]
-        )[0][1];
+        const newLine = findMissingLine(linesSelection, prevLinesSelection);
         setInputVal((prevInputVal: string) => {
           const prevInputValArray = Array.from(prevInputVal);
           // if ends in space, don't add another
@@ -264,9 +242,7 @@ const Header = ({
 
       // if line subtracted, search for it, remove if find, else do nothing
       if (prevLinesSelectionLength > linesSelectionLength) {
-        const oldLine = Object.entries(prevLinesSelection).filter(
-          (line) => !linesSelection[line[0]]
-        )[0][1];
+        const oldLine = findMissingLine(prevLinesSelection, linesSelection);
         setInputVal((prevInputVal: string) => {
           return prevInputVal.replace(oldLine, "");
         });
@@ -331,12 +307,12 @@ const HeaderContext = createContext({} as any);
 export const KonvaModal = () => {
   const {
     image,
-    linesSelection,
-    setLinesSelection,
     inputVal,
     setInputVal,
     currentLinesGeometry,
     docImageDimensions,
+    linesSelection,
+    linesSelectionDispatch,
   } = useContext(KonvaModalContext);
   const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
   const inputElRef = useRef(null as HTMLInputElement | null);
@@ -347,11 +323,11 @@ export const KonvaModal = () => {
         <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
         <HeaderContext.Provider
           value={{
-            linesSelection,
-            setLinesSelection,
             inputVal,
             setInputVal,
             inputElRef,
+            linesSelection,
+            linesSelectionDispatch,
           }}
         >
           <Header docImageDimensions={docImageDimensions} />
@@ -370,11 +346,11 @@ export const KonvaModal = () => {
             />
             <CurrentSelectionContext.Provider
               value={{
-                linesSelection,
-                setLinesSelection,
                 inputVal,
                 setInputVal,
                 inputElRef,
+                linesSelection,
+                linesSelectionDispatch,
               }}
             >
               {currentLinesGeometry.map(

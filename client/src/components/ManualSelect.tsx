@@ -1,4 +1,10 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useReducer,
+} from "react";
 
 import useImage from "use-image";
 
@@ -27,7 +33,29 @@ export interface LinesSelection {
   [lineID: string]: string;
 }
 
+export interface LinesSelectionReducerAction {
+  type: "select" | "deselect" | "reset";
+  line?: LinesSelection;
+}
+
 export const KonvaModalContext = createContext({} as any);
+
+function linesSelectionReducer(
+  state: LinesSelection,
+  action: LinesSelectionReducerAction
+) {
+  switch (action.type) {
+    case "select":
+      return { ...state, ...action.line };
+    case "deselect":
+      action.line && delete state[Object.keys(action.line)[0]];
+      return { ...state };
+    case "reset":
+      return {};
+    default:
+      throw new Error();
+  }
+}
 
 export const ManualSelect = () => {
   const { docImageDimensions, setDocImageDimensions } = useContext(
@@ -59,7 +87,10 @@ export const ManualSelect = () => {
   const [currentDocID, setCurrentDocID] = useState(
     undefined as string | undefined
   );
-  const [linesSelection, setLinesSelection] = useState({} as LinesSelection);
+  const [linesSelection, linesSelectionDispatch] = useReducer(
+    linesSelectionReducer,
+    {} as LinesSelection
+  );
   const [image] = useImage(docImageURL.url);
   const [errorLine, setErrorLine] = useState(null as null | string);
   const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
@@ -193,7 +224,7 @@ export const ManualSelect = () => {
         renderAccuracyScore("blank", eventTarget);
         eventTarget.value = inputVal;
         setErrorLine(null);
-        setLinesSelection({});
+        linesSelectionDispatch({ type: "reset" });
         setInputVal("");
       } else {
         setErrorLine("Nothing to enter");
@@ -221,13 +252,13 @@ export const ManualSelect = () => {
 
   // clear button
   const handleClear = () => {
-    setLinesSelection({});
+    linesSelectionDispatch({ type: "reset" });
     setInputVal("");
   };
 
   // clear entries on doc switch
   useEffect(() => {
-    setLinesSelection({});
+    linesSelectionDispatch({ type: "reset" });
     setInputVal("");
   }, [selectedFile]);
 
@@ -240,8 +271,6 @@ export const ManualSelect = () => {
               image,
               inputVal,
               setInputVal,
-              linesSelection,
-              setLinesSelection,
               currentLinesGeometry,
               docImageDimensions,
               docImageURL,
@@ -249,6 +278,8 @@ export const ManualSelect = () => {
               setErrorLine,
               handleSubmitAndClear,
               handleClear,
+              linesSelection,
+              linesSelectionDispatch,
             }}
           >
             <RndComponent />
