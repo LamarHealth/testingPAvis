@@ -194,11 +194,11 @@ const Header = ({
     KonvaModalContext
   );
   const {
-    inputVal,
-    setInputVal,
     inputElRef,
     linesSelection,
     linesSelectionDispatch,
+    inputVal,
+    inputValDispatch,
   } = useContext(HeaderContext);
   const prevLinesSelection = usePreviousLinesSelection(
     linesSelection as LinesSelection
@@ -217,7 +217,7 @@ const Header = ({
         });
       });
     // set new input val
-    setInputVal(newVal);
+    inputValDispatch({ type: "replace", value: newVal });
   };
 
   useEffect(() => {
@@ -229,23 +229,13 @@ const Header = ({
       // if line added, simply append
       if (prevLinesSelectionLength < linesSelectionLength) {
         const newLine = findMissingLine(linesSelection, prevLinesSelection);
-        setInputVal((prevInputVal: string) => {
-          const prevInputValArray = Array.from(prevInputVal);
-          // if ends in space, don't add another
-          if (prevInputValArray[prevInputValArray.length - 1] === " ") {
-            return prevInputVal + newLine;
-          } else {
-            return prevInputVal + " " + newLine;
-          }
-        });
+        inputValDispatch({ type: "append line", value: newLine });
       }
 
       // if line subtracted, search for it, remove if find, else do nothing
       if (prevLinesSelectionLength > linesSelectionLength) {
         const oldLine = findMissingLine(prevLinesSelection, linesSelection);
-        setInputVal((prevInputVal: string) =>
-          prevInputVal.replace(oldLine, "")
-        );
+        inputValDispatch({ type: "remove line", value: oldLine });
       }
     }
   }, [linesSelection]);
@@ -307,12 +297,12 @@ const HeaderContext = createContext({} as any);
 export const KonvaModal = () => {
   const {
     image,
-    inputVal,
-    setInputVal,
     currentLinesGeometry,
     docImageDimensions,
     linesSelection,
     linesSelectionDispatch,
+    inputVal,
+    inputValDispatch,
   } = useContext(KonvaModalContext);
   const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
   const inputElRef = useRef(null as HTMLInputElement | null);
@@ -323,11 +313,11 @@ export const KonvaModal = () => {
         <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
         <HeaderContext.Provider
           value={{
-            inputVal,
-            setInputVal,
             inputElRef,
             linesSelection,
             linesSelectionDispatch,
+            inputVal,
+            inputValDispatch,
           }}
         >
           <Header docImageDimensions={docImageDimensions} />
@@ -346,11 +336,11 @@ export const KonvaModal = () => {
             />
             <CurrentSelectionContext.Provider
               value={{
-                inputVal,
-                setInputVal,
                 inputElRef,
                 linesSelection,
                 linesSelectionDispatch,
+                inputVal,
+                inputValDispatch,
               }}
             >
               {currentLinesGeometry.map(

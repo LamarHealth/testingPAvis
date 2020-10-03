@@ -33,9 +33,14 @@ export interface LinesSelection {
   [lineID: string]: string;
 }
 
-export interface LinesSelectionReducerAction {
+interface LinesSelectionReducerAction {
   type: "select" | "deselect" | "reset";
   line?: LinesSelection;
+}
+
+interface InputValAction {
+  type: "replace" | "append line" | "remove line" | "reset";
+  value?: string;
 }
 
 export const KonvaModalContext = createContext({} as any);
@@ -52,6 +57,31 @@ function linesSelectionReducer(
       return { ...state };
     case "reset":
       return {};
+    default:
+      throw new Error();
+  }
+}
+
+function inputValReducer(state: string, action: InputValAction) {
+  switch (action.type) {
+    case "replace":
+      if (typeof action.value === "string") {
+        return action.value;
+      } else throw new Error();
+    case "append line":
+      const prevInputValArray = Array.from(state);
+      // if ends in space, don't add another
+      if (prevInputValArray[prevInputValArray.length - 1] === " ") {
+        return state + action.value;
+      } else {
+        return state + " " + action.value;
+      }
+    case "remove line":
+      if (action.value) {
+        return state.replace(action.value, "");
+      } else throw new Error();
+    case "reset":
+      return "";
     default:
       throw new Error();
   }
@@ -87,14 +117,17 @@ export const ManualSelect = () => {
   const [currentDocID, setCurrentDocID] = useState(
     undefined as string | undefined
   );
+  const [image] = useImage(docImageURL.url);
+  const [errorLine, setErrorLine] = useState(null as null | string);
+  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
   const [linesSelection, linesSelectionDispatch] = useReducer(
     linesSelectionReducer,
     {} as LinesSelection
   );
-  const [image] = useImage(docImageURL.url);
-  const [errorLine, setErrorLine] = useState(null as null | string);
-  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
-  const [inputVal, setInputVal] = useState("" as string);
+  const [inputVal, inputValDispatch] = useReducer(
+    inputValReducer,
+    "" as string
+  );
 
   // modal open
   const modalHandleClick = () => {
@@ -225,7 +258,7 @@ export const ManualSelect = () => {
         eventTarget.value = inputVal;
         setErrorLine(null);
         linesSelectionDispatch({ type: "reset" });
-        setInputVal("");
+        inputValDispatch({ type: "reset" });
       } else {
         setErrorLine("Nothing to enter");
       }
@@ -253,13 +286,13 @@ export const ManualSelect = () => {
   // clear button
   const handleClear = () => {
     linesSelectionDispatch({ type: "reset" });
-    setInputVal("");
+    inputValDispatch({ type: "reset" });
   };
 
   // clear entries on doc switch
   useEffect(() => {
     linesSelectionDispatch({ type: "reset" });
-    setInputVal("");
+    inputValDispatch({ type: "reset" });
   }, [selectedFile]);
 
   return (
@@ -269,8 +302,6 @@ export const ManualSelect = () => {
           <KonvaModalContext.Provider
             value={{
               image,
-              inputVal,
-              setInputVal,
               currentLinesGeometry,
               docImageDimensions,
               docImageURL,
@@ -280,6 +311,8 @@ export const ManualSelect = () => {
               handleClear,
               linesSelection,
               linesSelectionDispatch,
+              inputVal,
+              inputValDispatch,
             }}
           >
             <RndComponent />
