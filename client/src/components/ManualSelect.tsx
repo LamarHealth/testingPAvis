@@ -1,4 +1,10 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useRef,
+} from "react";
 
 import useImage from "use-image";
 import styled from "styled-components";
@@ -50,10 +56,6 @@ export interface LinesSelection {
   [lineID: string]: string;
 }
 
-// export interface Filled {
-//   [lineID: string]: boolean;
-// }
-
 export const KonvaModalContext = createContext({} as any);
 
 export const ManualSelect = () => {
@@ -93,9 +95,9 @@ export const ManualSelect = () => {
   );
   const [linesSelection, setLinesSelection] = useState({} as LinesSelection);
   const [image] = useImage(docImageURL.url);
-  // const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
   const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
+  const [inputVal, setInputVal] = useState("" as string);
 
   // modal open
   const modalHandleClick = () => {
@@ -221,14 +223,12 @@ export const ManualSelect = () => {
   // submit button / enter
   const handleSubmitAndClear = () => {
     if (eventTarget) {
-      if (Object.keys(linesSelection).length !== 0) {
+      if (inputVal !== "") {
         renderAccuracyScore("blank", eventTarget);
-        eventTarget.value = Object.keys(linesSelection)
-          .map((key) => linesSelection[key])
-          .join(" ");
+        eventTarget.value = inputVal;
         setErrorLine(null);
         setLinesSelection({});
-        // setFilled({});
+        setInputVal("");
       } else {
         setErrorLine("Nothing to enter");
       }
@@ -237,30 +237,32 @@ export const ManualSelect = () => {
     }
   };
 
-  // useEffect(() => {
-  //   function keydownListener(e: any) {
-  //     if (e.keyCode === 13) {
-  //       if (!autocompleteAnchor) {
-  //         // don't fire if autocomplete is open
-  //         handleSubmitAndClear();
-  //       }
-  //     }
-  //   }
-  //   document.addEventListener("keydown", keydownListener);
-  //   return () => {
-  //     document.removeEventListener("keydown", keydownListener);
-  //   };
-  // }, [linesSelection, eventTarget, autocompleteAnchor]);
+  // return key listener
+  useEffect(() => {
+    function keydownListener(e: any) {
+      if (e.keyCode === 13) {
+        if (!autocompleteAnchor) {
+          // don't fire if autocomplete is open
+          handleSubmitAndClear();
+        }
+      }
+    }
+    document.addEventListener("keydown", keydownListener);
+    return () => {
+      document.removeEventListener("keydown", keydownListener);
+    };
+  }, [inputVal, eventTarget, autocompleteAnchor]);
 
   // clear button
   const handleClear = () => {
     setLinesSelection({});
-    // setFilled({});
+    setInputVal("");
   };
 
   // clear entries on doc switch
   useEffect(() => {
     setLinesSelection({});
+    setInputVal("");
   }, [selectedFile]);
 
   // drag & resize
@@ -317,8 +319,8 @@ export const ManualSelect = () => {
               <KonvaModalContext.Provider
                 value={{
                   image,
-                  // filled,
-                  // setFilled,
+                  inputVal,
+                  setInputVal,
                   linesSelection,
                   setLinesSelection,
                   currentLinesGeometry,

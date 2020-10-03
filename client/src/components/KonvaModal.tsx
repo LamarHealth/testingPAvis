@@ -108,6 +108,15 @@ const StyledContentEditable = styled(ContentEditable)`
   cursor: text;
 `;
 
+const StyledInput = styled.input`
+  padding: 0.75em;
+  border-radius: 5px;
+  border: 0.5px solid ${colors.FONT_BLUE};
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
+`;
+
 const StickyHeaderWrapper = styled.div`
   position: sticky;
   top: 0;
@@ -129,7 +138,7 @@ const Polygon = ({
   docImageDimensions: DocImageDimensions;
 }) => {
   const [color, setColor] = useState("transparent");
-  const { linesSelection, setLinesSelection } = useContext(
+  const { linesSelection, setLinesSelection, inputElRef } = useContext(
     CurrentSelectionContext
   );
   const isFilled = linesSelection[lineGeometry.ID] ? true : false;
@@ -143,6 +152,7 @@ const Polygon = ({
           [lineGeometry.ID]: lineGeometry.Text,
         };
       });
+      inputElRef.current && inputElRef.current.focus(); // focus on input after selecting
     }
     if (isFilled) {
       setLinesSelection((prevLinesSelection: LinesSelection) => {
@@ -185,6 +195,14 @@ const Polygon = ({
   );
 };
 
+function usePreviousLinesSelection(value: LinesSelection) {
+  const ref = useRef(undefined as LinesSelection | undefined);
+  useEffect(() => {
+    ref.current = { ...value };
+  });
+  return ref.current as LinesSelection;
+}
+
 const Header = ({
   docImageDimensions,
 }: {
@@ -193,60 +211,67 @@ const Header = ({
   const { errorLine, handleSubmitAndClear, handleClear } = useContext(
     KonvaModalContext
   );
-  const { linesSelection, setLinesSelection } = useContext(HeaderContext);
-  const [eventTarget, autocompleteAnchor] = [
-    useStore((state) => state.eventTarget),
-    useStore((state) => state.autocompleteAnchor),
-  ];
-  const text = useRef("");
-  const [renderMe, setRenderMe] = useState(false as boolean);
-  const editableRef = useRef(null as HTMLElement | null);
-  let localScopedLines = linesSelection;
+  const {
+    linesSelection,
+    setLinesSelection,
+    inputVal,
+    setInputVal,
+    inputElRef,
+  } = useContext(HeaderContext);
+  const prevLinesSelection = usePreviousLinesSelection(
+    linesSelection as LinesSelection
+  );
 
+  // handle editing by user
+  const handleInputChange = (event: any) => {
+    const newVal = event.target.value;
+    // if a line has been edited, then deselect it automatically
+    Object.entries(linesSelection)
+      .filter((line) => !newVal.includes(line[1]))
+      .forEach((line) => {
+        setLinesSelection((prevLinesSelection: LinesSelection) => {
+          delete prevLinesSelection[line[0]];
+          return { ...prevLinesSelection };
+        });
+      });
+    // set new input val
+    setInputVal(newVal);
+  };
+
+  // handle line selection / deselection
   useEffect(() => {
-    const stringLines = Object.entries(linesSelection)
-      .map((entry) => `<span id=${entry[0]}>${entry[1] + " "}</span>`)
-      .join("");
-    text.current = stringLines;
-    setRenderMe(!renderMe); // seems like a hack, and it kinda is, but only because we have to use useRef instead of useState... see the react-contenteditable docs. if we could just setState, we wouldn't need to manually activate a render...
-  }, [linesSelection]);
+    // make sure not undef
+    if (prevLinesSelection) {
+      const linesSelectionLength = Object.keys(linesSelection).length;
+      const prevLinesSelectionLength = Object.keys(prevLinesSelection).length;
 
-  const handleEditableChange = (event: any) => {
-    console.log("event, ", event);
-    if (event.type === "input") {
-      const el = document.createElement("div");
-      el.innerHTML = event.target.value;
-      const editedTextAsArray = Array.from(el.getElementsByTagName("span"));
-      const newLines = editedTextAsArray.map((span) => {
-        return [span.id, span.innerText];
-      });
+      // if line added, simply append
+      if (prevLinesSelectionLength < linesSelectionLength) {
+        const newLine = Object.entries(linesSelection).filter(
+          (line) => !prevLinesSelection[line[0]]
+        )[0][1];
+        setInputVal((prevInputVal: string) => {
+          const prevInputValArray = Array.from(prevInputVal);
+          // if ends in space, don't add another
+          if (prevInputValArray[prevInputValArray.length - 1] === " ") {
+            return prevInputVal + newLine;
+          } else {
+            return prevInputVal + " " + newLine;
+          }
+        });
+      }
 
-      let payload = {} as any;
-      newLines.forEach((line) => {
-        payload[line[0]] = line[1];
-      });
-      localScopedLines = payload;
+      // if line subtracted, search for it, remove if find, else do nothing
+      if (prevLinesSelectionLength > linesSelectionLength) {
+        const oldLine = Object.entries(prevLinesSelection).filter(
+          (line) => !linesSelection[line[0]]
+        )[0][1];
+        setInputVal((prevInputVal: string) => {
+          return prevInputVal.replace(oldLine, "");
+        });
+      }
     }
-  };
-
-  const handleEditableBlur = (event: any) => {
-    setLinesSelection(localScopedLines);
-  };
-
-  // useEffect(() => {
-  //   function keydownListener(e: any) {
-  //     if (e.keyCode === 13) {
-  //       if (!autocompleteAnchor) {
-  //         // don't fire if autocomplete is open
-  //         handleSubmitAndClear();
-  //       }
-  //     }
-  //   }
-  //   document.addEventListener("keydown", keydownListener);
-  //   return () => {
-  //     document.removeEventListener("keydown", keydownListener);
-  //   };
-  // }, [eventTarget, autocompleteAnchor]);
+  }, [linesSelection]);
 
   return (
     <HeaderWrapper
@@ -257,41 +282,37 @@ const Header = ({
       <Typography>
         <Box fontStyle="italic">
           <b>Click</b> to select a line; <b>Click</b> again to unselect; press{" "}
-          <b>Return</b> key to fill.
+          <b>Enter</b> key to fill.
         </Box>
       </Typography>
-      {Object.keys(linesSelection).length > 0 && (
-        <div>
-          <Typography>
-            <Box fontStyle="fontWeightBold">
-              <strong>Current Selection:</strong>
-            </Box>
-          </Typography>
-          <FlexContainer>
-            <CurrentSelectionWrapper>
-              <StyledContentEditable
-                html={text.current}
-                onChange={handleEditableChange}
-                onBlur={handleEditableBlur}
-                innerRef={editableRef}
-              />
-            </CurrentSelectionWrapper>
-
-            <BigButton
-              onClick={handleClear}
-              style={{ backgroundColor: `${colors.RED}` }}
-            >
-              Clear
-            </BigButton>
-            <BigButton
-              onClick={handleSubmitAndClear}
-              style={{ backgroundColor: `${colors.FILL_BUTTON}` }}
-            >
-              Submit
-            </BigButton>
-          </FlexContainer>
-        </div>
-      )}
+      <div>
+        <Typography>
+          <Box fontStyle="fontWeightBold">
+            <strong>Current Selection:</strong>
+          </Box>
+        </Typography>
+        <FlexContainer>
+          <CurrentSelectionWrapper>
+            <StyledInput
+              value={inputVal}
+              onChange={handleInputChange}
+              ref={inputElRef}
+            />
+          </CurrentSelectionWrapper>
+          <BigButton
+            onClick={handleClear}
+            style={{ backgroundColor: `${colors.RED}` }}
+          >
+            Clear
+          </BigButton>
+          <BigButton
+            onClick={handleSubmitAndClear}
+            style={{ backgroundColor: `${colors.FILL_BUTTON}` }}
+          >
+            Submit
+          </BigButton>
+        </FlexContainer>
+      </div>
       {errorLine && (
         <Typography>
           <Box fontStyle="italic" color={`${colors.RED}`}>
@@ -310,10 +331,13 @@ export const KonvaModal = () => {
     image,
     linesSelection,
     setLinesSelection,
+    inputVal,
+    setInputVal,
     currentLinesGeometry,
     docImageDimensions,
   } = useContext(KonvaModalContext);
   const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+  const inputElRef = useRef(null as HTMLInputElement | null);
 
   return (
     <>
@@ -323,6 +347,9 @@ export const KonvaModal = () => {
           value={{
             linesSelection,
             setLinesSelection,
+            inputVal,
+            setInputVal,
+            inputElRef,
           }}
         >
           <Header docImageDimensions={docImageDimensions} />
@@ -343,6 +370,9 @@ export const KonvaModal = () => {
               value={{
                 linesSelection,
                 setLinesSelection,
+                inputVal,
+                setInputVal,
+                inputElRef,
               }}
             >
               {currentLinesGeometry.map(
