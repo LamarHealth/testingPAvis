@@ -25,9 +25,9 @@ const StyledDiv = styled.div`
 `;
 
 const resizeHandleStylesPayload = {
-  topBottom: { height: "15px", zIndex: 1, backgroundColor: "red" },
-  corner: { height: "30px", width: "30px", zIndex: 1, backgroundColor: "red" },
-  sides: { width: "15px", zIndex: 1, backgroundColor: "red" },
+  topBottom: { height: "15px", zIndex: 1 },
+  corner: { height: "30px", width: "30px", zIndex: 1 },
+  sides: { width: "15px", zIndex: 1 },
 };
 
 export const RndComponent = () => {
