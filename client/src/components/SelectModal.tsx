@@ -218,8 +218,6 @@ const ButtonsCell = (props: {
       inputRef.current.value = keyValue["value"]; // fill the kvp table input
       setUnalteredKeyValue(keyValue); // let the parent component know what the original string is
       inputRef.current.focus(); // focus on the text editor
-    } else {
-      console.log("error: kvp table inputRef is null in ButtonsBox");
     }
   };
 
