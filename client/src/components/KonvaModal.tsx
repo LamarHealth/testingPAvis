@@ -243,9 +243,9 @@ const Header = ({
       // if line subtracted, search for it, remove if find, else do nothing
       if (prevLinesSelectionLength > linesSelectionLength) {
         const oldLine = findMissingLine(prevLinesSelection, linesSelection);
-        setInputVal((prevInputVal: string) => {
-          return prevInputVal.replace(oldLine, "");
-        });
+        setInputVal((prevInputVal: string) =>
+          prevInputVal.replace(oldLine, "")
+        );
       }
     }
   }, [linesSelection]);
