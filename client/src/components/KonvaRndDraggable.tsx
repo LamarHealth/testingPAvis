@@ -14,15 +14,20 @@ const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
   position: absolute;
   height: ${KONVA_MODAL_HEIGHT}px;
-  overflow-y: scroll;
+  overflow-y: hidden;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
 `;
 
+const StyledDiv = styled.div`
+  overflow-y: scroll;
+  height: ${KONVA_MODAL_HEIGHT}px;
+`;
+
 const resizeHandleStylesPayload = {
-  topBottom: { height: "15px", zIndex: 1 },
-  corner: { height: "30px", width: "30px", zIndex: 1 },
-  sides: { width: "15px", zIndex: 1 },
+  topBottom: { height: "15px", zIndex: 1, backgroundColor: "red" },
+  corner: { height: "30px", width: "30px", zIndex: 1, backgroundColor: "red" },
+  sides: { width: "15px", zIndex: 1, backgroundColor: "red" },
 };
 
 export const RndComponent = () => {
@@ -82,9 +87,9 @@ export const RndComponent = () => {
       }}
       cancel={".docit-no-drag"}
     >
-      <div>
+      <StyledDiv>
         <KonvaModal />
-      </div>
+      </StyledDiv>
     </StyledRnD>
   );
 };
