@@ -220,6 +220,7 @@ const Header = ({
     inputValDispatch({ type: "replace", value: newVal });
   };
 
+  // handle line selection / deselection
   useEffect(() => {
     // make sure not undef
     if (prevLinesSelection) {
