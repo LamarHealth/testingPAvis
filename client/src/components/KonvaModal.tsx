@@ -216,8 +216,7 @@ const Header = ({
     if (event.type === "input") {
       const el = document.createElement("div");
       el.innerHTML = event.target.value;
-      //@ts-ignore
-      const editedTextAsArray = [...el.getElementsByTagName("span")];
+      const editedTextAsArray = Array.from(el.getElementsByTagName("span"));
       const newLines = editedTextAsArray.map((span) => {
         return [span.id, span.innerText];
       });
