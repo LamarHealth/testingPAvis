@@ -214,7 +214,7 @@ const ButtonsCell = (props: {
     setHardCollapse(false);
     const closeMessage = setTimeout(() => setMessageCollapse(false), 5000);
     return () => clearTimeout(closeMessage);
-  }, [hardCollapse]);
+  }, [hardCollapse, setMessageCollapse]);
 
   return (
     <>
