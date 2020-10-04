@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   useReducer,
+  useCallback,
 } from "react";
 
 import useImage from "use-image";
@@ -251,7 +252,8 @@ export const ManualSelect = () => {
   };
 
   // submit button / enter
-  const handleSubmitAndClear = () => {
+  const handleSubmitAndClear = useCallback(() => {
+    // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
     if (eventTarget) {
       if (inputVal !== "") {
         renderAccuracyScore("blank", eventTarget);
@@ -265,10 +267,17 @@ export const ManualSelect = () => {
     } else {
       setErrorLine("Please select a text input to fill");
     }
-  };
+  }, [
+    eventTarget,
+    inputVal,
+    setErrorLine,
+    linesSelectionDispatch,
+    inputValDispatch,
+  ]);
 
   // return key listener
   useEffect(() => {
+    console.log("useEffect return key listener called");
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
         if (!autocompleteAnchor) {
@@ -281,7 +290,7 @@ export const ManualSelect = () => {
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [inputVal, eventTarget, autocompleteAnchor]);
+  }, [inputVal, eventTarget, autocompleteAnchor, handleSubmitAndClear]);
 
   // clear button
   const handleClear = () => {
