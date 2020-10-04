@@ -34,6 +34,19 @@ export interface LinesSelection {
   [lineID: string]: string;
 }
 
+export const linesSelectionActionTypes = {
+  select: "select" as "select",
+  deselect: "deselect" as "deselect",
+  reset: "reset" as "reset",
+};
+
+export const inputValActionTypes = {
+  replace: "replace" as "replace",
+  appendLine: "append line" as "append line",
+  removeLine: "remove line" as "remove line",
+  reset: "reset" as "reset",
+};
+
 interface LinesSelectionReducerAction {
   type: "select" | "deselect" | "reset";
   line?: LinesSelection;
@@ -259,8 +272,8 @@ export const ManualSelect = () => {
         renderAccuracyScore("blank", eventTarget);
         eventTarget.value = inputVal;
         setErrorLine(null);
-        linesSelectionDispatch({ type: "reset" });
-        inputValDispatch({ type: "reset" });
+        linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
+        inputValDispatch({ type: inputValActionTypes.reset });
       } else {
         setErrorLine("Nothing to enter");
       }
@@ -293,14 +306,14 @@ export const ManualSelect = () => {
 
   // clear button
   const handleClear = () => {
-    linesSelectionDispatch({ type: "reset" });
-    inputValDispatch({ type: "reset" });
+    linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
+    inputValDispatch({ type: inputValActionTypes.reset });
   };
 
   // clear entries on doc switch
   useEffect(() => {
-    linesSelectionDispatch({ type: "reset" });
-    inputValDispatch({ type: "reset" });
+    linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
+    inputValDispatch({ type: inputValActionTypes.reset });
   }, [selectedFile]);
 
   return (

@@ -19,6 +19,8 @@ import {
   KonvaModalContext,
   LinesGeometry,
   LinesSelection,
+  linesSelectionActionTypes,
+  inputValActionTypes,
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
 
@@ -130,11 +132,14 @@ const Polygon = ({
   const fillAndSetCurrentSelection = () => {
     const line = { [lineGeometry.ID]: lineGeometry.Text };
     if (!isFilled) {
-      linesSelectionDispatch({ type: "select", line });
+      linesSelectionDispatch({ type: linesSelectionActionTypes.select, line });
       inputElRef.current && inputElRef.current.focus(); // focus on input after selecting
     }
     if (isFilled) {
-      linesSelectionDispatch({ type: "deselect", line });
+      linesSelectionDispatch({
+        type: linesSelectionActionTypes.deselect,
+        line,
+      });
     }
   };
 
@@ -213,7 +218,7 @@ const Header = ({
       .filter((line) => !newVal.includes(line[1]))
       .forEach((line) => {
         linesSelectionDispatch({
-          type: "deselect",
+          type: linesSelectionActionTypes.deselect,
           line: { [line[0]]: line[1] },
         });
       });
@@ -231,13 +236,19 @@ const Header = ({
       // if line added, simply append
       if (prevLinesSelectionLength < linesSelectionLength) {
         const newLine = findMissingLine(linesSelection, prevLinesSelection);
-        inputValDispatch({ type: "append line", value: newLine });
+        inputValDispatch({
+          type: inputValActionTypes.appendLine,
+          value: newLine,
+        });
       }
 
       // if line subtracted, search for it, remove if find, else do nothing
       if (prevLinesSelectionLength > linesSelectionLength) {
         const oldLine = findMissingLine(prevLinesSelection, linesSelection);
-        inputValDispatch({ type: "remove line", value: oldLine });
+        inputValDispatch({
+          type: inputValActionTypes.removeLine,
+          value: oldLine,
+        });
       }
     }
   }, [linesSelection, prevLinesSelection, inputValDispatch]);
