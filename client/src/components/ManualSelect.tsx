@@ -277,7 +277,6 @@ export const ManualSelect = () => {
 
   // return key listener
   useEffect(() => {
-    console.log("useEffect return key listener called");
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
         if (!autocompleteAnchor) {
