@@ -289,7 +289,7 @@ export const ManualSelect = () => {
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [inputVal, eventTarget, autocompleteAnchor, handleSubmitAndClear]);
+  }, [autocompleteAnchor, handleSubmitAndClear]);
 
   // clear button
   const handleClear = () => {

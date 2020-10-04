@@ -4,6 +4,7 @@ import React, {
   useContext,
   useRef,
   useEffect,
+  useCallback,
 } from "react";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import styled from "styled-components";
@@ -221,7 +222,7 @@ const Header = ({
   };
 
   // handle line selection / deselection
-  useEffect(() => {
+  const updateInputValOnLineClick = useCallback(() => {
     // make sure not undef
     if (prevLinesSelection) {
       const linesSelectionLength = Object.keys(linesSelection).length;
@@ -239,7 +240,11 @@ const Header = ({
         inputValDispatch({ type: "remove line", value: oldLine });
       }
     }
-  }, [linesSelection]);
+  }, [linesSelection, prevLinesSelection, inputValDispatch]);
+
+  useEffect(() => {
+    updateInputValOnLineClick();
+  }, [updateInputValOnLineClick]);
 
   return (
     <HeaderWrapper
