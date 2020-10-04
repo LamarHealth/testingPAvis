@@ -15,13 +15,14 @@ const StyledRnD = styled(Rnd)`
   position: absolute;
   height: ${KONVA_MODAL_HEIGHT}px;
   overflow-y: hidden;
+  overflow-x: hidden;
   border: 1px solid ${colors.MODAL_BORDER};
   box-shadow: ${MODAL_SHADOW};
 `;
 
 const StyledDiv = styled.div`
   overflow-y: scroll;
-  height: ${KONVA_MODAL_HEIGHT}px;
+  overflow-x: hidden;
 `;
 
 const resizeHandleStylesPayload = {
@@ -87,7 +88,7 @@ export const RndComponent = () => {
       }}
       cancel={".docit-no-drag"}
     >
-      <StyledDiv>
+      <StyledDiv style={{ height: konvaModalDimensions.height }}>
         <KonvaModal />
       </StyledDiv>
     </StyledRnD>
