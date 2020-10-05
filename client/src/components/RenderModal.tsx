@@ -8,6 +8,8 @@ import Popper from "@material-ui/core/Popper";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
+import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+
 import { DEFAULT } from "../common/themes";
 import {
   MAIN_MODAL_WIDTH,
@@ -68,16 +70,27 @@ export const RenderModal = () => {
     const handleInputClick = (event: MouseEvent) => {
       setEventTarget(event.target as HTMLInputElement);
     };
-    const inputEls = document.querySelectorAll("input");
-    inputEls.forEach((inputEl) =>
-      inputEl.addEventListener("click", handleInputClick)
-    );
-    return () => {
+    // listen for change in liberty modals (even fires on first modal open)
+    const observer = getLibertyModalMutationsObserver(() => {
+      // assign listeners here
+      const inputEls = document.querySelectorAll("input");
       inputEls.forEach((inputEl) =>
-        inputEl.removeEventListener("click", handleInputClick)
+        inputEl.addEventListener("click", handleInputClick)
       );
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+    return () => {
+      const inputEls = document.querySelectorAll("input");
+      inputEls.forEach((inputEl) => {
+        inputEl.removeEventListener("click", handleInputClick);
+      });
+      observer.disconnect();
     };
-  });
+  }, []);
 
   return (
     <ThemeProvider theme={DEFAULT}>
