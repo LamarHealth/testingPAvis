@@ -1,33 +1,23 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from "react";
 
 import useImage from "use-image";
-import styled from "styled-components";
-import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
-import { KonvaModal } from "./KonvaModal";
+import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
 import uuidv from "uuid";
-import { colors } from "../common/colors";
-import {
-  API_PATH,
-  DOC_IMAGE_WIDTH,
-  KONVA_MODAL_HEIGHT,
-  MODAL_SHADOW,
-} from "../common/constants";
-
-const StyledRnD = styled(Rnd)`
-  background: #f0f0f0;
-  position: absolute;
-  height: ${KONVA_MODAL_HEIGHT}px;
-  overflow-y: scroll;
-  border: 1px solid ${colors.MODAL_BORDER};
-  box-shadow: ${MODAL_SHADOW};
-`;
+import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";
 
 export interface LinesGeometry {
   Coordinates: { X: number; Y: number }[];
@@ -40,25 +30,81 @@ interface DocImageURL {
   url: string;
 }
 
-export interface CurrentSelection {
+export interface LinesSelection {
   [lineID: string]: string;
 }
 
-export interface Filled {
-  [lineID: string]: boolean;
+export const linesSelectionActionTypes = {
+  select: "select" as "select",
+  deselect: "deselect" as "deselect",
+  reset: "reset" as "reset",
+};
+
+export const inputValActionTypes = {
+  replace: "replace" as "replace",
+  appendLine: "append line" as "append line",
+  removeLine: "remove line" as "remove line",
+  reset: "reset" as "reset",
+};
+
+interface LinesSelectionReducerAction {
+  type: "select" | "deselect" | "reset";
+  line?: LinesSelection;
+}
+
+interface InputValAction {
+  type: "replace" | "append line" | "remove line" | "reset";
+  value?: string;
 }
 
 export const KonvaModalContext = createContext({} as any);
 
+function linesSelectionReducer(
+  state: LinesSelection,
+  action: LinesSelectionReducerAction
+) {
+  switch (action.type) {
+    case "select":
+      return { ...state, ...action.line };
+    case "deselect":
+      action.line && delete state[Object.keys(action.line)[0]];
+      return { ...state };
+    case "reset":
+      return {};
+    default:
+      throw new Error();
+  }
+}
+
+function inputValReducer(state: string, action: InputValAction) {
+  switch (action.type) {
+    case "replace":
+      if (typeof action.value === "string") {
+        return action.value;
+      } else throw new Error();
+    case "append line":
+      const prevInputValArray = Array.from(state);
+      // if ends in space, don't add another
+      if (prevInputValArray[prevInputValArray.length - 1] === " ") {
+        return state + action.value;
+      } else {
+        return state + " " + action.value;
+      }
+    case "remove line":
+      if (action.value) {
+        return state.replace(action.value, "");
+      } else throw new Error();
+    case "reset":
+      return "";
+    default:
+      throw new Error();
+  }
+}
+
 export const ManualSelect = () => {
-  const {
-    konvaModalDraggCoords,
-    setKonvaModalDraggCoords,
-    konvaModalDimensions,
-    setKonvaModalDimensions,
-    docImageDimensions,
-    setDocImageDimensions,
-  } = useContext(MainModalContext);
+  const { docImageDimensions, setDocImageDimensions } = useContext(
+    MainModalContext
+  );
   const [
     eventTarget,
     selectedFile,
@@ -82,14 +128,20 @@ export const ManualSelect = () => {
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
   );
-  const [currentDocID, setCurrentDocID] = useState(null as string | null);
-  const [currentSelection, setCurrentSelection] = useState(
-    {} as CurrentSelection
+  const [currentDocID, setCurrentDocID] = useState(
+    undefined as string | undefined
   );
   const [image] = useImage(docImageURL.url);
-  const [filled, setFilled] = useState({} as Filled);
   const [errorLine, setErrorLine] = useState(null as null | string);
   const errorGettingFile = checkFileError(errorFiles, selectedFile);
+  const [linesSelection, linesSelectionDispatch] = useReducer(
+    linesSelectionReducer,
+    {} as LinesSelection
+  );
+  const [inputVal, inputValDispatch] = useReducer(
+    inputValReducer,
+    "" as string
+  );
 
   // modal open
   const modalHandleClick = () => {
@@ -142,9 +194,10 @@ export const ManualSelect = () => {
           // if the first time an image is loaded, then set the img dim to a specified default. img dim are updated from resizing.
           if (docImageDimensions.height === 0) {
             setDocImageDimensions(() => {
-              const width = DOC_IMAGE_WIDTH;
-              const height = DOC_IMAGE_WIDTH * heightXWidthMultiplier;
-              return { width, height };
+              return {
+                width: DOC_IMAGE_WIDTH,
+                height: DOC_IMAGE_WIDTH * heightXWidthMultiplier,
+              };
             });
           }
 
@@ -214,24 +267,30 @@ export const ManualSelect = () => {
   };
 
   // submit button / enter
-  const handleSubmitAndClear = () => {
+  const handleSubmitAndClear = useCallback(() => {
+    // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
     if (eventTarget) {
-      if (Object.keys(currentSelection).length !== 0) {
+      if (inputVal !== "") {
         renderAccuracyScore("blank", eventTarget);
-        eventTarget.value = Object.keys(currentSelection)
-          .map((key) => currentSelection[key])
-          .join(" ");
+        eventTarget.value = inputVal;
         setErrorLine(null);
-        setCurrentSelection({});
-        setFilled({});
+        linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
+        inputValDispatch({ type: inputValActionTypes.reset });
       } else {
         setErrorLine("Nothing to enter");
       }
     } else {
       setErrorLine("Please select a text input to fill");
     }
-  };
+  }, [
+    eventTarget,
+    inputVal,
+    setErrorLine,
+    linesSelectionDispatch,
+    inputValDispatch,
+  ]);
 
+  // return key listener
   useEffect(() => {
     function keydownListener(e: any) {
       if (e.keyCode === 13) {
@@ -245,71 +304,42 @@ export const ManualSelect = () => {
     return () => {
       document.removeEventListener("keydown", keydownListener);
     };
-  }, [currentSelection, eventTarget, autocompleteAnchor]);
+  }, [autocompleteAnchor, handleSubmitAndClear]);
+
+  // clear button
+  const handleClear = () => {
+    linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
+    inputValDispatch({ type: inputValActionTypes.reset });
+  };
 
   // clear entries on doc switch
   useEffect(() => {
-    setCurrentSelection({});
+    linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
+    inputValDispatch({ type: inputValActionTypes.reset });
   }, [selectedFile]);
-
-  // drag & resize
-  const handleDragStop = (e: any, data: DraggableData) => {
-    const [x, y] = [data.x, data.y];
-    setKonvaModalDraggCoords({ x, y });
-  };
-
-  const handleResizeStop: RndResizeCallback = (
-    e,
-    dir,
-    refToElement,
-    delta,
-    position
-  ) => {
-    const [width, height] = [
-      parseInt(refToElement.style.width.replace("px", "")),
-      parseInt(refToElement.style.height.replace("px", "")),
-    ];
-    const [x, y] = [position.x, position.y];
-
-    setKonvaModalDimensions({ width, height }); // set new modal dim
-    setKonvaModalDraggCoords({ x, y }); // set coords after drag
-    setDocImageDimensions({
-      // set doc img dim
-      width,
-      height: width * docImageURL.heightXWidthMultiplier,
-    });
-  };
 
   return (
     <React.Fragment>
       {!errorGettingFile && isDocImageSet && (
         <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
-          <StyledRnD
-            position={konvaModalDraggCoords}
-            onDragStop={handleDragStop}
-            bounds="window"
-            size={konvaModalDimensions}
-            onResizeStop={handleResizeStop}
+          <KonvaModalContext.Provider
+            value={{
+              image,
+              currentLinesGeometry,
+              docImageDimensions,
+              docImageURL,
+              errorLine,
+              setErrorLine,
+              handleSubmitAndClear,
+              handleClear,
+              linesSelection,
+              linesSelectionDispatch,
+              inputVal,
+              inputValDispatch,
+            }}
           >
-            <div>
-              <KonvaModalContext.Provider
-                value={{
-                  currentSelection,
-                  image,
-                  filled,
-                  setFilled,
-                  setCurrentSelection,
-                  currentLinesGeometry,
-                  docImageDimensions,
-                  errorLine,
-                  setErrorLine,
-                  handleSubmitAndClear,
-                }}
-              >
-                <KonvaModal />
-              </KonvaModalContext.Provider>
-            </div>
-          </StyledRnD>
+            <RndComponent />
+          </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}
     </React.Fragment>

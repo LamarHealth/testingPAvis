@@ -268,10 +268,5 @@ export const renderAccuracyScore = (
         mounter
       );
     }
-  } else {
-    console.log(
-      "error: cannot render chiclet, no positioned parent for target: ",
-      target
-    );
   }
 };

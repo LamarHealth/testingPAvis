@@ -1,47 +1,23 @@
-import React, {
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useState, useRef } from "react";
 
 import styled from "styled-components";
 
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableBody from "@material-ui/core/TableBody";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
-import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
-import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import Collapse from "@material-ui/core/Collapse";
 import Chip from "@material-ui/core/Chip";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import VisibilityIcon from "@material-ui/icons/Visibility";
 import TextField from "@material-ui/core/TextField";
 
 import { colors } from "../common/colors";
 import {
   MAIN_MODAL_WIDTH,
-  API_PATH,
   MODAL_SHADOW,
   DEFAULT_ERROR_MESSAGE,
 } from "../common/constants";
-import {
-  getKeyValuePairsByDoc,
-  getEditDistanceAndSort,
-  sortKeyValuePairs,
-  KeyValuesWithDistance,
-  deleteKVPairFromLocalStorage,
-  KeyValuesByDoc,
-} from "./KeyValuePairs";
+import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
@@ -62,69 +38,6 @@ const StickyWrapper = styled.div`
   z-index: 1;
   padding-bottom: 10px;
   border-bottom: 1px solid ${colors.KVP_TABLE_BORDER};
-`;
-
-const StyledTableCellLeft = styled(TableCell)`
-  padding: 5px 5px 5px 10px;
-`;
-
-const StyledTableCellMiddle = styled(TableCell)`
-  padding: 5px;
-`;
-
-const StyledTableCellRight = styled(TableCell)`
-  padding: 5px 10px 5px 5px;
-`;
-
-const StyledTableHeadCell = styled(TableCell)`
-  padding: 10px;
-`;
-
-const FillButton = styled.button`
-  background-color: ${colors.FILL_BUTTON};
-  color: white;
-  border: 1px solid white;
-  border-radius: 5px;
-  width: 4em;
-  height: 2em;
-  font-weight: bold;
-  :hover {
-    opacity: 0.5;
-  }
-`;
-
-const ClosestMatch = styled.button`
-  padding: 0;
-  width: 6.5em;
-  border: none;
-  background-color: ${colors.TRANSPARENT};
-  text-align: left;
-`;
-
-const DownArrow = styled(ArrowDropDownIcon)`
-  width: 2em;
-  height: 2em;
-`;
-
-const UpArrow = styled(ArrowDropUpIcon)`
-  width: 2em;
-  height: 2em;
-`;
-
-const StyledIconButton = styled(IconButton)`
-  border: none;
-  background-color: transparent;
-  margin: 0;
-  padding: 0;
-  width: 2em;
-  height: 2em;
-  font-size: 1em;
-`;
-
-const FlexCell = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 `;
 
 const CloseButton = styled(IconButton)`
@@ -150,309 +63,6 @@ const BigButton = styled(Chip)`
 const ErrorMessage = styled(Typography)`
   margin: 1em;
 `;
-
-const TableHeadContext = createContext({} as any);
-
-const TableHeadComponent = () => {
-  const {
-    matchArrow,
-    matchScoreSortHandler,
-    alphabetArrow,
-    alphabeticSortHandler,
-  } = useContext(TableHeadContext);
-
-  return (
-    <TableHead>
-      <StyledTableHeadCell>
-        <FlexCell>
-          <Typography variant="subtitle1" noWrap>
-            Match Score
-          </Typography>
-          <StyledIconButton onClick={matchScoreSortHandler}>
-            {matchArrow === "highest match" ? <DownArrow /> : <UpArrow />}
-          </StyledIconButton>
-        </FlexCell>
-      </StyledTableHeadCell>
-      <StyledTableHeadCell>
-        <FlexCell>
-          <Typography variant="subtitle1" noWrap>
-            Field Name
-          </Typography>
-          <StyledIconButton onClick={alphabeticSortHandler}>
-            {alphabetArrow === "a-to-z" ? <DownArrow /> : <UpArrow />}
-          </StyledIconButton>
-        </FlexCell>
-      </StyledTableHeadCell>
-      <StyledTableHeadCell>
-        <Typography variant="subtitle1" noWrap>
-          Field Value
-        </Typography>
-      </StyledTableHeadCell>
-      <StyledTableHeadCell />
-    </TableHead>
-  );
-};
-
-const ButtonsCell = (props: {
-  keyValue: KeyValuesWithDistance;
-  isSelected: Boolean;
-}) => {
-  const {
-    selectedDocData,
-    setRemoveKVMessage,
-    setMessageCollapse,
-    setUnalteredKeyValue,
-  } = useContext(TableContext);
-  const [targetString, setDocData] = [
-    useStore((state) => state.targetString),
-    useStore((state) => state.setDocData),
-  ];
-  const [softCollapse, setSoftCollapse] = useState(false);
-  const [hardCollapse, setHardCollapse] = useState(false);
-  const keyValue = props.keyValue;
-  const isSelected = props.isSelected;
-
-  const fillButtonHandler = () => {
-    // fill the kvp table input
-    const shadowWrapper: any = document.querySelector(
-      ".shadow-root-for-modals"
-    );
-    const shadowRoot: any = shadowWrapper.children[0].shadowRoot;
-    const inputEl: any = shadowRoot.getElementById("kvp-table-fill-text-input");
-    inputEl.value = keyValue["value"];
-
-    // let the parent component know what the original string is
-    setUnalteredKeyValue(keyValue);
-
-    // focus on the text editor
-    inputEl.focus();
-  };
-
-  const reportKVPair = async (remove: boolean = false) => {
-    if (remove) {
-      deleteKVPairFromLocalStorage(
-        selectedDocData.docID,
-        keyValue["key"],
-        keyValue["value"]
-      );
-    }
-
-    setDocData(getKeyValuePairsByDoc());
-    setHardCollapse(true);
-    setSoftCollapse(false);
-
-    // query server
-    const docName = selectedDocData.docName;
-    const docType = selectedDocData.docType;
-    const docID = selectedDocData.docID;
-
-    const result = await fetch(
-      `${API_PATH}/api/report-kv-pair/${docID}/${encodeURIComponent(`
-        ${docName}.${docType}`)}`,
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({
-          targetString,
-          key: keyValue["key"],
-          value: keyValue["value"],
-        }),
-      }
-    );
-
-    // set message
-    setMessageCollapse(true);
-    switch (result.status) {
-      case 202:
-        const statusMessage = (await result.json()).status;
-        setRemoveKVMessage(statusMessage);
-        break;
-      default:
-        setRemoveKVMessage(
-          "The faulty key / value pair has been removed from your browser, but we are unable to pass this note on to the server at this time."
-        );
-        break;
-    }
-  };
-
-  // cleanup
-  useEffect(() => {
-    setHardCollapse(false);
-    const closeMessage = setTimeout(() => setMessageCollapse(false), 5000);
-    return () => clearTimeout(closeMessage);
-  }, [hardCollapse]);
-
-  return (
-    <>
-      <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
-        <FlexCell>
-          <IconButton
-            style={
-              isSelected ? { visibility: "visible" } : { visibility: "hidden" }
-            }
-          >
-            <VisibilityIcon />
-          </IconButton>
-          <FillButton onClick={fillButtonHandler}>Fill</FillButton>
-          <IconButton onClick={() => setSoftCollapse(true)}>
-            <HighlightOffIcon />
-          </IconButton>
-        </FlexCell>
-      </Collapse>
-      <ClickAwayListener
-        mouseEvent="onMouseDown"
-        touchEvent="onTouchStart"
-        onClickAway={() => setSoftCollapse(false)}
-      >
-        <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
-          <Chip
-            label="Report Unrelated"
-            variant="outlined"
-            onClick={() => reportKVPair()}
-            style={{ marginBottom: "1em" }}
-          />
-          <Chip
-            label="Delete Row"
-            variant="outlined"
-            onClick={() => reportKVPair(true)}
-          />
-        </Collapse>
-      </ClickAwayListener>
-    </>
-  );
-};
-
-const TableRowContext = createContext({} as any);
-
-const TableRowComponent = (props: {
-  keyValue: KeyValuesWithDistance;
-  bestMatch: string;
-  i: number;
-}) => {
-  const keyValue = props.keyValue;
-  const index = props.i;
-  const { selectedRow, setSelectedRow } = useContext(TableRowContext);
-  const isSelected = selectedRow === index ? true : false;
-
-  const handleRowClick = () => {
-    selectedRow === index ? setSelectedRow(null) : setSelectedRow(index);
-  };
-
-  return (
-    <TableRow
-      key={index}
-      onClick={handleRowClick}
-      style={
-        isSelected
-          ? { backgroundColor: `${colors.ACCURACY_SCORE_LIGHTBLUE}` }
-          : { backgroundColor: `${colors.DROPDOWN_TABLE_BACKGROUND}` }
-      }
-    >
-      <StyledTableCellLeft>
-        <LinearProgress
-          variant={"determinate"}
-          value={keyValue["distanceFromTarget"] * 100}
-        />
-        {keyValue["key"] === props.bestMatch && (
-          <ClosestMatch>
-            <Typography>
-              <i>closest match</i>
-            </Typography>
-          </ClosestMatch>
-        )}
-      </StyledTableCellLeft>
-      <StyledTableCellMiddle>
-        <Typography>{keyValue["key"]}</Typography>
-        {keyValue.interpretedFrom && (
-          <Typography variant="caption">
-            <i>Interpreted from: {keyValue["interpretedFrom"]}</i>
-          </Typography>
-        )}
-      </StyledTableCellMiddle>
-      <StyledTableCellMiddle>
-        <Typography>{keyValue["value"]}</Typography>
-      </StyledTableCellMiddle>
-      <StyledTableCellRight>
-        <ButtonsCell keyValue={keyValue} isSelected={isSelected} />
-      </StyledTableCellRight>
-    </TableRow>
-  );
-};
-
-const TableContext = createContext({} as any);
-
-const TableComponent = () => {
-  const { selectedDocData } = useContext(TableContext);
-  const targetString = useStore((state) => state.targetString);
-  const sortedKeyValuePairs = getEditDistanceAndSort(
-    selectedDocData,
-    targetString,
-    "lc substring"
-  );
-  const bestMatch = sortedKeyValuePairs[0].key;
-
-  const [sort, setSort] = useState(
-    "highest match" as "highest match" | "lowest match" | "a-to-z" | "z-to-a"
-  );
-
-  const dynamicallySortedKeyValuePairs = sortKeyValuePairs(
-    sortedKeyValuePairs,
-    sort
-  );
-
-  // match score sort
-  const [matchArrow, setMatchArrow] = useState("highest match");
-  const matchScoreSortHandler = () => {
-    if (matchArrow === "lowest match") {
-      setSort("highest match");
-      setMatchArrow("highest match");
-    } else {
-      setSort("lowest match");
-      setMatchArrow("lowest match");
-    }
-  };
-
-  // alphabetical sort
-  const [alphabetArrow, setAlphabetArrow] = useState("a-to-z");
-  const alphabeticSortHandler = () => {
-    if (alphabetArrow === "z-to-a") {
-      setSort("a-to-z");
-      setAlphabetArrow("a-to-z");
-    } else {
-      setSort("z-to-a");
-      setAlphabetArrow("z-to-a");
-    }
-  };
-
-  // selected row
-  const [selectedRow, setSelectedRow] = useState(null as null | number);
-
-  return (
-    <Table>
-      <TableHeadContext.Provider
-        value={{
-          matchArrow,
-          matchScoreSortHandler,
-          alphabetArrow,
-          alphabeticSortHandler,
-        }}
-      >
-        <TableHeadComponent />
-      </TableHeadContext.Provider>
-      <TableBody>
-        <TableRowContext.Provider value={{ selectedRow, setSelectedRow }}>
-          {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
-            <TableRowComponent
-              keyValue={keyValue}
-              bestMatch={bestMatch}
-              i={i}
-            />
-          ))}
-        </TableRowContext.Provider>
-      </TableBody>
-    </Table>
-  );
-};
 
 const Message = ({ msg }: any) => {
   return (
@@ -510,19 +120,11 @@ export const SelectModal = () => {
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
-  const [unalteredKeyValue, setUnalteredKeyValue] = useState(null);
-  const textFieldRef = useRef(null);
+  const [unalteredKeyValue, setUnalteredKeyValue] = useState(
+    null as KeyValuesWithDistance | null
+  );
+  const inputRef = useRef(null as HTMLInputElement | null);
   const errorGettingFile = checkFileError(errorFiles, selectedFile);
-
-  const findKvpTableInputEl = () => {
-    if (textFieldRef === null) {
-      console.log("error: textFieldRef null");
-      return;
-    } else {
-      //@ts-ignore
-      return textFieldRef.current.querySelector("#kvp-table-fill-text-input");
-    }
-  };
 
   const handleModalClose = () => {
     if (errorGettingFile) {
@@ -534,7 +136,8 @@ export const SelectModal = () => {
     }
     setKvpTableAnchorEl(null); // close modal
     setSelectedChiclet(null); // remove chiclet border
-    findKvpTableInputEl().value = ""; // clear the text editor
+    //@ts-ignore
+    inputRef.current && (inputRef.current.value = ""); // clear the text editor
   };
 
   const handleManualSelectButtonClick = () => {
@@ -542,26 +145,25 @@ export const SelectModal = () => {
   };
 
   const handleSubmit = () => {
-    const inputEl = findKvpTableInputEl();
-    const currentEditedValue = inputEl.value;
-    eventTarget && (eventTarget.value = currentEditedValue); // fill input w edited val
-    setKvpTableAnchorEl(null); // close the modal
-    setSelectedChiclet(null); // remove chiclet border
+    if (inputRef.current) {
+      const inputEl = inputRef.current as HTMLInputElement;
+      eventTarget && (eventTarget.value = inputEl.value); // fill input w edited val
+      setKvpTableAnchorEl(null); // close the modal
+      setSelectedChiclet(null); // remove chiclet border
 
-    // only render accuracy score if value was not edited.
-    if (
-      unalteredKeyValue !== null &&
-      //@ts-ignore
-      unalteredKeyValue.value === currentEditedValue
-    ) {
-      // impossible to suppress these ts errors!!!! can run it through an if() statement to make sure it's not null, and ts will still say it's possibly null!!!
-      //@ts-ignore
-      renderAccuracyScore("value", eventTarget, unalteredKeyValue);
+      // only render accuracy score if value was not edited.
+      if (
+        unalteredKeyValue !== null &&
+        unalteredKeyValue.value === inputEl.value
+      ) {
+        renderAccuracyScore("value", eventTarget, unalteredKeyValue);
+      } else {
+        renderAccuracyScore("blank", eventTarget);
+      }
+      inputEl.value = ""; // clear the text editor
     } else {
-      renderAccuracyScore("blank", eventTarget);
+      console.log("error: kvp table inputRef.current is null");
     }
-
-    inputEl.value = ""; // clear the text editor
   };
 
   return (
@@ -578,8 +180,7 @@ export const SelectModal = () => {
             variant="outlined"
             fullWidth
             placeholder={targetString}
-            id={"kvp-table-fill-text-input"}
-            ref={textFieldRef}
+            inputRef={inputRef}
             margin="dense"
             style={{ margin: 0 }}
           />
@@ -609,6 +210,7 @@ export const SelectModal = () => {
             setRemoveKVMessage,
             setMessageCollapse,
             setUnalteredKeyValue,
+            inputRef,
           }}
         >
           <TableComponent />

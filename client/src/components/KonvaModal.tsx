@@ -1,4 +1,11 @@
-import React, { useState, createContext, useContext } from "react";
+import React, {
+  useState,
+  createContext,
+  useContext,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { Stage, Layer, Line, Image as KonvaImage } from "react-konva";
 import styled from "styled-components";
 
@@ -6,12 +13,14 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
+import { KONVA_MODAL_STICKY_HEADER_SHADOW } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import {
   KonvaModalContext,
   LinesGeometry,
-  CurrentSelection,
-  Filled,
+  LinesSelection,
+  linesSelectionActionTypes,
+  inputValActionTypes,
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
 
@@ -31,10 +40,9 @@ const CloseButton = styled.button`
   }
 `;
 
-const FillButton = styled.button`
-  background-color: ${colors.FILL_BUTTON};
+const BigButton = styled.button`
   color: white;
-  margin: 1em 0 1em 2em;
+  margin: 1em 0 1em 1.5em;
   border: 1px solid white;
   border-radius: 5px;
   max-width: 6em;
@@ -47,13 +55,6 @@ const FillButton = styled.button`
   }
   flex-basis: auto;
   flex-grow: 0;
-
-  // mui font styles
-  font-size: 1rem;
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-  font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0.00938em;
 `;
 
 const FlexContainer = styled.div`
@@ -63,20 +64,53 @@ const FlexContainer = styled.div`
   width: 100%;
 `;
 
-const CurrentSelectionWrapper = styled.div`
+const HeaderWrapper = styled.div`
   padding: 1em 2em;
-  background-color: ${colors.MANUAL_SELECT_HEADER};
+  background-color: ${colors.WHITE};
+  border-bottom: 1px solid ${colors.KVP_TABLE_BORDER};
   box-sizing: border-box;
+
+  // mui font styles
+  font-size: 1rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  input {
+    font-size: 1rem;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+  }
+  p {
+    margin: 0;
+  }
 `;
 
-const CurrentSelectionTypography = styled(Typography)`
-  margin: 0;
-  background-color: ${colors.CURRENT_SELECTION_LIGHTBLUE};
-  padding: 1em;
-  border-radius: 5px;
-  border: 0.5px solid ${colors.FONT_BLUE};
+const CurrentSelectionWrapper = styled.div`
   flex-basis: auto;
   flex-grow: 10;
+`;
+
+const StyledInput = styled.input`
+  padding: 0.75em;
+  border-radius: 5px;
+  border: 0.5px solid ${colors.FONT_BLUE};
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
+`;
+
+const StickyHeaderWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: ${KONVA_MODAL_STICKY_HEADER_SHADOW};
+`;
+
+const CursorPointerWrapper = styled.div`
+  cursor: pointer;
 `;
 
 const CurrentSelectionContext = createContext({} as any);
@@ -89,36 +123,22 @@ const Polygon = ({
   docImageDimensions: DocImageDimensions;
 }) => {
   const [color, setColor] = useState("transparent");
-  const { filled, setFilled, setCurrentSelection } = useContext(
+  const { inputElRef, linesSelection, linesSelectionDispatch } = useContext(
     CurrentSelectionContext
   );
-  const isFilled = filled[lineGeometry.ID] ? true : false;
+  const isFilled = linesSelection[lineGeometry.ID] ? true : false;
+  const [isMouseDown, setIsMouseDown] = useState(false as boolean);
 
   const fillAndSetCurrentSelection = () => {
+    const line = { [lineGeometry.ID]: lineGeometry.Text };
     if (!isFilled) {
-      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
-        return {
-          ...prevCurrentSelection,
-          [lineGeometry.ID]: lineGeometry.Text,
-        };
-      });
-      setFilled((otherFilleds: Filled) => {
-        return {
-          ...otherFilleds,
-          [lineGeometry.ID]: true,
-        };
-      });
+      linesSelectionDispatch({ type: linesSelectionActionTypes.select, line });
+      inputElRef.current && inputElRef.current.focus(); // focus on input after selecting
     }
     if (isFilled) {
-      setCurrentSelection((prevCurrentSelection: CurrentSelection) => {
-        delete prevCurrentSelection[lineGeometry.ID];
-        return { ...prevCurrentSelection };
-      });
-      setFilled((otherFilleds: Filled) => {
-        return {
-          ...otherFilleds,
-          [lineGeometry.ID]: false,
-        };
+      linesSelectionDispatch({
+        type: linesSelectionActionTypes.deselect,
+        line,
       });
     }
   };
@@ -140,22 +160,105 @@ const Polygon = ({
         ])
       )}
       closed
-      fill={isFilled ? colors.MANUAL_SELECT_RECT_FILL : color}
+      fill={
+        isMouseDown
+          ? colors.MANUAL_SELECT_RECT_FILL_MOUSEDOWN
+          : isFilled
+          ? colors.MANUAL_SELECT_RECT_FILL
+          : color
+      }
       stroke={colors.MANUAL_SELECT_RECT_STROKE}
+      onMouseDown={() => setIsMouseDown(true)}
+      onMouseUp={() => setIsMouseDown(false)}
     />
   );
 };
 
+function findMissingLine(
+  linesSelectionToCheck: LinesSelection,
+  linesSelectionToCheckAgainst: LinesSelection
+) {
+  return Object.entries(linesSelectionToCheck).filter(
+    (line) => !linesSelectionToCheckAgainst[line[0]]
+  )[0][1];
+}
+
+function usePreviousLinesSelection(value: LinesSelection) {
+  const ref = useRef(undefined as LinesSelection | undefined);
+  useEffect(() => {
+    ref.current = { ...value };
+  });
+  return ref.current as LinesSelection;
+}
+
 const Header = ({
   docImageDimensions,
-  currentSelection,
 }: {
   docImageDimensions: DocImageDimensions;
-  currentSelection: CurrentSelection;
 }) => {
-  const { errorLine, handleSubmitAndClear } = useContext(KonvaModalContext);
+  const { errorLine, handleSubmitAndClear, handleClear } = useContext(
+    KonvaModalContext
+  );
+  const {
+    inputElRef,
+    linesSelection,
+    linesSelectionDispatch,
+    inputVal,
+    inputValDispatch,
+  } = useContext(HeaderContext);
+  const prevLinesSelection = usePreviousLinesSelection(
+    linesSelection as LinesSelection
+  );
+
+  // handle editing by user
+  const handleInputChange = (event: any) => {
+    const newVal = event.target.value;
+    // if a line has been edited, then deselect it automatically
+    Object.entries(linesSelection)
+      .filter((line) => !newVal.includes(line[1]))
+      .forEach((line) => {
+        linesSelectionDispatch({
+          type: linesSelectionActionTypes.deselect,
+          line: { [line[0]]: line[1] },
+        });
+      });
+    // set new input val
+    inputValDispatch({ type: "replace", value: newVal });
+  };
+
+  // handle line selection / deselection
+  const updateInputValOnLineClick = useCallback(() => {
+    // make sure not undef
+    if (prevLinesSelection) {
+      const linesSelectionLength = Object.keys(linesSelection).length;
+      const prevLinesSelectionLength = Object.keys(prevLinesSelection).length;
+
+      // if line added, simply append
+      if (prevLinesSelectionLength < linesSelectionLength) {
+        const newLine = findMissingLine(linesSelection, prevLinesSelection);
+        inputValDispatch({
+          type: inputValActionTypes.appendLine,
+          value: newLine,
+        });
+      }
+
+      // if line subtracted, search for it, remove if find, else do nothing
+      if (prevLinesSelectionLength > linesSelectionLength) {
+        const oldLine = findMissingLine(prevLinesSelection, linesSelection);
+        inputValDispatch({
+          type: inputValActionTypes.removeLine,
+          value: oldLine,
+        });
+      }
+    }
+  }, [linesSelection, prevLinesSelection, inputValDispatch]);
+
+  useEffect(() => {
+    updateInputValOnLineClick();
+  }, [updateInputValOnLineClick]);
+
   return (
-    <CurrentSelectionWrapper
+    <HeaderWrapper
       style={{
         width: `${docImageDimensions.width}px`,
       }}
@@ -163,26 +266,38 @@ const Header = ({
       <Typography>
         <Box fontStyle="italic">
           <b>Click</b> to select a line; <b>Click</b> again to unselect; press{" "}
-          <b>Return</b> key to fill.
+          <b>Enter</b> key to fill.
         </Box>
       </Typography>
-      {Object.keys(currentSelection).length > 0 && (
-        <div>
-          <Typography>
-            <Box fontStyle="fontWeightBold">
-              <strong>Current Selection:</strong>
-            </Box>
-          </Typography>
-          <FlexContainer>
-            <CurrentSelectionTypography>
-              {Object.keys(currentSelection).map(
-                (key) => currentSelection[key] + " "
-              )}
-            </CurrentSelectionTypography>
-            <FillButton onClick={handleSubmitAndClear}>Submit</FillButton>
-          </FlexContainer>
-        </div>
-      )}
+      <div>
+        <Typography>
+          <Box fontStyle="fontWeightBold">
+            <strong>Current Selection:</strong>
+          </Box>
+        </Typography>
+        <FlexContainer>
+          <CurrentSelectionWrapper>
+            <StyledInput
+              className={"docit-no-drag"}
+              value={inputVal}
+              onChange={handleInputChange}
+              ref={inputElRef}
+            />
+          </CurrentSelectionWrapper>
+          <BigButton
+            onClick={handleClear}
+            style={{ backgroundColor: `${colors.RED}` }}
+          >
+            Clear
+          </BigButton>
+          <BigButton
+            onClick={handleSubmitAndClear}
+            style={{ backgroundColor: `${colors.FILL_BUTTON}` }}
+          >
+            Submit
+          </BigButton>
+        </FlexContainer>
+      </div>
       {errorLine && (
         <Typography>
           <Box fontStyle="italic" color={`${colors.RED}`}>
@@ -190,60 +305,76 @@ const Header = ({
           </Box>
         </Typography>
       )}
-    </CurrentSelectionWrapper>
+    </HeaderWrapper>
   );
 };
 
+const HeaderContext = createContext({} as any);
+
 export const KonvaModal = () => {
   const {
-    currentSelection,
     image,
-    filled,
-    setFilled,
-    setCurrentSelection,
     currentLinesGeometry,
     docImageDimensions,
+    linesSelection,
+    linesSelectionDispatch,
+    inputVal,
+    inputValDispatch,
   } = useContext(KonvaModalContext);
   const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+  const inputElRef = useRef(null as HTMLInputElement | null);
 
   return (
     <>
-      <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
-      <Header
-        docImageDimensions={docImageDimensions}
-        currentSelection={currentSelection}
-      />
-      <Stage
-        width={docImageDimensions.width}
-        height={docImageDimensions.height}
-      >
-        <Layer>
-          <KonvaImage
-            image={image}
-            width={docImageDimensions.width}
-            height={docImageDimensions.height}
-          />
-          <CurrentSelectionContext.Provider
-            value={{
-              filled,
-              setFilled,
-              setCurrentSelection,
-            }}
-          >
-            {currentLinesGeometry.map(
-              (lineGeometry: LinesGeometry, ndx: number) => {
-                return (
-                  <Polygon
-                    key={ndx}
-                    lineGeometry={lineGeometry}
-                    docImageDimensions={docImageDimensions}
-                  />
-                );
-              }
-            )}
-          </CurrentSelectionContext.Provider>
-        </Layer>
-      </Stage>
+      <StickyHeaderWrapper>
+        <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
+        <HeaderContext.Provider
+          value={{
+            inputElRef,
+            linesSelection,
+            linesSelectionDispatch,
+            inputVal,
+            inputValDispatch,
+          }}
+        >
+          <Header docImageDimensions={docImageDimensions} />
+        </HeaderContext.Provider>
+      </StickyHeaderWrapper>
+      <CursorPointerWrapper className={"docit-no-drag"}>
+        <Stage
+          width={docImageDimensions.width}
+          height={docImageDimensions.height}
+        >
+          <Layer>
+            <KonvaImage
+              image={image}
+              width={docImageDimensions.width}
+              height={docImageDimensions.height}
+            />
+            <CurrentSelectionContext.Provider
+              value={{
+                inputElRef,
+                linesSelection,
+                linesSelectionDispatch,
+                inputVal,
+                inputValDispatch,
+              }}
+            >
+              {currentLinesGeometry.map(
+                (lineGeometry: LinesGeometry, ndx: number) => {
+                  return (
+                    <Polygon
+                      key={ndx}
+                      lineGeometry={lineGeometry}
+                      docImageDimensions={docImageDimensions}
+                    />
+                  );
+                }
+              )}
+            </CurrentSelectionContext.Provider>
+          </Layer>
+        </Stage>
+      </CursorPointerWrapper>
     </>
   );
 };

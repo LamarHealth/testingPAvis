@@ -4,6 +4,7 @@ import React, {
   useReducer,
   useContext,
   useRef,
+  useCallback,
 } from "react";
 import styled from "styled-components";
 import Clear from "@material-ui/icons/Clear";
@@ -115,16 +116,13 @@ const updateLocalStorage = (documentInfo: any) => {
 
 const FileStatus = (props: any) => {
   const [uploadStatus, setUploadStatus] = useState(Number);
-  const countContext = useContext(CountContext);
-  const fileInfoContext = useContext(FileContext);
-
+  const { countDispatch } = useContext(CountContext);
+  const { fileDispatch } = useContext(FileContext);
   const currentFile = props.fileWithPreview.file;
   const [thumbnailSrc, setThumbnailSrc] = useState(
     props.fileWithPreview.preview
   );
   const index = props.fileWithPreview.index;
-
-  // const docData = useSpecialHookState(globalDocData);
   const setDocData = useStore((state) => state.setDocData);
 
   // canvas reference so usePdf hook can select the canvas
@@ -151,53 +149,56 @@ const FileStatus = (props: any) => {
   });
 
   // upload file
-  const uploadImageFile = async (file: File) => {
-    // Increment load counter
-    countContext.countDispatch("increment");
+  const uploadImageFile = useCallback(
+    async (file: File) => {
+      // Increment load counter
+      countDispatch("increment");
 
-    const formData = new FormData();
-    formData.append("myfile", file);
-    try {
-      const result = await fetch(`${API_PATH}/api/upload_status`, {
-        method: "POST",
-        body: formData,
-      });
-      // Status code cases
-      switch (result.status) {
-        case 200:
-          // Add document info to list
-          const postSuccessResponse: any = {
-            type: "append",
-            documentInfo: await result.json(),
-          };
-          updateLocalStorage(postSuccessResponse.documentInfo).then(() => {
-            // update loc stor then set the global var to reflect that
-            setDocData(getKeyValuePairsByDoc());
-          });
-          fileInfoContext.fileDispatch(postSuccessResponse);
-          setUploadStatus(200);
-          break;
-        case 405:
-          setUploadStatus(405);
-          window.alert("file size exceeds > 5mb, cannot use OCR.");
-          break;
-        case 429:
-          setUploadStatus(429);
-          break;
-        default:
-          setUploadStatus(result.status);
+      const formData = new FormData();
+      formData.append("myfile", file);
+      try {
+        const result = await fetch(`${API_PATH}/api/upload_status`, {
+          method: "POST",
+          body: formData,
+        });
+        // Status code cases
+        switch (result.status) {
+          case 200:
+            // Add document info to list
+            const postSuccessResponse: any = {
+              type: "append",
+              documentInfo: await result.json(),
+            };
+            updateLocalStorage(postSuccessResponse.documentInfo).then(() => {
+              // update loc stor then set the global var to reflect that
+              setDocData(getKeyValuePairsByDoc());
+            });
+            fileDispatch(postSuccessResponse);
+            setUploadStatus(200);
+            break;
+          case 405:
+            setUploadStatus(405);
+            window.alert("file size exceeds > 5mb, cannot use OCR.");
+            break;
+          case 429:
+            setUploadStatus(429);
+            break;
+          default:
+            setUploadStatus(result.status);
+        }
+      } catch {
+        setUploadStatus(400);
       }
-    } catch {
-      setUploadStatus(400);
-    }
 
-    // Decrement load counter
-    countContext.countDispatch("decrement");
-  };
+      // Decrement load counter
+      countDispatch("decrement");
+    },
+    [setDocData, setUploadStatus, countDispatch, fileDispatch]
+  );
 
   useEffect(() => {
     uploadImageFile(currentFile);
-  }, []);
+  }, [uploadImageFile, currentFile]);
 
   return (
     <ThumbnailContainer key={index}>
