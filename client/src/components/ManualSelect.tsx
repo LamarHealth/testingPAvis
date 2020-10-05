@@ -10,7 +10,7 @@ import React, {
 import useImage from "use-image";
 
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
@@ -133,7 +133,7 @@ export const ManualSelect = () => {
   );
   const [image] = useImage(docImageURL.url);
   const [errorLine, setErrorLine] = useState(null as null | string);
-  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
+  const errorGettingFile = checkFileError(errorFiles, selectedFile);
   const [linesSelection, linesSelectionDispatch] = useReducer(
     linesSelectionReducer,
     {} as LinesSelection
@@ -147,7 +147,9 @@ export const ManualSelect = () => {
   const modalHandleClick = () => {
     if (
       konvaModalOpen === true &&
-      (currentDocID === "" || currentDocID !== selectedFile || errorGettingFile)
+      (currentDocID === null ||
+        currentDocID !== selectedFile ||
+        errorGettingFile)
     ) {
       getImageAndGeometryFromServer(selectedDocData);
     }

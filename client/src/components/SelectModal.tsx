@@ -18,7 +18,7 @@ import {
 import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { TableComponent, TableContext } from "./KvpTable";
-import { useStore, findErrorGettingFile } from "../contexts/ZustandStore";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -77,9 +77,11 @@ const ErrorLine = () => {
     useStore((state) => state.selectedFile),
     useStore((state) => state.errorFiles),
   ];
-  const errorMsg = errorFiles[selectedFile].errorMessage
-    ? errorFiles[selectedFile].errorMessage
-    : DEFAULT_ERROR_MESSAGE;
+  const errorMsg =
+    selectedFile &&
+    (errorFiles[selectedFile].errorMessage
+      ? errorFiles[selectedFile].errorMessage
+      : DEFAULT_ERROR_MESSAGE);
 
   return (
     <ErrorMessage>
@@ -122,16 +124,18 @@ export const SelectModal = () => {
     null as KeyValuesWithDistance | null
   );
   const inputRef = useRef(null as HTMLInputElement | null);
-  const errorGettingFile = findErrorGettingFile(errorFiles, selectedFile);
+  const errorGettingFile = checkFileError(errorFiles, selectedFile);
 
   const handleModalClose = () => {
     if (errorGettingFile) {
       // if there is an error, want to make sure that konva model is set to closed. otherwise, it will 'remain open' and the call to modalHandleClick won't go thru, cause it is useEffect, monitoring changes in konvaModalOpen
       setKonvaModalOpen(false);
-      setErrorFiles({ [selectedFile]: { image: false, geometry: false } });
+      selectedFile // make sure selectedFile isn't null
+        ? setErrorFiles({ [selectedFile]: { image: false, geometry: false } })
+        : console.log("error: selectedFile null");
     }
     setKvpTableAnchorEl(null); // close modal
-    setSelectedChiclet(""); // remove chiclet border
+    setSelectedChiclet(null); // remove chiclet border
     //@ts-ignore
     inputRef.current && (inputRef.current.value = ""); // clear the text editor
   };
@@ -145,7 +149,7 @@ export const SelectModal = () => {
       const inputEl = inputRef.current as HTMLInputElement;
       eventTarget && (eventTarget.value = inputEl.value); // fill input w edited val
       setKvpTableAnchorEl(null); // close the modal
-      setSelectedChiclet(""); // remove chiclet border
+      setSelectedChiclet(null); // remove chiclet border
 
       // only render accuracy score if value was not edited.
       if (

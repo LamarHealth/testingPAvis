@@ -86,7 +86,7 @@ const DocCell = (props: DocumentInfo) => {
 
   const setSelected = () => {
     selectedFile === props.docID
-      ? setSelectedFile("")
+      ? setSelectedFile(null)
       : setSelectedFile(props.docID.toString()); // toString() converts 'String' wrapper type to primitive 'string' type
   };
 
