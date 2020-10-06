@@ -8,6 +8,8 @@ import Popper from "@material-ui/core/Popper";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
+import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+
 import { DEFAULT } from "../common/themes";
 import {
   MAIN_MODAL_WIDTH,
@@ -47,7 +49,6 @@ export const RenderModal = () => {
     useStore((state) => state.kvpTableAnchorEl),
   ];
   const areThereDocs = docData.length > 0;
-  const isDocSelected = selectedFile !== "";
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
@@ -63,7 +64,7 @@ export const RenderModal = () => {
     height: 0,
   } as DocImageDimensions);
 
-  // handle input el click
+  // handle input el click (local mode)
   useEffect(() => {
     const handleInputClick = (event: MouseEvent) => {
       setEventTarget(event.target as HTMLInputElement);
@@ -79,9 +80,36 @@ export const RenderModal = () => {
     };
   });
 
+  // handle input el click (liberty modal)
+  useEffect(() => {
+    const handleInputClick = (event: MouseEvent) => {
+      setEventTarget(event.target as HTMLInputElement);
+    };
+    // listen for change in liberty modals (even fires on first modal open)
+    const observer = getLibertyModalMutationsObserver(() => {
+      // assign listeners here
+      const inputEls = document.querySelectorAll("input");
+      inputEls.forEach((inputEl) =>
+        inputEl.addEventListener("click", handleInputClick)
+      );
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+    return () => {
+      const inputEls = document.querySelectorAll("input");
+      inputEls.forEach((inputEl) => {
+        inputEl.removeEventListener("click", handleInputClick);
+      });
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={DEFAULT}>
-      {areThereDocs && isDocSelected && (
+      {areThereDocs && selectedFile && (
         <>
           {eventTarget && (
             <Popper
