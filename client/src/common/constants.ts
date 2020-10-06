@@ -4,6 +4,7 @@ enum envVars {
   BUILD = "build",
 }
 export const SIDEBAR_WIDTH = "25em";
+export const SIDEBAR_HEIGHT = "40em";
 export const SIDEBAR_TRANSITION_TIME = "0.5s";
 export const PAGE_SCALE = 0.5;
 export const MODAL_SHADOW = "0px 0px 15px 3px rgba(102, 102, 102, 0.15)";

@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import { colors } from "../common/colors";
 import {
   SIDEBAR_WIDTH,
+  SIDEBAR_HEIGHT,
   SIDEBAR_TRANSITION_TIME,
   LOCAL_MODE,
 } from "../common/constants";
 import styled from "styled-components";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import ChevronLeft from "@material-ui/icons/ChevronLeft";
-import ChevronRight from "@material-ui/icons/ChevronRight";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 
 import DocViewer from "./DocViewer";
 import WrappedJssComponent from "./ShadowComponent";
@@ -18,7 +19,7 @@ const Column = styled.div`
   justify-content: flex-start;
   flex-direction: column;
   align-items: stretch;
-  margin: 1em 0em;
+  margin: 1em 1em 0 0;
   border: ${(props: { open: boolean }) =>
     props.open
       ? `1px solid ${colors.LAYOUT_BLUE_SOLID}`
@@ -26,7 +27,8 @@ const Column = styled.div`
   border-radius: 10px;
   display: flex;
   opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0)};
-  height: 100%;
+  height: ${SIDEBAR_HEIGHT};
+  max-height: 100%;
   transition: all ${SIDEBAR_TRANSITION_TIME};
   width: ${SIDEBAR_WIDTH};
   background-color: ${colors.OFFWHITE};
@@ -35,21 +37,27 @@ const Column = styled.div`
 
 const Container = styled.div`
   position: fixed;
-  display: flex;
-  height: 90%;
+  // display: flex;
+  // flex-direction: column;
+  // height: 90%;
   z-index: 9999;
   transition: ${SIDEBAR_TRANSITION_TIME};
-  margin-left: ${(props: { open: boolean }) =>
-    props.open ? "0" : "-" + SIDEBAR_WIDTH};
+  margin-top: ${(props: { open: boolean }) =>
+    props.open
+      ? "0"
+      : "-" + (parseInt(SIDEBAR_HEIGHT.replace("em", "")) + 1) + "em"};
+  top: 0;
+  right: 0;
 `;
 
 const ExpandButton = styled.button`
   position: relative;
-  width: 2em;
-  height: 3em;
-  top: 50%;
-  right: 1em;
-  margin: 0em 0em 0em 1em;
+  width: 3.5em;
+  height: 2em;
+  // top: 50%;
+  // right: 1em;
+  // margin: 0 auto;
+  left: ${SIDEBAR_WIDTH};
   padding: 0;
   display: flex;
   justify-content: center;
@@ -58,7 +66,7 @@ const ExpandButton = styled.button`
   color: ${colors.WHITE};
   opacity: ${(props: { open: boolean }) => (props.open ? 0 : 1)};
   border: none;
-  border-radius: 0% 25% 25% 0%;
+  border-radius: 0% 0% 25% 25%;
   transition: ${(props: { open: boolean }) =>
     props.open
       ? `all ${SIDEBAR_TRANSITION_TIME} ease-out`
@@ -74,7 +82,7 @@ const ExpandButton = styled.button`
 `;
 
 export const Sidebar = () => {
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setOpen] = useState(true);
 
   // open the sidebar if extension icon clicked
   if (!LOCAL_MODE) {
@@ -105,7 +113,7 @@ export const Sidebar = () => {
           </Column>
         </ClickAwayListener>
         <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-          {isOpen ? <ChevronLeft /> : <ChevronRight />}
+          {isOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </ExpandButton>
       </Container>
     </WrappedJssComponent>
