@@ -25,6 +25,7 @@ const Column = styled.div`
       : `1px solid ${colors.LAYOUT_BLUE_CLEAR}`};
   border-radius: 10px;
   display: flex;
+  opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0)};
   height: 100%;
   transition: all ${SIDEBAR_TRANSITION_TIME};
   width: ${SIDEBAR_WIDTH};
@@ -58,7 +59,7 @@ const ExpandButton = styled.button`
   opacity: ${(props: { open: boolean }) => (props.open ? 0 : 1)};
   border: none;
   border-radius: 0% 25% 25% 0%;
-  transition: all ${SIDEBAR_TRANSITION_TIME};
+  transition: all ${SIDEBAR_TRANSITION_TIME} ease-in;
 
   &:hover {
     opacity: 1;
