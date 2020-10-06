@@ -37,9 +37,6 @@ const Column = styled.div`
 
 const Container = styled.div`
   position: fixed;
-  // display: flex;
-  // flex-direction: column;
-  // height: 90%;
   z-index: 9999;
   transition: ${SIDEBAR_TRANSITION_TIME};
   margin-top: ${(props: { open: boolean }) =>
@@ -54,9 +51,6 @@ const ExpandButton = styled.button`
   position: relative;
   width: 3.5em;
   height: 2em;
-  // top: 50%;
-  // right: 1em;
-  // margin: 0 auto;
   left: ${SIDEBAR_WIDTH};
   padding: 0;
   display: flex;
