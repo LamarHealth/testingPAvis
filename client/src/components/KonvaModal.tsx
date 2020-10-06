@@ -147,10 +147,11 @@ const Polygon = ({
     <Line
       onClick={fillAndSetCurrentSelection}
       onMouseEnter={() => {
-        setColor(colors.MANUAL_SELECT_RECT_FILL);
+        setColor(colors.MANUAL_SELECT_RECT_HOVER);
       }}
       onMouseLeave={() => {
         setColor("transparent");
+        setIsMouseDown(false);
       }}
       points={Array.prototype.concat.apply(
         [],
