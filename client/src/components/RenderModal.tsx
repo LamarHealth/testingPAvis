@@ -49,7 +49,6 @@ export const RenderModal = () => {
     useStore((state) => state.kvpTableAnchorEl),
   ];
   const areThereDocs = docData.length > 0;
-  const isDocSelected = selectedFile !== "";
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
@@ -65,7 +64,23 @@ export const RenderModal = () => {
     height: 0,
   } as DocImageDimensions);
 
-  // handle input el click
+  // handle input el click (local mode)
+  useEffect(() => {
+    const handleInputClick = (event: MouseEvent) => {
+      setEventTarget(event.target as HTMLInputElement);
+    };
+    const inputEls = document.querySelectorAll("input");
+    inputEls.forEach((inputEl) =>
+      inputEl.addEventListener("click", handleInputClick)
+    );
+    return () => {
+      inputEls.forEach((inputEl) =>
+        inputEl.removeEventListener("click", handleInputClick)
+      );
+    };
+  });
+
+  // handle input el click (liberty modal)
   useEffect(() => {
     const handleInputClick = (event: MouseEvent) => {
       setEventTarget(event.target as HTMLInputElement);
@@ -94,7 +109,7 @@ export const RenderModal = () => {
 
   return (
     <ThemeProvider theme={DEFAULT}>
-      {areThereDocs && isDocSelected && (
+      {areThereDocs && selectedFile && (
         <>
           {eventTarget && (
             <Popper
