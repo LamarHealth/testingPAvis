@@ -66,11 +66,19 @@ const Instructions = styled(Typography)`
 
 const Box = styled(Card)`
   margin: 1em;
+  min-height: 60px;
 `;
+
+const DocCard = styled.div``;
 
 const Type = styled(Typography)`
   display: flex;
-  margin: 1em 0;
+  margin: 1em 0.5em;
+`;
+
+const TypeWrapper = styled.span`
+  display: ${(props: { hovering: boolean; isSelected: boolean }) =>
+    props.hovering ? `none` : `inherit`};
 `;
 
 const FeedbackTypography = styled(Typography)`
@@ -83,6 +91,8 @@ const DocCell = (props: DocumentInfo) => {
     useStore((state) => state.selectedFile),
     useStore((state) => state.setSelectedFile),
   ];
+  const [hovering, setHovering] = useState(false as boolean);
+  const isSelected = selectedFile === props.docID;
 
   const setSelected = () => {
     selectedFile === props.docID
@@ -91,29 +101,26 @@ const DocCell = (props: DocumentInfo) => {
   };
 
   return (
-    <Box>
-      <CardContent>
-        <span onClick={setSelected}>
-          {selectedFile === props.docID ? (
-            <Type
-              variant="subtitle1"
-              style={{
-                backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
-              }}
-            >
-              {props.docName}
-              <CheckCircleIcon style={{ color: green[500] }} />
-            </Type>
-          ) : (
-            <Type variant="subtitle1">{props.docName}</Type>
-          )}
-          <Type>
-            <FileCopyOutlinedIcon />
-            Format: {props.docType}
-          </Type>
-        </span>
-        <ButtonsBox docInfo={props} />
-      </CardContent>
+    <Box
+      onClick={setSelected}
+      onMouseOver={() => setHovering(true)}
+      onMouseOut={() => setHovering(false)}
+      style={
+        isSelected
+          ? { backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}` }
+          : { backgroundColor: "transparent" }
+      }
+    >
+      <DocCard id="doc-card">
+        <TypeWrapper hovering={hovering} isSelected={isSelected}>
+          <Type variant="subtitle2">{props.docName}</Type>
+        </TypeWrapper>
+        <ButtonsBox
+          docInfo={props}
+          hovering={hovering}
+          isSelected={isSelected}
+        />
+      </DocCard>
     </Box>
   );
 };

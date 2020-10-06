@@ -27,6 +27,8 @@ import { renderAccuracyScore } from "./AccuracyScoreCircle";
 const ButtonsBoxWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
 `;
 
 const ChipWrapper = styled.div`
@@ -136,7 +138,11 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
   );
 };
 
-const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
+const ButtonsBox = (props: {
+  docInfo: DocumentInfo;
+  hovering: boolean;
+  isSelected: boolean;
+}) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialog] = useState<"delete" | "download">();
   const [docData, setSelectedFile, setKonvaModalOpen, errorFiles] = [
@@ -217,34 +223,39 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
   };
 
   return (
-    <>
+    <div
+      style={
+        props.isSelected
+          ? {
+              backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+            }
+          : { backgroundColor: "transparent" }
+      }
+    >
       {errorGettingFile && <ErrorMessage docID={docID} />}
-      <ButtonsBoxWrapper>
-        <ChipWrapper>
-          <Chip
-            label="Complete Forms on Page"
-            onClick={() => {
-              populateForms();
-              setSelectedFile(props.docInfo.docID.toString());
-            }}
-            variant="outlined"
-            style={{ marginBottom: "0.5em" }}
-          />
-          <Chip
-            label="View PDF"
-            variant="outlined"
-            onClick={handleViewPdfClick}
-            disabled={errorGettingFile}
-          />
-        </ChipWrapper>
-        <ButtonsWrapper>
-          <FlexIconButton onClick={handleDeleteClick}>
-            <DeleteIcon />
-          </FlexIconButton>
-          <FlexIconButton onClick={handleDownloadClick}>
-            <GetAppIcon />
-          </FlexIconButton>
-        </ButtonsWrapper>
+      <ButtonsBoxWrapper
+        style={props.hovering ? { display: "flex" } : { display: "none" }}
+      >
+        <Chip
+          label="Complete Forms"
+          onClick={() => {
+            populateForms();
+            setSelectedFile(props.docInfo.docID.toString());
+          }}
+          variant="outlined"
+        />
+        <Chip
+          label="View PDF"
+          variant="outlined"
+          onClick={handleViewPdfClick}
+          disabled={errorGettingFile}
+        />
+        <FlexIconButton onClick={handleDeleteClick}>
+          <DeleteIcon />
+        </FlexIconButton>
+        <FlexIconButton onClick={handleDownloadClick}>
+          <GetAppIcon />
+        </FlexIconButton>
       </ButtonsBoxWrapper>
       <ClickAwayListener
         mouseEvent="onMouseDown"
@@ -253,15 +264,16 @@ const ButtonsBox = (props: { docInfo: DocumentInfo }) => {
       >
         <Collapse in={dialogOpen}>
           <Divider style={{ margin: "1em 0em" }} />
-
-          {dialogType === "delete" ? (
-            <DeleteConfirm docInfo={props.docInfo} />
-          ) : (
-            <DownloadConfirm docInfo={props.docInfo} />
-          )}
+          <div style={{ textAlign: "center", margin: "0.75em" }}>
+            {dialogType === "delete" ? (
+              <DeleteConfirm docInfo={props.docInfo} />
+            ) : (
+              <DownloadConfirm docInfo={props.docInfo} />
+            )}
+          </div>
         </Collapse>
       </ClickAwayListener>
-    </>
+    </div>
   );
 };
 
