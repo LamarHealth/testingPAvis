@@ -55,9 +55,10 @@ const ExpandButton = styled.button`
   align-items: center;
   background-color: ${colors.LAYOUT_BLUE_SOLID};
   color: ${colors.WHITE};
-  opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0.4)};
+  opacity: ${(props: { open: boolean }) => (props.open ? 0 : 1)};
   border: none;
   border-radius: 0% 25% 25% 0%;
+  transition: all ${SIDEBAR_TRANSITION_TIME};
 
   &:hover {
     opacity: 1;
