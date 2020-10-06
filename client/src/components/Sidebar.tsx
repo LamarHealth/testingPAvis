@@ -59,7 +59,10 @@ const ExpandButton = styled.button`
   opacity: ${(props: { open: boolean }) => (props.open ? 0 : 1)};
   border: none;
   border-radius: 0% 25% 25% 0%;
-  transition: all ${SIDEBAR_TRANSITION_TIME} ease-in;
+  transition: ${(props: { open: boolean }) =>
+    props.open
+      ? `all ${SIDEBAR_TRANSITION_TIME} ease-out`
+      : `all ${SIDEBAR_TRANSITION_TIME} ease-in`};
 
   &:hover {
     opacity: 1;
