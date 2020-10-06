@@ -151,6 +151,7 @@ const Polygon = ({
       }}
       onMouseLeave={() => {
         setColor("transparent");
+        setIsMouseDown(false);
       }}
       points={Array.prototype.concat.apply(
         [],
