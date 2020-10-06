@@ -90,20 +90,20 @@ export const Sidebar = () => {
 
   return (
     <WrappedJssComponent wrapperClassName={"shadow-root-for-sidebar"}>
-      <ClickAwayListener
-        mouseEvent={isOpen ? "onMouseDown" : false}
-        touchEvent={isOpen ? "onTouchStart" : false}
-        onClickAway={handleClickAway}
-      >
-        <Container open={isOpen}>
+      <Container open={isOpen} id="the-container">
+        <ClickAwayListener
+          mouseEvent={isOpen ? "onMouseDown" : false}
+          touchEvent={isOpen ? "onTouchStart" : false}
+          onClickAway={handleClickAway}
+        >
           <Column open={isOpen}>
             <DocViewer />
           </Column>
-          <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-            {isOpen ? <ChevronLeft /> : <ChevronRight />}
-          </ExpandButton>
-        </Container>
-      </ClickAwayListener>
+        </ClickAwayListener>
+        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+          {isOpen ? <ChevronLeft /> : <ChevronRight />}
+        </ExpandButton>
+      </Container>
     </WrappedJssComponent>
   );
 };
