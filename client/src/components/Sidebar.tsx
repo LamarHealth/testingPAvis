@@ -1,8 +1,13 @@
 /*global chrome*/
 import React, { useState } from "react";
 import { colors } from "../common/colors";
-import { SIDEBAR_WIDTH, LOCAL_MODE } from "../common/constants";
+import {
+  SIDEBAR_WIDTH,
+  SIDEBAR_TRANSITION_TIME,
+  LOCAL_MODE,
+} from "../common/constants";
 import styled from "styled-components";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
 
@@ -21,7 +26,7 @@ const Column = styled.div`
   border-radius: 10px;
   display: flex;
   height: 100%;
-  transition: all 1s;
+  transition: all ${SIDEBAR_TRANSITION_TIME};
   width: ${SIDEBAR_WIDTH};
   background-color: ${colors.OFFWHITE};
   overflow: auto;
@@ -32,7 +37,7 @@ const Container = styled.div`
   display: flex;
   height: 90%;
   z-index: 9999;
-  transition: 1s;
+  transition: ${SIDEBAR_TRANSITION_TIME};
   margin-left: ${(props: { open: boolean }) =>
     props.open ? "0" : "-" + SIDEBAR_WIDTH};
 `;
@@ -77,16 +82,27 @@ export const Sidebar = () => {
     chrome.runtime.onMessage.addListener(callback);
   }
 
+  // handle click away
+  const handleClickAway = () => {
+    setOpen(false);
+  };
+
   return (
     <WrappedJssComponent wrapperClassName={"shadow-root-for-sidebar"}>
-      <Container open={isOpen}>
-        <Column open={isOpen}>
-          <DocViewer />
-        </Column>
-        <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
-          {isOpen ? <ChevronLeft /> : <ChevronRight />}
-        </ExpandButton>
-      </Container>
+      <ClickAwayListener
+        mouseEvent={isOpen ? "onMouseDown" : false}
+        touchEvent={isOpen ? "onTouchStart" : false}
+        onClickAway={handleClickAway}
+      >
+        <Container open={isOpen}>
+          <Column open={isOpen}>
+            <DocViewer />
+          </Column>
+          <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
+            {isOpen ? <ChevronLeft /> : <ChevronRight />}
+          </ExpandButton>
+        </Container>
+      </ClickAwayListener>
     </WrappedJssComponent>
   );
 };
