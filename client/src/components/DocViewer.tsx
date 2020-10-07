@@ -68,6 +68,8 @@ const Instructions = styled(Typography)`
 const Box = styled(Card)`
   margin: 1em;
   min-height: 60px;
+  height: ${(props: { boxHeight: string | null }) =>
+    props.boxHeight ? props.boxHeight : "auto"};
 `;
 
 const DocCard = styled.div``;
@@ -94,7 +96,7 @@ const DocCell = (props: DocumentInfo) => {
   ];
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
-  const [boxHeight, setBoxHeight] = useState(undefined as string | undefined);
+  const boxHeight = useRef(null as string | null);
 
   const setSelected = () => {
     selectedFile === props.docID
@@ -113,8 +115,11 @@ const DocCell = (props: DocumentInfo) => {
           : { backgroundColor: "transparent" }
       }
       ref={(docBox: any) => {
-        docBox && setBoxHeight(window.getComputedStyle(docBox).height);
+        if (docBox && !boxHeight.current) {
+          boxHeight.current = window.getComputedStyle(docBox).height;
+        }
       }}
+      boxHeight={boxHeight.current}
     >
       <DocCard id="doc-card">
         <TypeWrapper hovering={hovering} isSelected={isSelected}>

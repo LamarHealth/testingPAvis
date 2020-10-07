@@ -29,9 +29,6 @@ const ButtonsBoxWrapper = styled.div`
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-
-  height: ${(props: { boxHeight: string | undefined }) =>
-    props.boxHeight ? props.boxHeight : "auto"};
 `;
 
 // display: ${(props: { hovering: boolean }) =>
@@ -248,7 +245,7 @@ const ButtonsBox = memo(
           style={props.hovering ? { display: "flex" } : { display: "none" }}
           //@ts-ignore
           // hovering={props.hovering}
-          boxHeight={props.boxHeight}
+          // boxHeight={props.boxHeight}
         >
           <Chip
             label="Complete Forms"
