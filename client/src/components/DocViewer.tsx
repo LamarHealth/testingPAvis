@@ -1,4 +1,4 @@
-import React, { useReducer, useState, createContext } from "react";
+import React, { useReducer, useState, createContext, useRef } from "react";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
@@ -16,6 +16,7 @@ import { colors } from "../common/colors";
 import { useStore } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
+import { useEffect } from "react";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -93,6 +94,7 @@ const DocCell = (props: DocumentInfo) => {
   ];
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
+  const [boxHeight, setBoxHeight] = useState(undefined as string | undefined);
 
   const setSelected = () => {
     selectedFile === props.docID
@@ -110,6 +112,9 @@ const DocCell = (props: DocumentInfo) => {
           ? { backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}` }
           : { backgroundColor: "transparent" }
       }
+      ref={(docBox: any) => {
+        docBox && setBoxHeight(window.getComputedStyle(docBox).height);
+      }}
     >
       <DocCard id="doc-card">
         <TypeWrapper hovering={hovering} isSelected={isSelected}>
@@ -119,6 +124,7 @@ const DocCell = (props: DocumentInfo) => {
           docInfo={props}
           hovering={hovering}
           isSelected={isSelected}
+          boxHeight={boxHeight}
         />
       </DocCard>
     </Box>
