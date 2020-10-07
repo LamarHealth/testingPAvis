@@ -1,8 +1,13 @@
 /*global chrome*/
 import React, { useState } from "react";
 import { colors } from "../common/colors";
-import { SIDEBAR_WIDTH, LOCAL_MODE } from "../common/constants";
+import {
+  SIDEBAR_WIDTH,
+  SIDEBAR_TRANSITION_TIME,
+  LOCAL_MODE,
+} from "../common/constants";
 import styled from "styled-components";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
 
@@ -20,8 +25,9 @@ const Column = styled.div`
       : `1px solid ${colors.LAYOUT_BLUE_CLEAR}`};
   border-radius: 10px;
   display: flex;
+  opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0)};
   height: 100%;
-  transition: all 1s;
+  transition: all ${SIDEBAR_TRANSITION_TIME};
   width: ${SIDEBAR_WIDTH};
   background-color: ${colors.OFFWHITE};
   overflow: auto;
@@ -32,7 +38,7 @@ const Container = styled.div`
   display: flex;
   height: 90%;
   z-index: 9999;
-  transition: 1s;
+  transition: ${SIDEBAR_TRANSITION_TIME};
   margin-left: ${(props: { open: boolean }) =>
     props.open ? "0" : "-" + SIDEBAR_WIDTH};
 `;
@@ -50,9 +56,13 @@ const ExpandButton = styled.button`
   align-items: center;
   background-color: ${colors.LAYOUT_BLUE_SOLID};
   color: ${colors.WHITE};
-  opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0.4)};
+  opacity: ${(props: { open: boolean }) => (props.open ? 0 : 1)};
   border: none;
   border-radius: 0% 25% 25% 0%;
+  transition: ${(props: { open: boolean }) =>
+    props.open
+      ? `all ${SIDEBAR_TRANSITION_TIME} ease-out`
+      : `all ${SIDEBAR_TRANSITION_TIME} ease-in`};
 
   &:hover {
     opacity: 1;
@@ -77,12 +87,23 @@ export const Sidebar = () => {
     chrome.runtime.onMessage.addListener(callback);
   }
 
+  // handle click away
+  const handleClickAway = () => {
+    setOpen(false);
+  };
+
   return (
     <WrappedJssComponent wrapperClassName={"shadow-root-for-sidebar"}>
-      <Container open={isOpen}>
-        <Column open={isOpen}>
-          <DocViewer />
-        </Column>
+      <Container open={isOpen} id="the-container">
+        <ClickAwayListener
+          mouseEvent={isOpen ? "onMouseDown" : false}
+          touchEvent={isOpen ? "onTouchStart" : false}
+          onClickAway={handleClickAway}
+        >
+          <Column open={isOpen}>
+            <DocViewer />
+          </Column>
+        </ClickAwayListener>
         <ExpandButton onClick={() => setOpen(!isOpen)} open={isOpen}>
           {isOpen ? <ChevronLeft /> : <ChevronRight />}
         </ExpandButton>
