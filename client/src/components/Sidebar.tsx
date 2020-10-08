@@ -78,7 +78,7 @@ const ExpandButton = styled.button`
 `;
 
 export const Sidebar = () => {
-  const [isOpen, setOpen] = useState(true);
+  const [isOpen, setOpen] = useState(false);
 
   // open the sidebar if extension icon clicked
   if (!LOCAL_MODE) {
