@@ -217,13 +217,7 @@ const FileStatus = (props: any) => {
       docID &&
       thumbnailSrc.startsWith("data:image/png;base64,")
     ) {
-      // console.log("thumbnailSrc,  ", thumbnailSrc);
-      // console.log("docID,  ", docID);
-      // console.log("UPDATING THUMBS STORAGE");
-      updateThumbsLocalStorage(docID, thumbnailSrc);
-      // .then(() => {
-      //   setDocThumbsReference();
-      // });
+      updateThumbsLocalStorage(docID, "add", thumbnailSrc);
     }
   }, [thumbnailSrc, docID]);
 

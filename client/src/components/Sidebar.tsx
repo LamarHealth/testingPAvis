@@ -6,6 +6,7 @@ import {
   SIDEBAR_HEIGHT,
   SIDEBAR_TRANSITION_TIME,
   LOCAL_MODE,
+  MODAL_SHADOW,
 } from "../common/constants";
 import styled from "styled-components";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
@@ -22,16 +23,17 @@ const Column = styled.div`
   margin: 1em 1em 0 0;
   border: ${(props: { open: boolean }) =>
     props.open
-      ? `1px solid ${colors.LAYOUT_BLUE_SOLID}`
+      ? `1px solid ${colors.DOC_CARD_BORDER};`
       : `1px solid ${colors.LAYOUT_BLUE_CLEAR}`};
   border-radius: 10px;
+  box-shadow: ${MODAL_SHADOW};
   display: flex;
   opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0)};
   height: ${SIDEBAR_HEIGHT};
   max-height: 100%;
   transition: all ${SIDEBAR_TRANSITION_TIME};
   width: ${SIDEBAR_WIDTH};
-  background-color: ${colors.OFFWHITE};
+  background-color: ${colors.SIDEBAR_BACKGROUND};
   overflow: auto;
 `;
 

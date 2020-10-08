@@ -6,7 +6,7 @@ import { StyledDropzone } from "./DocUploader";
 import { DocThumbsReference } from "./docThumbnails";
 
 import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
+
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
@@ -66,6 +66,7 @@ const Instructions = styled(Typography)`
 const Box = styled(Card)`
   margin: 1em;
   min-height: 60px;
+  border: 1px solid ${colors.DOC_CARD_BORDER};
 `;
 
 const DocCard = styled.div`
@@ -91,6 +92,7 @@ const NameAndButtonsWrapper = styled.div`
 
 const StyledImg = styled.img`
   max-height: 100%;
+  filter: ${(props: { blur: boolean }) => (props.blur ? "blur(1px)" : 0)};
 `;
 
 const DocNameWrapper = styled.span`
@@ -137,14 +139,10 @@ const DocCell = (props: DocumentInfo) => {
 
   return (
     <Box
+      variant={isSelected ? "elevation" : "outlined"}
       onClick={setSelected}
       onMouseOver={() => setHovering(true)}
       onMouseOut={() => setHovering(false)}
-      style={
-        isSelected
-          ? { backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}` }
-          : { backgroundColor: "transparent" }
-      }
       // TYPE THIS
       ref={(docBox: any) => {
         // set height of Box, so that height is the max of the child elements. so that height isn't changing while hovering
@@ -154,23 +152,31 @@ const DocCell = (props: DocumentInfo) => {
         }
       }}
     >
-      <DocCard id="doc-card">
-        <ImgWrapper>
-          <StyledImg src={docThumbnail} />
-        </ImgWrapper>
-        <NameAndButtonsWrapper boxWidth={boxWidth.current}>
-          <DocNameWrapper hovering={hovering}>
-            <Type variant="subtitle2">{props.docName}</Type>
-          </DocNameWrapper>
-          <ButtonsBox
-            docInfo={props}
-            hovering={hovering}
-            isSelected={isSelected}
-            boxHeight={boxHeight.current}
-            boxWidth={boxWidth.current}
-          />
-        </NameAndButtonsWrapper>
-      </DocCard>
+      <div
+        style={
+          isSelected
+            ? { background: `${colors.SELECTED_DOC_BACKGROUND}` }
+            : { background: `${colors.DOC_CARD_BACKGROUND}` }
+        }
+      >
+        <DocCard>
+          <ImgWrapper>
+            <StyledImg src={docThumbnail} blur={!isSelected} />
+          </ImgWrapper>
+          <NameAndButtonsWrapper boxWidth={boxWidth.current}>
+            <DocNameWrapper hovering={hovering}>
+              <Type variant="subtitle2">{props.docName}</Type>
+            </DocNameWrapper>
+            <ButtonsBox
+              docInfo={props}
+              hovering={hovering}
+              isSelected={isSelected}
+              boxHeight={boxHeight.current}
+              boxWidth={boxWidth.current}
+            />
+          </NameAndButtonsWrapper>
+        </DocCard>
+      </div>
     </Box>
   );
 };

@@ -17,6 +17,7 @@ import { FileContext, DocumentInfo } from "./DocViewer";
 import { DEFAULT_ERROR_MESSAGE } from "./../common/constants";
 import { colors } from "./../common/colors";
 import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
+import { updateThumbsLocalStorage } from "./docThumbnails";
 import {
   handleFreightTerms,
   assignTargetString,
@@ -88,6 +89,7 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
       type: "remove",
       documentInfo: props.docInfo,
     });
+    updateThumbsLocalStorage(props.docInfo.docID.toString(), "delete");
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>
@@ -246,9 +248,9 @@ const ButtonsBox = memo(
         style={
           props.isSelected
             ? {
-                backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
+                background: `${colors.SELECTED_DOC_BACKGROUND}`,
               }
-            : { backgroundColor: "transparent" }
+            : { background: "transparent" }
         }
       >
         {errorGettingFile && <ErrorMessage docID={docID} />}
