@@ -101,7 +101,6 @@ const StyledImg = styled.img`
   max-height: 100%;
   padding: 5px;
   box-sizing: border-box;
-  filter: ${(props: { blur: boolean }) => (props.blur ? "blur(1px)" : 0)};
 `;
 
 const DocNameWrapper = styled.span`
@@ -188,7 +187,7 @@ const DocCell = (props: DocumentInfo) => {
     >
       <DocCard isSelected={isSelected}>
         <ImgWrapper>
-          <StyledImg src={docThumbnail} blur={!isSelected} />
+          <StyledImg src={docThumbnail} />
         </ImgWrapper>
         <NameAndButtonsWrapper boxWidth={boxWidth.current}>
           <DocNameWrapper hovering={hovering}>
