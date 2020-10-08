@@ -42,7 +42,7 @@ const Container = styled.div`
     color: ${colors.FONT_BLUE};
     border-color: ${colors.FONT_BLUE};
   }
-  margin: 2em;
+  margin: 1em 2em 2em 2em;
 
   & > p {
     padding: 1em;

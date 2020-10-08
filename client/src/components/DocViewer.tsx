@@ -62,12 +62,12 @@ const DocCellTransitionGroup = styled.div`
 
 const Instructions = styled(Typography)`
   text-align: center;
-  padding: 2em 2em 0em 2em;
+  margin: 1em;
   color: ${colors.FONT_BLUE};
 `;
 
 const Box = styled(Card)`
-  margin: 1em;
+  margin: 0 1em 1em 1em;
   min-height: 60px;
   border: 1px solid ${colors.DOC_CARD_BORDER};
 `;
@@ -272,6 +272,7 @@ const DocViewer = () => {
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
+      <Feedback />
       {numDocs === 0 && <InstructionsCell />}
       <TransitionGroup component={DocCellTransitionGroup}>
         {fileList.documents.map((doc: DocumentInfo) => {
@@ -298,7 +299,6 @@ const DocViewer = () => {
         })}
       </TransitionGroup>
       <StyledDropzone />
-      <Feedback />
     </FileContext.Provider>
   );
 };
