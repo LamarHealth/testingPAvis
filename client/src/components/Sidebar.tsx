@@ -17,6 +17,7 @@ import DocViewer from "./DocViewer";
 import WrappedJssComponent from "./ShadowComponent";
 
 const Column = styled.div`
+  display: flex;
   justify-content: flex-start;
   flex-direction: column;
   align-items: stretch;
@@ -27,7 +28,6 @@ const Column = styled.div`
       : `1px solid ${colors.LAYOUT_BLUE_CLEAR}`};
   border-radius: 10px;
   box-shadow: ${MODAL_SHADOW};
-  display: flex;
   opacity: ${(props: { open: boolean }) => (props.open ? 1 : 0)};
   height: ${SIDEBAR_HEIGHT};
   max-height: 100%;

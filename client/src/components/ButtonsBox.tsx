@@ -14,8 +14,6 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo } from "./DocViewer";
-import { DEFAULT_ERROR_MESSAGE } from "./../common/constants";
-import { colors } from "./../common/colors";
 import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
 import { updateThumbsLocalStorage } from "./docThumbnails";
 import {
@@ -71,12 +69,6 @@ const FlexIconButton = styled(IconButton)`
   max-height: 2em;
   min-width: 2em;
   max-width: 2em;
-`;
-
-const ErrorMessageWrapper = styled.div`
-  margin: 1em 0;
-  padding: 0.5em;
-  background-color: ${colors.ERROR_BACKGROUND_RED};
 `;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
@@ -139,23 +131,6 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
   );
 };
 
-const ErrorMessage = ({ docID }: { docID: string }) => {
-  const errorFiles = useStore((state) => state.errorFiles);
-  const errorMsg = errorFiles[docID].errorMessage
-    ? errorFiles[docID].errorMessage
-    : DEFAULT_ERROR_MESSAGE;
-
-  return (
-    <ErrorMessageWrapper>
-      <Typography>
-        <i>
-          <strong>Error</strong>: {errorMsg}
-        </i>
-      </Typography>
-    </ErrorMessageWrapper>
-  );
-};
-
 const ButtonsBox = memo(
   (props: {
     docInfo: DocumentInfo;
@@ -163,17 +138,16 @@ const ButtonsBox = memo(
     isSelected: boolean;
     boxHeight: string | null;
     boxWidth: string | null;
+    errorGettingFile: boolean;
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
-    const [docData, setSelectedFile, setKonvaModalOpen, errorFiles] = [
+    const [docData, setSelectedFile, setKonvaModalOpen] = [
       useStore((state) => state.docData),
       useStore((state) => state.setSelectedFile),
       useStore((state) => state.setKonvaModalOpen),
-      useStore((state) => state.errorFiles),
     ];
     const docID = props.docInfo.docID.toString();
-    const errorGettingFile = checkFileError(errorFiles, docID);
 
     // click away
     const handleClickAway = () => {
@@ -253,74 +227,63 @@ const ButtonsBox = memo(
     };
 
     return (
-      <div
-        style={
-          props.isSelected
-            ? {
-                background: `${colors.SELECTED_DOC_BACKGROUND}`,
-              }
-            : { background: "transparent" }
-        }
+      <ButtonsBoxWrapper
+        hovering={props.hovering}
+        boxHeight={props.boxHeight}
+        boxWidth={props.boxWidth}
       >
-        {errorGettingFile && <ErrorMessage docID={docID} />}
-        <ButtonsBoxWrapper
-          hovering={props.hovering}
-          boxHeight={props.boxHeight}
-          boxWidth={props.boxWidth}
+        <Collapse in={!dialogOpen}>
+          <CollapseInnerWrapper
+            boxHeight={props.boxHeight}
+            boxWidth={props.boxWidth}
+          >
+            <ButtonsFlexContainer className={"flex-container"}>
+              <Chip
+                size="small"
+                label="Complete Forms"
+                onClick={handleCompleteFormsClick}
+                variant="outlined"
+              />
+              <Chip
+                size="small"
+                label="View PDF"
+                variant="outlined"
+                onClick={handleViewPdfClick}
+                disabled={props.errorGettingFile}
+              />
+              <FlexIconButton onClick={handleDeleteClick}>
+                <DeleteIcon />
+              </FlexIconButton>
+              <FlexIconButton onClick={handleDownloadClick}>
+                <GetAppIcon />
+              </FlexIconButton>
+            </ButtonsFlexContainer>
+          </CollapseInnerWrapper>
+        </Collapse>
+
+        <ClickAwayListener
+          mouseEvent="onMouseDown"
+          touchEvent="onTouchStart"
+          onClickAway={handleClickAway}
         >
-          <Collapse in={!dialogOpen}>
+          <Collapse in={dialogOpen}>
             <CollapseInnerWrapper
               boxHeight={props.boxHeight}
               boxWidth={props.boxWidth}
             >
-              <ButtonsFlexContainer className={"flex-container"}>
-                <Chip
-                  size="small"
-                  label="Complete Forms"
-                  onClick={handleCompleteFormsClick}
-                  variant="outlined"
-                />
-                <Chip
-                  size="small"
-                  label="View PDF"
-                  variant="outlined"
-                  onClick={handleViewPdfClick}
-                  disabled={errorGettingFile}
-                />
-                <FlexIconButton onClick={handleDeleteClick}>
-                  <DeleteIcon />
-                </FlexIconButton>
-                <FlexIconButton onClick={handleDownloadClick}>
-                  <GetAppIcon />
-                </FlexIconButton>
+              <ButtonsFlexContainer>
+                {dialogType === "delete" ? (
+                  <DeleteConfirm docInfo={props.docInfo} />
+                ) : (
+                  <div>
+                    <DownloadConfirm docInfo={props.docInfo} />
+                  </div>
+                )}
               </ButtonsFlexContainer>
             </CollapseInnerWrapper>
           </Collapse>
-
-          <ClickAwayListener
-            mouseEvent="onMouseDown"
-            touchEvent="onTouchStart"
-            onClickAway={handleClickAway}
-          >
-            <Collapse in={dialogOpen}>
-              <CollapseInnerWrapper
-                boxHeight={props.boxHeight}
-                boxWidth={props.boxWidth}
-              >
-                <ButtonsFlexContainer>
-                  {dialogType === "delete" ? (
-                    <DeleteConfirm docInfo={props.docInfo} />
-                  ) : (
-                    <div>
-                      <DownloadConfirm docInfo={props.docInfo} />
-                    </div>
-                  )}
-                </ButtonsFlexContainer>
-              </CollapseInnerWrapper>
-            </Collapse>
-          </ClickAwayListener>
-        </ButtonsBoxWrapper>
-      </div>
+        </ClickAwayListener>
+      </ButtonsBoxWrapper>
     );
   }
 );

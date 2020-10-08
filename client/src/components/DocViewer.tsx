@@ -10,7 +10,8 @@ import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
 import { colors } from "../common/colors";
-import { useStore } from "../contexts/ZustandStore";
+import { DEFAULT_ERROR_MESSAGE } from "../common/constants";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
 import { useEffect } from "react";
@@ -72,6 +73,10 @@ const DocCard = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  background: ${(props: { isSelected: boolean }) =>
+    props.isSelected
+      ? `${colors.SELECTED_DOC_BACKGROUND}`
+      : `${colors.DOC_CARD_BACKGROUND}`};
 `;
 
 const ImgWrapper = styled.div`
@@ -108,11 +113,36 @@ const FeedbackTypography = styled(Typography)`
   color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
+const ErrorMessageWrapper = styled.div`
+  margin: 0.5em;
+  padding: 0.5em;
+  background-color: ${colors.ERROR_BACKGROUND_RED};
+`;
+
+const ErrorMessage = ({ docID }: { docID: string }) => {
+  const errorFiles = useStore((state) => state.errorFiles);
+  const errorMsg = errorFiles[docID].errorMessage
+    ? errorFiles[docID].errorMessage
+    : DEFAULT_ERROR_MESSAGE;
+
+  return (
+    <ErrorMessageWrapper>
+      <Typography variant={"body2"}>
+        <i>
+          <strong>Error</strong>: {errorMsg}
+        </i>
+      </Typography>
+    </ErrorMessageWrapper>
+  );
+};
+
 const DocCell = (props: DocumentInfo) => {
-  const [selectedFile, setSelectedFile] = [
+  const [selectedFile, setSelectedFile, errorFiles] = [
     useStore((state) => state.selectedFile),
     useStore((state) => state.setSelectedFile),
+    useStore((state) => state.errorFiles),
   ];
+  const errorGettingFile = checkFileError(errorFiles, props.docID.toString());
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
   const boxHeight = useRef(null as string | null);
@@ -151,31 +181,25 @@ const DocCell = (props: DocumentInfo) => {
         }
       }}
     >
-      <div
-        style={
-          isSelected
-            ? { background: `${colors.SELECTED_DOC_BACKGROUND}` }
-            : { background: `${colors.DOC_CARD_BACKGROUND}` }
-        }
-      >
-        <DocCard>
-          <ImgWrapper>
-            <StyledImg src={docThumbnail} blur={!isSelected} />
-          </ImgWrapper>
-          <NameAndButtonsWrapper boxWidth={boxWidth.current}>
-            <DocNameWrapper hovering={hovering}>
-              <Type variant="subtitle2">{props.docName}</Type>
-            </DocNameWrapper>
-            <ButtonsBox
-              docInfo={props}
-              hovering={hovering}
-              isSelected={isSelected}
-              boxHeight={boxHeight.current}
-              boxWidth={boxWidth.current}
-            />
-          </NameAndButtonsWrapper>
-        </DocCard>
-      </div>
+      <DocCard isSelected={isSelected}>
+        <ImgWrapper>
+          <StyledImg src={docThumbnail} blur={!isSelected} />
+        </ImgWrapper>
+        <NameAndButtonsWrapper boxWidth={boxWidth.current}>
+          <DocNameWrapper hovering={hovering}>
+            <Type variant="subtitle2">{props.docName}</Type>
+          </DocNameWrapper>
+          <ButtonsBox
+            docInfo={props}
+            hovering={hovering}
+            isSelected={isSelected}
+            boxHeight={boxHeight.current}
+            boxWidth={boxWidth.current}
+            errorGettingFile={errorGettingFile}
+          />
+          {errorGettingFile && <ErrorMessage docID={props.docID.toString()} />}
+        </NameAndButtonsWrapper>
+      </DocCard>
     </Box>
   );
 };
