@@ -5,7 +5,11 @@
   "description": "DocIt enables users to fill out web forms with OCR data",
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "*://*.herokuapp.com/*",
+        "*://*.libertygl.com/*",
+        "*://libertygl.com/*"
+      ],
       "js": ["./main.js"],
       "css": ["/main.css"]
     }
