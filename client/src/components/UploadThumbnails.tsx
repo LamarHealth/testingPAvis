@@ -52,8 +52,8 @@ const ThumbnailContainer = styled.div`
   border-radius: 2;
   border: 1px solid #eaeaea;
   margin: 8px;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   padding: 4px;
 `;
 
