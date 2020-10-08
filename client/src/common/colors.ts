@@ -15,7 +15,8 @@ export const colors = {
   SIDEBAR_BACKGROUND: "white",
   DROPZONE_BACKGROUND_GREY: "hsla(140, 16%, 96%)",
   DROPZONE_TEXT_GREY: "gray",
-  DROPZONE_BACKGROUND_HOVER_LIGHTBLUE: "hsl(196, 100%, 88%)",
+  DROPZONE_BACKGROUND_HOVER_LIGHTBLUE:
+    "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   DROPDOWN_TABLE_BACKGROUND: "white",
   DOC_CARD_BACKGROUND: "white",
   DOC_CARD_BORDER: "#918383",
@@ -33,6 +34,7 @@ export const colors = {
   MANUAL_SELECT_RECT_FILL_MOUSEDOWN: "hsla(104, 74%, 33%, 0.65)",
   MANUAL_SELECT_POPOVER_BACKDROP: "hsla(0, 0%, 0%, 0.4)",
   CURRENT_SELECTION_LIGHTBLUE: "hsla(204, 33%, 94%, 1)",
-  ACCURACY_SCORE_LIGHTBLUE: "hsl(195,100%,90%)",
+  ACCURACY_SCORE_LIGHTBLUE:
+    "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   ERROR_BACKGROUND_RED: "rgb(244, 175, 173)",
 };

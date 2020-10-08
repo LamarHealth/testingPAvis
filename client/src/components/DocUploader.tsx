@@ -38,7 +38,7 @@ const Container = styled.div`
   padding: 1em 0;
   max-height: 11em;
   :hover {
-    background-color: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
+    background: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
     color: ${colors.FONT_BLUE};
     border-color: ${colors.FONT_BLUE};
   }

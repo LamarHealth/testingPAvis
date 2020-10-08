@@ -6,7 +6,6 @@ import { StyledDropzone } from "./DocUploader";
 import { DocThumbsReference } from "./docThumbnails";
 
 import Card from "@material-ui/core/Card";
-
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
