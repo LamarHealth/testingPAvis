@@ -24,12 +24,7 @@ import {
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
-const ButtonsBoxWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-`;
+const ButtonsBoxWrapper = styled.div``;
 
 // display: ${(props: { hovering: boolean }) =>
 // props.hovering ? "flex" : "none"};
@@ -56,10 +51,10 @@ const FlexIconButton = styled(IconButton)`
   flex-basis: auto;
   flex-grow: 1;
   padding: 0;
-  min-height: 2.5em;
-  max-height: 2.5em;
-  min-width: 2.5em;
-  max-width: 2.5em;
+  min-height: 2em;
+  max-height: 2em;
+  min-width: 2em;
+  max-width: 2em;
 `;
 
 const ErrorMessageWrapper = styled.div`
@@ -242,48 +237,53 @@ const ButtonsBox = memo(
       >
         {errorGettingFile && <ErrorMessage docID={docID} />}
         <ButtonsBoxWrapper
-          style={props.hovering ? { display: "flex" } : { display: "none" }}
+          style={props.hovering ? { display: "inherit" } : { display: "none" }}
           //@ts-ignore
           // hovering={props.hovering}
           // boxHeight={props.boxHeight}
         >
-          <Chip
-            label="Complete Forms"
-            onClick={() => {
-              populateForms();
-              setSelectedFile(props.docInfo.docID.toString());
-            }}
-            variant="outlined"
-          />
-          <Chip
-            label="View PDF"
-            variant="outlined"
-            onClick={handleViewPdfClick}
-            disabled={errorGettingFile}
-          />
-          <FlexIconButton onClick={handleDeleteClick}>
-            <DeleteIcon />
-          </FlexIconButton>
-          <FlexIconButton onClick={handleDownloadClick}>
-            <GetAppIcon />
-          </FlexIconButton>
-        </ButtonsBoxWrapper>
-        <ClickAwayListener
-          mouseEvent="onMouseDown"
-          touchEvent="onTouchStart"
-          onClickAway={handleClickAway}
-        >
-          <Collapse in={dialogOpen}>
-            <Divider style={{ margin: "1em 0em" }} />
-            <div style={{ textAlign: "center", margin: "0.75em" }}>
-              {dialogType === "delete" ? (
-                <DeleteConfirm docInfo={props.docInfo} />
-              ) : (
-                <DownloadConfirm docInfo={props.docInfo} />
-              )}
+          <Collapse in={!dialogOpen}>
+            <div style={{ display: "flex" }}>
+              <Chip
+                label="Complete Forms"
+                onClick={() => {
+                  populateForms();
+                  setSelectedFile(props.docInfo.docID.toString());
+                }}
+                variant="outlined"
+              />
+              <Chip
+                label="View PDF"
+                variant="outlined"
+                onClick={handleViewPdfClick}
+                disabled={errorGettingFile}
+              />
+              <FlexIconButton onClick={handleDeleteClick}>
+                <DeleteIcon />
+              </FlexIconButton>
+              <FlexIconButton onClick={handleDownloadClick}>
+                <GetAppIcon />
+              </FlexIconButton>
             </div>
           </Collapse>
-        </ClickAwayListener>
+
+          <ClickAwayListener
+            mouseEvent="onMouseDown"
+            touchEvent="onTouchStart"
+            onClickAway={handleClickAway}
+          >
+            <Collapse in={dialogOpen}>
+              {/* <Divider style={{ margin: "1em 0em" }} /> */}
+              <div style={{ textAlign: "center", margin: "0.75em" }}>
+                {dialogType === "delete" ? (
+                  <DeleteConfirm docInfo={props.docInfo} />
+                ) : (
+                  <DownloadConfirm docInfo={props.docInfo} />
+                )}
+              </div>
+            </Collapse>
+          </ClickAwayListener>
+        </ButtonsBoxWrapper>
       </div>
     );
   }
