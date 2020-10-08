@@ -119,7 +119,7 @@ const FeedbackTypography = styled(Typography)`
 `;
 
 const ErrorMessageWrapper = styled.div`
-  margin: 0.5em;
+  margin: 0 0.5em 0.5em 0.5em;
   padding: 0.5em;
   background-color: ${colors.ERROR_BACKGROUND_RED};
 `;
