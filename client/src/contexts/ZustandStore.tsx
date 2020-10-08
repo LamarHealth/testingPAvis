@@ -21,7 +21,6 @@ type State = {
   selectedFile: Uuid;
   selectedChiclet: Uuid;
   docData: KeyValuesByDoc[];
-  // docThumbsReference: string[] | null;
   konvaModalOpen: boolean;
   autocompleteAnchor: null | HTMLInputElement;
   eventTarget: null | HTMLInputElement;
@@ -31,10 +30,6 @@ type State = {
   setSelectedFile: (selectedFile: Uuid) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
   setDocData: (docData: KeyValuesByDoc[]) => void;
-  // setDocThumbsReference: (
-  //   docThumbRef: string,
-  //   action: "add" | "delete"
-  // ) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
   setAutocompleteAnchor: (
     autocompleteAnchorEl: null | HTMLInputElement
@@ -49,7 +44,6 @@ export const useStore = create<State>((set) => ({
   selectedFile: null,
   selectedChiclet: null,
   docData: getKeyValuePairsByDoc(),
-  // docThumbsReference: null,
   konvaModalOpen: false,
   autocompleteAnchor: null,
   eventTarget: null,
@@ -61,13 +55,6 @@ export const useStore = create<State>((set) => ({
   setSelectedChiclet: (selectedChiclet) =>
     set((state) => ({ ...state, selectedChiclet })),
   setDocData: (docData) => set((state) => ({ ...state, docData })),
-  // setDocThumbsReference: (docThumbRef, action) =>
-  //   if (action === "add")
-  //   return { set((state) => {
-  //     return { ...state, docThumbsReference: {
-  //       ...state.docThumbsReference, []
-  //     } };
-  //   })},
   setKonvaModalOpen: (konvaModalOpen) =>
     set((state) => ({ ...state, konvaModalOpen })),
   setAutocompleteAnchor: (autocompleteAnchor) =>
