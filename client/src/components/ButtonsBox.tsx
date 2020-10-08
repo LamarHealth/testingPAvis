@@ -59,6 +59,7 @@ const CollapseInnerWrapper = styled.div`
 const ButtonsFlexContainer = styled.div`
   height: 100%;
   display: flex;
+  margin: 0 0.5em;
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
@@ -68,10 +69,10 @@ const FlexIconButton = styled(IconButton)`
   flex-basis: auto;
   flex-grow: 1;
   padding: 0;
-  min-height: 2em;
-  max-height: 2em;
-  min-width: 2em;
-  max-width: 2em;
+  min-height: 1.5em;
+  max-height: 1.5em;
+  min-width: 1.5em;
+  max-width: 1.5em;
 `;
 
 const populateForms = (docID: string, docData: KeyValuesByDoc[]) => {
