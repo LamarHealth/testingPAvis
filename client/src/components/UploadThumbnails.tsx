@@ -219,7 +219,7 @@ const FileStatus = (props: any) => {
     ) {
       updateThumbsLocalStorage(docID, "add", thumbnailSrc);
     }
-  }, [thumbnailSrc, docID]);
+  }, [thumbnailSrc, docID, props.fileWithPreview.file.type]);
 
   return (
     <ThumbnailContainer key={index}>
