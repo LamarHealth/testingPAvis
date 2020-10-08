@@ -118,13 +118,7 @@ const updateLocalStorage = (documentInfo: any) => {
 const FileStatus = (props: any) => {
   const currentFile = props.fileWithPreview.file;
   const index = props.fileWithPreview.index;
-  const [
-    setDocData,
-    // setDocThumbsReference
-  ] = [
-    useStore((state) => state.setDocData),
-    // useStore((state) => state.setDocThumbsReference),
-  ];
+  const [setDocData] = [useStore((state) => state.setDocData)];
   const { countDispatch } = useContext(CountContext);
   const { fileDispatch } = useContext(FileContext);
   const [uploadStatus, setUploadStatus] = useState(Number);
