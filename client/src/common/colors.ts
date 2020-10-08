@@ -14,7 +14,8 @@ export const colors = {
   FONT_BLUE: "hsla(210, 95%, 10%, 1)",
   SIDEBAR_BACKGROUND: "white",
   DROPZONE_BACKGROUND_GREY: "hsla(140, 16%, 96%)",
-  DROPZONE_TEXT_GREY: "gray",
+  DROPZONE_TEXT_GREY: "	hsl(0, 0%, 50%)",
+  DROPZONE_TEXT_LIGHTGREY: "hsl(0, 0%, 75%)",
   DROPZONE_BACKGROUND_HOVER_LIGHTBLUE:
     "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   DROPDOWN_TABLE_BACKGROUND: "white",
@@ -38,3 +39,16 @@ export const colors = {
     "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   ERROR_BACKGROUND_RED: "rgb(244, 175, 173)",
 };
+
+export const colorSwitcher = (
+  isSelected: boolean,
+  cssAttribute: string,
+  cssPrepends?: string,
+  faintColor?: string,
+  accentColor?: string,
+) =>
+  `${cssAttribute}: ${
+    isSelected
+      ? `${cssPrepends ? cssPrepends : ""} ${accentColor ? accentColor: colors.FONT_BLUE}`
+      : `${cssPrepends ? cssPrepends : ""} ${faintColor ? faintColor : colors.DROPZONE_TEXT_GREY}`
+  }`;

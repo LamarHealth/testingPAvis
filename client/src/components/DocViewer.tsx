@@ -9,7 +9,7 @@ import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
-import { colors } from "../common/colors";
+import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,
   SIDEBAR_THUMBNAIL_WIDTH,
@@ -18,6 +18,7 @@ import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
 import { useEffect } from "react";
+import { isSpreadElement } from "typescript";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -35,6 +36,10 @@ export interface DocumentInfo {
 export interface IFileDispatch {
   type: String;
   documentInfo: DocumentInfo;
+}
+
+export interface IsSelected {
+  isSelected: boolean;
 }
 
 export const CountContext = createContext({} as any);
@@ -70,16 +75,28 @@ const Box = styled(Card)`
   margin: 0 1em 1em 1em;
   min-height: 60px;
   border: 1px solid ${colors.DOC_CARD_BORDER};
+  ${(props: IsSelected) =>
+    colorSwitcher(
+      props.isSelected,
+      "border",
+      "1px solid",
+      `${colors.DROPZONE_TEXT_LIGHTGREY}`,
+      `${colors.DOC_CARD_BORDER}`
+    )}
 `;
 
 const DocCard = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  background: ${(props: { isSelected: boolean }) =>
-    props.isSelected
-      ? `${colors.SELECTED_DOC_BACKGROUND}`
-      : `${colors.DOC_CARD_BACKGROUND}`};
+  ${(props: IsSelected) =>
+    colorSwitcher(
+      props.isSelected,
+      "background",
+      "",
+      `${colors.DOC_CARD_BACKGROUND}`,
+      `${colors.SELECTED_DOC_BACKGROUND}`
+    )}
 `;
 
 const ImgWrapper = styled.div`
@@ -110,6 +127,7 @@ const DocNameWrapper = styled.span`
 
 const Type = styled(Typography)`
   margin: 1em 0.5em;
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
 `;
 
 const FeedbackTypography = styled(Typography)`
@@ -184,6 +202,7 @@ const DocCell = (props: DocumentInfo) => {
           boxWidth.current = window.getComputedStyle(docBox).width;
         }
       }}
+      isSelected={isSelected}
     >
       <DocCard isSelected={isSelected}>
         <ImgWrapper>
@@ -191,7 +210,9 @@ const DocCell = (props: DocumentInfo) => {
         </ImgWrapper>
         <NameAndButtonsWrapper boxWidth={boxWidth.current}>
           <DocNameWrapper hovering={hovering}>
-            <Type variant="subtitle2">{props.docName}</Type>
+            <Type variant="subtitle2" isSelected={isSelected}>
+              {props.docName}
+            </Type>
           </DocNameWrapper>
           <ButtonsBox
             docInfo={props}
@@ -199,6 +220,7 @@ const DocCell = (props: DocumentInfo) => {
             boxHeight={boxHeight.current}
             boxWidth={boxWidth.current}
             errorGettingFile={errorGettingFile}
+            isSelected={isSelected}
           />
           {errorGettingFile && <ErrorMessage docID={props.docID.toString()} />}
         </NameAndButtonsWrapper>

@@ -13,7 +13,7 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
-import { FileContext, DocumentInfo } from "./DocViewer";
+import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
 import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
 import { updateThumbsLocalStorage } from "./docThumbnails";
 import {
@@ -21,6 +21,7 @@ import {
   assignTargetString,
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { colors, colorSwitcher } from "../common/colors";
 import { SIDEBAR_THUMBNAIL_WIDTH } from "../common/constants";
 
 interface ButtonsBoxWrapperProps {
@@ -73,6 +74,26 @@ const FlexIconButton = styled(IconButton)`
   max-height: 2em;
   min-width: 2em;
   max-width: 2em;
+`;
+
+const StyledChip = styled(Chip)`
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
+  ${(props: IsSelected) =>
+    colorSwitcher(
+      props.isSelected,
+      "border",
+      "1px solid",
+      `${colors.DROPZONE_TEXT_LIGHTGREY}`,
+      `${colors.DOC_CARD_BORDER}`
+    )}
+`;
+
+const StyledDeleteIcon = styled(DeleteIcon)`
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
+`;
+
+const StyledGetAppIcon = styled(GetAppIcon)`
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
 `;
 
 const populateForms = (docID: string, docData: KeyValuesByDoc[]) => {
@@ -186,6 +207,7 @@ const ButtonsBox = memo(
     boxHeight: string | null;
     boxWidth: string | null;
     errorGettingFile: boolean;
+    isSelected: boolean;
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
@@ -240,27 +262,29 @@ const ButtonsBox = memo(
             boxWidth={props.boxWidth}
           >
             <ButtonsFlexContainer className={"flex-container"}>
-              <Chip
+              <StyledChip
                 size="small"
                 label="Complete Forms"
                 onClick={handleCompleteFormsClick}
                 variant="outlined"
+                isSelected={props.isSelected}
               />
-              <Chip
+              <StyledChip
                 size="small"
                 label="View PDF"
                 variant="outlined"
                 onClick={handleViewPdfClick}
                 disabled={props.errorGettingFile}
+                isSelected={props.isSelected}
               />
               <FlexIconButton
                 onClick={handleDeleteClick}
                 style={{ marginLeft: "-0.25em" }}
               >
-                <DeleteIcon />
+                <StyledDeleteIcon isSelected={props.isSelected} />
               </FlexIconButton>
               <FlexIconButton onClick={handleDownloadClick} edge={"start"}>
-                <GetAppIcon />
+                <StyledGetAppIcon isSelected={props.isSelected} />
               </FlexIconButton>
             </ButtonsFlexContainer>
           </CollapseInnerWrapper>
