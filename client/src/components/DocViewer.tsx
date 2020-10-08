@@ -5,9 +5,6 @@ import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { StyledDropzone } from "./DocUploader";
 import { DocThumbsReference } from "./docThumbnails";
 
-import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
@@ -71,45 +68,37 @@ const Box = styled(Card)`
   min-height: 60px;
 `;
 
-// height: ${(props: { boxHeight: string | null }) =>
-// props.boxHeight ? props.boxHeight : "auto"};
-
 const DocCard = styled.div`
-  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
 
-const NameAndButtonsWrapper = styled.span`
-  width: 84%;
+const ImgWrapper = styled.div`
   display: inline-block;
+  height: 70px;
+  width: 50px;
+  overflow: hidden;
 `;
 
-const ImgWrapper = styled.span`
-  height: 100%;
-  width: 14%;
-  position: relative;
-  top: 0;
-  left: 0;
+const NameAndButtonsWrapper = styled.div`
+  display: inline-block;
+  max-width: ${(props: { boxWidth: string | null }) =>
+    props.boxWidth
+      ? Number(props.boxWidth.replace("px", "")) - 50 + "px"
+      : undefined};
 `;
 
 const StyledImg = styled.img`
-  box-sizing: border-box;
-  border: 1px solid ${colors.KVP_TABLE_BORDER};
-  display: inline;
-  height: auto;
-  width: auto;
-  max-width: 15%;
   max-height: 100%;
 `;
 
 const DocNameWrapper = styled.span`
-  display: ${(props: { hovering: boolean; isSelected: boolean }) =>
+  display: ${(props: { hovering: boolean }) =>
     props.hovering ? `none` : `flex`};
-  height: 100%;
-  justify-content: center;
 `;
 
 const Type = styled(Typography)`
-  display: inline;
   margin: 1em 0.5em;
 `;
 
@@ -126,6 +115,7 @@ const DocCell = (props: DocumentInfo) => {
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
   const boxHeight = useRef(null as string | null);
+  const boxWidth = useRef(null as string | null);
   const [docThumbnail, setDocThumbnail] = useState(
     undefined as string | undefined
   );
@@ -141,7 +131,6 @@ const DocCell = (props: DocumentInfo) => {
       localStorage.getItem("docThumbnails") || "{}"
     ) as DocThumbsReference)[props.docID.toString()] as string | undefined;
     if (thumb) {
-      console.log("setting thumb");
       setDocThumbnail(thumb);
     }
   }, [props.docID]);
@@ -159,25 +148,26 @@ const DocCell = (props: DocumentInfo) => {
       // TYPE THIS
       ref={(docBox: any) => {
         // set height of Box, so that height is the max of the child elements. so that height isn't changing while hovering
-        if (docBox && !boxHeight.current) {
+        if (docBox && (!boxHeight.current || !boxWidth.current)) {
           boxHeight.current = window.getComputedStyle(docBox).height;
+          boxWidth.current = window.getComputedStyle(docBox).width;
         }
       }}
-      // boxHeight={boxHeight.current}
     >
       <DocCard id="doc-card">
         <ImgWrapper>
           <StyledImg src={docThumbnail} />
         </ImgWrapper>
-        <NameAndButtonsWrapper>
-          <DocNameWrapper hovering={hovering} isSelected={isSelected}>
+        <NameAndButtonsWrapper boxWidth={boxWidth.current}>
+          <DocNameWrapper hovering={hovering}>
             <Type variant="subtitle2">{props.docName}</Type>
           </DocNameWrapper>
           <ButtonsBox
             docInfo={props}
             hovering={hovering}
             isSelected={isSelected}
-            boxHeight={boxHeight}
+            boxHeight={boxHeight.current}
+            boxWidth={boxWidth.current}
           />
         </NameAndButtonsWrapper>
       </DocCard>

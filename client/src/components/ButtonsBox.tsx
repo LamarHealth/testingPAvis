@@ -10,7 +10,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import Collapse from "@material-ui/core/Collapse";
 import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
@@ -24,27 +23,43 @@ import {
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 
-const ButtonsBoxWrapper = styled.div``;
+interface ButtonsBoxWrapperProps {
+  boxHeight: string | null;
+  boxWidth: string | null;
+  hovering: boolean;
+}
 
-// display: ${(props: { hovering: boolean }) =>
-// props.hovering ? "flex" : "none"};
+interface CollapseInnerWrapperProps {
+  boxHeight: string | null;
+  boxWidth: string | null;
+}
 
-// height: ${(props: { docBox: any }) =>
-//     props.docBox ? props.docBox.current.height + "px" : "auto"};
-
-const ChipWrapper = styled.div`
-  flex-basis: auto;
-  display: flex;
-  flex-direction: column;
+const ButtonsBoxWrapper = styled.div`
+  height: ${(props: ButtonsBoxWrapperProps) =>
+    props.boxHeight ? props.boxHeight : "auto"};
+  width: ${(props: ButtonsBoxWrapperProps) =>
+    props.boxWidth
+      ? Number(props.boxWidth.replace("px", "")) - 50 + "px"
+      : "auto"};
+  display: ${(props: ButtonsBoxWrapperProps) =>
+    props.hovering ? "inherit" : "none"};
 `;
 
-const ButtonsWrapper = styled.div`
-  flex-basis: auto;
-  flex-grow: 2;
+const CollapseInnerWrapper = styled.div`
+  height: ${(props: CollapseInnerWrapperProps) =>
+    props.boxHeight ? props.boxHeight : "auto"};
+  width: ${(props: CollapseInnerWrapperProps) =>
+    props.boxWidth
+      ? Number(props.boxWidth.replace("px", "")) - 50 + "px"
+      : "auto"};
+`;
+
+const ButtonsFlexContainer = styled.div`
+  height: 100%;
   display: flex;
-  justify-content: center;
-  margin-left: 2em;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-around;
 `;
 
 const FlexIconButton = styled(IconButton)`
@@ -144,7 +159,8 @@ const ButtonsBox = memo(
     docInfo: DocumentInfo;
     hovering: boolean;
     isSelected: boolean;
-    boxHeight: any;
+    boxHeight: string | null;
+    boxWidth: string | null;
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
@@ -237,34 +253,40 @@ const ButtonsBox = memo(
       >
         {errorGettingFile && <ErrorMessage docID={docID} />}
         <ButtonsBoxWrapper
-          style={props.hovering ? { display: "inherit" } : { display: "none" }}
-          //@ts-ignore
-          // hovering={props.hovering}
-          // boxHeight={props.boxHeight}
+          hovering={props.hovering}
+          boxHeight={props.boxHeight}
+          boxWidth={props.boxWidth}
         >
           <Collapse in={!dialogOpen}>
-            <div style={{ display: "flex" }}>
-              <Chip
-                label="Complete Forms"
-                onClick={() => {
-                  populateForms();
-                  setSelectedFile(props.docInfo.docID.toString());
-                }}
-                variant="outlined"
-              />
-              <Chip
-                label="View PDF"
-                variant="outlined"
-                onClick={handleViewPdfClick}
-                disabled={errorGettingFile}
-              />
-              <FlexIconButton onClick={handleDeleteClick}>
-                <DeleteIcon />
-              </FlexIconButton>
-              <FlexIconButton onClick={handleDownloadClick}>
-                <GetAppIcon />
-              </FlexIconButton>
-            </div>
+            <CollapseInnerWrapper
+              boxHeight={props.boxHeight}
+              boxWidth={props.boxWidth}
+            >
+              <ButtonsFlexContainer className={"flex-container"}>
+                <Chip
+                  size="small"
+                  label="Complete Forms"
+                  onClick={() => {
+                    populateForms();
+                    setSelectedFile(props.docInfo.docID.toString());
+                  }}
+                  variant="outlined"
+                />
+                <Chip
+                  size="small"
+                  label="View PDF"
+                  variant="outlined"
+                  onClick={handleViewPdfClick}
+                  disabled={errorGettingFile}
+                />
+                <FlexIconButton onClick={handleDeleteClick}>
+                  <DeleteIcon />
+                </FlexIconButton>
+                <FlexIconButton onClick={handleDownloadClick}>
+                  <GetAppIcon />
+                </FlexIconButton>
+              </ButtonsFlexContainer>
+            </CollapseInnerWrapper>
           </Collapse>
 
           <ClickAwayListener
@@ -273,14 +295,20 @@ const ButtonsBox = memo(
             onClickAway={handleClickAway}
           >
             <Collapse in={dialogOpen}>
-              {/* <Divider style={{ margin: "1em 0em" }} /> */}
-              <div style={{ textAlign: "center", margin: "0.75em" }}>
-                {dialogType === "delete" ? (
-                  <DeleteConfirm docInfo={props.docInfo} />
-                ) : (
-                  <DownloadConfirm docInfo={props.docInfo} />
-                )}
-              </div>
+              <CollapseInnerWrapper
+                boxHeight={props.boxHeight}
+                boxWidth={props.boxWidth}
+              >
+                <ButtonsFlexContainer>
+                  {dialogType === "delete" ? (
+                    <DeleteConfirm docInfo={props.docInfo} />
+                  ) : (
+                    <div>
+                      <DownloadConfirm docInfo={props.docInfo} />
+                    </div>
+                  )}
+                </ButtonsFlexContainer>
+              </CollapseInnerWrapper>
             </Collapse>
           </ClickAwayListener>
         </ButtonsBoxWrapper>
