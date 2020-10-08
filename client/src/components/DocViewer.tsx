@@ -3,14 +3,17 @@ import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import { DocThumbsReference } from "./docThumbnails";
+import { DocThumbsReference, getThumbsFromLocalStorage } from "./docThumbnails";
 
 import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
 import { colors } from "../common/colors";
-import { DEFAULT_ERROR_MESSAGE } from "../common/constants";
+import {
+  DEFAULT_ERROR_MESSAGE,
+  SIDEBAR_THUMBNAIL_WIDTH,
+} from "../common/constants";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
@@ -82,7 +85,7 @@ const DocCard = styled.div`
 const ImgWrapper = styled.div`
   display: inline-block;
   height: 70px;
-  width: 50px;
+  width: ${SIDEBAR_THUMBNAIL_WIDTH};
   overflow: hidden;
 `;
 
@@ -96,6 +99,8 @@ const NameAndButtonsWrapper = styled.div`
 
 const StyledImg = styled.img`
   max-height: 100%;
+  padding: 5px;
+  box-sizing: border-box;
   filter: ${(props: { blur: boolean }) => (props.blur ? "blur(1px)" : 0)};
 `;
 
@@ -151,16 +156,17 @@ const DocCell = (props: DocumentInfo) => {
     undefined as string | undefined
   );
 
+  // handle box click
   const setSelected = () => {
     selectedFile === props.docID
       ? setSelectedFile(null)
       : setSelectedFile(props.docID.toString()); // toString() converts 'String' wrapper type to primitive 'string' type
   };
 
+  // set thumbnail
   useEffect(() => {
-    const thumb = (JSON.parse(
-      localStorage.getItem("docThumbnails") || "{}"
-    ) as DocThumbsReference)[props.docID.toString()] as string | undefined;
+    const storedThumbs = getThumbsFromLocalStorage() as DocThumbsReference;
+    const thumb = storedThumbs[props.docID.toString()] as string | undefined;
     if (thumb) {
       setDocThumbnail(thumb);
     }
@@ -172,9 +178,8 @@ const DocCell = (props: DocumentInfo) => {
       onClick={setSelected}
       onMouseOver={() => setHovering(true)}
       onMouseOut={() => setHovering(false)}
-      // TYPE THIS
-      ref={(docBox: any) => {
-        // set height of Box, so that height is the max of the child elements. so that height isn't changing while hovering
+      ref={(docBox: HTMLElement) => {
+        // get dimensions of Box, so can set dim of child elements
         if (docBox && (!boxHeight.current || !boxWidth.current)) {
           boxHeight.current = window.getComputedStyle(docBox).height;
           boxWidth.current = window.getComputedStyle(docBox).width;
@@ -192,7 +197,6 @@ const DocCell = (props: DocumentInfo) => {
           <ButtonsBox
             docInfo={props}
             hovering={hovering}
-            isSelected={isSelected}
             boxHeight={boxHeight.current}
             boxWidth={boxWidth.current}
             errorGettingFile={errorGettingFile}

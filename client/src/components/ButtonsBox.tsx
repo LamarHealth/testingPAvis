@@ -2,7 +2,7 @@ import React, { useState, useContext, memo, MouseEvent } from "react";
 
 import $ from "jquery";
 import styled from "styled-components";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
+import { useStore } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -21,6 +21,7 @@ import {
   assignTargetString,
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { SIDEBAR_THUMBNAIL_WIDTH } from "../common/constants";
 
 interface ButtonsBoxWrapperProps {
   boxHeight: string | null;
@@ -49,7 +50,9 @@ const CollapseInnerWrapper = styled.div`
     props.boxHeight ? props.boxHeight : "auto"};
   width: ${(props: CollapseInnerWrapperProps) =>
     props.boxWidth
-      ? Number(props.boxWidth.replace("px", "")) - 50 + "px"
+      ? Number(props.boxWidth.replace("px", "")) -
+        Number(SIDEBAR_THUMBNAIL_WIDTH.replace("px", "")) +
+        "px"
       : "auto"};
 `;
 
@@ -70,6 +73,50 @@ const FlexIconButton = styled(IconButton)`
   min-width: 2em;
   max-width: 2em;
 `;
+
+const populateForms = (docID: string, docData: KeyValuesByDoc[]) => {
+  $(document).ready(() => {
+    const keyValuePairs = docData.filter(
+      (doc: KeyValuesByDoc) => doc.docID === docID
+    )[0];
+
+    $("select").each(function () {
+      handleFreightTerms(this, keyValuePairs);
+    });
+
+    $("input").each(function () {
+      const targetString = assignTargetString(this);
+
+      if (typeof targetString === "undefined") {
+        return;
+      }
+
+      const areThereKVPairs =
+        Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
+
+      if (!areThereKVPairs) {
+        return;
+      }
+
+      const sortedKeyValuePairs = getEditDistanceAndSort(
+        keyValuePairs,
+        targetString,
+        "lc substring"
+      );
+
+      if (
+        sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
+        sortedKeyValuePairs[0].value === ""
+      ) {
+        renderAccuracyScore("blank", this);
+        $(this).prop("value", null);
+      } else {
+        renderAccuracyScore("value", this, sortedKeyValuePairs[0]);
+        $(this).prop("value", sortedKeyValuePairs[0]["value"]);
+      }
+    });
+  });
+};
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
@@ -135,7 +182,6 @@ const ButtonsBox = memo(
   (props: {
     docInfo: DocumentInfo;
     hovering: boolean;
-    isSelected: boolean;
     boxHeight: string | null;
     boxWidth: string | null;
     errorGettingFile: boolean;
@@ -147,7 +193,6 @@ const ButtonsBox = memo(
       useStore((state) => state.setSelectedFile),
       useStore((state) => state.setKonvaModalOpen),
     ];
-    const docID = props.docInfo.docID.toString();
 
     // click away
     const handleClickAway = () => {
@@ -176,53 +221,9 @@ const ButtonsBox = memo(
     };
 
     // handle complete forms click
-    const populateForms = () => {
-      $(document).ready(() => {
-        const keyValuePairs = docData.filter(
-          (doc: KeyValuesByDoc) => doc.docID === props.docInfo.docID
-        )[0];
-
-        $("select").each(function () {
-          handleFreightTerms(this, keyValuePairs);
-        });
-
-        $("input").each(function () {
-          const targetString = assignTargetString(this);
-
-          if (typeof targetString === "undefined") {
-            return;
-          }
-
-          const areThereKVPairs =
-            Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
-
-          if (!areThereKVPairs) {
-            return;
-          }
-
-          const sortedKeyValuePairs = getEditDistanceAndSort(
-            keyValuePairs,
-            targetString,
-            "lc substring"
-          );
-
-          if (
-            sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
-            sortedKeyValuePairs[0].value === ""
-          ) {
-            renderAccuracyScore("blank", this);
-            $(this).prop("value", null);
-          } else {
-            renderAccuracyScore("value", this, sortedKeyValuePairs[0]);
-            $(this).prop("value", sortedKeyValuePairs[0]["value"]);
-          }
-        });
-      });
-    };
-
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      populateForms();
+      populateForms(props.docInfo.docID.toString(), docData);
       setSelectedFile(props.docInfo.docID.toString());
     };
 

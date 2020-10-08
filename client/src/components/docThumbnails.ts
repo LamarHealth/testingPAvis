@@ -2,7 +2,7 @@ export interface DocThumbsReference {
   [docID: string]: string;
 }
 
-const getThumbsFromLocalStorage = (): DocThumbsReference =>
+export const getThumbsFromLocalStorage = (): DocThumbsReference =>
   JSON.parse(localStorage.getItem("docThumbnails") || "{}");
 
 const setThumbsToLocalStorage = (thumbnails: DocThumbsReference) => {
