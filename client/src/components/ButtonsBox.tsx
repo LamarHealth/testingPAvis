@@ -1,4 +1,4 @@
-import React, { useState, useContext, memo } from "react";
+import React, { useState, useContext, memo, MouseEvent } from "react";
 
 import $ from "jquery";
 import styled from "styled-components";
@@ -180,25 +180,28 @@ const ButtonsBox = memo(
       setDialogOpen(false);
     };
 
-    // delete click
-    const handleDeleteClick = () => {
+    // handle delete click
+    const handleDeleteClick = (e: MouseEvent) => {
+      e.stopPropagation();
       setDialogOpen(true);
       setDialog("delete");
     };
 
-    // download click
-    const handleDownloadClick = () => {
+    // handle download click
+    const handleDownloadClick = (e: MouseEvent) => {
+      e.stopPropagation();
       setDialogOpen(true);
       setDialog("download");
     };
 
-    // view pdf click
-    const handleViewPdfClick = () => {
+    // handle view pdf click
+    const handleViewPdfClick = (e: MouseEvent) => {
+      e.stopPropagation();
       setSelectedFile(props.docInfo.docID.toString());
       setKonvaModalOpen(true);
     };
 
-    // populate forms click
+    // handle complete forms click
     const populateForms = () => {
       $(document).ready(() => {
         const keyValuePairs = docData.filter(
@@ -243,6 +246,12 @@ const ButtonsBox = memo(
       });
     };
 
+    const handleCompleteFormsClick = (e: MouseEvent) => {
+      e.stopPropagation();
+      populateForms();
+      setSelectedFile(props.docInfo.docID.toString());
+    };
+
     return (
       <div
         style={
@@ -268,10 +277,7 @@ const ButtonsBox = memo(
                 <Chip
                   size="small"
                   label="Complete Forms"
-                  onClick={() => {
-                    populateForms();
-                    setSelectedFile(props.docInfo.docID.toString());
-                  }}
+                  onClick={handleCompleteFormsClick}
                   variant="outlined"
                 />
                 <Chip
