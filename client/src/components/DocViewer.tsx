@@ -182,8 +182,7 @@ const DocCell = (props: DocumentInfo) => {
 
   // set thumbnail
   useEffect(() => {
-    const storedThumbs = getThumbsFromLocalStorage() as DocThumbsReference;
-    const thumb = storedThumbs[props.docID.toString()] as string | undefined;
+    const thumb = getThumbsFromLocalStorage()[props.docID.toString()];
     if (thumb) {
       setDocThumbnail(thumb);
     }
