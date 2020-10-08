@@ -69,10 +69,10 @@ const FlexIconButton = styled(IconButton)`
   flex-basis: auto;
   flex-grow: 1;
   padding: 0;
-  min-height: 1.5em;
-  max-height: 1.5em;
-  min-width: 1.5em;
-  max-width: 1.5em;
+  min-height: 2em;
+  max-height: 2em;
+  min-width: 2em;
+  max-width: 2em;
 `;
 
 const populateForms = (docID: string, docData: KeyValuesByDoc[]) => {
@@ -253,10 +253,13 @@ const ButtonsBox = memo(
                 onClick={handleViewPdfClick}
                 disabled={props.errorGettingFile}
               />
-              <FlexIconButton onClick={handleDeleteClick}>
+              <FlexIconButton
+                onClick={handleDeleteClick}
+                style={{ marginLeft: "-0.25em" }}
+              >
                 <DeleteIcon />
               </FlexIconButton>
-              <FlexIconButton onClick={handleDownloadClick}>
+              <FlexIconButton onClick={handleDownloadClick} edge={"start"}>
                 <GetAppIcon />
               </FlexIconButton>
             </ButtonsFlexContainer>
