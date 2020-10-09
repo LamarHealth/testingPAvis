@@ -14,13 +14,8 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
-import { KeyValuesByDoc, getEditDistanceAndSort } from "./KeyValuePairs";
 import { updateThumbsLocalStorage } from "./docThumbnails";
-import {
-  handleFreightTerms,
-  assignTargetString,
-} from "./libertyInputsDictionary";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import { populateForms } from "./AccuracyScoreCircle";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT } from "../common/constants";
 
@@ -77,50 +72,6 @@ const StyledDeleteIcon = styled(DeleteIcon)`
 const StyledGetAppIcon = styled(GetAppIcon)`
   ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
 `;
-
-const populateForms = (docID: string, docData: KeyValuesByDoc[]) => {
-  $(document).ready(() => {
-    const keyValuePairs = docData.filter(
-      (doc: KeyValuesByDoc) => doc.docID === docID
-    )[0];
-
-    $("select").each(function () {
-      handleFreightTerms(this, keyValuePairs);
-    });
-
-    $("input").each(function () {
-      const targetString = assignTargetString(this);
-
-      if (typeof targetString === "undefined") {
-        return;
-      }
-
-      const areThereKVPairs =
-        Object.keys(keyValuePairs.keyValuePairs).length > 0 ? true : false;
-
-      if (!areThereKVPairs) {
-        return;
-      }
-
-      const sortedKeyValuePairs = getEditDistanceAndSort(
-        keyValuePairs,
-        targetString,
-        "lc substring"
-      );
-
-      if (
-        sortedKeyValuePairs[0].distanceFromTarget < 0.5 ||
-        sortedKeyValuePairs[0].value === ""
-      ) {
-        renderAccuracyScore("blank", this);
-        $(this).prop("value", null);
-      } else {
-        renderAccuracyScore("value", this, sortedKeyValuePairs[0]);
-        $(this).prop("value", sortedKeyValuePairs[0]["value"]);
-      }
-    });
-  });
-};
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const fileInfoContext = useContext(FileContext);
@@ -226,7 +177,7 @@ const ButtonsBox = memo(
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      populateForms(props.docInfo.docID.toString(), docData);
+      populateForms(props.docInfo.docID.toString(), "best guess", docData);
       setSelectedFile(props.docInfo.docID.toString());
     };
 

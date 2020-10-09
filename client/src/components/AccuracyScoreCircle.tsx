@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
+import $ from "jquery";
 
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Box from "@material-ui/core/Box";
@@ -14,8 +15,15 @@ import { ACC_SCORE_LARGE } from "../common/constants";
 import { ACC_SCORE_MEDIUM } from "../common/constants";
 import { ACC_SCORE_SMALL } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
-import { KeyValuesWithDistance } from "./KeyValuePairs";
-import { assignTargetString } from "./libertyInputsDictionary";
+import {
+  KeyValuesWithDistance,
+  KeyValuesByDoc,
+  getEditDistanceAndSort,
+} from "./KeyValuePairs";
+import {
+  assignTargetString,
+  handleFreightTerms,
+} from "./libertyInputsDictionary";
 import WrappedJssComponent from "./ShadowComponent";
 
 const AccuracyScoreBox = styled.div`
@@ -41,6 +49,7 @@ const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
 const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
+//// COMPONENTS ////
 const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
   const [
     selectedChiclet,
@@ -171,14 +180,8 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
   );
 };
 
-const setMounter = (target: any) => {
-  const inputStyle = window.getComputedStyle(target);
-  const inputZIndex = target.style.zIndex;
-  const positionedParent = target.offsetParent;
-  //@ts-ignore
-  const mounterID = uuidv();
-
-  // remove the old mounter
+//// FUNCTIONS ////
+const removeMounter = (target: any): void => {
   if (target.className.includes("has-docit-mounter")) {
     //@ts-ignore
     const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
@@ -192,19 +195,68 @@ const setMounter = (target: any) => {
     ReactDOM.unmountComponentAtNode(oldMounter); // unmount React component from old mounter
     target.classList.remove(oldMounterClassName); // remove old class name from targeted inputEl
     oldMounter.remove(); // remove mounter from DOM
-    window.removeEventListener("resize", positionMounter); // remove resize listener
   }
+};
 
-  // add the new mounter
-  const mounter = document.createElement("span");
-  mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
-  mounter.style.position = "absolute";
+function positionMounter(
+  target: any,
+  inputStyle: CSSStyleDeclaration,
+  mounter: HTMLSpanElement,
+  accuracyScoreElHeight: number,
+  accuracyScoreElWidth: number
+): any {
+  const scopedInputHeight = parseInt(inputStyle.height.replace("px", ""));
+  const scopedInputWidth = parseInt(inputStyle.width.replace("px", ""));
 
-  mounter.style.zIndex =
-    inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
+  mounter.style.top = `${
+    (scopedInputHeight - accuracyScoreElHeight) / 2 + target.offsetTop
+  }px`;
+  mounter.style.left = `${
+    scopedInputWidth + target.offsetLeft - (accuracyScoreElWidth + 5)
+  }px`;
+}
 
+function positionAllMounters() {
+  $(document).ready(function () {
+    $("input").each(function () {
+      if (this.offsetParent) {
+        const inputStyle = window.getComputedStyle(this);
+        const inputHeight = parseInt(inputStyle.height.replace("px", ""));
+        const mounter = this.className.includes("has-docit-mounter")
+          ? (Array.from(this.offsetParent?.children).filter((el) =>
+              el.id.includes("docit-accuracy-score-mounter")
+            )[0] as HTMLSpanElement)
+          : undefined;
+        const accuracyScoreElHeight =
+          inputHeight >= 30
+            ? ACC_SCORE_LARGE + 8
+            : inputHeight >= 20
+            ? ACC_SCORE_MEDIUM + 8
+            : ACC_SCORE_SMALL + 8;
+        const accuracyScoreElWidth =
+          inputHeight >= 30
+            ? ACC_SCORE_LARGE + 40
+            : inputHeight >= 20
+            ? ACC_SCORE_MEDIUM + 32
+            : ACC_SCORE_SMALL + 26;
+        if (mounter) {
+          positionMounter(
+            this,
+            inputStyle,
+            mounter,
+            accuracyScoreElHeight,
+            accuracyScoreElWidth
+          );
+        }
+      }
+    });
+  });
+}
+
+const setMounter = (target: any) => {
+  const inputStyle = window.getComputedStyle(target);
   const inputHeight = parseInt(inputStyle.height.replace("px", ""));
-
+  const inputZIndex = target.style.zIndex;
   const accuracyScoreElHeight =
     inputHeight >= 30
       ? ACC_SCORE_LARGE + 8
@@ -217,31 +269,36 @@ const setMounter = (target: any) => {
       : inputHeight >= 20
       ? ACC_SCORE_MEDIUM + 32
       : ACC_SCORE_SMALL + 26;
+  const positionedParent = target.offsetParent;
+  const mounter = document.createElement("span");
+  //@ts-ignore
+  const mounterID = uuidv();
 
-  function positionMounter() {
-    const scopedInputHeight = parseInt(inputStyle.height.replace("px", ""));
-    const scopedInputWidth = parseInt(inputStyle.width.replace("px", ""));
+  // remove the old mounter
+  removeMounter(target);
 
-    mounter.style.top = `${
-      (scopedInputHeight - accuracyScoreElHeight) / 2 + target.offsetTop
-    }px`;
-    mounter.style.left = `${
-      scopedInputWidth + target.offsetLeft - (accuracyScoreElWidth + 5)
-    }px`;
-  }
-  positionMounter();
+  // add the new mounter
+  mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
+  mounter.style.position = "absolute";
+  mounter.style.zIndex =
+    inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
 
-  window.addEventListener("resize", positionMounter);
+  positionMounter(
+    target,
+    inputStyle,
+    mounter,
+    accuracyScoreElHeight,
+    accuracyScoreElWidth
+  );
 
-  target.className += ` has-docit-mounter-${mounterID}`;
-
-  positionedParent.appendChild(mounter);
+  target.className += ` has-docit-mounter-${mounterID}`; // add class to link to chiclet
+  positionedParent.appendChild(mounter); // append mounter
 
   return { mounter, mounterID };
 };
 
 export const renderAccuracyScore = (
-  valueOrBlank: "value" | "blank",
+  action: "value" | "blank",
   target: any,
   keyValue?: KeyValuesWithDistance
 ) => {
@@ -250,23 +307,89 @@ export const renderAccuracyScore = (
     const inputHeight = parseInt(
       window.getComputedStyle(target).height.replace("px", "")
     );
-
-    if (valueOrBlank === "value") {
-      ReactDOM.render(
-        <AccuracyScoreEl
-          //@ts-ignore
-          value={keyValue.distanceFromTarget * 100}
-          inputHeight={inputHeight}
-          mounterID={mounterID}
-        />,
-        mounter
-      );
-    }
-    if (valueOrBlank === "blank") {
-      ReactDOM.render(
-        <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
-        mounter
-      );
+    switch (action) {
+      case "value":
+        ReactDOM.render(
+          <AccuracyScoreEl
+            //@ts-ignore
+            value={keyValue.distanceFromTarget * 100}
+            inputHeight={inputHeight}
+            mounterID={mounterID}
+          />,
+          mounter
+        );
+        break;
+      case "blank":
+        ReactDOM.render(
+          <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
+          mounter
+        );
+        break;
+      default:
+        throw new Error();
     }
   }
+};
+
+export const populateForms = (
+  docID: string,
+  action: "blank chiclets" | "best guess",
+  docData?: KeyValuesByDoc[]
+): void => {
+  $(document).ready(() => {
+    switch (action) {
+      case "best guess":
+        if (docData) {
+          const keyValuePairs = docData.filter(
+            (doc: KeyValuesByDoc) => doc.docID === docID
+          )[0];
+          $("select").each(function () {
+            handleFreightTerms(this, keyValuePairs);
+          });
+          $("input").each(function () {
+            const targetString = assignTargetString(this);
+            if (typeof targetString !== "undefined") {
+              const areThereKVPairs =
+                Object.keys(keyValuePairs.keyValuePairs).length > 0
+                  ? true
+                  : false;
+              if (areThereKVPairs) {
+                const sortedKeyValuePairs = getEditDistanceAndSort(
+                  keyValuePairs,
+                  targetString,
+                  "lc substring"
+                );
+                if (
+                  sortedKeyValuePairs[0].distanceFromTarget > 0.5 &&
+                  sortedKeyValuePairs[0].value !== ""
+                ) {
+                  renderAccuracyScore("value", this, sortedKeyValuePairs[0]);
+                  $(this).prop("value", sortedKeyValuePairs[0]["value"]);
+                } else {
+                  renderAccuracyScore("blank", this);
+                  $(this).prop("value", null);
+                }
+              }
+            }
+          });
+        } else throw new Error();
+        break;
+      case "blank chiclets":
+        $("input").each(function () {
+          renderAccuracyScore("blank", this);
+        });
+        break;
+      default:
+        throw new Error();
+    }
+    window.addEventListener("resize", positionAllMounters); // no need remove listener, as identical listeners are automatically discarded
+  });
+};
+
+export const removeAllChiclets = () => {
+  $(document).ready(function () {
+    $("input").each(function () {
+      removeMounter(this);
+    });
+  });
 };

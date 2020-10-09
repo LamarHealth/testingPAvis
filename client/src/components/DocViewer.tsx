@@ -9,6 +9,7 @@ import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
+import { populateForms, removeAllChiclets } from "./AccuracyScoreCircle";
 import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,
@@ -169,11 +170,20 @@ const DocCell = (props: DocumentInfo) => {
     undefined as string | undefined
   );
 
-  // handle box click
+  // handle click to select doc
   const setSelected = () => {
     selectedFile === props.docID
       ? setSelectedFile(null)
       : setSelectedFile(props.docID.toString());
+  };
+
+  const handleBoxClick = () => {
+    setSelected();
+    if (!isSelected) {
+      populateForms(props.docID.toString(), "blank chiclets");
+    } else {
+      removeAllChiclets();
+    }
   };
 
   // set thumbnail
@@ -187,7 +197,7 @@ const DocCell = (props: DocumentInfo) => {
   return (
     <Box
       variant={isSelected ? "elevation" : "outlined"}
-      onClick={setSelected}
+      onClick={handleBoxClick}
       onMouseOver={() => setHovering(true)}
       onMouseOut={() => setHovering(false)}
       isSelected={isSelected}
