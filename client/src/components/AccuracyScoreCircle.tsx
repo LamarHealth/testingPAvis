@@ -181,8 +181,36 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
 };
 
 //// FUNCTIONS ////
+const getComputedStyle = (target: HTMLElement): CSSStyleDeclaration =>
+  window.getComputedStyle(target);
+
+const getComputedHeight = (style: CSSStyleDeclaration): number =>
+  parseInt(style.height.replace("px", ""));
+
+const hasDocitMounter = (target: HTMLElement): boolean =>
+  target.className.includes("has-docit-mounter");
+
+const findAccuracyScoreElDimensions = (
+  inputHeight: number
+): { accuracyScoreElHeight: number; accuracyScoreElWidth: number } => {
+  const accuracyScoreElHeight =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE + 8
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM + 8
+      : ACC_SCORE_SMALL + 8;
+  const accuracyScoreElWidth =
+    inputHeight >= 30
+      ? ACC_SCORE_LARGE + 40
+      : inputHeight >= 20
+      ? ACC_SCORE_MEDIUM + 32
+      : ACC_SCORE_SMALL + 26;
+
+  return { accuracyScoreElHeight, accuracyScoreElWidth };
+};
+
 const removeMounter = (target: any): void => {
-  if (target.className.includes("has-docit-mounter")) {
+  if (hasDocitMounter(target)) {
     //@ts-ignore
     const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
       target.className
@@ -220,25 +248,17 @@ function positionAllMounters() {
   $(document).ready(function () {
     $("input").each(function () {
       if (this.offsetParent) {
-        const inputStyle = window.getComputedStyle(this);
-        const inputHeight = parseInt(inputStyle.height.replace("px", ""));
-        const mounter = this.className.includes("has-docit-mounter")
+        const inputStyle = getComputedStyle(this);
+        const inputHeight = getComputedHeight(inputStyle);
+        const mounter = hasDocitMounter(this)
           ? (Array.from(this.offsetParent?.children).filter((el) =>
               el.id.includes("docit-accuracy-score-mounter")
             )[0] as HTMLSpanElement)
           : undefined;
-        const accuracyScoreElHeight =
-          inputHeight >= 30
-            ? ACC_SCORE_LARGE + 8
-            : inputHeight >= 20
-            ? ACC_SCORE_MEDIUM + 8
-            : ACC_SCORE_SMALL + 8;
-        const accuracyScoreElWidth =
-          inputHeight >= 30
-            ? ACC_SCORE_LARGE + 40
-            : inputHeight >= 20
-            ? ACC_SCORE_MEDIUM + 32
-            : ACC_SCORE_SMALL + 26;
+        const {
+          accuracyScoreElHeight,
+          accuracyScoreElWidth,
+        } = findAccuracyScoreElDimensions(inputHeight);
         if (mounter) {
           positionMounter(
             this,
@@ -254,21 +274,13 @@ function positionAllMounters() {
 }
 
 const setMounter = (target: any) => {
-  const inputStyle = window.getComputedStyle(target);
-  const inputHeight = parseInt(inputStyle.height.replace("px", ""));
+  const inputStyle = getComputedStyle(target);
+  const inputHeight = getComputedHeight(inputStyle);
   const inputZIndex = target.style.zIndex;
-  const accuracyScoreElHeight =
-    inputHeight >= 30
-      ? ACC_SCORE_LARGE + 8
-      : inputHeight >= 20
-      ? ACC_SCORE_MEDIUM + 8
-      : ACC_SCORE_SMALL + 8;
-  const accuracyScoreElWidth =
-    inputHeight >= 30
-      ? ACC_SCORE_LARGE + 40
-      : inputHeight >= 20
-      ? ACC_SCORE_MEDIUM + 32
-      : ACC_SCORE_SMALL + 26;
+  const {
+    accuracyScoreElHeight,
+    accuracyScoreElWidth,
+  } = findAccuracyScoreElDimensions(inputHeight);
   const positionedParent = target.offsetParent;
   const mounter = document.createElement("span");
   //@ts-ignore
@@ -282,7 +294,6 @@ const setMounter = (target: any) => {
   mounter.style.position = "absolute";
   mounter.style.zIndex =
     inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
-
   positionMounter(
     target,
     inputStyle,
@@ -290,7 +301,6 @@ const setMounter = (target: any) => {
     accuracyScoreElHeight,
     accuracyScoreElWidth
   );
-
   target.className += ` has-docit-mounter-${mounterID}`; // add class to link to chiclet
   positionedParent.appendChild(mounter); // append mounter
 
@@ -304,9 +314,7 @@ export const renderAccuracyScore = (
 ) => {
   if (target.offsetParent) {
     const { mounter, mounterID } = setMounter(target);
-    const inputHeight = parseInt(
-      window.getComputedStyle(target).height.replace("px", "")
-    );
+    const inputHeight = getComputedHeight(getComputedStyle(target));
     switch (action) {
       case "value":
         ReactDOM.render(
