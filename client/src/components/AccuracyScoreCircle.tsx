@@ -184,8 +184,17 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
 const getComputedStyle = (target: HTMLElement): CSSStyleDeclaration =>
   window.getComputedStyle(target);
 
-const getComputedHeight = (style: CSSStyleDeclaration): number =>
-  parseInt(style.height.replace("px", ""));
+const getComputedDimension = (
+  style: CSSStyleDeclaration,
+  dimension: "height" | "width"
+): number => {
+  switch (dimension) {
+    case "height":
+      return parseInt(style.height.replace("px", ""));
+    case "width":
+      return parseInt(style.width.replace("px", ""));
+  }
+};
 
 const hasDocitMounter = (target: HTMLElement): boolean =>
   target.className.includes("has-docit-mounter");
@@ -233,8 +242,8 @@ function positionMounter(
   accuracyScoreElHeight: number,
   accuracyScoreElWidth: number
 ): any {
-  const scopedInputHeight = parseInt(inputStyle.height.replace("px", ""));
-  const scopedInputWidth = parseInt(inputStyle.width.replace("px", ""));
+  const scopedInputHeight = getComputedDimension(inputStyle, "height");
+  const scopedInputWidth = getComputedDimension(inputStyle, "width");
 
   mounter.style.top = `${
     (scopedInputHeight - accuracyScoreElHeight) / 2 + target.offsetTop
@@ -249,7 +258,7 @@ function positionAllMounters() {
     $("input").each(function () {
       if (this.offsetParent) {
         const inputStyle = getComputedStyle(this);
-        const inputHeight = getComputedHeight(inputStyle);
+        const inputHeight = getComputedDimension(inputStyle, "height");
         const mounter = hasDocitMounter(this)
           ? (Array.from(this.offsetParent?.children).filter((el) =>
               el.id.includes("docit-accuracy-score-mounter")
@@ -275,7 +284,7 @@ function positionAllMounters() {
 
 const setMounter = (target: any) => {
   const inputStyle = getComputedStyle(target);
-  const inputHeight = getComputedHeight(inputStyle);
+  const inputHeight = getComputedDimension(inputStyle, "height");
   const inputZIndex = target.style.zIndex;
   const {
     accuracyScoreElHeight,
@@ -314,7 +323,10 @@ export const renderAccuracyScore = (
 ) => {
   if (target.offsetParent) {
     const { mounter, mounterID } = setMounter(target);
-    const inputHeight = getComputedHeight(getComputedStyle(target));
+    const inputHeight = getComputedDimension(
+      getComputedStyle(target),
+      "height"
+    );
     switch (action) {
       case "value":
         ReactDOM.render(
