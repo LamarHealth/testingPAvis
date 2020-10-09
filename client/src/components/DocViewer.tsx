@@ -3,19 +3,22 @@ import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
+import { getThumbsFromLocalStorage } from "./docThumbnails";
 
-import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import { green } from "@material-ui/core/colors";
 import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
-import { colors } from "../common/colors";
-import { useStore } from "../contexts/ZustandStore";
+import { colors, colorSwitcher } from "../common/colors";
+import {
+  DEFAULT_ERROR_MESSAGE,
+  DOC_CARD_THUMBNAIL_WIDTH,
+  DOC_CARD_HEIGHT,
+} from "../common/constants";
+import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
+import { useEffect } from "react";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -33,6 +36,10 @@ export interface DocumentInfo {
 export interface IFileDispatch {
   type: String;
   documentInfo: DocumentInfo;
+}
+
+export interface IsSelected {
+  isSelected: boolean;
 }
 
 export const CountContext = createContext({} as any);
@@ -60,17 +67,8 @@ const DocCellTransitionGroup = styled.div`
 
 const Instructions = styled(Typography)`
   text-align: center;
-  padding: 2em 2em 0em 2em;
-  color: ${colors.FONT_BLUE};
-`;
-
-const Box = styled(Card)`
   margin: 1em;
-`;
-
-const Type = styled(Typography)`
-  display: flex;
-  margin: 1em 0;
+  color: ${colors.FONT_BLUE};
 `;
 
 const FeedbackTypography = styled(Typography)`
@@ -78,42 +76,141 @@ const FeedbackTypography = styled(Typography)`
   color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
+const ErrorMessageWrapper = styled.div`
+  margin: 0 0.5em 0.5em 0.5em;
+  padding: 0.5em;
+  background-color: ${colors.ERROR_BACKGROUND_RED};
+`;
+
+const Box = styled(Card)`
+  margin: 0 1em 1em 1em;
+  ${(props: IsSelected) =>
+    colorSwitcher(
+      props.isSelected,
+      "border",
+      "1px solid",
+      `${colors.DROPZONE_TEXT_LIGHTGREY}`,
+      `${colors.DOC_CARD_BORDER}`
+    )}
+`;
+
+const DocCard = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  ${(props: IsSelected) =>
+    colorSwitcher(
+      props.isSelected,
+      "background",
+      "",
+      `${colors.DOC_CARD_BACKGROUND}`,
+      `${colors.SELECTED_DOC_BACKGROUND}`
+    )}
+`;
+
+const ImgWrapper = styled.div`
+  display: inline-block;
+  height: ${DOC_CARD_HEIGHT};
+  width: ${DOC_CARD_THUMBNAIL_WIDTH};
+  overflow: hidden;
+  flex-shrink: 0;
+`;
+
+const StyledImg = styled.img`
+  max-height: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+`;
+
+const NameAndButtonsWrapper = styled.div`
+  display: inline-block;
+  width: 100%;
+`;
+
+const DocNameWrapper = styled.span`
+  display: ${(props: { hovering: boolean }) =>
+    props.hovering ? "none" : "flex"};
+  max-height: ${DOC_CARD_HEIGHT};
+  overflow: hidden;
+`;
+
+const Type = styled(Typography)`
+  margin: 1em 0.5em;
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
+`;
+
+const ErrorMessage = ({ docID }: { docID: string }) => {
+  const errorFiles = useStore((state) => state.errorFiles);
+  const errorMsg = errorFiles[docID].errorMessage
+    ? errorFiles[docID].errorMessage
+    : DEFAULT_ERROR_MESSAGE;
+
+  return (
+    <ErrorMessageWrapper>
+      <Typography variant={"body2"}>
+        <i>
+          <strong>Error</strong>: {errorMsg}
+        </i>
+      </Typography>
+    </ErrorMessageWrapper>
+  );
+};
+
 const DocCell = (props: DocumentInfo) => {
-  const [selectedFile, setSelectedFile] = [
+  const [selectedFile, setSelectedFile, errorFiles] = [
     useStore((state) => state.selectedFile),
     useStore((state) => state.setSelectedFile),
+    useStore((state) => state.errorFiles),
   ];
+  const errorGettingFile = checkFileError(errorFiles, props.docID.toString());
+  const [hovering, setHovering] = useState(false as boolean);
+  const isSelected = selectedFile === props.docID;
+  const [docThumbnail, setDocThumbnail] = useState(
+    undefined as string | undefined
+  );
 
+  // handle box click
   const setSelected = () => {
     selectedFile === props.docID
       ? setSelectedFile(null)
-      : setSelectedFile(props.docID.toString()); // toString() converts 'String' wrapper type to primitive 'string' type
+      : setSelectedFile(props.docID.toString());
   };
 
+  // set thumbnail
+  useEffect(() => {
+    const thumb = getThumbsFromLocalStorage()[props.docID.toString()];
+    if (thumb) {
+      setDocThumbnail(thumb);
+    }
+  }, [props.docID]);
+
   return (
-    <Box>
-      <CardContent>
-        <span onClick={setSelected}>
-          {selectedFile === props.docID ? (
-            <Type
-              variant="subtitle1"
-              style={{
-                backgroundColor: `${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE}`,
-              }}
-            >
+    <Box
+      variant={isSelected ? "elevation" : "outlined"}
+      onClick={setSelected}
+      onMouseOver={() => setHovering(true)}
+      onMouseOut={() => setHovering(false)}
+      isSelected={isSelected}
+    >
+      <DocCard isSelected={isSelected}>
+        <ImgWrapper>
+          <StyledImg src={docThumbnail} />
+        </ImgWrapper>
+        <NameAndButtonsWrapper>
+          <DocNameWrapper hovering={hovering}>
+            <Type variant="subtitle2" isSelected={isSelected}>
               {props.docName}
-              <CheckCircleIcon style={{ color: green[500] }} />
             </Type>
-          ) : (
-            <Type variant="subtitle1">{props.docName}</Type>
-          )}
-          <Type>
-            <FileCopyOutlinedIcon />
-            Format: {props.docType}
-          </Type>
-        </span>
-        <ButtonsBox docInfo={props} />
-      </CardContent>
+          </DocNameWrapper>
+          <ButtonsBox
+            docInfo={props}
+            hovering={hovering}
+            errorGettingFile={errorGettingFile}
+            isSelected={isSelected}
+          />
+          {errorGettingFile && <ErrorMessage docID={props.docID.toString()} />}
+        </NameAndButtonsWrapper>
+      </DocCard>
     </Box>
   );
 };
@@ -183,6 +280,7 @@ const DocViewer = () => {
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
+      <Feedback />
       {numDocs === 0 && <InstructionsCell />}
       <TransitionGroup component={DocCellTransitionGroup}>
         {fileList.documents.map((doc: DocumentInfo) => {
@@ -209,7 +307,6 @@ const DocViewer = () => {
         })}
       </TransitionGroup>
       <StyledDropzone />
-      <Feedback />
     </FileContext.Provider>
   );
 };

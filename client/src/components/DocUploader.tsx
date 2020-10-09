@@ -38,11 +38,11 @@ const Container = styled.div`
   padding: 1em 0;
   max-height: 11em;
   :hover {
-    background-color: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
+    background: ${colors.DROPZONE_BACKGROUND_HOVER_LIGHTBLUE};
     color: ${colors.FONT_BLUE};
     border-color: ${colors.FONT_BLUE};
   }
-  margin: 2em;
+  margin: 1em 2em 2em 2em;
 
   & > p {
     padding: 1em;
@@ -82,11 +82,6 @@ export const StyledDropzone = () => {
     [newFiles]
   );
 
-  // onDragOver- Use this to make fancy animations with other components
-  const onDragOver = React.useCallback((acceptedFiles: any) => {
-    console.log("dragging");
-  }, []);
-
   // Dropzone Hook
   const {
     getRootProps,
@@ -97,7 +92,6 @@ export const StyledDropzone = () => {
   } = useDropzone({
     accept: ["application/pdf", "image/*"],
     onDrop,
-    onDragOver,
   });
 
   return (

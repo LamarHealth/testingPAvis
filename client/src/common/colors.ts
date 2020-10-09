@@ -12,10 +12,17 @@ export const colors = {
   LAYOUT_BLUE_SOLID: "hsla(210, 95%, 20%, 1)",
   LAYOUT_BLUE_CLEAR: "hsla(210, 95%, 20%, 0)",
   FONT_BLUE: "hsla(210, 95%, 10%, 1)",
+  SIDEBAR_BACKGROUND: "white",
   DROPZONE_BACKGROUND_GREY: "hsla(140, 16%, 96%)",
-  DROPZONE_TEXT_GREY: "gray",
-  DROPZONE_BACKGROUND_HOVER_LIGHTBLUE: "hsl(196, 100%, 88%)",
+  DROPZONE_TEXT_GREY: "	hsl(0, 0%, 50%)",
+  DROPZONE_TEXT_LIGHTGREY: "hsl(0, 0%, 75%)",
+  DROPZONE_BACKGROUND_HOVER_LIGHTBLUE:
+    "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   DROPDOWN_TABLE_BACKGROUND: "white",
+  DOC_CARD_BACKGROUND: "white",
+  DOC_CARD_BORDER: "#918383",
+  SELECTED_DOC_BACKGROUND:
+    "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   FILL_BUTTON: "#22c062",
   MODAL_BORDER: "rgba(224, 224, 224, 1)",
   KVP_TABLE_BORDER: "hsla(0, 0%, 87%, 1)",
@@ -28,6 +35,20 @@ export const colors = {
   MANUAL_SELECT_RECT_FILL_MOUSEDOWN: "hsla(104, 74%, 33%, 0.65)",
   MANUAL_SELECT_POPOVER_BACKDROP: "hsla(0, 0%, 0%, 0.4)",
   CURRENT_SELECTION_LIGHTBLUE: "hsla(204, 33%, 94%, 1)",
-  ACCURACY_SCORE_LIGHTBLUE: "hsl(195,100%,90%)",
+  ACCURACY_SCORE_LIGHTBLUE:
+    "linear-gradient(0.10turn, hsla(215, 91%, 79%, 0.3), hsla(252, 80%, 80%, 0.3))",
   ERROR_BACKGROUND_RED: "rgb(244, 175, 173)",
 };
+
+export const colorSwitcher = (
+  isSelected: boolean,
+  cssAttribute: string,
+  cssPrepends?: string,
+  faintColor?: string,
+  accentColor?: string,
+) =>
+  `${cssAttribute}: ${
+    isSelected
+      ? `${cssPrepends ? cssPrepends : ""} ${accentColor ? accentColor: colors.FONT_BLUE}`
+      : `${cssPrepends ? cssPrepends : ""} ${faintColor ? faintColor : colors.DROPZONE_TEXT_GREY}`
+  }`;

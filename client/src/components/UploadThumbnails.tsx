@@ -21,6 +21,7 @@ import { usePdf } from "@mikecousins/react-pdf";
 import { PAGE_SCALE, API_PATH } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { updateThumbsLocalStorage } from "./docThumbnails";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -51,8 +52,8 @@ const ThumbnailContainer = styled.div`
   border-radius: 2;
   border: 1px solid #eaeaea;
   margin: 8px;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   padding: 4px;
 `;
 
@@ -115,15 +116,16 @@ const updateLocalStorage = (documentInfo: any) => {
 };
 
 const FileStatus = (props: any) => {
-  const [uploadStatus, setUploadStatus] = useState(Number);
+  const currentFile = props.fileWithPreview.file;
+  const index = props.fileWithPreview.index;
+  const [setDocData] = [useStore((state) => state.setDocData)];
   const { countDispatch } = useContext(CountContext);
   const { fileDispatch } = useContext(FileContext);
-  const currentFile = props.fileWithPreview.file;
+  const [uploadStatus, setUploadStatus] = useState(Number);
   const [thumbnailSrc, setThumbnailSrc] = useState(
     props.fileWithPreview.preview
   );
-  const index = props.fileWithPreview.index;
-  const setDocData = useStore((state) => state.setDocData);
+  const [docID, setDocID] = useState(undefined as string | undefined);
 
   // canvas reference so usePdf hook can select the canvas
   const canvasRef = useRef(null);
@@ -135,8 +137,8 @@ const FileStatus = (props: any) => {
     );
     const shadowRoot: any = shadowRootWrapper.children[0].shadowRoot;
     const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
-    const dataUrl = canvas.toDataURL();
-    setThumbnailSrc(dataUrl);
+    const dataURL = canvas.toDataURL();
+    setThumbnailSrc(dataURL);
   };
 
   // the PDFJS usePdf hook
@@ -164,6 +166,7 @@ const FileStatus = (props: any) => {
         // Status code cases
         switch (result.status) {
           case 200:
+            // console.log("DOC UPLOADED");
             // Add document info to list
             const postSuccessResponse: any = {
               type: "append",
@@ -173,6 +176,7 @@ const FileStatus = (props: any) => {
               // update loc stor then set the global var to reflect that
               setDocData(getKeyValuePairsByDoc());
             });
+            setDocID(postSuccessResponse.documentInfo.docID);
             fileDispatch(postSuccessResponse);
             setUploadStatus(200);
             break;
@@ -199,6 +203,17 @@ const FileStatus = (props: any) => {
   useEffect(() => {
     uploadImageFile(currentFile);
   }, [uploadImageFile, currentFile]);
+
+  useEffect(() => {
+    const fileType = props.fileWithPreview.file.type;
+    if (
+      fileType === "application/pdf" &&
+      docID &&
+      thumbnailSrc.startsWith("data:image/png;base64,")
+    ) {
+      updateThumbsLocalStorage(docID, "add", thumbnailSrc);
+    }
+  }, [thumbnailSrc, docID, props.fileWithPreview.file.type]);
 
   return (
     <ThumbnailContainer key={index}>
