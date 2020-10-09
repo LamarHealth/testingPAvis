@@ -1,9 +1,9 @@
-import React, { useReducer, useState, createContext, useRef } from "react";
+import React, { useReducer, useState, createContext } from "react";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 import { StyledDropzone } from "./DocUploader";
-import { DocThumbsReference, getThumbsFromLocalStorage } from "./docThumbnails";
+import { getThumbsFromLocalStorage } from "./docThumbnails";
 
 import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
@@ -19,7 +19,6 @@ import { useStore, checkFileError } from "../contexts/ZustandStore";
 
 import ButtonsBox from "./ButtonsBox";
 import { useEffect } from "react";
-import { isSpreadElement } from "typescript";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;

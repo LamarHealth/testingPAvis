@@ -22,7 +22,7 @@ import {
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { colors, colorSwitcher } from "../common/colors";
-import { DOC_CARD_THUMBNAIL_WIDTH, DOC_CARD_HEIGHT } from "../common/constants";
+import { DOC_CARD_HEIGHT } from "../common/constants";
 
 const ButtonsBoxWrapper = styled.div`
   height: ${DOC_CARD_HEIGHT};

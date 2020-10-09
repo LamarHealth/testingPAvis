@@ -82,11 +82,6 @@ export const StyledDropzone = () => {
     [newFiles]
   );
 
-  // onDragOver- Use this to make fancy animations with other components
-  const onDragOver = React.useCallback((acceptedFiles: any) => {
-    console.log("dragging");
-  }, []);
-
   // Dropzone Hook
   const {
     getRootProps,
@@ -97,7 +92,6 @@ export const StyledDropzone = () => {
   } = useDropzone({
     accept: ["application/pdf", "image/*"],
     onDrop,
-    onDragOver,
   });
 
   return (
