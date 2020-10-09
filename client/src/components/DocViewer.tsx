@@ -12,7 +12,8 @@ import Link from "@material-ui/core/Link";
 import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,
-  SIDEBAR_THUMBNAIL_WIDTH,
+  DOC_CARD_THUMBNAIL_WIDTH,
+  DOC_CARD_HEIGHT,
 } from "../common/constants";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 
@@ -71,10 +72,19 @@ const Instructions = styled(Typography)`
   color: ${colors.FONT_BLUE};
 `;
 
+const FeedbackTypography = styled(Typography)`
+  margin: 0.5em auto;
+  color: ${colors.DROPZONE_TEXT_GREY};
+`;
+
+const ErrorMessageWrapper = styled.div`
+  margin: 0 0.5em 0.5em 0.5em;
+  padding: 0.5em;
+  background-color: ${colors.ERROR_BACKGROUND_RED};
+`;
+
 const Box = styled(Card)`
   margin: 0 1em 1em 1em;
-  min-height: 60px;
-  border: 1px solid ${colors.DOC_CARD_BORDER};
   ${(props: IsSelected) =>
     colorSwitcher(
       props.isSelected,
@@ -101,17 +111,10 @@ const DocCard = styled.div`
 
 const ImgWrapper = styled.div`
   display: inline-block;
-  height: 70px;
-  width: ${SIDEBAR_THUMBNAIL_WIDTH};
+  height: ${DOC_CARD_HEIGHT};
+  width: ${DOC_CARD_THUMBNAIL_WIDTH};
   overflow: hidden;
-`;
-
-const NameAndButtonsWrapper = styled.div`
-  display: inline-block;
-  max-width: ${(props: { boxWidth: string | null }) =>
-    props.boxWidth
-      ? Number(props.boxWidth.replace("px", "")) - 50 + "px"
-      : undefined};
+  flex-shrink: 0;
 `;
 
 const StyledImg = styled.img`
@@ -120,25 +123,21 @@ const StyledImg = styled.img`
   box-sizing: border-box;
 `;
 
+const NameAndButtonsWrapper = styled.div`
+  display: inline-block;
+  width: 100%;
+`;
+
 const DocNameWrapper = styled.span`
   display: ${(props: { hovering: boolean }) =>
-    props.hovering ? `none` : `flex`};
+    props.hovering ? "none" : "flex"};
+  max-height: ${DOC_CARD_HEIGHT};
+  overflow: hidden;
 `;
 
 const Type = styled(Typography)`
   margin: 1em 0.5em;
   ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
-`;
-
-const FeedbackTypography = styled(Typography)`
-  margin: 0.5em auto;
-  color: ${colors.DROPZONE_TEXT_GREY};
-`;
-
-const ErrorMessageWrapper = styled.div`
-  margin: 0 0.5em 0.5em 0.5em;
-  padding: 0.5em;
-  background-color: ${colors.ERROR_BACKGROUND_RED};
 `;
 
 const ErrorMessage = ({ docID }: { docID: string }) => {
@@ -167,8 +166,6 @@ const DocCell = (props: DocumentInfo) => {
   const errorGettingFile = checkFileError(errorFiles, props.docID.toString());
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
-  const boxHeight = useRef(null as string | null);
-  const boxWidth = useRef(null as string | null);
   const [docThumbnail, setDocThumbnail] = useState(
     undefined as string | undefined
   );
@@ -177,7 +174,7 @@ const DocCell = (props: DocumentInfo) => {
   const setSelected = () => {
     selectedFile === props.docID
       ? setSelectedFile(null)
-      : setSelectedFile(props.docID.toString()); // toString() converts 'String' wrapper type to primitive 'string' type
+      : setSelectedFile(props.docID.toString());
   };
 
   // set thumbnail
@@ -194,20 +191,13 @@ const DocCell = (props: DocumentInfo) => {
       onClick={setSelected}
       onMouseOver={() => setHovering(true)}
       onMouseOut={() => setHovering(false)}
-      ref={(docBox: HTMLElement) => {
-        // get dimensions of Box, so can set dim of child elements
-        if (docBox && (!boxHeight.current || !boxWidth.current)) {
-          boxHeight.current = window.getComputedStyle(docBox).height;
-          boxWidth.current = window.getComputedStyle(docBox).width;
-        }
-      }}
       isSelected={isSelected}
     >
       <DocCard isSelected={isSelected}>
         <ImgWrapper>
           <StyledImg src={docThumbnail} />
         </ImgWrapper>
-        <NameAndButtonsWrapper boxWidth={boxWidth.current}>
+        <NameAndButtonsWrapper>
           <DocNameWrapper hovering={hovering}>
             <Type variant="subtitle2" isSelected={isSelected}>
               {props.docName}
@@ -216,8 +206,6 @@ const DocCell = (props: DocumentInfo) => {
           <ButtonsBox
             docInfo={props}
             hovering={hovering}
-            boxHeight={boxHeight.current}
-            boxWidth={boxWidth.current}
             errorGettingFile={errorGettingFile}
             isSelected={isSelected}
           />

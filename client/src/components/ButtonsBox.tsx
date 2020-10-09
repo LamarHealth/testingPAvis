@@ -22,45 +22,27 @@ import {
 } from "./libertyInputsDictionary";
 import { renderAccuracyScore } from "./AccuracyScoreCircle";
 import { colors, colorSwitcher } from "../common/colors";
-import { SIDEBAR_THUMBNAIL_WIDTH } from "../common/constants";
-
-interface ButtonsBoxWrapperProps {
-  boxHeight: string | null;
-  boxWidth: string | null;
-  hovering: boolean;
-}
-
-interface CollapseInnerWrapperProps {
-  boxHeight: string | null;
-  boxWidth: string | null;
-}
+import { DOC_CARD_THUMBNAIL_WIDTH, DOC_CARD_HEIGHT } from "../common/constants";
 
 const ButtonsBoxWrapper = styled.div`
-  height: ${(props: ButtonsBoxWrapperProps) =>
-    props.boxHeight ? props.boxHeight : "auto"};
-  width: ${(props: ButtonsBoxWrapperProps) =>
-    props.boxWidth
-      ? Number(props.boxWidth.replace("px", "")) - 50 + "px"
-      : "auto"};
-  display: ${(props: ButtonsBoxWrapperProps) =>
+  height: ${DOC_CARD_HEIGHT};
+  width: 100%;
+  display: ${(props: { hovering: boolean }) =>
     props.hovering ? "inherit" : "none"};
+  flex-grow: 100;
 `;
 
 const CollapseInnerWrapper = styled.div`
-  height: ${(props: CollapseInnerWrapperProps) =>
-    props.boxHeight ? props.boxHeight : "auto"};
-  width: ${(props: CollapseInnerWrapperProps) =>
-    props.boxWidth
-      ? Number(props.boxWidth.replace("px", "")) -
-        Number(SIDEBAR_THUMBNAIL_WIDTH.replace("px", "")) +
-        "px"
-      : "auto"};
+  height: ${DOC_CARD_HEIGHT};
+  width: 100%;
 `;
 
 const ButtonsFlexContainer = styled.div`
   height: 100%;
+  width: 100%;
   display: flex;
-  margin: 0 0.5em;
+  box-sizing: border-box;
+  padding: 0 0.5em;
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
@@ -85,7 +67,7 @@ const StyledChip = styled(Chip)`
       "1px solid",
       `${colors.DROPZONE_TEXT_LIGHTGREY}`,
       `${colors.DOC_CARD_BORDER}`
-    )}
+    )};
 `;
 
 const StyledDeleteIcon = styled(DeleteIcon)`
@@ -204,8 +186,6 @@ const ButtonsBox = memo(
   (props: {
     docInfo: DocumentInfo;
     hovering: boolean;
-    boxHeight: string | null;
-    boxWidth: string | null;
     errorGettingFile: boolean;
     isSelected: boolean;
   }) => {
@@ -251,16 +231,9 @@ const ButtonsBox = memo(
     };
 
     return (
-      <ButtonsBoxWrapper
-        hovering={props.hovering}
-        boxHeight={props.boxHeight}
-        boxWidth={props.boxWidth}
-      >
+      <ButtonsBoxWrapper hovering={props.hovering}>
         <Collapse in={!dialogOpen}>
-          <CollapseInnerWrapper
-            boxHeight={props.boxHeight}
-            boxWidth={props.boxWidth}
-          >
+          <CollapseInnerWrapper>
             <ButtonsFlexContainer className={"flex-container"}>
               <StyledChip
                 size="small"
@@ -296,10 +269,7 @@ const ButtonsBox = memo(
           onClickAway={handleClickAway}
         >
           <Collapse in={dialogOpen}>
-            <CollapseInnerWrapper
-              boxHeight={props.boxHeight}
-              boxWidth={props.boxWidth}
-            >
+            <CollapseInnerWrapper>
               <ButtonsFlexContainer>
                 {dialogType === "delete" ? (
                   <DeleteConfirm docInfo={props.docInfo} />
