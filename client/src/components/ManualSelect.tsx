@@ -19,7 +19,7 @@ import {
   RenderAccuracyScoreActionTypes,
 } from "./accuracyScoreCircle";
 
-import uuidv from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";
 
 export interface LinesGeometry {
@@ -245,7 +245,7 @@ export const ManualSelect = () => {
           await linesGeometryResponse.json()
         ).linesGeometry.map((lineGeometry: any) => {
           //@ts-ignore
-          return { ...lineGeometry, ID: uuidv() };
+          return { ...lineGeometry, ID: uuidv4() };
         });
         setCurrentLinesGeometry(linesGeometry);
         break;
