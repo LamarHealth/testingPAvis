@@ -16,7 +16,10 @@ import {
   DEFAULT_ERROR_MESSAGE,
 } from "../common/constants";
 import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import {
+  renderAccuracyScore,
+  RenderAccuracyScoreActionTypes,
+} from "./AccuracyScoreCircle/components";
 import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 
@@ -145,7 +148,7 @@ export const SelectModal = () => {
   };
 
   const handleSubmit = () => {
-    if (inputRef.current) {
+    if (inputRef.current && eventTarget) {
       const inputEl = inputRef.current as HTMLInputElement;
       eventTarget && (eventTarget.value = inputEl.value); // fill input w edited val
       setKvpTableAnchorEl(null); // close the modal
@@ -156,9 +159,13 @@ export const SelectModal = () => {
         unalteredKeyValue !== null &&
         unalteredKeyValue.value === inputEl.value
       ) {
-        renderAccuracyScore("value", eventTarget, unalteredKeyValue);
+        renderAccuracyScore(
+          RenderAccuracyScoreActionTypes.value,
+          eventTarget,
+          unalteredKeyValue
+        );
       } else {
-        renderAccuracyScore("blank", eventTarget);
+        renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, eventTarget);
       }
       inputEl.value = ""; // clear the text editor
     } else {

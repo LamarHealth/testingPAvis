@@ -7,16 +7,26 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 
-import uuidv from "uuid";
+import { colors } from "../../common/colors";
+import {
+  ACC_SCORE_LARGE,
+  ACC_SCORE_SMALL,
+  ACC_SCORE_MEDIUM,
+} from "../../common/constants";
+import {
+  setMounter,
+  getComputedDimension,
+  GetComputedDimensionActionTypes,
+} from "./functions";
+import { useStore } from "../../contexts/ZustandStore";
+import { KeyValuesWithDistance } from "../KeyValuePairs";
+import { assignTargetString } from "../libertyInputsDictionary";
+import WrappedJssComponent from "../ShadowComponent";
 
-import { colors } from "../common/colors";
-import { ACC_SCORE_LARGE } from "../common/constants";
-import { ACC_SCORE_MEDIUM } from "../common/constants";
-import { ACC_SCORE_SMALL } from "../common/constants";
-import { useStore } from "../contexts/ZustandStore";
-import { KeyValuesWithDistance } from "./KeyValuePairs";
-import { assignTargetString } from "./libertyInputsDictionary";
-import WrappedJssComponent from "./ShadowComponent";
+export enum RenderAccuracyScoreActionTypes {
+  blank = "blank",
+  value = "value",
+}
 
 const AccuracyScoreBox = styled.div`
   background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
@@ -171,102 +181,36 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
   );
 };
 
-const setMounter = (target: any) => {
-  const inputStyle = window.getComputedStyle(target);
-  const inputZIndex = target.style.zIndex;
-  const positionedParent = target.offsetParent;
-  //@ts-ignore
-  const mounterID = uuidv();
-
-  // remove the old mounter
-  if (target.className.includes("has-docit-mounter")) {
-    //@ts-ignore
-    const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
-      target.className
-    )[0];
-    const oldMounterID = oldMounterClassName.replace("has-docit-mounter-", "");
-    const oldMounter = document.getElementById(
-      `docit-accuracy-score-mounter-${oldMounterID}`
-    ) as HTMLElement;
-
-    ReactDOM.unmountComponentAtNode(oldMounter); // unmount React component from old mounter
-    target.classList.remove(oldMounterClassName); // remove old class name from targeted inputEl
-    oldMounter.remove(); // remove mounter from DOM
-    window.removeEventListener("resize", positionMounter); // remove resize listener
-  }
-
-  // add the new mounter
-  const mounter = document.createElement("span");
-  mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
-  mounter.style.position = "absolute";
-
-  mounter.style.zIndex =
-    inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
-
-  const inputHeight = parseInt(inputStyle.height.replace("px", ""));
-
-  const accuracyScoreElHeight =
-    inputHeight >= 30
-      ? ACC_SCORE_LARGE + 8
-      : inputHeight >= 20
-      ? ACC_SCORE_MEDIUM + 8
-      : ACC_SCORE_SMALL + 8;
-  const accuracyScoreElWidth =
-    inputHeight >= 30
-      ? ACC_SCORE_LARGE + 40
-      : inputHeight >= 20
-      ? ACC_SCORE_MEDIUM + 32
-      : ACC_SCORE_SMALL + 26;
-
-  function positionMounter() {
-    const scopedInputHeight = parseInt(inputStyle.height.replace("px", ""));
-    const scopedInputWidth = parseInt(inputStyle.width.replace("px", ""));
-
-    mounter.style.top = `${
-      (scopedInputHeight - accuracyScoreElHeight) / 2 + target.offsetTop
-    }px`;
-    mounter.style.left = `${
-      scopedInputWidth + target.offsetLeft - (accuracyScoreElWidth + 5)
-    }px`;
-  }
-  positionMounter();
-
-  window.addEventListener("resize", positionMounter);
-
-  target.className += ` has-docit-mounter-${mounterID}`;
-
-  positionedParent.appendChild(mounter);
-
-  return { mounter, mounterID };
-};
-
 export const renderAccuracyScore = (
-  valueOrBlank: "value" | "blank",
-  target: any,
+  action: "value" | "blank",
+  target: HTMLElement,
   keyValue?: KeyValuesWithDistance
 ) => {
   if (target.offsetParent) {
     const { mounter, mounterID } = setMounter(target);
-    const inputHeight = parseInt(
-      window.getComputedStyle(target).height.replace("px", "")
+    const inputHeight = getComputedDimension(
+      getComputedStyle(target),
+      GetComputedDimensionActionTypes.height
     );
-
-    if (valueOrBlank === "value") {
-      ReactDOM.render(
-        <AccuracyScoreEl
-          //@ts-ignore
-          value={keyValue.distanceFromTarget * 100}
-          inputHeight={inputHeight}
-          mounterID={mounterID}
-        />,
-        mounter
-      );
-    }
-    if (valueOrBlank === "blank") {
-      ReactDOM.render(
-        <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
-        mounter
-      );
+    switch (action) {
+      case "value":
+        if (keyValue) {
+          ReactDOM.render(
+            <AccuracyScoreEl
+              value={keyValue.distanceFromTarget * 100}
+              inputHeight={inputHeight}
+              mounterID={mounterID}
+            />,
+            mounter
+          );
+        } else throw new Error("keyValue is falsy");
+        break;
+      case "blank":
+        ReactDOM.render(
+          <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
+          mounter
+        );
+        break;
     }
   }
 };
