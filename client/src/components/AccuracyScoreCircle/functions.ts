@@ -12,7 +12,11 @@ import {
   renderAccuracyScore,
   RenderAccuracyScoreActionTypes,
 } from "./components";
-import { KeyValuesByDoc, getEditDistanceAndSort } from "../KeyValuePairs";
+import {
+  KeyValuesByDoc,
+  getEditDistanceAndSort,
+  readyToFill,
+} from "../KeyValuePairs";
 import {
   assignTargetString,
   handleFreightTerms,
@@ -185,32 +189,24 @@ export const populateForms = (
           });
           $("input").each(function () {
             const targetString = assignTargetString(this);
-            if (typeof targetString !== "undefined") {
-              const areThereKVPairs =
-                Object.keys(keyValuePairs.keyValuePairs).length > 0;
-              if (areThereKVPairs) {
-                const sortedKeyValuePairs = getEditDistanceAndSort(
-                  keyValuePairs,
-                  targetString,
-                  "lc substring"
+            const areThereKVPairs =
+              Object.keys(keyValuePairs.keyValuePairs).length > 0;
+            if (areThereKVPairs) {
+              const sortedKeyValuePairs = getEditDistanceAndSort(
+                keyValuePairs,
+                targetString,
+                "lc substring"
+              );
+              if (readyToFill(sortedKeyValuePairs)) {
+                renderAccuracyScore(
+                  RenderAccuracyScoreActionTypes.value,
+                  this,
+                  sortedKeyValuePairs[0]
                 );
-                if (
-                  sortedKeyValuePairs[0].distanceFromTarget > 0.5 &&
-                  sortedKeyValuePairs[0].value !== ""
-                ) {
-                  renderAccuracyScore(
-                    RenderAccuracyScoreActionTypes.value,
-                    this,
-                    sortedKeyValuePairs[0]
-                  );
-                  $(this).prop("value", sortedKeyValuePairs[0]["value"]);
-                } else {
-                  renderAccuracyScore(
-                    RenderAccuracyScoreActionTypes.blank,
-                    this
-                  );
-                  $(this).prop("value", null);
-                }
+                $(this).prop("value", sortedKeyValuePairs[0]["value"]);
+              } else {
+                renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, this);
+                $(this).prop("value", null);
               }
             }
           });

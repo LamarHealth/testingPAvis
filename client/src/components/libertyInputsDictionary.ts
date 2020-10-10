@@ -38,11 +38,9 @@ export const assignTargetString = (inputEl: any): string => {
     targetString = placeholderText;
   } else {
     const inputID = $(inputEl).attr("id");
-    if (inputID && libertyInputsDictionary[inputID]) {
-      targetString = libertyInputsDictionary[inputID];
-    } else {
-      targetString = "";
-    }
+    inputID && libertyInputsDictionary[inputID]
+      ? (targetString = libertyInputsDictionary[inputID])
+      : (targetString = "");
   }
   return targetString;
 };
