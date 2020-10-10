@@ -173,17 +173,13 @@ export const replaceAndSetNewMounter = (
 };
 
 export const populateForms = (
-  docID: string,
   action: "blank chiclets" | "best guess",
-  docData?: KeyValuesByDoc[]
+  keyValuePairs?: KeyValuesByDoc
 ): void => {
   $(document).ready(() => {
     switch (action) {
       case "best guess":
-        if (docData) {
-          const keyValuePairs = docData.filter(
-            (doc: KeyValuesByDoc) => doc.docID === docID
-          )[0];
+        if (keyValuePairs) {
           $("select").each(function () {
             handleFreightTerms(this, keyValuePairs);
           });
@@ -191,9 +187,7 @@ export const populateForms = (
             const targetString = assignTargetString(this);
             if (typeof targetString !== "undefined") {
               const areThereKVPairs =
-                Object.keys(keyValuePairs.keyValuePairs).length > 0
-                  ? true
-                  : false;
+                Object.keys(keyValuePairs.keyValuePairs).length > 0;
               if (areThereKVPairs) {
                 const sortedKeyValuePairs = getEditDistanceAndSort(
                   keyValuePairs,

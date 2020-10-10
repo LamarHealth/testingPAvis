@@ -14,6 +14,7 @@ import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
 import { updateThumbsLocalStorage } from "./docThumbnails";
+import { KeyValuesByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
@@ -149,6 +150,7 @@ const ButtonsBox = memo(
       useStore((state) => state.setSelectedFile),
       useStore((state) => state.setKonvaModalOpen),
     ];
+    const docID = props.docInfo.docID.toString();
 
     // click away
     const handleClickAway = () => {
@@ -172,7 +174,7 @@ const ButtonsBox = memo(
     // handle view pdf click
     const handleViewPdfClick = (e: MouseEvent) => {
       e.stopPropagation();
-      setSelectedFile(props.docInfo.docID.toString());
+      setSelectedFile(docID);
       setKonvaModalOpen(true);
     };
 
@@ -180,9 +182,8 @@ const ButtonsBox = memo(
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
       populateForms(
-        props.docInfo.docID.toString(),
         PopulateFormsActionTypes.bestGuess,
-        docData
+        docData.filter((doc: KeyValuesByDoc) => doc.docID === docID)[0]
       );
       setSelectedFile(props.docInfo.docID.toString());
     };
