@@ -2,7 +2,7 @@ import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 import {
   renderAccuracyScore,
   RenderAccuracyScoreActionTypes,
-} from "./AccuracyScoreCircle/components";
+} from "./accuracyScoreCircle";
 import $ from "jquery";
 
 interface LibertyInputsDictionary {

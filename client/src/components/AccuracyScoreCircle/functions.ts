@@ -8,10 +8,7 @@ import {
   ACC_SCORE_SMALL,
   ACC_SCORE_MEDIUM,
 } from "../../common/constants";
-import {
-  renderAccuracyScore,
-  RenderAccuracyScoreActionTypes,
-} from "./components";
+import { renderAccuracyScore, RenderAccuracyScoreActionTypes } from ".";
 import {
   KeyValuesByDoc,
   getEditDistanceAndSort,

@@ -18,7 +18,7 @@ import { KeyValuesByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
-} from "./AccuracyScoreCircle/functions";
+} from "./accuracyScoreCircle/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT } from "../common/constants";
 

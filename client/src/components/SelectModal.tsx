@@ -19,7 +19,7 @@ import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
 import {
   renderAccuracyScore,
   RenderAccuracyScoreActionTypes,
-} from "./AccuracyScoreCircle/components";
+} from "./accuracyScoreCircle";
 import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 
