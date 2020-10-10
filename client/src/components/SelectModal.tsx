@@ -148,7 +148,7 @@ export const SelectModal = () => {
   };
 
   const handleSubmit = () => {
-    if (inputRef.current) {
+    if (inputRef.current && eventTarget) {
       const inputEl = inputRef.current as HTMLInputElement;
       eventTarget && (eventTarget.value = inputEl.value); // fill input w edited val
       setKvpTableAnchorEl(null); // close the modal

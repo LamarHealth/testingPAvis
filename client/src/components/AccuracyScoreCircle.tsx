@@ -228,7 +228,7 @@ const findAccuracyScoreElDimensions = (
   return { accuracyScoreElHeight, accuracyScoreElWidth };
 };
 
-const removeMounter = (target: any): void => {
+const removeMounter = (target: HTMLElement): void => {
   if (hasDocitMounter(target)) {
     //@ts-ignore
     const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
@@ -246,7 +246,7 @@ const removeMounter = (target: any): void => {
 };
 
 function positionMounter(
-  target: any,
+  target: HTMLElement,
   inputStyle: CSSStyleDeclaration,
   mounter: HTMLSpanElement,
   accuracyScoreElHeight: number,
@@ -292,7 +292,7 @@ function positionAllMounters() {
   });
 }
 
-const setMounter = (target: any) => {
+const setMounter = (target: HTMLElement) => {
   const inputStyle = getComputedStyle(target);
   const inputHeight = getComputedDimension(inputStyle, "height");
   const inputZIndex = target.style.zIndex;
@@ -321,14 +321,14 @@ const setMounter = (target: any) => {
     accuracyScoreElWidth
   );
   target.className += ` has-docit-mounter-${mounterID}`; // add class to link to chiclet
-  positionedParent.appendChild(mounter); // append mounter
+  positionedParent && positionedParent.appendChild(mounter); // append mounter
 
   return { mounter, mounterID };
 };
 
 export const renderAccuracyScore = (
   action: "value" | "blank",
-  target: any,
+  target: HTMLElement,
   keyValue?: KeyValuesWithDistance
 ) => {
   if (target.offsetParent) {
