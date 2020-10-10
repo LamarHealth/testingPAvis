@@ -1,6 +1,5 @@
 import React, { useState, useContext, memo, MouseEvent } from "react";
 
-import $ from "jquery";
 import styled from "styled-components";
 import { useStore } from "../contexts/ZustandStore";
 
@@ -15,7 +14,10 @@ import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
 import { updateThumbsLocalStorage } from "./docThumbnails";
-import { populateForms } from "./AccuracyScoreCircle";
+import {
+  populateForms,
+  PopulateFormsActionTypes,
+} from "./AccuracyScoreCircle/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT } from "../common/constants";
 
@@ -177,7 +179,11 @@ const ButtonsBox = memo(
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      populateForms(props.docInfo.docID.toString(), "best guess", docData);
+      populateForms(
+        props.docInfo.docID.toString(),
+        PopulateFormsActionTypes.bestGuess,
+        docData
+      );
       setSelectedFile(props.docInfo.docID.toString());
     };
 
