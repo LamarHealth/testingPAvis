@@ -17,7 +17,7 @@ import WrappedJssComponent from "./ShadowComponent";
 import {
   renderAccuracyScore,
   RenderAccuracyScoreActionTypes,
-} from "./AccuracyScoreCircle";
+} from "./AccuracyScoreCircle/components";
 
 import uuidv from "uuid";
 import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";

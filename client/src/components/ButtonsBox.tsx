@@ -14,7 +14,10 @@ import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
 import { updateThumbsLocalStorage } from "./docThumbnails";
-import { populateForms, PopulateFormsActionTypes } from "./AccuracyScoreCircle";
+import {
+  populateForms,
+  PopulateFormsActionTypes,
+} from "./AccuracyScoreCircle/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT } from "../common/constants";
 
