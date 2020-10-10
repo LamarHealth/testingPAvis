@@ -42,15 +42,17 @@ const handleMenuNavigation = (event: any) => {
     event.code === "ArrowUp" ||
     event.code === "Tab"
   ) {
+    if (event.code === "ArrowDown" || event.code === "ArrowUp") {
+      // cancel the arrow key press, because is doing some mui jankiness
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+      event.preventDefault();
+    }
     if (!activeElementInShadowRoot) {
       // if not in the menu yet, then focus on the menu
       menuList?.focus();
     } else {
       if (event.code === "ArrowDown" || event.code === "ArrowUp") {
-        // cancel the arrow key press, because is doing some mui jankiness
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-        event.preventDefault();
         if (
           // if focused on whole menu, focus on the first LI
           activeElementInShadowRoot &&
