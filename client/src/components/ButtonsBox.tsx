@@ -1,6 +1,5 @@
 import React, { useState, useContext, memo, MouseEvent } from "react";
 
-import $ from "jquery";
 import styled from "styled-components";
 import { useStore } from "../contexts/ZustandStore";
 
