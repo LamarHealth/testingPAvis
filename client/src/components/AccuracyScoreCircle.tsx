@@ -230,10 +230,10 @@ const findAccuracyScoreElDimensions = (
 
 const removeMounter = (target: HTMLElement): void => {
   if (hasDocitMounter(target)) {
-    //@ts-ignore
-    const oldMounterClassName = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
+    const oldMounterClassExec = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
       target.className
-    )[0];
+    ) as RegExpExecArray;
+    const oldMounterClassName = oldMounterClassExec[0];
     const oldMounterID = oldMounterClassName.replace("has-docit-mounter-", "");
     const oldMounter = document.getElementById(
       `docit-accuracy-score-mounter-${oldMounterID}`
