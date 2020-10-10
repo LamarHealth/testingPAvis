@@ -185,7 +185,9 @@ export const deleteKVPairFromLocalStorage = (
   localStorage.setItem("docList", JSON.stringify(storedDocs));
 };
 
-export const readyToFill = (sortedKeyValuePairs: KeyValuesWithDistance[]) =>
+export const hasGoodHighestMatch = (
+  sortedKeyValuePairs: KeyValuesWithDistance[]
+) =>
   sortedKeyValuePairs[0].distanceFromTarget > 0.5 &&
   sortedKeyValuePairs[0].value !== "";
 

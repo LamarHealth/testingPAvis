@@ -15,7 +15,7 @@ import {
 import {
   KeyValuesByDoc,
   getEditDistanceAndSort,
-  readyToFill,
+  hasGoodHighestMatch,
 } from "../KeyValuePairs";
 import {
   assignTargetString,
@@ -197,7 +197,7 @@ export const populateForms = (
                 targetString,
                 "lc substring"
               );
-              if (readyToFill(sortedKeyValuePairs)) {
+              if (hasGoodHighestMatch(sortedKeyValuePairs)) {
                 renderAccuracyScore(
                   RenderAccuracyScoreActionTypes.value,
                   this,
