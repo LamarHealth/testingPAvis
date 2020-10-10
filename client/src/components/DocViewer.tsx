@@ -185,10 +185,7 @@ const DocCell = (props: DocumentInfo) => {
     setSelected();
     isSelected
       ? removeAllChiclets()
-      : populateForms(
-          props.docID.toString(),
-          PopulateFormsActionTypes.blankChiclets
-        );
+      : populateForms(PopulateFormsActionTypes.blankChiclets);
   };
 
   // set thumbnail
