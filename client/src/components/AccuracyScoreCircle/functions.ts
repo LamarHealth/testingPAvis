@@ -144,13 +144,11 @@ function positionAllMounters() {
 export const setMounter = (target: HTMLElement) => {
   const inputStyle = getComputedStyle(target);
   const inputHeight = getComputedDimension(inputStyle, "height");
-
   const {
     accuracyScoreElHeight,
     accuracyScoreElWidth,
   } = findAccuracyScoreElDimensions(inputHeight);
   const positionedParent = target.offsetParent;
-  //@ts-ignore
 
   // remove the old mounter
   removeMounter(target);
