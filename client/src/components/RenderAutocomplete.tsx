@@ -33,7 +33,7 @@ const findActiveElInShadowRoot = () => {
   return { activeElementInShadowRoot, menuList };
 };
 
-const handleMenuNavigation = (event: any) => {
+const handleMenuNavigation = (event: any, target: HTMLInputElement) => {
   // cannot type as a react KeyboardEvent because it doesn't have stopImmediatePropagation
   const { activeElementInShadowRoot, menuList } = findActiveElInShadowRoot();
 
@@ -48,7 +48,7 @@ const handleMenuNavigation = (event: any) => {
       event.stopPropagation();
       event.preventDefault();
     }
-    if (!activeElementInShadowRoot) {
+    if (!activeElementInShadowRoot && event.code !== "ArrowUp") {
       // if not in the menu yet, then focus on the menu
       menuList?.focus();
     } else {
@@ -70,7 +70,13 @@ const handleMenuNavigation = (event: any) => {
             nextEl && nextEl.focus();
           } else if (event.code === "ArrowUp") {
             const prevEl = activeElementInShadowRoot.previousSibling as HTMLElement;
-            prevEl && prevEl.focus();
+            if (prevEl) {
+              // if el above, focus
+              prevEl.focus();
+            } else {
+              // if top of list el, then focus on input
+              target.focus();
+            }
           }
         }
       }
@@ -133,7 +139,7 @@ export const RenderAutocomplete = () => {
   useEffect(() => {
     function arrowKeyListener(event: any) {
       if (autocompleteAnchor) {
-        handleMenuNavigation(event);
+        handleMenuNavigation(event, autocompleteAnchor);
       }
     }
     document.addEventListener("keydown", arrowKeyListener, true);
