@@ -183,14 +183,12 @@ const DocCell = (props: DocumentInfo) => {
 
   const handleBoxClick = () => {
     setSelected();
-    if (!isSelected) {
-      populateForms(
-        props.docID.toString(),
-        PopulateFormsActionTypes.blankChiclets
-      );
-    } else {
-      removeAllChiclets();
-    }
+    isSelected
+      ? removeAllChiclets()
+      : populateForms(
+          props.docID.toString(),
+          PopulateFormsActionTypes.blankChiclets
+        );
   };
 
   // set thumbnail
