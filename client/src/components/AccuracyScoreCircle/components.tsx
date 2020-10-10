@@ -14,7 +14,7 @@ import {
   ACC_SCORE_MEDIUM,
 } from "../../common/constants";
 import {
-  setMounter,
+  replaceAndSetNewMounter,
   getComputedDimension,
   GetComputedDimensionActionTypes,
 } from "./functions";
@@ -187,7 +187,7 @@ export const renderAccuracyScore = (
   keyValue?: KeyValuesWithDistance
 ) => {
   if (target.offsetParent) {
-    const { mounter, mounterID } = setMounter(target);
+    const { mounter, mounterID } = replaceAndSetNewMounter(target);
     const inputHeight = getComputedDimension(
       getComputedStyle(target),
       GetComputedDimensionActionTypes.height

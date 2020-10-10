@@ -141,7 +141,9 @@ function positionAllMounters() {
   });
 }
 
-export const setMounter = (target: HTMLElement) => {
+export const replaceAndSetNewMounter = (
+  target: HTMLElement
+): { mounter: HTMLSpanElement; mounterID: string } => {
   const inputStyle = getComputedStyle(target);
   const inputHeight = getComputedDimension(inputStyle, "height");
   const {
