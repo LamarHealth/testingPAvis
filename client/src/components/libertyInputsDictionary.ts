@@ -1,5 +1,8 @@
 import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import {
+  renderAccuracyScore,
+  RenderAccuracyScoreActionTypes,
+} from "./AccuracyScoreCircle";
 import $ from "jquery";
 
 interface LibertyInputsDictionary {
@@ -61,10 +64,18 @@ export const handleFreightTerms = (
 
     if (valIsSufficiently("collect")) {
       $(selectEl).val(2);
-      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore(
+        RenderAccuracyScoreActionTypes.value,
+        selectEl,
+        sortedKeyValuePairs[0]
+      );
     } else if (valIsSufficiently("prepaid")) {
       $(selectEl).val(1);
-      renderAccuracyScore("value", selectEl, sortedKeyValuePairs[0]);
+      renderAccuracyScore(
+        RenderAccuracyScoreActionTypes.value,
+        selectEl,
+        sortedKeyValuePairs[0]
+      );
     }
   }
 };

@@ -26,6 +26,16 @@ import {
 } from "./libertyInputsDictionary";
 import WrappedJssComponent from "./ShadowComponent";
 
+export enum PopulateFormsActionTypes {
+  blankChiclets = "blank chiclets",
+  bestGuess = "best guess",
+}
+
+export enum RenderAccuracyScoreActionTypes {
+  blank = "blank",
+  value = "value",
+}
+
 const AccuracyScoreBox = styled.div`
   background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
   padding: 4px;
@@ -383,10 +393,17 @@ export const populateForms = (
                   sortedKeyValuePairs[0].distanceFromTarget > 0.5 &&
                   sortedKeyValuePairs[0].value !== ""
                 ) {
-                  renderAccuracyScore("value", this, sortedKeyValuePairs[0]);
+                  renderAccuracyScore(
+                    RenderAccuracyScoreActionTypes.value,
+                    this,
+                    sortedKeyValuePairs[0]
+                  );
                   $(this).prop("value", sortedKeyValuePairs[0]["value"]);
                 } else {
-                  renderAccuracyScore("blank", this);
+                  renderAccuracyScore(
+                    RenderAccuracyScoreActionTypes.blank,
+                    this
+                  );
                   $(this).prop("value", null);
                 }
               }
@@ -396,7 +413,7 @@ export const populateForms = (
         break;
       case "blank chiclets":
         $("input").each(function () {
-          renderAccuracyScore("blank", this);
+          renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, this);
         });
         break;
       default:

@@ -15,7 +15,7 @@ import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
 import { updateThumbsLocalStorage } from "./docThumbnails";
-import { populateForms } from "./AccuracyScoreCircle";
+import { populateForms, PopulateFormsActionTypes } from "./AccuracyScoreCircle";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT } from "../common/constants";
 
@@ -177,7 +177,11 @@ const ButtonsBox = memo(
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      populateForms(props.docInfo.docID.toString(), "best guess", docData);
+      populateForms(
+        props.docInfo.docID.toString(),
+        PopulateFormsActionTypes.bestGuess,
+        docData
+      );
       setSelectedFile(props.docInfo.docID.toString());
     };
 

@@ -9,7 +9,11 @@ import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 
-import { populateForms, removeAllChiclets } from "./AccuracyScoreCircle";
+import {
+  populateForms,
+  removeAllChiclets,
+  PopulateFormsActionTypes,
+} from "./AccuracyScoreCircle";
 import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,
@@ -180,7 +184,10 @@ const DocCell = (props: DocumentInfo) => {
   const handleBoxClick = () => {
     setSelected();
     if (!isSelected) {
-      populateForms(props.docID.toString(), "blank chiclets");
+      populateForms(
+        props.docID.toString(),
+        PopulateFormsActionTypes.blankChiclets
+      );
     } else {
       removeAllChiclets();
     }

@@ -19,8 +19,8 @@ import {
   KonvaModalContext,
   LinesGeometry,
   LinesSelection,
-  linesSelectionActionTypes,
-  inputValActionTypes,
+  LinesSelectionActionTypes,
+  InputValActionTypes,
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
 
@@ -132,12 +132,12 @@ const Polygon = ({
   const fillAndSetCurrentSelection = () => {
     const line = { [lineGeometry.ID]: lineGeometry.Text };
     if (!isFilled) {
-      linesSelectionDispatch({ type: linesSelectionActionTypes.select, line });
+      linesSelectionDispatch({ type: LinesSelectionActionTypes.select, line });
       inputElRef.current && inputElRef.current.focus(); // focus on input after selecting
     }
     if (isFilled) {
       linesSelectionDispatch({
-        type: linesSelectionActionTypes.deselect,
+        type: LinesSelectionActionTypes.deselect,
         line,
       });
     }
@@ -219,7 +219,7 @@ const Header = ({
       .filter((line) => !newVal.includes(line[1]))
       .forEach((line) => {
         linesSelectionDispatch({
-          type: linesSelectionActionTypes.deselect,
+          type: LinesSelectionActionTypes.deselect,
           line: { [line[0]]: line[1] },
         });
       });
@@ -238,7 +238,7 @@ const Header = ({
       if (prevLinesSelectionLength < linesSelectionLength) {
         const newLine = findMissingLine(linesSelection, prevLinesSelection);
         inputValDispatch({
-          type: inputValActionTypes.appendLine,
+          type: InputValActionTypes.appendLine,
           value: newLine,
         });
       }
@@ -247,7 +247,7 @@ const Header = ({
       if (prevLinesSelectionLength > linesSelectionLength) {
         const oldLine = findMissingLine(prevLinesSelection, linesSelection);
         inputValDispatch({
-          type: inputValActionTypes.removeLine,
+          type: InputValActionTypes.removeLine,
           value: oldLine,
         });
       }

@@ -14,7 +14,10 @@ import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
-import { renderAccuracyScore } from "./AccuracyScoreCircle";
+import {
+  renderAccuracyScore,
+  RenderAccuracyScoreActionTypes,
+} from "./AccuracyScoreCircle";
 
 import uuidv from "uuid";
 import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";
@@ -34,18 +37,18 @@ export interface LinesSelection {
   [lineID: string]: string;
 }
 
-export const linesSelectionActionTypes = {
-  select: "select" as "select",
-  deselect: "deselect" as "deselect",
-  reset: "reset" as "reset",
-};
+export enum LinesSelectionActionTypes {
+  select = "select",
+  deselect = "deselect",
+  reset = "reset",
+}
 
-export const inputValActionTypes = {
-  replace: "replace" as "replace",
-  appendLine: "append line" as "append line",
-  removeLine: "remove line" as "remove line",
-  reset: "reset" as "reset",
-};
+export enum InputValActionTypes {
+  replace = "replace",
+  appendLine = "append line",
+  removeLine = "remove line",
+  reset = "reset",
+}
 
 interface LinesSelectionReducerAction {
   type: "select" | "deselect" | "reset";
@@ -271,11 +274,11 @@ export const ManualSelect = () => {
     // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
     if (eventTarget) {
       if (inputVal !== "") {
-        renderAccuracyScore("blank", eventTarget);
+        renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, eventTarget);
         eventTarget.value = inputVal;
         setErrorLine(null);
-        linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
-        inputValDispatch({ type: inputValActionTypes.reset });
+        linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
+        inputValDispatch({ type: InputValActionTypes.reset });
       } else {
         setErrorLine("Nothing to enter");
       }
@@ -308,14 +311,14 @@ export const ManualSelect = () => {
 
   // clear button
   const handleClear = () => {
-    linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
-    inputValDispatch({ type: inputValActionTypes.reset });
+    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
+    inputValDispatch({ type: InputValActionTypes.reset });
   };
 
   // clear entries on doc switch
   useEffect(() => {
-    linesSelectionDispatch({ type: linesSelectionActionTypes.reset });
-    inputValDispatch({ type: inputValActionTypes.reset });
+    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
+    inputValDispatch({ type: InputValActionTypes.reset });
   }, [selectedFile]);
 
   return (
