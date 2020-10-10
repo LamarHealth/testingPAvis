@@ -24,8 +24,8 @@ import { assignTargetString } from "../libertyInputsDictionary";
 import WrappedJssComponent from "../ShadowComponent";
 
 export enum RenderAccuracyScoreActionTypes {
-  blank = "blank",
-  value = "value",
+  blank,
+  value,
 }
 
 const AccuracyScoreBox = styled.div`
@@ -182,7 +182,7 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
 };
 
 export const renderAccuracyScore = (
-  action: "value" | "blank",
+  action: RenderAccuracyScoreActionTypes,
   target: HTMLElement,
   keyValue?: KeyValuesWithDistance
 ) => {
@@ -193,7 +193,7 @@ export const renderAccuracyScore = (
       GetComputedDimensionActionTypes.height
     );
     switch (action) {
-      case "value":
+      case RenderAccuracyScoreActionTypes.value:
         if (keyValue) {
           ReactDOM.render(
             <AccuracyScoreEl
@@ -205,7 +205,7 @@ export const renderAccuracyScore = (
           );
         } else throw new Error("keyValue is falsy");
         break;
-      case "blank":
+      case RenderAccuracyScoreActionTypes.blank:
         ReactDOM.render(
           <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
           mounter
