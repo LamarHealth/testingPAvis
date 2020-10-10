@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import $ from "jquery";
 
-import uuidv from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   ACC_SCORE_LARGE,
@@ -82,13 +82,26 @@ const removeMounter = (target: HTMLElement): void => {
   }
 };
 
-function positionMounter(
+const createMounter = (
+  target: HTMLElement
+): { mounter: HTMLSpanElement; mounterID: string } => {
+  const inputZIndex = target.style.zIndex;
+  const mounter = document.createElement("span");
+  const mounterID = uuidv4();
+  mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
+  mounter.style.position = "absolute";
+  mounter.style.zIndex =
+    inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
+  return { mounter, mounterID };
+};
+
+const positionMounter = (
   target: HTMLElement,
   inputStyle: CSSStyleDeclaration,
   mounter: HTMLSpanElement,
   accuracyScoreElHeight: number,
   accuracyScoreElWidth: number
-): void {
+): void => {
   const scopedInputHeight = getComputedDimension(inputStyle, "height");
   const scopedInputWidth = getComputedDimension(inputStyle, "width");
 
@@ -98,7 +111,7 @@ function positionMounter(
   mounter.style.left = `${
     scopedInputWidth + target.offsetLeft - (accuracyScoreElWidth + 5)
   }px`;
-}
+};
 
 function positionAllMounters() {
   $(document).ready(function () {
@@ -115,7 +128,7 @@ function positionAllMounters() {
           accuracyScoreElHeight,
           accuracyScoreElWidth,
         } = findAccuracyScoreElDimensions(inputHeight);
-        if (mounter) {
+        mounter &&
           positionMounter(
             this,
             inputStyle,
@@ -123,7 +136,6 @@ function positionAllMounters() {
             accuracyScoreElHeight,
             accuracyScoreElWidth
           );
-        }
       }
     });
   });
@@ -132,24 +144,20 @@ function positionAllMounters() {
 export const setMounter = (target: HTMLElement) => {
   const inputStyle = getComputedStyle(target);
   const inputHeight = getComputedDimension(inputStyle, "height");
-  const inputZIndex = target.style.zIndex;
+
   const {
     accuracyScoreElHeight,
     accuracyScoreElWidth,
   } = findAccuracyScoreElDimensions(inputHeight);
   const positionedParent = target.offsetParent;
-  const mounter = document.createElement("span");
   //@ts-ignore
-  const mounterID = uuidv();
 
   // remove the old mounter
   removeMounter(target);
 
   // add the new mounter
-  mounter.id = `docit-accuracy-score-mounter-${mounterID}`;
-  mounter.style.position = "absolute";
-  mounter.style.zIndex =
-    inputZIndex !== "" ? `${parseInt(inputZIndex) + 1}` : `${2}`;
+  const { mounter, mounterID } = createMounter(target);
+
   positionMounter(
     target,
     inputStyle,
@@ -157,6 +165,7 @@ export const setMounter = (target: HTMLElement) => {
     accuracyScoreElHeight,
     accuracyScoreElWidth
   );
+
   target.className += ` has-docit-mounter-${mounterID}`; // add class to link to chiclet
   positionedParent && positionedParent.appendChild(mounter); // append mounter
 
