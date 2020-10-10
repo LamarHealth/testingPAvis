@@ -251,7 +251,7 @@ function positionMounter(
   mounter: HTMLSpanElement,
   accuracyScoreElHeight: number,
   accuracyScoreElWidth: number
-): any {
+): void {
   const scopedInputHeight = getComputedDimension(inputStyle, "height");
   const scopedInputWidth = getComputedDimension(inputStyle, "width");
 
