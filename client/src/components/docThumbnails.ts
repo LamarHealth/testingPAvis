@@ -9,6 +9,11 @@ const setThumbsToLocalStorage = (thumbnails: DocThumbsReference) => {
   localStorage.setItem("docThumbnails", JSON.stringify(thumbnails));
 };
 
+export enum updateThumbsActionTypes {
+  height = "height",
+  width = "width",
+}
+
 export const updateThumbsLocalStorage = (
   docID: string,
   action: "add" | "delete",

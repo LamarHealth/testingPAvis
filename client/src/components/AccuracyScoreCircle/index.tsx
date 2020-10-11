@@ -16,7 +16,7 @@ import {
 import {
   replaceAndSetNewMounter,
   getComputedDimension,
-  GetComputedDimensionActionTypes,
+  ComputedDimensionTypes,
 } from "./functions";
 import { useStore } from "../../contexts/ZustandStore";
 import { KeyValuesWithDistance } from "../KeyValuePairs";
@@ -190,7 +190,7 @@ export const renderAccuracyScore = (
     const { mounter, mounterID } = replaceAndSetNewMounter(target);
     const inputHeight = getComputedDimension(
       getComputedStyle(target),
-      GetComputedDimensionActionTypes.height
+      ComputedDimensionTypes.height
     );
     switch (action) {
       case RenderAccuracyScoreActionTypes.value:
