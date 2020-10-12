@@ -15,8 +15,8 @@ import { MainModalContext } from "./RenderModal";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 import {
-  renderAccuracyScore,
-  RenderAccuracyScoreActionTypes,
+  renderChiclets,
+  RenderChicletsActionTypes,
 } from "./accuracyScoreCircle";
 
 import { v4 as uuidv4 } from "uuid";
@@ -274,7 +274,7 @@ export const ManualSelect = () => {
     // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
     if (eventTarget) {
       if (inputVal !== "") {
-        renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, eventTarget);
+        renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
         eventTarget.value = inputVal;
         setErrorLine(null);
         linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });

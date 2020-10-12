@@ -8,7 +8,7 @@ import {
   ACC_SCORE_SMALL,
   ACC_SCORE_MEDIUM,
 } from "../../common/constants";
-import { renderAccuracyScore, RenderAccuracyScoreActionTypes } from ".";
+import { renderChiclets, RenderChicletsActionTypes } from ".";
 import {
   KeyValuesByDoc,
   getEditDistanceAndSort,
@@ -47,7 +47,7 @@ export const getComputedDimension = (
 const hasDocitMounter = (target: HTMLElement): boolean =>
   target.className.includes("has-docit-mounter");
 
-const findAccuracyScoreElDimensions = (
+const getChicletDimensions = (
   inputHeight: number
 ): { accuracyScoreElHeight: number; accuracyScoreElWidth: number } => {
   const accuracyScoreElHeight =
@@ -137,7 +137,7 @@ function positionAllMounters() {
         const {
           accuracyScoreElHeight,
           accuracyScoreElWidth,
-        } = findAccuracyScoreElDimensions(inputHeight);
+        } = getChicletDimensions(inputHeight);
         mounter &&
           positionMounter(
             this,
@@ -159,10 +159,9 @@ export const replaceAndSetNewMounter = (
     inputStyle,
     ComputedDimensionTypes.height
   );
-  const {
-    accuracyScoreElHeight,
-    accuracyScoreElWidth,
-  } = findAccuracyScoreElDimensions(inputHeight);
+  const { accuracyScoreElHeight, accuracyScoreElWidth } = getChicletDimensions(
+    inputHeight
+  );
   const positionedParent = target.offsetParent;
 
   // remove the old mounter
@@ -207,23 +206,23 @@ export const populateForms = (
                 "lc substring"
               );
               if (hasGoodHighestMatch(sortedKeyValuePairs)) {
-                renderAccuracyScore(
-                  RenderAccuracyScoreActionTypes.value,
+                renderChiclets(
+                  RenderChicletsActionTypes.value,
                   this,
                   sortedKeyValuePairs[0]
                 );
                 $(this).prop("value", sortedKeyValuePairs[0]["value"]);
               } else {
-                renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, this);
+                renderChiclets(RenderChicletsActionTypes.blank, this);
                 $(this).prop("value", null);
               }
             }
           });
-        } else throw new Error("docData is falsy");
+        } else console.error("keyValuePairs is falsy");
         break;
       case PopulateFormsActionTypes.blankChiclets:
         $("input").each(function () {
-          renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, this);
+          renderChiclets(RenderChicletsActionTypes.blank, this);
         });
         break;
     }

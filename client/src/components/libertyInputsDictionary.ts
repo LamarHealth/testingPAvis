@@ -1,7 +1,7 @@
 import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 import {
-  renderAccuracyScore,
-  RenderAccuracyScoreActionTypes,
+  renderChiclets,
+  RenderChicletsActionTypes,
 } from "./accuracyScoreCircle";
 import $ from "jquery";
 
@@ -62,15 +62,15 @@ export const handleFreightTerms = (
 
     if (valIsSufficiently("collect")) {
       $(selectEl).val(2);
-      renderAccuracyScore(
-        RenderAccuracyScoreActionTypes.value,
+      renderChiclets(
+        RenderChicletsActionTypes.value,
         selectEl,
         sortedKeyValuePairs[0]
       );
     } else if (valIsSufficiently("prepaid")) {
       $(selectEl).val(1);
-      renderAccuracyScore(
-        RenderAccuracyScoreActionTypes.value,
+      renderChiclets(
+        RenderChicletsActionTypes.value,
         selectEl,
         sortedKeyValuePairs[0]
       );
