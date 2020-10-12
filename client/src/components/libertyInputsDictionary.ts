@@ -2,7 +2,7 @@ import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
-} from "./accuracyScoreCircle";
+} from "./AccuracyScoreCircle/index";
 import $ from "jquery";
 
 interface LibertyInputsDictionary {

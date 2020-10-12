@@ -19,7 +19,8 @@ import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
-} from "./accuracyScoreCircle";
+} from "./AccuracyScoreCircle/index";
+
 import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 

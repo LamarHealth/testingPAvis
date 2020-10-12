@@ -13,7 +13,7 @@ import {
   populateForms,
   removeAllChiclets,
   PopulateFormsActionTypes,
-} from "./accuracyScoreCircle/functions";
+} from "./AccuracyScoreCircle/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,

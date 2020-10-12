@@ -9,15 +9,15 @@ import React, {
 
 import useImage from "use-image";
 
+import {
+  renderChiclets,
+  RenderChicletsActionTypes,
+} from "./AccuracyScoreCircle/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
-import {
-  renderChiclets,
-  RenderChicletsActionTypes,
-} from "./accuracyScoreCircle";
 
 import { v4 as uuidv4 } from "uuid";
 import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";
