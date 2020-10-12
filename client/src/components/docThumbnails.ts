@@ -9,19 +9,24 @@ const setThumbsToLocalStorage = (thumbnails: DocThumbsReference) => {
   localStorage.setItem("docThumbnails", JSON.stringify(thumbnails));
 };
 
+export enum updateThumbsActionTypes {
+  add = "add",
+  delete = "delete",
+}
+
 export const updateThumbsLocalStorage = (
   docID: string,
-  action: "add" | "delete",
+  action: updateThumbsActionTypes,
   dataURL?: string
 ) => {
   const storedThumbs = getThumbsFromLocalStorage();
   switch (action) {
-    case "add":
+    case updateThumbsActionTypes.add:
       if (dataURL) {
         storedThumbs[docID] = dataURL;
       } else throw new Error();
       break;
-    case "delete":
+    case updateThumbsActionTypes.delete:
       delete storedThumbs[docID];
       break;
   }

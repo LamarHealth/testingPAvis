@@ -24,7 +24,7 @@ export enum PopulateFormsActionTypes {
   bestGuess = "best guess",
 }
 
-export enum GetComputedDimensionActionTypes {
+export enum ComputedDimensionTypes {
   height = "height",
   width = "width",
 }
@@ -34,12 +34,12 @@ const getComputedStyle = (target: HTMLElement): CSSStyleDeclaration =>
 
 export const getComputedDimension = (
   style: CSSStyleDeclaration,
-  dimension: "height" | "width"
+  dimension: ComputedDimensionTypes
 ): number => {
   switch (dimension) {
-    case "height":
+    case ComputedDimensionTypes.height:
       return parseInt(style.height.replace("px", ""));
-    case "width":
+    case ComputedDimensionTypes.width:
       return parseInt(style.width.replace("px", ""));
   }
 };
@@ -103,8 +103,14 @@ const positionMounter = (
   accuracyScoreElHeight: number,
   accuracyScoreElWidth: number
 ): void => {
-  const scopedInputHeight = getComputedDimension(inputStyle, "height");
-  const scopedInputWidth = getComputedDimension(inputStyle, "width");
+  const scopedInputHeight = getComputedDimension(
+    inputStyle,
+    ComputedDimensionTypes.height
+  );
+  const scopedInputWidth = getComputedDimension(
+    inputStyle,
+    ComputedDimensionTypes.width
+  );
 
   mounter.style.top = `${
     (scopedInputHeight - accuracyScoreElHeight) / 2 + target.offsetTop
@@ -119,7 +125,10 @@ function positionAllMounters() {
     $("input").each(function () {
       if (this.offsetParent) {
         const inputStyle = getComputedStyle(this);
-        const inputHeight = getComputedDimension(inputStyle, "height");
+        const inputHeight = getComputedDimension(
+          inputStyle,
+          ComputedDimensionTypes.height
+        );
         const mounter = hasDocitMounter(this)
           ? (Array.from(this.offsetParent?.children).filter((el) =>
               el.id.includes("docit-accuracy-score-mounter")
@@ -146,7 +155,10 @@ export const replaceAndSetNewMounter = (
   target: HTMLElement
 ): { mounter: HTMLSpanElement; mounterID: string } => {
   const inputStyle = getComputedStyle(target);
-  const inputHeight = getComputedDimension(inputStyle, "height");
+  const inputHeight = getComputedDimension(
+    inputStyle,
+    ComputedDimensionTypes.height
+  );
   const {
     accuracyScoreElHeight,
     accuracyScoreElWidth,
@@ -174,12 +186,12 @@ export const replaceAndSetNewMounter = (
 };
 
 export const populateForms = (
-  action: "blank chiclets" | "best guess",
+  action: PopulateFormsActionTypes,
   keyValuePairs?: KeyValuesByDoc
 ): void => {
   $(document).ready(() => {
     switch (action) {
-      case "best guess":
+      case PopulateFormsActionTypes.bestGuess:
         if (keyValuePairs) {
           $("select").each(function () {
             handleFreightTerms(this, keyValuePairs);
@@ -209,7 +221,7 @@ export const populateForms = (
           });
         } else throw new Error("docData is falsy");
         break;
-      case "blank chiclets":
+      case PopulateFormsActionTypes.blankChiclets:
         $("input").each(function () {
           renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, this);
         });

@@ -13,7 +13,10 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
-import { updateThumbsLocalStorage } from "./docThumbnails";
+import {
+  updateThumbsLocalStorage,
+  updateThumbsActionTypes,
+} from "./docThumbnails";
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import {
   populateForms,
@@ -86,7 +89,10 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
       type: "remove",
       documentInfo: props.docInfo,
     });
-    updateThumbsLocalStorage(props.docInfo.docID.toString(), "delete");
+    updateThumbsLocalStorage(
+      props.docInfo.docID.toString(),
+      updateThumbsActionTypes.delete
+    );
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>
