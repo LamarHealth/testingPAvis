@@ -19,7 +19,7 @@ import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
-} from "./AccuracyScoreCircle/index";
+} from "./ScoreChiclet/index";
 
 import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
