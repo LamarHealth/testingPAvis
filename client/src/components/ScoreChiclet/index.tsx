@@ -180,7 +180,12 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
     </ChicletBox>
   );
 };
-
+/**
+ * Given an HTML input or textareaelement on the page, renders a score chiclet
+ * @param {RenderChicletsActionTypes} action - Determine whether to render a chiclet with our without a score
+ * @param {HTMLElement} target - The HTML element ot render the chiclet inside
+ * @param {KeyValuesWithDistance} [keyValue] - The KVP value with attached score
+ */
 export const renderChiclets = (
   action: RenderChicletsActionTypes,
   target: HTMLElement,
@@ -203,7 +208,7 @@ export const renderChiclets = (
             />,
             mounter
           );
-        } else console.error("keyValue is falsy");
+        } else console.error("Unable to render score. Key Value not declared.");
         break;
       case RenderChicletsActionTypes.blank:
         ReactDOM.render(
@@ -214,3 +219,5 @@ export const renderChiclets = (
     }
   }
 };
+
+export default ScoreChiclet;

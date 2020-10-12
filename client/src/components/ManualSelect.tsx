@@ -12,7 +12,7 @@ import useImage from "use-image";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
-} from "./AccuracyScoreCircle/index";
+} from "./ScoreChiclet/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
