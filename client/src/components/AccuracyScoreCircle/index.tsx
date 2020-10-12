@@ -203,7 +203,7 @@ export const renderAccuracyScore = (
             />,
             mounter
           );
-        } else throw new Error("keyValue is falsy");
+        }
         break;
       case RenderAccuracyScoreActionTypes.blank:
         ReactDOM.render(
