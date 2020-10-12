@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components";
-import { FormGroup, InputGroup } from "@blueprintjs/core";
+import { FormGroup, InputGroup, TextArea } from "@blueprintjs/core";
 import "@blueprintjs/core/lib/css/blueprint.css";
 
 class ShipmentsDashboard extends React.Component {
@@ -25,7 +25,12 @@ class ShipmentsDashboard extends React.Component {
       width: 60%;
     `;
 
-    const FormContainer = styled(InputGroup)`
+    const StyledInput = styled(InputGroup)`
+      display: flex;
+      margin: 2em;
+    `;
+
+    const StyledTextArea = styled(TextArea)`
       display: flex;
       margin: 2em;
     `;
@@ -39,27 +44,28 @@ class ShipmentsDashboard extends React.Component {
             labelFor="text-input"
             labelInfo="(required)"
           >
-            <FormContainer placeholder="Bill of Lading Number" />
-            <FormContainer placeholder="Freight Terms" />
-            <FormContainer placeholder="Export References" />
+            <StyledInput placeholder="Bill of Lading Number" />
+            <StyledInput placeholder="Freight Terms" />
+            <StyledInput placeholder="Export References" />
+            <StyledTextArea placeholder="DOMESTIC ROUTING" />
             <h3>Shipper</h3>
-            <FormContainer placeholder="Shipper Name" />
-            <FormContainer placeholder="Shipper Address" />
-            <FormContainer placeholder="Shipper Contact Info" />
+            <StyledInput placeholder="Shipper Name" />
+            <StyledInput placeholder="Shipper Address" />
+            <StyledInput placeholder="Shipper Contact Info" />
             <h3>Consignee</h3>
-            <FormContainer placeholder="Consignee Name" />
-            <FormContainer placeholder="Consignee Address" />
-            <FormContainer placeholder="Consignee Contact Info" />
+            <StyledInput placeholder="Consignee Name" />
+            <StyledInput placeholder="Consignee Address" />
+            <StyledInput placeholder="Consignee Contact Info" />
             <h3>Notify Party</h3>
-            <FormContainer placeholder="Notify Party Name" />
-            <FormContainer placeholder="Notify Party Address" />
-            <FormContainer placeholder="Notify Party Contact Info" />
+            <StyledInput placeholder="Notify Party Name" />
+            <StyledInput placeholder="Notify Party Address" />
+            <StyledInput placeholder="Notify Party Contact Info" />
             <h3>Other</h3>
-            <FormContainer placeholder="Shipper's Declaration of Value" />
-            <FormContainer placeholder="Express Release" />
-            <FormContainer placeholder="AES ITN" />
-            <FormContainer placeholder="HS Code" />
-            <FormContainer placeholder="Comments" />
+            <StyledInput placeholder="Shipper's Declaration of Value" />
+            <StyledInput placeholder="Express Release" />
+            <StyledInput placeholder="AES ITN" />
+            <StyledInput placeholder="HS Code" />
+            <StyledInput placeholder="Comments" />
           </FormGroup>
         </ChecklistColumn>
       </Container>

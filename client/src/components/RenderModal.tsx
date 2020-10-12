@@ -66,13 +66,14 @@ export const RenderModal = () => {
 
   // handle input el click (local mode)
   useEffect(() => {
-    const handleInputClick = (event: MouseEvent) => {
-      setEventTarget(event.target as HTMLInputElement);
+    // type as native (not react) event
+    const handleInputClick = (event: Event) => {
+      setEventTarget(event.target as HTMLInputElement | HTMLTextAreaElement);
     };
-    const inputEls = document.querySelectorAll("input");
-    inputEls.forEach((inputEl) =>
-      inputEl.addEventListener("click", handleInputClick)
-    );
+    const inputEls = document.querySelectorAll("input, textarea");
+    inputEls.forEach((inputEl: Element) => {
+      inputEl.addEventListener("click", handleInputClick);
+    });
     return () => {
       inputEls.forEach((inputEl) =>
         inputEl.removeEventListener("click", handleInputClick)
@@ -82,14 +83,14 @@ export const RenderModal = () => {
 
   // handle input el click (liberty modal)
   useEffect(() => {
-    const handleInputClick = (event: MouseEvent) => {
-      setEventTarget(event.target as HTMLInputElement);
+    const handleInputClick = (event: Event) => {
+      setEventTarget(event.target as HTMLInputElement | HTMLTextAreaElement);
     };
     // listen for change in liberty modals (even fires on first modal open)
     const observer = getLibertyModalMutationsObserver(() => {
       // assign listeners here
-      const inputEls = document.querySelectorAll("input");
-      inputEls.forEach((inputEl) =>
+      const inputEls = document.querySelectorAll("input, textarea");
+      inputEls.forEach((inputEl: Element) =>
         inputEl.addEventListener("click", handleInputClick)
       );
     });
@@ -99,7 +100,7 @@ export const RenderModal = () => {
       subtree: true,
     });
     return () => {
-      const inputEls = document.querySelectorAll("input");
+      const inputEls = document.querySelectorAll("input, textarea");
       inputEls.forEach((inputEl) => {
         inputEl.removeEventListener("click", handleInputClick);
       });

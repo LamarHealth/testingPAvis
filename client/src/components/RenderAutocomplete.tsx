@@ -33,7 +33,10 @@ const findActiveElInShadowRoot = () => {
   return { activeElementInShadowRoot, menuList };
 };
 
-const handleMenuNavigation = (event: any, target: HTMLInputElement) => {
+const handleMenuNavigation = (
+  event: any,
+  target: HTMLInputElement | HTMLTextAreaElement
+) => {
   // cannot type as a react KeyboardEvent because it doesn't have stopImmediatePropagation
   const { activeElementInShadowRoot, menuList } = findActiveElInShadowRoot();
 
@@ -115,8 +118,8 @@ export const RenderAutocomplete = () => {
   // handle input typing
   const listenForInputTypying = () => {
     $(document).ready(() => {
-      $("input").on("input", function () {
-        const inputEl = this as HTMLInputElement;
+      $("input, textarea").on("input", function () {
+        const inputEl = this as HTMLInputElement | HTMLTextAreaElement;
         setFilter(inputEl.value);
         setAutocompleteAnchor(inputEl);
       });
