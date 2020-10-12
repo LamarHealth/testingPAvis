@@ -17,9 +17,10 @@ import {
 } from "../common/constants";
 import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
 import {
-  renderAccuracyScore,
-  RenderAccuracyScoreActionTypes,
-} from "./AccuracyScoreCircle/components";
+  renderChiclets,
+  RenderChicletsActionTypes,
+} from "./ScoreChiclet/index";
+
 import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 
@@ -159,13 +160,13 @@ export const SelectModal = () => {
         unalteredKeyValue !== null &&
         unalteredKeyValue.value === inputEl.value
       ) {
-        renderAccuracyScore(
-          RenderAccuracyScoreActionTypes.value,
+        renderChiclets(
+          RenderChicletsActionTypes.value,
           eventTarget,
           unalteredKeyValue
         );
       } else {
-        renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, eventTarget);
+        renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
       }
       inputEl.value = ""; // clear the text editor
     } else {

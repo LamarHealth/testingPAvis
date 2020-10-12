@@ -185,6 +185,12 @@ export const deleteKVPairFromLocalStorage = (
   localStorage.setItem("docList", JSON.stringify(storedDocs));
 };
 
+export const hasGoodHighestMatch = (
+  sortedKeyValuePairs: KeyValuesWithDistance[]
+) =>
+  sortedKeyValuePairs[0].distanceFromTarget > 0.5 &&
+  sortedKeyValuePairs[0].value !== "";
+
 // helper functions
 const lowercaseKeys = (initialObject: any) => {
   const lowercasedObject = {} as any;

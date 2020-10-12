@@ -9,17 +9,17 @@ import React, {
 
 import useImage from "use-image";
 
+import {
+  renderChiclets,
+  RenderChicletsActionTypes,
+} from "./ScoreChiclet/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { MainModalContext } from "./RenderModal";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
-import {
-  renderAccuracyScore,
-  RenderAccuracyScoreActionTypes,
-} from "./AccuracyScoreCircle/components";
 
-import uuidv from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { API_PATH, DOC_IMAGE_WIDTH } from "../common/constants";
 
 export interface LinesGeometry {
@@ -38,25 +38,25 @@ export interface LinesSelection {
 }
 
 export enum LinesSelectionActionTypes {
-  select = "select",
-  deselect = "deselect",
-  reset = "reset",
+  select,
+  deselect,
+  reset,
 }
 
 export enum InputValActionTypes {
-  replace = "replace",
-  appendLine = "append line",
-  removeLine = "remove line",
-  reset = "reset",
+  replace,
+  appendLine,
+  removeLine,
+  reset,
 }
 
 interface LinesSelectionReducerAction {
-  type: "select" | "deselect" | "reset";
+  type: LinesSelectionActionTypes;
   line?: LinesSelection;
 }
 
 interface InputValAction {
-  type: "replace" | "append line" | "remove line" | "reset";
+  type: InputValActionTypes;
   value?: string;
 }
 
@@ -67,12 +67,12 @@ function linesSelectionReducer(
   action: LinesSelectionReducerAction
 ) {
   switch (action.type) {
-    case "select":
+    case LinesSelectionActionTypes.select:
       return { ...state, ...action.line };
-    case "deselect":
+    case LinesSelectionActionTypes.deselect:
       action.line && delete state[Object.keys(action.line)[0]];
       return { ...state };
-    case "reset":
+    case LinesSelectionActionTypes.reset:
       return {};
     default:
       throw new Error();
@@ -81,11 +81,11 @@ function linesSelectionReducer(
 
 function inputValReducer(state: string, action: InputValAction) {
   switch (action.type) {
-    case "replace":
+    case InputValActionTypes.replace:
       if (typeof action.value === "string") {
         return action.value;
       } else throw new Error();
-    case "append line":
+    case InputValActionTypes.appendLine:
       const prevInputValArray = Array.from(state);
       // if ends in space, don't add another
       if (prevInputValArray[prevInputValArray.length - 1] === " ") {
@@ -93,11 +93,11 @@ function inputValReducer(state: string, action: InputValAction) {
       } else {
         return state + " " + action.value;
       }
-    case "remove line":
+    case InputValActionTypes.removeLine:
       if (action.value) {
         return state.replace(action.value, "");
       } else throw new Error();
-    case "reset":
+    case InputValActionTypes.reset:
       return "";
     default:
       throw new Error();
@@ -245,7 +245,7 @@ export const ManualSelect = () => {
           await linesGeometryResponse.json()
         ).linesGeometry.map((lineGeometry: any) => {
           //@ts-ignore
-          return { ...lineGeometry, ID: uuidv() };
+          return { ...lineGeometry, ID: uuidv4() };
         });
         setCurrentLinesGeometry(linesGeometry);
         break;
@@ -274,7 +274,7 @@ export const ManualSelect = () => {
     // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
     if (eventTarget) {
       if (inputVal !== "") {
-        renderAccuracyScore(RenderAccuracyScoreActionTypes.blank, eventTarget);
+        renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
         eventTarget.value = inputVal;
         setErrorLine(null);
         linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });

@@ -1,8 +1,8 @@
 import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
 import {
-  renderAccuracyScore,
-  RenderAccuracyScoreActionTypes,
-} from "./AccuracyScoreCircle/components";
+  renderChiclets,
+  RenderChicletsActionTypes,
+} from "./ScoreChiclet/index";
 import $ from "jquery";
 
 interface LibertyInputsDictionary {
@@ -38,11 +38,9 @@ export const assignTargetString = (inputEl: any): string => {
     targetString = placeholderText;
   } else {
     const inputID = $(inputEl).attr("id");
-    if (inputID && libertyInputsDictionary[inputID]) {
-      targetString = libertyInputsDictionary[inputID];
-    } else {
-      targetString = "";
-    }
+    inputID && libertyInputsDictionary[inputID]
+      ? (targetString = libertyInputsDictionary[inputID])
+      : (targetString = "");
   }
   return targetString;
 };
@@ -64,15 +62,15 @@ export const handleFreightTerms = (
 
     if (valIsSufficiently("collect")) {
       $(selectEl).val(2);
-      renderAccuracyScore(
-        RenderAccuracyScoreActionTypes.value,
+      renderChiclets(
+        RenderChicletsActionTypes.value,
         selectEl,
         sortedKeyValuePairs[0]
       );
     } else if (valIsSufficiently("prepaid")) {
       $(selectEl).val(1);
-      renderAccuracyScore(
-        RenderAccuracyScoreActionTypes.value,
+      renderChiclets(
+        RenderChicletsActionTypes.value,
         selectEl,
         sortedKeyValuePairs[0]
       );

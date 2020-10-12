@@ -13,7 +13,7 @@ import {
   populateForms,
   removeAllChiclets,
   PopulateFormsActionTypes,
-} from "./AccuracyScoreCircle/functions";
+} from "./ScoreChiclet/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,
@@ -185,10 +185,7 @@ const DocCell = (props: DocumentInfo) => {
     setSelected();
     isSelected
       ? removeAllChiclets()
-      : populateForms(
-          props.docID.toString(),
-          PopulateFormsActionTypes.blankChiclets
-        );
+      : populateForms(PopulateFormsActionTypes.blankChiclets);
   };
 
   // set thumbnail

@@ -13,11 +13,15 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
-import { updateThumbsLocalStorage } from "./docThumbnails";
+import {
+  updateThumbsLocalStorage,
+  updateThumbsActionTypes,
+} from "./docThumbnails";
+import { KeyValuesByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
-} from "./AccuracyScoreCircle/functions";
+} from "./ScoreChiclet/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT } from "../common/constants";
 
@@ -85,7 +89,10 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
       type: "remove",
       documentInfo: props.docInfo,
     });
-    updateThumbsLocalStorage(props.docInfo.docID.toString(), "delete");
+    updateThumbsLocalStorage(
+      props.docInfo.docID.toString(),
+      updateThumbsActionTypes.delete
+    );
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>
@@ -149,6 +156,7 @@ const ButtonsBox = memo(
       useStore((state) => state.setSelectedFile),
       useStore((state) => state.setKonvaModalOpen),
     ];
+    const docID = props.docInfo.docID.toString();
 
     // click away
     const handleClickAway = () => {
@@ -172,7 +180,7 @@ const ButtonsBox = memo(
     // handle view pdf click
     const handleViewPdfClick = (e: MouseEvent) => {
       e.stopPropagation();
-      setSelectedFile(props.docInfo.docID.toString());
+      setSelectedFile(docID);
       setKonvaModalOpen(true);
     };
 
@@ -180,9 +188,8 @@ const ButtonsBox = memo(
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
       populateForms(
-        props.docInfo.docID.toString(),
         PopulateFormsActionTypes.bestGuess,
-        docData
+        docData.filter((doc: KeyValuesByDoc) => doc.docID === docID)[0]
       );
       setSelectedFile(props.docInfo.docID.toString());
     };

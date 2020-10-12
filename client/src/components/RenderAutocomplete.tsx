@@ -23,6 +23,67 @@ const Container = styled.div`
   border: 1px solid ${colors.KVP_TABLE_BORDER};
 `;
 
+const findActiveElInShadowRoot = () => {
+  const container = document.querySelector(
+    "#container-for-autocomplete-dropdown"
+  );
+  const shadowRoot = container?.children[0].children[0].shadowRoot;
+  const menuList = shadowRoot?.querySelector("ul") as HTMLElement;
+  const activeElementInShadowRoot = shadowRoot?.activeElement as HTMLElement;
+  return { activeElementInShadowRoot, menuList };
+};
+
+const handleMenuNavigation = (event: any, target: HTMLInputElement) => {
+  // cannot type as a react KeyboardEvent because it doesn't have stopImmediatePropagation
+  const { activeElementInShadowRoot, menuList } = findActiveElInShadowRoot();
+
+  if (
+    event.code === "ArrowDown" ||
+    event.code === "ArrowUp" ||
+    event.code === "Tab"
+  ) {
+    if (event.code === "ArrowDown" || event.code === "ArrowUp") {
+      // cancel the arrow key press, because is doing some mui jankiness
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    if (!activeElementInShadowRoot && event.code !== "ArrowUp") {
+      // if not in the menu yet, then focus on the menu
+      menuList?.focus();
+    } else {
+      if (event.code === "ArrowDown" || event.code === "ArrowUp") {
+        if (
+          // if focused on whole menu, focus on the first LI
+          activeElementInShadowRoot &&
+          activeElementInShadowRoot.nodeName === "UL"
+        ) {
+          const firstLi = menuList.children[0] as HTMLElement;
+          firstLi.focus();
+        } else if (
+          // else go up or down the LIs
+          activeElementInShadowRoot &&
+          activeElementInShadowRoot.nodeName === "LI"
+        ) {
+          if (event.code === "ArrowDown") {
+            const nextEl = activeElementInShadowRoot.nextSibling as HTMLElement;
+            nextEl && nextEl.focus();
+          } else if (event.code === "ArrowUp") {
+            const prevEl = activeElementInShadowRoot.previousSibling as HTMLElement;
+            if (prevEl) {
+              // if el above, focus
+              prevEl.focus();
+            } else {
+              // if top of list el, then focus on input
+              target.focus();
+            }
+          }
+        }
+      }
+    }
+  }
+};
+
 export const RenderAutocomplete = () => {
   const [docData, selectedFile, autocompleteAnchor, setAutocompleteAnchor] = [
     useStore((state) => state.docData),
@@ -74,39 +135,16 @@ export const RenderAutocomplete = () => {
     return () => observer.disconnect();
   });
 
-  // listen for menu tabbing
-  const findActiveElInShadowRoot = () => {
-    const container = document.querySelector(
-      "#container-for-autocomplete-dropdown"
-    );
-    const shadowRoot = container?.children[0].children[0].shadowRoot;
-    const menuList = shadowRoot?.querySelector("ul") as HTMLElement;
-    const activeElementInShadowRoot = shadowRoot?.activeElement;
-    return { activeElementInShadowRoot, menuList };
-  };
-
+  // listen for menu tabbing / arrow keys
   useEffect(() => {
-    function keydownListener(event: any) {
-      const {
-        activeElementInShadowRoot,
-        menuList,
-      } = findActiveElInShadowRoot();
-
-      if (
-        !autocompleteAnchor ||
-        event.code !== "Tab" ||
-        (activeElementInShadowRoot &&
-          activeElementInShadowRoot.nodeName === "LI") // even tho we focus() on the menuList, which is <ul>, mui puts the focus on the first <li> in the list
-      )
-        return;
-      else {
-        // only want to focus on the menu with the first tab, subsequent tabs will iterate through the menu list
-        menuList?.focus();
+    function arrowKeyListener(event: any) {
+      if (autocompleteAnchor) {
+        handleMenuNavigation(event, autocompleteAnchor);
       }
     }
-    document.addEventListener("keydown", keydownListener);
+    document.addEventListener("keydown", arrowKeyListener, true);
     return () => {
-      document.removeEventListener("keydown", keydownListener);
+      document.removeEventListener("keydown", arrowKeyListener, true);
     };
   }, [autocompleteAnchor]);
 

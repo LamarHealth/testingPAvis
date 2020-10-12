@@ -14,21 +14,21 @@ import {
   ACC_SCORE_MEDIUM,
 } from "../../common/constants";
 import {
-  setMounter,
+  replaceAndSetNewMounter,
   getComputedDimension,
-  GetComputedDimensionActionTypes,
+  ComputedDimensionTypes,
 } from "./functions";
 import { useStore } from "../../contexts/ZustandStore";
 import { KeyValuesWithDistance } from "../KeyValuePairs";
 import { assignTargetString } from "../libertyInputsDictionary";
 import WrappedJssComponent from "../ShadowComponent";
 
-export enum RenderAccuracyScoreActionTypes {
-  blank = "blank",
-  value = "value",
+export enum RenderChicletsActionTypes {
+  blank,
+  value,
 }
 
-const AccuracyScoreBox = styled.div`
+const ChicletBox = styled.div`
   background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
   padding: 4px;
   border-radius: 5px;
@@ -51,7 +51,7 @@ const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
 const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
-const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
+const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
   const [
     selectedChiclet,
     setSelectedChiclet,
@@ -93,7 +93,7 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
   };
 
   return (
-    <AccuracyScoreBox
+    <ChicletBox
       className={wrapperClasses.root}
       onClick={handleClick}
       style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
@@ -118,7 +118,7 @@ const AccuracyScoreEl = ({ value, inputHeight, mounterID }: any) => {
         thickness={10}
         classes={colorClasses}
       />
-    </AccuracyScoreBox>
+    </ChicletBox>
   );
 };
 
@@ -157,7 +157,7 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
   };
 
   return (
-    <AccuracyScoreBox
+    <ChicletBox
       className={wrapperClasses.root}
       onClick={handleClick}
       style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
@@ -177,35 +177,40 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
           </Typography>
         </WrappedJssComponent>
       </Box>
-    </AccuracyScoreBox>
+    </ChicletBox>
   );
 };
-
-export const renderAccuracyScore = (
-  action: "value" | "blank",
+/**
+ * Given an HTML input or textareaelement on the page, renders a score chiclet
+ * @param {RenderChicletsActionTypes} action - Determine whether to render a chiclet with our without a score
+ * @param {HTMLElement} target - The HTML element ot render the chiclet inside
+ * @param {KeyValuesWithDistance} [keyValue] - The KVP value with attached score
+ */
+export const renderChiclets = (
+  action: RenderChicletsActionTypes,
   target: HTMLElement,
   keyValue?: KeyValuesWithDistance
 ) => {
   if (target.offsetParent) {
-    const { mounter, mounterID } = setMounter(target);
+    const { mounter, mounterID } = replaceAndSetNewMounter(target);
     const inputHeight = getComputedDimension(
       getComputedStyle(target),
-      GetComputedDimensionActionTypes.height
+      ComputedDimensionTypes.height
     );
     switch (action) {
-      case "value":
+      case RenderChicletsActionTypes.value:
         if (keyValue) {
           ReactDOM.render(
-            <AccuracyScoreEl
+            <ScoreChiclet
               value={keyValue.distanceFromTarget * 100}
               inputHeight={inputHeight}
               mounterID={mounterID}
             />,
             mounter
           );
-        } else throw new Error("keyValue is falsy");
+        } else console.error("Unable to render score. Key Value not declared.");
         break;
-      case "blank":
+      case RenderChicletsActionTypes.blank:
         ReactDOM.render(
           <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
           mounter
@@ -214,3 +219,5 @@ export const renderAccuracyScore = (
     }
   }
 };
+
+export default ScoreChiclet;

@@ -239,17 +239,20 @@ const ButtonsCell = (props: {
         onClickAway={() => setSoftCollapse(false)}
       >
         <Collapse in={softCollapse} timeout={hardCollapse ? 0 : "auto"}>
-          <Chip
-            label="Report Unrelated"
-            variant="outlined"
-            onClick={() => reportKVPair()}
-            style={{ marginBottom: "1em" }}
-          />
-          <Chip
-            label="Delete Row"
-            variant="outlined"
-            onClick={() => reportKVPair(true)}
-          />
+          <span style={{ display: "flex" }}>
+            <Chip
+              label="Report Unrelated"
+              variant="outlined"
+              onClick={() => reportKVPair()}
+              style={{ margin: "0.5em" }}
+            />
+            <Chip
+              label="Delete Row"
+              variant="outlined"
+              onClick={() => reportKVPair(true)}
+              style={{ margin: "0.5em" }}
+            />
+          </span>
         </Collapse>
       </ClickAwayListener>
     </>

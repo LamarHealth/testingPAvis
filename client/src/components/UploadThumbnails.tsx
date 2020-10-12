@@ -21,7 +21,10 @@ import { usePdf } from "@mikecousins/react-pdf";
 import { PAGE_SCALE, API_PATH } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
-import { updateThumbsLocalStorage } from "./docThumbnails";
+import {
+  updateThumbsLocalStorage,
+  updateThumbsActionTypes,
+} from "./docThumbnails";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -211,7 +214,11 @@ const FileStatus = (props: any) => {
       docID &&
       thumbnailSrc.startsWith("data:image/png;base64,")
     ) {
-      updateThumbsLocalStorage(docID, "add", thumbnailSrc);
+      updateThumbsLocalStorage(
+        docID,
+        updateThumbsActionTypes.add,
+        thumbnailSrc
+      );
     }
   }, [thumbnailSrc, docID, props.fileWithPreview.file.type]);
 
