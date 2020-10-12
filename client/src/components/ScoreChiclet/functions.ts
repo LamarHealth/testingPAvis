@@ -8,7 +8,7 @@ import {
   ACC_SCORE_SMALL,
   ACC_SCORE_MEDIUM,
 } from "../../common/constants";
-import { renderChiclets, RenderChicletsActionTypes } from ".";
+import { renderChiclets, RenderChicletsActionTypes } from "./index";
 import {
   KeyValuesByDoc,
   getEditDistanceAndSort,
@@ -122,7 +122,7 @@ const positionMounter = (
 
 function positionAllMounters() {
   $(document).ready(function () {
-    $("input").each(function () {
+    $("input, textarea").each(function () {
       if (this.offsetParent) {
         const inputStyle = getComputedStyle(this);
         const inputHeight = getComputedDimension(
@@ -195,7 +195,7 @@ export const populateForms = (
           $("select").each(function () {
             handleFreightTerms(this, keyValuePairs);
           });
-          $("input").each(function () {
+          $("input, textarea").each(function () {
             const targetString = assignTargetString(this);
             const areThereKVPairs =
               Object.keys(keyValuePairs.keyValuePairs).length > 0;
@@ -221,7 +221,7 @@ export const populateForms = (
         } else console.error("keyValuePairs is falsy");
         break;
       case PopulateFormsActionTypes.blankChiclets:
-        $("input").each(function () {
+        $("input, textarea").each(function () {
           renderChiclets(RenderChicletsActionTypes.blank, this);
         });
         break;
@@ -232,7 +232,7 @@ export const populateForms = (
 
 export const removeAllChiclets = () => {
   $(document).ready(function () {
-    $("input").each(function () {
+    $("input, textarea").each(function () {
       removeMounter(this);
     });
   });

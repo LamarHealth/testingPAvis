@@ -85,8 +85,8 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
   const handleClick = () => {
     setSelectedChiclet(mounterID);
     const eventTarget = document.querySelector(
-      `input.has-docit-mounter-${mounterID}`
-    ) as HTMLInputElement;
+      `.has-docit-mounter-${mounterID}`
+    ) as HTMLInputElement | HTMLTextAreaElement;
     setEventTarget(eventTarget);
     setTargetString(assignTargetString(eventTarget));
     setKvpTableAnchorEl(eventTarget);
@@ -149,8 +149,8 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
   const handleClick = () => {
     setSelectedChiclet(mounterID);
     const eventTarget = document.querySelector(
-      `input.has-docit-mounter-${mounterID}`
-    ) as HTMLInputElement;
+      `.has-docit-mounter-${mounterID}`
+    ) as HTMLInputElement | HTMLTextAreaElement;
     setEventTarget(eventTarget);
     setTargetString(assignTargetString(eventTarget));
     setKvpTableAnchorEl(eventTarget);

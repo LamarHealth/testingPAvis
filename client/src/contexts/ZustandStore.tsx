@@ -22,21 +22,23 @@ type State = {
   selectedChiclet: Uuid;
   docData: KeyValuesByDoc[];
   konvaModalOpen: boolean;
-  autocompleteAnchor: null | HTMLInputElement;
-  eventTarget: null | HTMLInputElement;
+  autocompleteAnchor: null | HTMLInputElement | HTMLTextAreaElement;
+  eventTarget: null | HTMLInputElement | HTMLTextAreaElement;
   targetString: string;
-  kvpTableAnchorEl: null | HTMLInputElement;
+  kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement;
   errorFiles: ErrorFile; // not just one error file, but an object of error files
   setSelectedFile: (selectedFile: Uuid) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
   setDocData: (docData: KeyValuesByDoc[]) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
   setAutocompleteAnchor: (
-    autocompleteAnchorEl: null | HTMLInputElement
+    autocompleteAnchorEl: null | HTMLInputElement | HTMLTextAreaElement
   ) => void;
-  setEventTarget: (eventTarget: HTMLInputElement) => void;
+  setEventTarget: (eventTarget: HTMLInputElement | HTMLTextAreaElement) => void;
   setTargetString: (targetString: string) => void;
-  setKvpTableAnchorEl: (kvpTableAnchorEl: null | HTMLInputElement) => void;
+  setKvpTableAnchorEl: (
+    kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement
+  ) => void;
   setErrorFiles: (errorFile: ErrorFile) => void;
 };
 
