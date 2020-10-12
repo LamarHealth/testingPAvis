@@ -17,6 +17,7 @@ import {
 import {
   assignTargetString,
   handleFreightTerms,
+  libertyDocitInputsSelector,
 } from "../libertyInputsDictionary";
 
 export enum PopulateFormsActionTypes {
@@ -122,7 +123,7 @@ const positionMounter = (
 
 function positionAllMounters() {
   $(document).ready(function () {
-    $("input, textarea").each(function () {
+    $(libertyDocitInputsSelector).each(function () {
       if (this.offsetParent) {
         const inputStyle = getComputedStyle(this);
         const inputHeight = getComputedDimension(
@@ -195,7 +196,7 @@ export const populateForms = (
           $("select").each(function () {
             handleFreightTerms(this, keyValuePairs);
           });
-          $("input, textarea").each(function () {
+          $(libertyDocitInputsSelector).each(function () {
             const targetString = assignTargetString(this);
             const areThereKVPairs =
               Object.keys(keyValuePairs.keyValuePairs).length > 0;
@@ -221,7 +222,7 @@ export const populateForms = (
         } else console.error("keyValuePairs is falsy");
         break;
       case PopulateFormsActionTypes.blankChiclets:
-        $("input, textarea").each(function () {
+        $(libertyDocitInputsSelector).each(function () {
           renderChiclets(RenderChicletsActionTypes.blank, this);
         });
         break;
@@ -232,7 +233,7 @@ export const populateForms = (
 
 export const removeAllChiclets = () => {
   $(document).ready(function () {
-    $("input, textarea").each(function () {
+    $(libertyDocitInputsSelector).each(function () {
       removeMounter(this);
     });
   });

@@ -14,7 +14,10 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import { DEFAULT } from "../common/themes";
 import { colors } from "../common/colors";
 import WrappedJssComponent from "./ShadowComponent";
-import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+import {
+  getLibertyModalMutationsObserver,
+  libertyDocitInputsSelector,
+} from "./libertyInputsDictionary";
 
 const Container = styled.div`
   max-height: 280px;
@@ -118,7 +121,7 @@ export const RenderAutocomplete = () => {
   // handle input typing
   const listenForInputTypying = () => {
     $(document).ready(() => {
-      $("input, textarea").on("input", function () {
+      $(libertyDocitInputsSelector).on("input", function () {
         const inputEl = this as HTMLInputElement | HTMLTextAreaElement;
         setFilter(inputEl.value);
         setAutocompleteAnchor(inputEl);
