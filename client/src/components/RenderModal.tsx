@@ -30,6 +30,25 @@ export interface DocImageDimensions {
   height: number;
 }
 
+const getInputsAndTextAreas = (): NodeListOf<Element> =>
+  document.querySelectorAll("input, textarea");
+
+const addClickListeners = (
+  elements: NodeListOf<Element>,
+  listener: EventListener
+): void => {
+  elements.forEach((el: Element) => {
+    el.addEventListener("click", listener);
+  });
+};
+
+const removeClickListeners = (
+  elements: NodeListOf<Element>,
+  listener: EventListener
+): void => {
+  elements.forEach((el) => el.removeEventListener("click", listener));
+};
+
 export const MainModalContext = createContext({} as any);
 
 export const RenderModal = () => {
@@ -66,18 +85,14 @@ export const RenderModal = () => {
 
   // handle input el click (local mode)
   useEffect(() => {
-    // type as native (not react) event
+    // native (not react) event
     const handleInputClick = (event: Event) => {
       setEventTarget(event.target as HTMLInputElement | HTMLTextAreaElement);
     };
-    const inputEls = document.querySelectorAll("input, textarea");
-    inputEls.forEach((inputEl: Element) => {
-      inputEl.addEventListener("click", handleInputClick);
-    });
+    const inputEls = getInputsAndTextAreas();
+    addClickListeners(inputEls, handleInputClick);
     return () => {
-      inputEls.forEach((inputEl) =>
-        inputEl.removeEventListener("click", handleInputClick)
-      );
+      removeClickListeners(inputEls, handleInputClick);
     };
   });
 
@@ -89,10 +104,7 @@ export const RenderModal = () => {
     // listen for change in liberty modals (even fires on first modal open)
     const observer = getLibertyModalMutationsObserver(() => {
       // assign listeners here
-      const inputEls = document.querySelectorAll("input, textarea");
-      inputEls.forEach((inputEl: Element) =>
-        inputEl.addEventListener("click", handleInputClick)
-      );
+      addClickListeners(getInputsAndTextAreas(), handleInputClick);
     });
     observer.observe(document.body, {
       attributes: true,
@@ -100,10 +112,7 @@ export const RenderModal = () => {
       subtree: true,
     });
     return () => {
-      const inputEls = document.querySelectorAll("input, textarea");
-      inputEls.forEach((inputEl) => {
-        inputEl.removeEventListener("click", handleInputClick);
-      });
+      removeClickListeners(getInputsAndTextAreas(), handleInputClick);
       observer.disconnect();
     };
   });
