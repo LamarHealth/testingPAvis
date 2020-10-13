@@ -106,11 +106,15 @@ export const RenderAutocomplete = () => {
   )[0];
   const isDocSelected = Boolean(selectedDocData);
   const allLinesAndValues = isDocSelected
-    ? Object.entries(selectedDocData.keyValuePairs)
-        .map((entry) => entry[1])
-        .concat(selectedDocData.lines)
-        .filter((value) => value !== "")
-        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sorting
+    ? Array.from(
+        new Set( // remove duplicates
+          Object.entries(selectedDocData.keyValuePairs)
+            .map((entry) => entry[1])
+            .concat(selectedDocData.lines) // add non-kvp lines
+            .filter((value) => value !== "") // filter out blanks
+            .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sort
+        )
+      )
     : [];
   const areThereFilteredEntries = isDocSelected
     ? allLinesAndValues.filter((value: string) =>
@@ -162,6 +166,8 @@ export const RenderAutocomplete = () => {
       setAutocompleteAnchor(null);
     }
   };
+
+  console.log("allLinesAndValues, ", allLinesAndValues);
 
   return (
     <>
