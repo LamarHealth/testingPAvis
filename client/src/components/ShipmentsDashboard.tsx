@@ -44,28 +44,61 @@ class ShipmentsDashboard extends React.Component {
             labelFor="text-input"
             labelInfo="(required)"
           >
-            <StyledInput placeholder="Bill of Lading Number" />
-            <StyledInput placeholder="Freight Terms" />
-            <StyledInput placeholder="Export References" />
-            <StyledTextArea placeholder="DOMESTIC ROUTING" />
+            <StyledInput
+              placeholder="Bill of Lading Number"
+              data-docit-input="true"
+            />
+            <StyledInput placeholder="Freight Terms" data-docit-input="true" />
+            <StyledInput placeholder="Export References ***NO data-docit-input***" />
+            <StyledTextArea
+              placeholder="DOMESTIC ROUTING"
+              data-docit-input="true"
+            />
             <h3>Shipper</h3>
-            <StyledInput placeholder="Shipper Name" />
-            <StyledInput placeholder="Shipper Address" />
-            <StyledInput placeholder="Shipper Contact Info" />
+            <StyledInput placeholder="Shipper Name" data-docit-input="true" />
+            <StyledInput
+              placeholder="Shipper Address"
+              data-docit-input="true"
+            />
+            <StyledInput
+              placeholder="Shipper Contact Info"
+              data-docit-input="true"
+            />
             <h3>Consignee</h3>
-            <StyledInput placeholder="Consignee Name" />
-            <StyledInput placeholder="Consignee Address" />
-            <StyledInput placeholder="Consignee Contact Info" />
+            <StyledInput placeholder="Consignee Name" data-docit-input="true" />
+            <StyledInput
+              placeholder="Consignee Address"
+              data-docit-input="true"
+            />
+            <StyledInput
+              placeholder="Consignee Contact Info"
+              data-docit-input="true"
+            />
             <h3>Notify Party</h3>
-            <StyledInput placeholder="Notify Party Name" />
-            <StyledInput placeholder="Notify Party Address" />
-            <StyledInput placeholder="Notify Party Contact Info" />
+            <StyledInput
+              placeholder="Notify Party Name"
+              data-docit-input="true"
+            />
+            <StyledInput
+              placeholder="Notify Party Address"
+              data-docit-input="true"
+            />
+            <StyledInput
+              placeholder="Notify Party Contact Info"
+              data-docit-input="true"
+            />
             <h3>Other</h3>
-            <StyledInput placeholder="Shipper's Declaration of Value" />
-            <StyledInput placeholder="Express Release" />
-            <StyledInput placeholder="AES ITN" />
-            <StyledInput placeholder="HS Code" />
-            <StyledInput placeholder="Comments" />
+            <StyledInput
+              placeholder="Shipper's Declaration of Value"
+              data-docit-input="true"
+            />
+            <StyledInput
+              placeholder="Express Release"
+              data-docit-input="true"
+            />
+            <StyledInput placeholder="AES ITN" data-docit-input="true" />
+            <StyledInput placeholder="HS Code" data-docit-input="true" />
+            <StyledInput placeholder="Comments" data-docit-input="true" />
           </FormGroup>
         </ChecklistColumn>
       </Container>

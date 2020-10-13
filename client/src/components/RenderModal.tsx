@@ -8,7 +8,10 @@ import Popper from "@material-ui/core/Popper";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
-import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+import {
+  getLibertyModalMutationsObserver,
+  libertyDocitInputsSelector,
+} from "./libertyInputsDictionary";
 
 import { DEFAULT } from "../common/themes";
 import {
@@ -31,7 +34,7 @@ export interface DocImageDimensions {
 }
 
 const getInputsAndTextAreas = (): NodeListOf<Element> =>
-  document.querySelectorAll("input, textarea");
+  document.querySelectorAll(libertyDocitInputsSelector);
 
 const addClickListeners = (
   elements: NodeListOf<Element>,
