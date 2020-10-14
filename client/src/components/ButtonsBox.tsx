@@ -1,4 +1,5 @@
 import React, { useState, useContext, memo, MouseEvent } from "react";
+import { Link } from "react-router-dom";
 
 import styled from "styled-components";
 import { useStore } from "../contexts/ZustandStore";
@@ -206,14 +207,16 @@ const ButtonsBox = memo(
                 variant="outlined"
                 isSelected={props.isSelected}
               />
-              <StyledChip
-                size="small"
-                label="View PDF"
-                variant="outlined"
-                onClick={handleViewPdfClick}
-                disabled={props.errorGettingFile}
-                isSelected={props.isSelected}
-              />
+              <Link to={`/viewdoc/${docID}`} target={"_blank"}>
+                <StyledChip
+                  size="small"
+                  label="View PDF"
+                  variant="outlined"
+                  onClick={handleViewPdfClick}
+                  disabled={props.errorGettingFile}
+                  isSelected={props.isSelected}
+                />
+              </Link>
               <FlexIconButton
                 onClick={handleDeleteClick}
                 style={{ marginLeft: "-0.25em" }}

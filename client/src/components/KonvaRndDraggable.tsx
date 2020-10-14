@@ -1,14 +1,19 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
 import { KonvaModalContext } from "./ManualSelect";
-import { MainModalContext } from "./RenderModal";
 import { KonvaModal } from "./KonvaModal";
 
 import { colors } from "../common/colors";
-import { KONVA_MODAL_HEIGHT, MODAL_SHADOW } from "../common/constants";
+import {
+  KONVA_MODAL_HEIGHT,
+  MODAL_SHADOW,
+  KONVA_MODAL_OFFSET_X,
+  KONVA_MODAL_OFFSET_Y,
+  DOC_IMAGE_WIDTH,
+} from "../common/constants";
 
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
@@ -32,14 +37,15 @@ const resizeHandleStylesPayload = {
 };
 
 export const RndComponent = () => {
-  const {
-    konvaModalDraggCoords,
-    setKonvaModalDraggCoords,
-    konvaModalDimensions,
-    setKonvaModalDimensions,
-    setDocImageDimensions,
-  } = useContext(MainModalContext);
-  const { docImageURL } = useContext(KonvaModalContext);
+  const { docImageURL, setDocImageDimensions } = useContext(KonvaModalContext);
+  const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
+    x: KONVA_MODAL_OFFSET_X,
+    y: KONVA_MODAL_OFFSET_Y,
+  });
+  const [konvaModalDimensions, setKonvaModalDimensions] = useState({
+    width: DOC_IMAGE_WIDTH,
+    height: KONVA_MODAL_HEIGHT,
+  });
 
   // drag & resize
   const handleDragStop = (e: any, data: DraggableData) => {

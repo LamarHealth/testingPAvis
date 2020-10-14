@@ -1,4 +1,4 @@
-import React, { useState, createContext } from "react";
+import React from "react";
 
 import styled from "styled-components";
 
@@ -14,13 +14,7 @@ import {
 } from "./libertyInputsDictionary";
 
 import { DEFAULT } from "../common/themes";
-import {
-  MAIN_MODAL_WIDTH,
-  KONVA_MODAL_OFFSET_X,
-  KONVA_MODAL_OFFSET_Y,
-  DOC_IMAGE_WIDTH,
-  KONVA_MODAL_HEIGHT,
-} from "../common/constants";
+import { MAIN_MODAL_WIDTH } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { useEffect } from "react";
 
@@ -52,8 +46,6 @@ const removeClickListeners = (
   elements.forEach((el) => el.removeEventListener("click", listener));
 };
 
-export const MainModalContext = createContext({} as any);
-
 export const RenderModal = () => {
   const [
     docData,
@@ -73,18 +65,6 @@ export const RenderModal = () => {
   const areThereDocs = docData.length > 0;
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
-  const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
-    x: KONVA_MODAL_OFFSET_X,
-    y: KONVA_MODAL_OFFSET_Y,
-  });
-  const [konvaModalDimensions, setKonvaModalDimensions] = useState({
-    width: DOC_IMAGE_WIDTH,
-    height: KONVA_MODAL_HEIGHT,
-  });
-  const [docImageDimensions, setDocImageDimensions] = useState({
-    width: 0,
-    height: 0,
-  } as DocImageDimensions);
 
   // handle input el click (local mode)
   useEffect(() => {
@@ -145,37 +125,13 @@ export const RenderModal = () => {
                 <WrappedJssComponent
                   wrapperClassName={"shadow-root-for-modals"}
                 >
-                  <MainModalContext.Provider
-                    value={{
-                      konvaModalDraggCoords,
-                      setKonvaModalDraggCoords,
-                      konvaModalDimensions,
-                      setKonvaModalDimensions,
-                      docImageDimensions,
-                      setDocImageDimensions,
-                    }}
-                  >
-                    <SelectModal />
-                  </MainModalContext.Provider>
+                  <SelectModal />
                 </WrappedJssComponent>
               </Container>
             </Popper>
           )}
 
-          {konvaModalOpen && (
-            <MainModalContext.Provider
-              value={{
-                konvaModalDraggCoords,
-                setKonvaModalDraggCoords,
-                konvaModalDimensions,
-                setKonvaModalDimensions,
-                docImageDimensions,
-                setDocImageDimensions,
-              }}
-            >
-              <ManualSelect />
-            </MainModalContext.Provider>
-          )}
+          {konvaModalOpen && <ManualSelect />}
         </>
       )}
     </ThemeProvider>

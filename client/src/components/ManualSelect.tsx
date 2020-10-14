@@ -2,7 +2,6 @@ import React, {
   useState,
   useEffect,
   createContext,
-  useContext,
   useReducer,
   useCallback,
 } from "react";
@@ -15,7 +14,6 @@ import {
 } from "./ScoreChiclet/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
-import { MainModalContext } from "./RenderModal";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -31,6 +29,11 @@ export interface LinesGeometry {
 interface DocImageURL {
   heightXWidthMultiplier: number;
   url: string;
+}
+
+export interface DocImageDimensions {
+  width: number;
+  height: number;
 }
 
 export interface LinesSelection {
@@ -58,6 +61,11 @@ interface LinesSelectionReducerAction {
 interface InputValAction {
   type: InputValActionTypes;
   value?: string;
+}
+
+interface ManualSelectNewTabProps {
+  konvaModalOpen?: boolean;
+  selectedFile?: string;
 }
 
 export const KonvaModalContext = createContext({} as any);
@@ -104,15 +112,16 @@ function inputValReducer(state: string, action: InputValAction) {
   }
 }
 
-export const ManualSelect = () => {
-  const { docImageDimensions, setDocImageDimensions } = useContext(
-    MainModalContext
-  );
+export const ManualSelect = (props: ManualSelectNewTabProps) => {
+  const [docImageDimensions, setDocImageDimensions] = useState({
+    width: 0,
+    height: 0,
+  } as DocImageDimensions);
   const [
     eventTarget,
-    selectedFile,
+    _selectedFile,
     docData,
-    konvaModalOpen,
+    _konvaModalOpen,
     setKvpTableAnchorEl,
     autocompleteAnchor,
     errorFiles,
@@ -127,6 +136,10 @@ export const ManualSelect = () => {
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
+  const konvaModalOpen = props.konvaModalOpen
+    ? props.konvaModalOpen // if render in new tab, use the props instead of zustand
+    : _konvaModalOpen;
+  const selectedFile = props.selectedFile ? props.selectedFile : _selectedFile;
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
@@ -330,6 +343,7 @@ export const ManualSelect = () => {
               image,
               currentLinesGeometry,
               docImageDimensions,
+              setDocImageDimensions,
               docImageURL,
               errorLine,
               setErrorLine,
