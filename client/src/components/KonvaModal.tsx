@@ -224,7 +224,7 @@ const Header = ({
         });
       });
     // set new input val
-    inputValDispatch({ type: "replace", value: newVal });
+    inputValDispatch({ type: InputValActionTypes.replace, value: newVal });
   };
 
   // handle line selection / deselection

@@ -75,7 +75,7 @@ function linesSelectionReducer(
     case LinesSelectionActionTypes.reset:
       return {};
     default:
-      throw new Error();
+      throw new Error("linesSelectionReducer action type is wrong");
   }
 }
 
@@ -100,7 +100,7 @@ function inputValReducer(state: string, action: InputValAction) {
     case InputValActionTypes.reset:
       return "";
     default:
-      throw new Error();
+      throw new Error("inputValReducer action type is wrong");
   }
 }
 
