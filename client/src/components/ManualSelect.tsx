@@ -15,6 +15,7 @@ import {
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError } from "../contexts/ZustandStore";
 import { RndComponent } from "./KonvaRndDraggable";
+import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
 
 import { v4 as uuidv4 } from "uuid";
@@ -136,6 +137,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
+  const isInNewTab = Boolean(props.konvaModalOpen && props.selectedFile);
   const konvaModalOpen = props.konvaModalOpen
     ? props.konvaModalOpen // if render in new tab, use the props instead of zustand
     : _konvaModalOpen;
@@ -355,7 +357,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
               inputValDispatch,
             }}
           >
-            <RndComponent />
+            {isInNewTab ? <KonvaModal /> : <RndComponent />}
           </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}
