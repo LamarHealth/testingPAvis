@@ -15,9 +15,10 @@ export interface ErrorFile {
   };
 }
 
-type Uuid = string | null;
+export type Uuid = string | null;
 
 type State = {
+  openDocInNewTab: boolean;
   selectedFile: Uuid;
   selectedChiclet: Uuid;
   docData: KeyValuesByDoc[];
@@ -27,6 +28,7 @@ type State = {
   targetString: string;
   kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement;
   errorFiles: ErrorFile; // not just one error file, but an object of error files
+  setOpenDocInNewTab: (openDocInNewTab: boolean) => void;
   setSelectedFile: (selectedFile: Uuid) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
   setDocData: (docData: KeyValuesByDoc[]) => void;
@@ -43,6 +45,7 @@ type State = {
 };
 
 export const useStore = create<State>((set) => ({
+  openDocInNewTab: false,
   selectedFile: null,
   selectedChiclet: null,
   docData: getKeyValuePairsByDoc(),
@@ -52,6 +55,8 @@ export const useStore = create<State>((set) => ({
   targetString: "",
   kvpTableAnchorEl: null,
   errorFiles: {},
+  setOpenDocInNewTab: (openDocInNewTab) =>
+    set((state) => ({ ...state, openDocInNewTab })),
   setSelectedFile: (selectedFile) =>
     set((state) => ({ ...state, selectedFile })),
   setSelectedChiclet: (selectedChiclet) =>

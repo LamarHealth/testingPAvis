@@ -1,3 +1,4 @@
+/* global chrome */
 import React, {
   useState,
   useEffect,
@@ -13,7 +14,7 @@ import {
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
+import { useStore, checkFileError, Uuid } from "../contexts/ZustandStore";
 import { RndComponent } from "./KonvaRndDraggable";
 import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
@@ -138,10 +139,12 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     useStore((state) => state.setErrorFiles),
   ];
   const isInNewTab = Boolean(props.konvaModalOpen && props.selectedFile);
-  const konvaModalOpen = props.konvaModalOpen
+  const konvaModalOpen = isInNewTab
     ? props.konvaModalOpen // if render in new tab, use the props instead of zustand
     : _konvaModalOpen;
-  const selectedFile = props.selectedFile ? props.selectedFile : _selectedFile;
+  const selectedFile = (isInNewTab
+    ? props.selectedFile
+    : _selectedFile) as Uuid;
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
@@ -284,25 +287,50 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     }
   };
 
+  // listen for message coming back from RenderModal / background.js, saying that eventTarget is falsy
+  useEffect(() => {
+    if (isInNewTab) {
+      const callback = function (request: any, sender: any) {
+        if (request.error) {
+          setErrorLine("Please select a text input to fill");
+        }
+      };
+      chrome.runtime.onMessage.addListener(callback);
+      return () => chrome.runtime.onMessage.removeListener(callback);
+    }
+  }, [setErrorLine]);
+
   // submit button / enter
+  const cleanupAfterSubmit = useCallback(() => {
+    setErrorLine(null);
+    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
+    inputValDispatch({ type: InputValActionTypes.reset });
+  }, [setErrorLine, linesSelectionDispatch, inputValDispatch]);
+
   const handleSubmitAndClear = useCallback(() => {
     // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
-    if (eventTarget) {
-      if (inputVal !== "") {
-        renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
-        eventTarget.value = inputVal;
-        setErrorLine(null);
-        linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
-        inputValDispatch({ type: InputValActionTypes.reset });
-      } else {
-        setErrorLine("Nothing to enter");
-      }
+    if (isInNewTab) {
+      chrome.runtime.sendMessage({
+        fillValue: inputVal,
+      });
+      cleanupAfterSubmit();
     } else {
-      setErrorLine("Please select a text input to fill");
+      if (eventTarget) {
+        if (inputVal !== "") {
+          renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
+          eventTarget.value = inputVal;
+          cleanupAfterSubmit();
+        } else {
+          setErrorLine("Nothing to enter");
+        }
+      } else {
+        setErrorLine("Please select a text input to fill");
+      }
     }
   }, [
     eventTarget,
     inputVal,
+    errorLine,
     setErrorLine,
     linesSelectionDispatch,
     inputValDispatch,
@@ -326,14 +354,12 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
 
   // clear button
   const handleClear = () => {
-    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
-    inputValDispatch({ type: InputValActionTypes.reset });
+    cleanupAfterSubmit();
   };
 
   // clear entries on doc switch
   useEffect(() => {
-    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
-    inputValDispatch({ type: InputValActionTypes.reset });
+    cleanupAfterSubmit();
   }, [selectedFile]);
 
   return (

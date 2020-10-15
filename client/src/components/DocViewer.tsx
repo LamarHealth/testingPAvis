@@ -8,6 +8,8 @@ import { getThumbsFromLocalStorage } from "./docThumbnails";
 import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Radio from "@material-ui/core/Radio";
 
 import {
   populateForms,
@@ -77,7 +79,8 @@ const Instructions = styled(Typography)`
 `;
 
 const FeedbackTypography = styled(Typography)`
-  margin: 0.5em auto;
+  float: right;
+  margin: 0.5em 1em;
   color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
@@ -142,6 +145,16 @@ const DocNameWrapper = styled.span`
 const Type = styled(Typography)`
   margin: 1em 0.5em;
   ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
+`;
+
+const StyledFormControlLabel = styled(FormControlLabel)`
+  float: left;
+  margin: 0.5em 1em;
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
+`;
+
+const StyledRadio = styled(Radio)`
+  color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
 const ErrorMessage = ({ docID }: { docID: string }) => {
@@ -289,10 +302,24 @@ const Feedback = () => {
 const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
+  const [openDocInNewTab, setOpenDocInNewTab] = [
+    useStore((state) => state.openDocInNewTab),
+    useStore((state) => state.setOpenDocInNewTab),
+  ];
 
   return (
     <FileContext.Provider value={{ fileList, fileDispatch }}>
-      <Feedback />
+      <div>
+        <StyledFormControlLabel
+          value="newTab"
+          control={<StyledRadio />}
+          label="Open PDF in new tab"
+          checked={openDocInNewTab}
+          onClick={() => setOpenDocInNewTab(!openDocInNewTab)}
+          isSelected={openDocInNewTab}
+        />
+        <Feedback />
+      </div>
       {numDocs === 0 && <InstructionsCell />}
       <TransitionGroup component={DocCellTransitionGroup}>
         {fileList.documents.map((doc: DocumentInfo) => {

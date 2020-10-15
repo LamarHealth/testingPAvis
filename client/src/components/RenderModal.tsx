@@ -1,3 +1,4 @@
+/*global chrome*/
 import React from "react";
 
 import styled from "styled-components";
@@ -12,9 +13,12 @@ import {
   getLibertyModalMutationsObserver,
   libertyDocitInputsSelector,
 } from "./libertyInputsDictionary";
-
+import {
+  renderChiclets,
+  RenderChicletsActionTypes,
+} from "./ScoreChiclet/index";
 import { DEFAULT } from "../common/themes";
-import { MAIN_MODAL_WIDTH } from "../common/constants";
+import { MAIN_MODAL_WIDTH, LOCAL_MODE } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { useEffect } from "react";
 
@@ -54,6 +58,7 @@ export const RenderModal = () => {
     eventTarget,
     setEventTarget,
     kvpTableAnchorEl,
+    openDocInNewTab,
   ] = [
     useStore((state) => state.docData),
     useStore((state) => state.selectedFile),
@@ -61,12 +66,13 @@ export const RenderModal = () => {
     useStore((state) => state.eventTarget),
     useStore((state) => state.setEventTarget),
     useStore((state) => state.kvpTableAnchorEl),
+    useStore((state) => state.openDocInNewTab),
   ];
   const areThereDocs = docData.length > 0;
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
 
-  // handle input el click (local mode)
+  // set eventTarget (local mode)
   useEffect(() => {
     // native (not react) event
     const handleInputClick = (event: Event) => {
@@ -79,7 +85,7 @@ export const RenderModal = () => {
     };
   });
 
-  // handle input el click (liberty modal)
+  // set eventTarget (liberty modal)
   useEffect(() => {
     const handleInputClick = (event: Event) => {
       setEventTarget(event.target as HTMLInputElement | HTMLTextAreaElement);
@@ -99,6 +105,24 @@ export const RenderModal = () => {
       observer.disconnect();
     };
   });
+
+  // listen for ManualSelect submit in other tab
+  useEffect(() => {
+    if (!LOCAL_MODE) {
+      const callback = function (request: any, sender: any) {
+        if (request.fillValue) {
+          if (eventTarget) {
+            eventTarget.value = request.fillValue;
+            renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
+          } else {
+            chrome.runtime.sendMessage({ error: "eventTarget is falsy" });
+          }
+        }
+      };
+      chrome.runtime.onMessage.addListener(callback);
+      return () => chrome.runtime.onMessage.removeListener(callback);
+    }
+  }, [eventTarget]);
 
   return (
     <ThemeProvider theme={DEFAULT}>
@@ -131,7 +155,7 @@ export const RenderModal = () => {
             </Popper>
           )}
 
-          {konvaModalOpen && <ManualSelect />}
+          {konvaModalOpen && !openDocInNewTab && <ManualSelect />}
         </>
       )}
     </ThemeProvider>

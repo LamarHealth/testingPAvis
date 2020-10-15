@@ -152,10 +152,11 @@ const ButtonsBox = memo(
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
-    const [docData, setSelectedFile, setKonvaModalOpen] = [
+    const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
       useStore((state) => state.docData),
       useStore((state) => state.setSelectedFile),
       useStore((state) => state.setKonvaModalOpen),
+      useStore((state) => state.openDocInNewTab),
     ];
     const docID = props.docInfo.docID.toString();
 
@@ -207,7 +208,18 @@ const ButtonsBox = memo(
                 variant="outlined"
                 isSelected={props.isSelected}
               />
-              <Link to={`/viewdoc/${docID}`} target={"_blank"}>
+              {openDocInNewTab ? (
+                <Link to={`/viewdoc/${docID}`} target={"_blank"}>
+                  <StyledChip
+                    size="small"
+                    label="View PDF"
+                    variant="outlined"
+                    onClick={handleViewPdfClick}
+                    disabled={props.errorGettingFile}
+                    isSelected={props.isSelected}
+                  />
+                </Link>
+              ) : (
                 <StyledChip
                   size="small"
                   label="View PDF"
@@ -216,7 +228,8 @@ const ButtonsBox = memo(
                   disabled={props.errorGettingFile}
                   isSelected={props.isSelected}
                 />
-              </Link>
+              )}
+
               <FlexIconButton
                 onClick={handleDeleteClick}
                 style={{ marginLeft: "-0.25em" }}
