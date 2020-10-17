@@ -8,9 +8,6 @@ import $ from "jquery";
 interface LibertyInputsDictionary {
   [key: string]: string;
 }
-
-export const libertyDocitInputsSelector = `input[data-docit-input="true"], textarea[data-docit-input="true"]` as string;
-
 export const libertyInputsDictionary = {
   CMCarrierBookingRef: "Carrier Booking Ref",
   // exclude forwarder, will already be there according to brandon

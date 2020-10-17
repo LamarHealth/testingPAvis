@@ -8,10 +8,7 @@ import Popper from "@material-ui/core/Popper";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
-import {
-  getLibertyModalMutationsObserver,
-  libertyDocitInputsSelector,
-} from "./libertyInputsDictionary";
+import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
 
 import { DEFAULT } from "../common/themes";
 import {
@@ -20,6 +17,7 @@ import {
   KONVA_MODAL_OFFSET_Y,
   DOC_IMAGE_WIDTH,
   KONVA_MODAL_HEIGHT,
+  DOCIT_TAG,
 } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { useEffect } from "react";
@@ -34,7 +32,7 @@ export interface DocImageDimensions {
 }
 
 const getInputsAndTextAreas = (): NodeListOf<Element> =>
-  document.querySelectorAll(libertyDocitInputsSelector);
+  document.querySelectorAll(DOCIT_TAG);
 
 const addClickListeners = (
   elements: NodeListOf<Element>,
