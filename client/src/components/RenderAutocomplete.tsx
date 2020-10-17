@@ -14,10 +14,9 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import { DEFAULT } from "../common/themes";
 import { colors } from "../common/colors";
 import WrappedJssComponent from "./ShadowComponent";
-import {
-  getLibertyModalMutationsObserver,
-  libertyDocitInputsSelector,
-} from "./libertyInputsDictionary";
+import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+
+import { DOCIT_TAG } from "../common/constants";
 
 const Container = styled.div`
   max-height: 280px;
@@ -106,11 +105,15 @@ export const RenderAutocomplete = () => {
   )[0];
   const isDocSelected = Boolean(selectedDocData);
   const allLinesAndValues = isDocSelected
-    ? Object.entries(selectedDocData.keyValuePairs)
-        .map((entry) => entry[1])
-        .concat(selectedDocData.lines)
-        .filter((value) => value !== "")
-        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sorting
+    ? Array.from(
+        new Set( // remove duplicates
+          Object.entries(selectedDocData.keyValuePairs)
+            .map((entry) => entry[1])
+            .concat(selectedDocData.lines) // add non-kvp lines
+            .filter((value) => value !== "") // filter out blanks
+            .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sort
+        )
+      )
     : [];
   const areThereFilteredEntries = isDocSelected
     ? allLinesAndValues.filter((value: string) =>
@@ -121,7 +124,7 @@ export const RenderAutocomplete = () => {
   // handle input typing
   const listenForInputTypying = () => {
     $(document).ready(() => {
-      $(libertyDocitInputsSelector).on("input", function () {
+      $(DOCIT_TAG).on("input", function () {
         const inputEl = this as HTMLInputElement | HTMLTextAreaElement;
         setFilter(inputEl.value);
         setAutocompleteAnchor(inputEl);

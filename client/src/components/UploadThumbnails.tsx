@@ -169,7 +169,6 @@ const FileStatus = (props: any) => {
         // Status code cases
         switch (result.status) {
           case 200:
-            // console.log("DOC UPLOADED");
             // Add document info to list
             const postSuccessResponse: any = {
               type: "append",
