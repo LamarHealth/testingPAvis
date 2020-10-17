@@ -136,7 +136,7 @@ export const SelectModal = () => {
       setKonvaModalOpen(false);
       selectedFile // make sure selectedFile isn't null
         ? setErrorFiles({ [selectedFile]: { image: false, geometry: false } })
-        : console.log("error: selectedFile null");
+        : console.error("error: selectedFile null");
     }
     setKvpTableAnchorEl(null); // close modal
     setSelectedChiclet(null); // remove chiclet border
@@ -170,7 +170,7 @@ export const SelectModal = () => {
       }
       inputEl.value = ""; // clear the text editor
     } else {
-      console.log("error: kvp table inputRef.current is null");
+      console.error("error: kvp table inputRef.current is null");
     }
   };
 

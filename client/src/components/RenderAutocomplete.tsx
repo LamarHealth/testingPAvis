@@ -166,8 +166,6 @@ export const RenderAutocomplete = () => {
     }
   };
 
-  console.log("allLinesAndValues, ", allLinesAndValues);
-
   return (
     <>
       {isDocSelected && (
