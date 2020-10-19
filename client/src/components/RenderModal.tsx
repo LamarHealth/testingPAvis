@@ -31,6 +31,10 @@ export interface DocImageDimensions {
   height: number;
 }
 
+interface RequestWithFillValue {
+  fillValue: string;
+}
+
 const getInputsAndTextAreas = (): NodeListOf<Element> =>
   document.querySelectorAll(libertyDocitInputsSelector);
 
@@ -109,7 +113,7 @@ export const RenderModal = () => {
   // listen for ManualSelect submit in other tab
   useEffect(() => {
     if (!LOCAL_MODE) {
-      const callback = function (request: any, sender: any) {
+      const callback = function (request: RequestWithFillValue) {
         if (request.fillValue) {
           if (eventTarget) {
             eventTarget.value = request.fillValue;

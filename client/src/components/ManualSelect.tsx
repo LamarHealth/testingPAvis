@@ -42,6 +42,10 @@ export interface LinesSelection {
   [lineID: string]: string;
 }
 
+interface RequestWithError {
+  error?: string;
+}
+
 export enum LinesSelectionActionTypes {
   select,
   deselect,
@@ -304,7 +308,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   // listen for message coming back from RenderModal / background.js, saying that eventTarget is falsy
   useEffect(() => {
     if (isInNewTab) {
-      const callback = function (request: any, sender: any) {
+      const callback = function (request: RequestWithError) {
         if (request.error) {
           setErrorLine("Please select a text input to fill");
         }
