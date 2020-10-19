@@ -76,41 +76,55 @@ function linesSelectionReducer(
   state: LinesSelection,
   action: LinesSelectionReducerAction
 ) {
-  switch (action.type) {
-    case LinesSelectionActionTypes.select:
-      return { ...state, ...action.line };
-    case LinesSelectionActionTypes.deselect:
-      action.line && delete state[Object.keys(action.line)[0]];
-      return { ...state };
-    case LinesSelectionActionTypes.reset:
-      return {};
-    default:
-      throw new Error("linesSelectionReducer action type is wrong");
+  try {
+    switch (action.type) {
+      case LinesSelectionActionTypes.select:
+        return { ...state, ...action.line };
+      case LinesSelectionActionTypes.deselect:
+        action.line && delete state[Object.keys(action.line)[0]];
+        return { ...state };
+      case LinesSelectionActionTypes.reset:
+        return {};
+      default:
+        throw new Error("linesSelectionReducer action type is wrong");
+    }
+  } catch (e) {
+    console.error(e);
+    return {};
   }
 }
 
 function inputValReducer(state: string, action: InputValAction) {
-  switch (action.type) {
-    case InputValActionTypes.replace:
-      if (typeof action.value === "string") {
-        return action.value;
-      } else throw new Error();
-    case InputValActionTypes.appendLine:
-      const prevInputValArray = Array.from(state);
-      // if ends in space, don't add another
-      if (prevInputValArray[prevInputValArray.length - 1] === " ") {
-        return state + action.value;
-      } else {
-        return state + " " + action.value;
-      }
-    case InputValActionTypes.removeLine:
-      if (action.value) {
-        return state.replace(action.value, "");
-      } else throw new Error();
-    case InputValActionTypes.reset:
-      return "";
-    default:
-      throw new Error("inputValReducer action type is wrong");
+  try {
+    switch (action.type) {
+      case InputValActionTypes.replace:
+        if (typeof action.value === "string") {
+          return action.value;
+        } else
+          throw new Error(
+            "inputValReducer called without a valid string replace value"
+          );
+      case InputValActionTypes.appendLine:
+        const prevInputValArray = Array.from(state);
+        // if ends in space, don't add another
+        if (prevInputValArray[prevInputValArray.length - 1] === " ") {
+          return state + action.value;
+        } else {
+          return state + " " + action.value;
+        }
+      case InputValActionTypes.removeLine:
+        if (action.value) {
+          return state.replace(action.value, "");
+        } else
+          throw new Error("inputValReducer called without a value to remove");
+      case InputValActionTypes.reset:
+        return "";
+      default:
+        throw new Error("inputValReducer action type is wrong");
+    }
+  } catch (e) {
+    console.error(e);
+    return "";
   }
 }
 
