@@ -70,8 +70,10 @@ interface InputValAction {
 }
 
 interface ManualSelectNewTabProps {
+  isInNewTab?: boolean;
   konvaModalOpen?: boolean;
   selectedFile?: string;
+  docData?: KeyValuesByDoc[];
 }
 
 export const KonvaModalContext = createContext({} as any);
@@ -140,7 +142,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   const [
     eventTarget,
     _selectedFile,
-    docData,
+    _docData,
     _konvaModalOpen,
     setKvpTableAnchorEl,
     autocompleteAnchor,
@@ -156,13 +158,16 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
-  const isInNewTab = Boolean(props.konvaModalOpen && props.selectedFile);
-  const konvaModalOpen = isInNewTab
-    ? props.konvaModalOpen // if render in new tab, use the props instead of zustand
+  // if in new tab, no access to same zustand store, so use props instead
+  const konvaModalOpen = props.isInNewTab
+    ? props.konvaModalOpen
     : _konvaModalOpen;
-  const selectedFile = (isInNewTab
+  const selectedFile = (props.isInNewTab
     ? props.selectedFile
     : _selectedFile) as Uuid;
+  const docData = (props.isInNewTab
+    ? props.docData
+    : _docData) as KeyValuesByDoc[];
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
@@ -307,7 +312,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
 
   // listen for message coming back from RenderModal / background.js, saying that eventTarget is falsy
   useEffect(() => {
-    if (isInNewTab) {
+    if (props.isInNewTab) {
       const callback = function (request: RequestWithError) {
         if (request.error) {
           setErrorLine("Please select a text input to fill");
@@ -327,7 +332,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
 
   const handleSubmitAndClear = useCallback(() => {
     // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
-    if (isInNewTab) {
+    if (props.isInNewTab) {
       chrome.runtime.sendMessage({
         fillValue: inputVal,
       });
@@ -401,7 +406,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
               inputValDispatch,
             }}
           >
-            {isInNewTab ? <KonvaModal /> : <RndComponent />}
+            {props.isInNewTab ? <KonvaModal /> : <RndComponent />}
           </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}
