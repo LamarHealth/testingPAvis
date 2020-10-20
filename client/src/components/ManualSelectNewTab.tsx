@@ -18,7 +18,6 @@ export const ManualSelectNewTab = () => {
   useEffect(() => {
     if (!LOCAL_MODE) {
       chrome.storage.local.get((items: ChromeStorage) => {
-        console.log("items, ", items);
         if (items.selectedFile) {
           setDocID(items.selectedFile);
         }
