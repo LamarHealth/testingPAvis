@@ -22,7 +22,7 @@ insertionPoint.style.position = "relative";
 insertionPoint.style.zIndex = Z_INDEX_ALLOCATOR.insertionPoint();
 $(insertionPoint).insertBefore(document.body);
 
-const isDocViewOnly = Boolean(document.getElementById("docit-docview-only"));
+const isDocViewOnly = Boolean(document.getElementById("DOCIT-DOCVIEW-ONLY"));
 
 isDocViewOnly // makeshift react-router. can't use react-router bc docview.html is opened as a completely different URL; react-router can only render in relative URLs
   ? ReactDOM.render(
