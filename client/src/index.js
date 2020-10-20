@@ -24,7 +24,7 @@ $(insertionPoint).insertBefore(document.body);
 
 const isDocViewOnly = Boolean(document.getElementById("docit-docview-only"));
 
-isDocViewOnly
+isDocViewOnly // makeshift react-router. can't use react-router bc docview.html is opened as a completely different URL; react-router can only render in relative URLs
   ? ReactDOM.render(
       <ManualSelectNewTab />,
       document.getElementById("insertion-point")
