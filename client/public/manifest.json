@@ -20,5 +20,7 @@
   },
   "background": {
     "scripts": ["background.js"]
-  }
+  },
+  "permissions": ["storage"],
+  "web_accessible_resources": ["docview.html"]
 }

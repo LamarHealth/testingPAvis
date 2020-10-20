@@ -84,7 +84,7 @@ export const Sidebar = () => {
   useEffect(() => {
     if (!LOCAL_MODE) {
       const callback = function (request: any) {
-        if (request.message === "open sesame") {
+        if (request.message === "open sidebar") {
           setOpen(!isOpen);
         }
       };

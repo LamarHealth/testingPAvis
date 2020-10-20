@@ -2,7 +2,7 @@
 
 // listen for ext button click
 chrome.browserAction.onClicked.addListener(function (tab) {
-  chrome.tabs.sendMessage(tab.id, { message: "open sesame" });
+  chrome.tabs.sendMessage(tab.id, { message: "open sidebar" });
 });
 
 // listen for ManualSelect in other tab sending fill value

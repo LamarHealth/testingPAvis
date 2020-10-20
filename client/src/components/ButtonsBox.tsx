@@ -18,13 +18,13 @@ import {
   updateThumbsLocalStorage,
   updateThumbsActionTypes,
 } from "./docThumbnails";
-import { KeyValuesByDoc } from "./KeyValuePairs";
+import { KeyValuesByDoc, getKeyValuePairsByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
 } from "./ScoreChiclet/functions";
 import { colors, colorSwitcher } from "../common/colors";
-import { DOC_CARD_HEIGHT } from "../common/constants";
+import { DOC_CARD_HEIGHT, LOCAL_MODE } from "../common/constants";
 
 const ButtonsBoxWrapper = styled.div`
   height: ${DOC_CARD_HEIGHT};
@@ -81,19 +81,29 @@ const StyledGetAppIcon = styled(GetAppIcon)`
 `;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
-  const fileInfoContext = useContext(FileContext);
-  const setSelectedFile = useStore((state) => state.setSelectedFile);
+  const { fileDispatch } = useContext(FileContext);
+  const [setSelectedFile, setDocData] = [
+    useStore((state) => state.setSelectedFile),
+    useStore((state) => state.setDocData),
+  ];
 
   const handleDelete = () => {
-    setSelectedFile(null);
-    fileInfoContext.fileDispatch({
-      type: "remove",
-      documentInfo: props.docInfo,
-    });
-    updateThumbsLocalStorage(
-      props.docInfo.docID.toString(),
-      updateThumbsActionTypes.delete
-    );
+    const deleteAsync = async () => {
+      setSelectedFile(null);
+      fileDispatch({
+        type: "remove",
+        documentInfo: props.docInfo,
+      });
+      updateThumbsLocalStorage(
+        props.docInfo.docID.toString(),
+        updateThumbsActionTypes.delete
+      );
+
+      return new Promise((resolve) => {
+        resolve();
+      });
+    };
+    deleteAsync().then(() => setDocData(getKeyValuePairsByDoc()));
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>
@@ -160,6 +170,8 @@ const ButtonsBox = memo(
     ];
     const docID = props.docInfo.docID.toString();
 
+    console.log("docData at ButtonsBox, ", docData);
+
     // click away
     const handleClickAway = () => {
       setDialogOpen(false);
@@ -186,6 +198,10 @@ const ButtonsBox = memo(
       setKonvaModalOpen(true);
     };
 
+    const docViewURL = LOCAL_MODE
+      ? undefined
+      : chrome.runtime.getURL("docview.html");
+
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
@@ -209,7 +225,7 @@ const ButtonsBox = memo(
                 isSelected={props.isSelected}
               />
               {openDocInNewTab ? (
-                <Link to={`/viewdoc/${docID}`} target={"_blank"}>
+                <a href={docViewURL} target="_blank">
                   <StyledChip
                     size="small"
                     label="View PDF"
@@ -218,7 +234,7 @@ const ButtonsBox = memo(
                     disabled={props.errorGettingFile}
                     isSelected={props.isSelected}
                   />
-                </Link>
+                </a>
               ) : (
                 <StyledChip
                   size="small"

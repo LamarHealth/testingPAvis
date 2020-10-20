@@ -1,5 +1,7 @@
+/* global chrome */
 import create from "zustand";
 
+import { LOCAL_MODE } from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   KeyValuesByDoc,
@@ -58,10 +60,21 @@ export const useStore = create<State>((set) => ({
   setOpenDocInNewTab: (openDocInNewTab) =>
     set((state) => ({ ...state, openDocInNewTab })),
   setSelectedFile: (selectedFile) =>
-    set((state) => ({ ...state, selectedFile })),
+    set((state) => {
+      if (!LOCAL_MODE) {
+        chrome.storage.local.set({ selectedFile });
+      }
+      return { ...state, selectedFile };
+    }),
   setSelectedChiclet: (selectedChiclet) =>
     set((state) => ({ ...state, selectedChiclet })),
-  setDocData: (docData) => set((state) => ({ ...state, docData })),
+  setDocData: (docData) =>
+    set((state) => {
+      if (!LOCAL_MODE) {
+        chrome.storage.local.set({ docData });
+      }
+      return { ...state, docData };
+    }),
   setKonvaModalOpen: (konvaModalOpen) =>
     set((state) => ({ ...state, konvaModalOpen })),
   setAutocompleteAnchor: (autocompleteAnchor) =>
