@@ -9,7 +9,7 @@ import Card from "@material-ui/core/Card";
 import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Radio from "@material-ui/core/Radio";
+import Checkbox from "@material-ui/core/Checkbox";
 
 import {
   populateForms,
@@ -153,7 +153,7 @@ const StyledFormControlLabel = styled(FormControlLabel)`
   ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
 `;
 
-const StyledRadio = styled(Radio)`
+const StyledCheckbox = styled(Checkbox)`
   color: ${colors.DROPZONE_TEXT_GREY};
 `;
 
@@ -312,7 +312,7 @@ const DocViewer = () => {
       <div>
         <StyledFormControlLabel
           value="newTab"
-          control={<StyledRadio />}
+          control={<StyledCheckbox />}
           label="Open PDF in new tab"
           checked={openDocInNewTab}
           onClick={() => setOpenDocInNewTab(!openDocInNewTab)}
