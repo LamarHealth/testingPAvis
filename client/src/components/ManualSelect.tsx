@@ -98,12 +98,13 @@ const linesSelectionReducer = (
 const inputValReducer = (state: string, action: InputValAction) => {
   switch (action.type) {
     case InputValActionTypes.replace:
-      if (typeof action.value === "string") {
+      if (action.value) {
         return action.value;
       } else
         console.error(
           "inputValReducer called without a valid string replace value"
         );
+      break;
     case InputValActionTypes.appendLine:
       const prevInputValArray = Array.from(state);
       // if ends in space, don't add another
@@ -120,8 +121,9 @@ const inputValReducer = (state: string, action: InputValAction) => {
       return "";
     default:
       console.error("inputValReducer action type is wrong");
-      return "";
+      break;
   }
+  return "";
 };
 
 export const ManualSelect = (props: ManualSelectNewTabProps) => {
