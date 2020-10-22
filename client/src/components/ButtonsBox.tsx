@@ -13,10 +13,7 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
-import {
-  updateThumbsLocalStorage,
-  updateThumbsActionTypes,
-} from "./docThumbnails";
+import { deleteThumbsLocalStorage } from "./docThumbnails";
 import { KeyValuesByDoc, getKeyValuePairsByDoc } from "./KeyValuePairs";
 import {
   populateForms,
@@ -90,17 +87,15 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
     useStore((state) => state.setDocData),
   ];
 
-  const handleDelete = () => {
+  const handleDelete = (e: MouseEvent) => {
+    e.stopPropagation();
     const deleteAsync = async () => {
       setSelectedFile(null);
       fileDispatch({
         type: "remove",
         documentInfo: props.docInfo,
       });
-      updateThumbsLocalStorage(
-        props.docInfo.docID.toString(),
-        updateThumbsActionTypes.delete
-      );
+      deleteThumbsLocalStorage(props.docInfo.docID.toString());
 
       return new Promise((resolve) => {
         resolve();

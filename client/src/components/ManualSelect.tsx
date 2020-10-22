@@ -77,61 +77,52 @@ interface ManualSelectNewTabProps {
 
 export const KonvaModalContext = createContext({} as any);
 
-function linesSelectionReducer(
+const linesSelectionReducer = (
   state: LinesSelection,
   action: LinesSelectionReducerAction
-) {
-  try {
-    switch (action.type) {
-      case LinesSelectionActionTypes.select:
-        return { ...state, ...action.line };
-      case LinesSelectionActionTypes.deselect:
-        action.line && delete state[Object.keys(action.line)[0]];
-        return { ...state };
-      case LinesSelectionActionTypes.reset:
-        return {};
-      default:
-        throw new Error("linesSelectionReducer action type is wrong");
-    }
-  } catch (e) {
-    console.error(e);
-    return {};
+) => {
+  switch (action.type) {
+    case LinesSelectionActionTypes.select:
+      return { ...state, ...action.line };
+    case LinesSelectionActionTypes.deselect:
+      action.line && delete state[Object.keys(action.line)[0]];
+      return { ...state };
+    case LinesSelectionActionTypes.reset:
+      return {};
+    default:
+      console.error("linesSelectionReducer action type is wrong");
+      return {};
   }
-}
+};
 
-function inputValReducer(state: string, action: InputValAction) {
-  try {
-    switch (action.type) {
-      case InputValActionTypes.replace:
-        if (typeof action.value === "string") {
-          return action.value;
-        } else
-          throw new Error(
-            "inputValReducer called without a valid string replace value"
-          );
-      case InputValActionTypes.appendLine:
-        const prevInputValArray = Array.from(state);
-        // if ends in space, don't add another
-        if (prevInputValArray[prevInputValArray.length - 1] === " ") {
-          return state + action.value;
-        } else {
-          return state + " " + action.value;
-        }
-      case InputValActionTypes.removeLine:
-        if (action.value) {
-          return state.replace(action.value, "");
-        } else
-          throw new Error("inputValReducer called without a value to remove");
-      case InputValActionTypes.reset:
-        return "";
-      default:
-        throw new Error("inputValReducer action type is wrong");
-    }
-  } catch (e) {
-    console.error(e);
-    return "";
+const inputValReducer = (state: string, action: InputValAction) => {
+  switch (action.type) {
+    case InputValActionTypes.replace:
+      if (typeof action.value === "string") {
+        return action.value;
+      } else
+        console.error(
+          "inputValReducer called without a valid string replace value"
+        );
+    case InputValActionTypes.appendLine:
+      const prevInputValArray = Array.from(state);
+      // if ends in space, don't add another
+      if (prevInputValArray[prevInputValArray.length - 1] === " ") {
+        return state + action.value;
+      } else {
+        return state + " " + action.value;
+      }
+    case InputValActionTypes.removeLine:
+      if (action.value) {
+        return state.replace(action.value, "");
+      } else console.error("inputValReducer called without a value to remove");
+    case InputValActionTypes.reset:
+      return "";
+    default:
+      console.error("inputValReducer action type is wrong");
+      return "";
   }
-}
+};
 
 export const ManualSelect = (props: ManualSelectNewTabProps) => {
   const [docImageDimensions, setDocImageDimensions] = useState({
@@ -140,9 +131,9 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   } as DocImageDimensions);
   const [
     eventTarget,
-    _selectedFile,
-    _docData,
-    _konvaModalOpen,
+    selectedFileFromStore,
+    docDataFromStore,
+    konvaModalOpenFromStore,
     setKvpTableAnchorEl,
     autocompleteAnchor,
     errorFiles,
@@ -160,13 +151,13 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   // if in new tab, no access to same zustand store, so use props instead
   const konvaModalOpen = props.isInNewTab
     ? props.konvaModalOpen
-    : _konvaModalOpen;
+    : konvaModalOpenFromStore;
   const selectedFile = (props.isInNewTab
     ? props.selectedFile
-    : _selectedFile) as Uuid;
+    : selectedFileFromStore) as Uuid;
   const docData = (props.isInNewTab
     ? props.docData
-    : _docData) as KeyValuesByDoc[];
+    : docDataFromStore) as KeyValuesByDoc[];
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
