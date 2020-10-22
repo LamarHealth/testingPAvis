@@ -9,16 +9,14 @@ import Popper from "@material-ui/core/Popper";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
-import {
-  getLibertyModalMutationsObserver,
-  libertyDocitInputsSelector,
-} from "./libertyInputsDictionary";
+import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
+
 import { DEFAULT } from "../common/themes";
-import { MAIN_MODAL_WIDTH, LOCAL_MODE } from "../common/constants";
+import { LOCAL_MODE, MAIN_MODAL_WIDTH, DOCIT_TAG } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { useEffect } from "react";
 
@@ -36,7 +34,7 @@ interface RequestWithFillValue {
 }
 
 const getInputsAndTextAreas = (): NodeListOf<Element> =>
-  document.querySelectorAll(libertyDocitInputsSelector);
+  document.querySelectorAll(DOCIT_TAG);
 
 const addClickListeners = (
   elements: NodeListOf<Element>,

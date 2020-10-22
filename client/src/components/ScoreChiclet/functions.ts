@@ -7,6 +7,7 @@ import {
   ACC_SCORE_LARGE,
   ACC_SCORE_SMALL,
   ACC_SCORE_MEDIUM,
+  DOCIT_TAG,
 } from "../../common/constants";
 import { renderChiclets, RenderChicletsActionTypes } from "./index";
 import {
@@ -17,7 +18,6 @@ import {
 import {
   assignTargetString,
   handleFreightTerms,
-  libertyDocitInputsSelector,
 } from "../libertyInputsDictionary";
 
 export enum PopulateFormsActionTypes {
@@ -123,7 +123,7 @@ const positionMounter = (
 
 function positionAllMounters() {
   $(document).ready(function () {
-    $(libertyDocitInputsSelector).each(function () {
+    $(DOCIT_TAG).each(function () {
       if (this.offsetParent) {
         const inputStyle = getComputedStyle(this);
         const inputHeight = getComputedDimension(
@@ -196,7 +196,7 @@ export const populateForms = (
           $("select").each(function () {
             handleFreightTerms(this, keyValuePairs);
           });
-          $(libertyDocitInputsSelector).each(function () {
+          $(DOCIT_TAG).each(function () {
             const targetString = assignTargetString(this);
             const areThereKVPairs =
               Object.keys(keyValuePairs.keyValuePairs).length > 0;
@@ -222,7 +222,7 @@ export const populateForms = (
         } else console.error("keyValuePairs is falsy");
         break;
       case PopulateFormsActionTypes.blankChiclets:
-        $(libertyDocitInputsSelector).each(function () {
+        $(DOCIT_TAG).each(function () {
           renderChiclets(RenderChicletsActionTypes.blank, this);
         });
         break;
@@ -233,7 +233,7 @@ export const populateForms = (
 
 export const removeAllChiclets = () => {
   $(document).ready(function () {
-    $(libertyDocitInputsSelector).each(function () {
+    $(DOCIT_TAG).each(function () {
       removeMounter(this);
     });
   });
