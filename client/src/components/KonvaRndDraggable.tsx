@@ -108,7 +108,7 @@ export const RndComponent = (props: RndComponentProps) => {
     <div>
       {props.isInNewTab ? (
         <NewTabContainer style={{ width: docImageDimensions.width + "px" }}>
-          <KonvaModal />
+          <KonvaModal isInNewTab={props.isInNewTab} />
         </NewTabContainer>
       ) : (
         <StyledRnD
@@ -130,7 +130,7 @@ export const RndComponent = (props: RndComponentProps) => {
           cancel={".docit-no-drag"}
         >
           <ScrollContainer style={{ height: konvaModalDimensions.height }}>
-            <KonvaModal />
+            <KonvaModal isInNewTab={props.isInNewTab} />
           </ScrollContainer>
         </StyledRnD>
       )}
