@@ -199,10 +199,6 @@ const ButtonsBox = memo(
       setKonvaModalOpen(true);
     };
 
-    const docViewURL = LOCAL_MODE
-      ? undefined
-      : chrome.runtime.getURL("docview.html");
-
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
@@ -227,7 +223,7 @@ const ButtonsBox = memo(
               />
               {openDocInNewTab ? (
                 <StyledATag
-                  href={docViewURL}
+                  href={LOCAL_MODE ? "" : chrome.runtime.getURL("docview.html")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
