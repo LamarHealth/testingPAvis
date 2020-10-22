@@ -85,13 +85,13 @@ export const Sidebar = () => {
     if (!LOCAL_MODE) {
       const callback = function (request: any) {
         if (request.message === "open sidebar") {
-          setOpen(!isOpen);
+          setOpen((prev) => !prev);
         }
       };
       chrome.runtime.onMessage.addListener(callback);
       return () => chrome.runtime.onMessage.removeListener(callback);
     }
-  }, []);
+  }, [setOpen]);
 
   // handle click away
   const handleClickAway = () => {

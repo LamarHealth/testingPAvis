@@ -16,7 +16,6 @@ import {
 import { KeyValuesByDoc } from "./KeyValuePairs";
 import { useStore, checkFileError, Uuid } from "../contexts/ZustandStore";
 import { RndComponent } from "./KonvaRndDraggable";
-import { KonvaModal } from "./KonvaModal";
 import WrappedJssComponent from "./ShadowComponent";
 
 import { v4 as uuidv4 } from "uuid";
@@ -321,7 +320,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
       chrome.runtime.onMessage.addListener(callback);
       return () => chrome.runtime.onMessage.removeListener(callback);
     }
-  }, [setErrorLine]);
+  }, [setErrorLine, props.isInNewTab]);
 
   // submit button / enter
   const cleanupAfterSubmit = useCallback(() => {
@@ -353,10 +352,9 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   }, [
     eventTarget,
     inputVal,
-    errorLine,
     setErrorLine,
-    linesSelectionDispatch,
-    inputValDispatch,
+    cleanupAfterSubmit,
+    props.isInNewTab,
   ]);
 
   // return key listener
@@ -383,7 +381,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   // clear entries on doc switch
   useEffect(() => {
     cleanupAfterSubmit();
-  }, [selectedFile]);
+  }, [cleanupAfterSubmit]);
 
   return (
     <React.Fragment>

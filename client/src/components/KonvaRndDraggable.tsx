@@ -102,7 +102,7 @@ export const RndComponent = (props: RndComponentProps) => {
     }
     window.addEventListener("resize", resizeCallback);
     return () => window.removeEventListener("resize", resizeCallback);
-  }, []);
+  }, [setDocImageDimensions, docImageURL]);
 
   return (
     <div>
