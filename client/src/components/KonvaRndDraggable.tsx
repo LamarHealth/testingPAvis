@@ -1,9 +1,9 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef } from "react";
 
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
 
-import { KonvaModalContext } from "./ManualSelect";
+import { KonvaModalContext, DocImageDimensions } from "./ManualSelect";
 import { KonvaModal } from "./KonvaModal";
 
 import { colors } from "../common/colors";
@@ -14,6 +14,11 @@ import {
   KONVA_MODAL_OFFSET_Y,
   DOC_IMAGE_WIDTH,
 } from "../common/constants";
+import { useEffect } from "react";
+
+interface RndComponentProps {
+  isInNewTab?: boolean;
+}
 
 const StyledRnD = styled(Rnd)`
   background: #f0f0f0;
@@ -25,9 +30,14 @@ const StyledRnD = styled(Rnd)`
   box-shadow: ${MODAL_SHADOW};
 `;
 
-const StyledDiv = styled.div`
+const ScrollContainer = styled.div`
   overflow-y: scroll;
   overflow-x: hidden;
+`;
+
+const NewTabContainer = styled.div`
+  width: 80%;
+  margin: 0 auto;
 `;
 
 const resizeHandleStylesPayload = {
@@ -36,8 +46,10 @@ const resizeHandleStylesPayload = {
   sides: { width: "15px", zIndex: 1 },
 };
 
-export const RndComponent = () => {
-  const { docImageURL, setDocImageDimensions } = useContext(KonvaModalContext);
+export const RndComponent = (props: RndComponentProps) => {
+  const { docImageURL, docImageDimensions, setDocImageDimensions } = useContext(
+    KonvaModalContext
+  );
   const [konvaModalDraggCoords, setKonvaModalDraggCoords] = useState({
     x: KONVA_MODAL_OFFSET_X,
     y: KONVA_MODAL_OFFSET_Y,
@@ -46,8 +58,11 @@ export const RndComponent = () => {
     width: DOC_IMAGE_WIDTH,
     height: KONVA_MODAL_HEIGHT,
   });
+  const initialDocImageDimensions = useRef(
+    docImageDimensions as DocImageDimensions
+  );
 
-  // drag & resize
+  // NO new tab: Rnd drag & resize
   const handleDragStop = (e: any, data: DraggableData) => {
     const [x, y] = [data.x, data.y];
     setKonvaModalDraggCoords({ x, y });
@@ -75,28 +90,50 @@ export const RndComponent = () => {
     });
   };
 
+  // YES new tab: window resize listener
+  useEffect(() => {
+    function resizeCallback() {
+      if (window.innerWidth < initialDocImageDimensions.current.width) {
+        setDocImageDimensions({
+          width: window.innerWidth,
+          height: window.innerWidth * docImageURL.heightXWidthMultiplier,
+        });
+      }
+    }
+    window.addEventListener("resize", resizeCallback);
+    return () => window.removeEventListener("resize", resizeCallback);
+  }, []);
+
   return (
-    <StyledRnD
-      position={konvaModalDraggCoords}
-      onDragStop={handleDragStop}
-      bounds="window"
-      size={konvaModalDimensions}
-      onResizeStop={handleResizeStop}
-      resizeHandleStyles={{
-        bottom: resizeHandleStylesPayload.topBottom,
-        bottomLeft: resizeHandleStylesPayload.corner,
-        bottomRight: resizeHandleStylesPayload.corner,
-        left: resizeHandleStylesPayload.sides,
-        right: resizeHandleStylesPayload.sides,
-        top: resizeHandleStylesPayload.topBottom,
-        topLeft: resizeHandleStylesPayload.corner,
-        topRight: resizeHandleStylesPayload.corner,
-      }}
-      cancel={".docit-no-drag"}
-    >
-      <StyledDiv style={{ height: konvaModalDimensions.height }}>
-        <KonvaModal />
-      </StyledDiv>
-    </StyledRnD>
+    <div>
+      {props.isInNewTab ? (
+        <NewTabContainer style={{ width: docImageDimensions.width + "px" }}>
+          <KonvaModal />
+        </NewTabContainer>
+      ) : (
+        <StyledRnD
+          position={konvaModalDraggCoords}
+          onDragStop={handleDragStop}
+          bounds="window"
+          size={konvaModalDimensions}
+          onResizeStop={handleResizeStop}
+          resizeHandleStyles={{
+            bottom: resizeHandleStylesPayload.topBottom,
+            bottomLeft: resizeHandleStylesPayload.corner,
+            bottomRight: resizeHandleStylesPayload.corner,
+            left: resizeHandleStylesPayload.sides,
+            right: resizeHandleStylesPayload.sides,
+            top: resizeHandleStylesPayload.topBottom,
+            topLeft: resizeHandleStylesPayload.corner,
+            topRight: resizeHandleStylesPayload.corner,
+          }}
+          cancel={".docit-no-drag"}
+        >
+          <ScrollContainer style={{ height: konvaModalDimensions.height }}>
+            <KonvaModal />
+          </ScrollContainer>
+        </StyledRnD>
+      )}
+    </div>
   );
 };
