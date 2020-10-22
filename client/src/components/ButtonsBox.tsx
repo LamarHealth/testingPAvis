@@ -1,5 +1,4 @@
 import React, { useState, useContext, memo, MouseEvent } from "react";
-import { Link } from "react-router-dom";
 
 import styled from "styled-components";
 import { useStore } from "../contexts/ZustandStore";
@@ -70,6 +69,10 @@ const StyledChip = styled(Chip)`
       `${colors.DROPZONE_TEXT_LIGHTGREY}`,
       `${colors.DOC_CARD_BORDER}`
     )};
+`;
+
+const StyledATag = styled.a`
+  text-decoration: none;
 `;
 
 const StyledDeleteIcon = styled(DeleteIcon)`
@@ -170,8 +173,6 @@ const ButtonsBox = memo(
     ];
     const docID = props.docInfo.docID.toString();
 
-    console.log("docData at ButtonsBox, ", docData);
-
     // click away
     const handleClickAway = () => {
       setDialogOpen(false);
@@ -225,7 +226,11 @@ const ButtonsBox = memo(
                 isSelected={props.isSelected}
               />
               {openDocInNewTab ? (
-                <a href={docViewURL} target="_blank">
+                <StyledATag
+                  href={docViewURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <StyledChip
                     size="small"
                     label="View PDF"
@@ -234,7 +239,7 @@ const ButtonsBox = memo(
                     disabled={props.errorGettingFile}
                     isSelected={props.isSelected}
                   />
-                </a>
+                </StyledATag>
               ) : (
                 <StyledChip
                   size="small"
