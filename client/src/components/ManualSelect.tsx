@@ -116,7 +116,10 @@ const inputValReducer = (state: string, action: InputValAction) => {
     case InputValActionTypes.removeLine:
       if (action.value) {
         return state.replace(action.value, "");
-      } else console.error("inputValReducer called without a value to remove");
+      } else {
+        console.error("inputValReducer called without a value to remove");
+        break;
+      }
     case InputValActionTypes.reset:
       return "";
     default:
