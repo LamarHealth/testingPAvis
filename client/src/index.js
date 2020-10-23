@@ -4,10 +4,8 @@ import $ from "jquery";
 
 // Load dotenv
 import dotenv from "dotenv";
-import ShipmentsDashboard from "./components/ShipmentsDashboard";
-import { Sidebar } from "./components/Sidebar";
-import { RenderModal } from "./components/RenderModal";
-import { RenderAutocomplete } from "./components/RenderAutocomplete";
+import { App } from "./App";
+import { ManualSelectNewTab } from "./components/ManualSelectNewTab";
 
 import { LOCAL_MODE, Z_INDEX_ALLOCATOR } from "./common/constants";
 dotenv.config();
@@ -22,27 +20,16 @@ const insertionPoint = document.createElement("div");
 insertionPoint.id = "insertion-point";
 insertionPoint.style.position = "relative";
 insertionPoint.style.zIndex = Z_INDEX_ALLOCATOR.insertionPoint();
-
 $(insertionPoint).insertBefore(document.body);
 
-ReactDOM.render(
-  <>
-    <RenderModal />
-    <RenderAutocomplete />
-    <Sidebar />
-    {LOCAL_MODE && (
-      <body
-        style={{
-          position: "relative",
-          zIndex: Z_INDEX_ALLOCATOR.body(),
-        }}
-      >
-        <ShipmentsDashboard />
-      </body>
-    )}
-  </>,
-  document.getElementById("insertion-point")
-);
+const isDocViewOnly = Boolean(document.getElementById("DOCIT-DOCVIEW-ONLY"));
+
+isDocViewOnly // makeshift react-router. can't use react-router bc docview.html is opened as a completely different URL; react-router can only render in relative URLs
+  ? ReactDOM.render(
+      <ManualSelectNewTab />,
+      document.getElementById("insertion-point")
+    )
+  : ReactDOM.render(<App />, document.getElementById("insertion-point"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

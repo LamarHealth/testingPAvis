@@ -1,8 +1,8 @@
+/* global chrome */
 import React, {
   useState,
   useEffect,
   createContext,
-  useContext,
   useReducer,
   useCallback,
 } from "react";
@@ -14,8 +14,7 @@ import {
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
-import { MainModalContext } from "./RenderModal";
+import { useStore, checkFileError, Uuid } from "../contexts/ZustandStore";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -33,8 +32,17 @@ interface DocImageURL {
   url: string;
 }
 
+export interface DocImageDimensions {
+  width: number;
+  height: number;
+}
+
 export interface LinesSelection {
   [lineID: string]: string;
+}
+
+interface RequestWithError {
+  error?: string;
 }
 
 export enum LinesSelectionActionTypes {
@@ -60,12 +68,19 @@ interface InputValAction {
   value?: string;
 }
 
+interface ManualSelectNewTabProps {
+  isInNewTab?: boolean;
+  konvaModalOpen?: boolean;
+  selectedFile?: string;
+  docData?: KeyValuesByDoc[];
+}
+
 export const KonvaModalContext = createContext({} as any);
 
-function linesSelectionReducer(
+const linesSelectionReducer = (
   state: LinesSelection,
   action: LinesSelectionReducerAction
-) {
+) => {
   switch (action.type) {
     case LinesSelectionActionTypes.select:
       return { ...state, ...action.line };
@@ -75,16 +90,21 @@ function linesSelectionReducer(
     case LinesSelectionActionTypes.reset:
       return {};
     default:
-      throw new Error();
+      console.error("linesSelectionReducer action type is wrong");
+      return {};
   }
-}
+};
 
-function inputValReducer(state: string, action: InputValAction) {
+const inputValReducer = (state: string, action: InputValAction) => {
   switch (action.type) {
     case InputValActionTypes.replace:
-      if (typeof action.value === "string") {
+      if (action.value) {
         return action.value;
-      } else throw new Error();
+      } else
+        console.error(
+          "inputValReducer called without a valid string replace value"
+        );
+      break;
     case InputValActionTypes.appendLine:
       const prevInputValArray = Array.from(state);
       // if ends in space, don't add another
@@ -96,23 +116,29 @@ function inputValReducer(state: string, action: InputValAction) {
     case InputValActionTypes.removeLine:
       if (action.value) {
         return state.replace(action.value, "");
-      } else throw new Error();
+      } else {
+        console.error("inputValReducer called without a value to remove");
+        break;
+      }
     case InputValActionTypes.reset:
       return "";
     default:
-      throw new Error();
+      console.error("inputValReducer action type is wrong");
+      break;
   }
-}
+  return "";
+};
 
-export const ManualSelect = () => {
-  const { docImageDimensions, setDocImageDimensions } = useContext(
-    MainModalContext
-  );
+export const ManualSelect = (props: ManualSelectNewTabProps) => {
+  const [docImageDimensions, setDocImageDimensions] = useState({
+    width: 0,
+    height: 0,
+  } as DocImageDimensions);
   const [
     eventTarget,
-    selectedFile,
-    docData,
-    konvaModalOpen,
+    selectedFileFromStore,
+    docDataFromStore,
+    konvaModalOpenFromStore,
     setKvpTableAnchorEl,
     autocompleteAnchor,
     errorFiles,
@@ -127,6 +153,16 @@ export const ManualSelect = () => {
     useStore((state) => state.errorFiles),
     useStore((state) => state.setErrorFiles),
   ];
+  // if in new tab, no access to same zustand store, so use props instead
+  const konvaModalOpen = props.isInNewTab
+    ? props.konvaModalOpen
+    : konvaModalOpenFromStore;
+  const selectedFile = (props.isInNewTab
+    ? props.selectedFile
+    : selectedFileFromStore) as Uuid;
+  const docData = (props.isInNewTab
+    ? props.docData
+    : docDataFromStore) as KeyValuesByDoc[];
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
@@ -269,28 +305,52 @@ export const ManualSelect = () => {
     }
   };
 
+  // listen for message coming back from RenderModal / background.js, saying that eventTarget is falsy
+  useEffect(() => {
+    if (props.isInNewTab) {
+      const callback = function (request: RequestWithError) {
+        if (request.error) {
+          setErrorLine("Please select a text input to fill");
+        }
+      };
+      chrome.runtime.onMessage.addListener(callback);
+      return () => chrome.runtime.onMessage.removeListener(callback);
+    }
+  }, [setErrorLine, props.isInNewTab]);
+
   // submit button / enter
+  const cleanupAfterSubmit = useCallback(() => {
+    setErrorLine(null);
+    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
+    inputValDispatch({ type: InputValActionTypes.reset });
+  }, [setErrorLine, linesSelectionDispatch, inputValDispatch]);
+
   const handleSubmitAndClear = useCallback(() => {
     // useCallback because we have to use in useEffect below, and React will ping with warning if handleSubmitAndClear not wrapped in useCallback
-    if (eventTarget) {
-      if (inputVal !== "") {
-        renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
-        eventTarget.value = inputVal;
-        setErrorLine(null);
-        linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
-        inputValDispatch({ type: InputValActionTypes.reset });
-      } else {
-        setErrorLine("Nothing to enter");
-      }
+    if (props.isInNewTab) {
+      chrome.runtime.sendMessage({
+        fillValue: inputVal,
+      });
+      cleanupAfterSubmit();
     } else {
-      setErrorLine("Please select a text input to fill");
+      if (eventTarget) {
+        if (inputVal !== "") {
+          renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
+          eventTarget.value = inputVal;
+          cleanupAfterSubmit();
+        } else {
+          setErrorLine("Nothing to enter");
+        }
+      } else {
+        setErrorLine("Please select a text input to fill");
+      }
     }
   }, [
     eventTarget,
     inputVal,
     setErrorLine,
-    linesSelectionDispatch,
-    inputValDispatch,
+    cleanupAfterSubmit,
+    props.isInNewTab,
   ]);
 
   // return key listener
@@ -311,15 +371,13 @@ export const ManualSelect = () => {
 
   // clear button
   const handleClear = () => {
-    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
-    inputValDispatch({ type: InputValActionTypes.reset });
+    cleanupAfterSubmit();
   };
 
   // clear entries on doc switch
   useEffect(() => {
-    linesSelectionDispatch({ type: LinesSelectionActionTypes.reset });
-    inputValDispatch({ type: InputValActionTypes.reset });
-  }, [selectedFile]);
+    cleanupAfterSubmit();
+  }, [cleanupAfterSubmit]);
 
   return (
     <React.Fragment>
@@ -330,6 +388,7 @@ export const ManualSelect = () => {
               image,
               currentLinesGeometry,
               docImageDimensions,
+              setDocImageDimensions,
               docImageURL,
               errorLine,
               setErrorLine,
@@ -341,7 +400,7 @@ export const ManualSelect = () => {
               inputValDispatch,
             }}
           >
-            <RndComponent />
+            <RndComponent isInNewTab={props.isInNewTab} />
           </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}

@@ -24,6 +24,10 @@ import {
 } from "./ManualSelect";
 import { DocImageDimensions } from "./RenderModal";
 
+interface KonvaModalProps {
+  isInNewTab?: boolean;
+}
+
 // cannot import from SelectModal... likely a shadow dom issue
 const CloseButton = styled.button`
   float: right;
@@ -224,7 +228,7 @@ const Header = ({
         });
       });
     // set new input val
-    inputValDispatch({ type: "replace", value: newVal });
+    inputValDispatch({ type: InputValActionTypes.replace, value: newVal });
   };
 
   // handle line selection / deselection
@@ -312,7 +316,7 @@ const Header = ({
 
 const HeaderContext = createContext({} as any);
 
-export const KonvaModal = () => {
+export const KonvaModal = (props: KonvaModalProps) => {
   const {
     image,
     currentLinesGeometry,
@@ -328,7 +332,9 @@ export const KonvaModal = () => {
   return (
     <>
       <StickyHeaderWrapper>
-        <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
+        {!props.isInNewTab && (
+          <CloseButton onClick={() => setKonvaModalOpen(false)}>X</CloseButton>
+        )}
         <HeaderContext.Provider
           value={{
             inputElRef,

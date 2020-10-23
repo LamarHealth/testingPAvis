@@ -2,6 +2,7 @@
   "short_name": "DocIt",
   "name": "DocIt",
   "version": "1.0.4",
+  "manifest_version": 2,
   "description": "DocIt enables users to fill out web forms with OCR data",
   "content_scripts": [
     {
@@ -17,8 +18,9 @@
   "browser_action": {
     "default_title": "open the popup"
   },
-  "manifest_version": 2,
   "background": {
     "scripts": ["background.js"]
-  }
+  },
+  "permissions": ["storage"],
+  "web_accessible_resources": ["docview.html"]
 }

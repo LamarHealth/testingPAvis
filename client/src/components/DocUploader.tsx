@@ -79,7 +79,7 @@ export const StyledDropzone = () => {
 
       // endblock
     },
-    [newFiles]
+    [newFiles, index]
   );
 
   // Dropzone Hook

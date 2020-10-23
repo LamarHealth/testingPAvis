@@ -21,10 +21,7 @@ import { usePdf } from "@mikecousins/react-pdf";
 import { PAGE_SCALE, API_PATH } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
-import {
-  updateThumbsLocalStorage,
-  updateThumbsActionTypes,
-} from "./docThumbnails";
+import { addThumbsLocalStorage } from "./docThumbnails";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -103,7 +100,7 @@ const RefreshIcon = styled(LoopIcon)`
   }
 `;
 
-const updateLocalStorage = (documentInfo: any) => {
+const addDocToLocalStorage = (documentInfo: any) => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let updatedList = Array.isArray(storedDocs)
     ? storedDocs.filter((item: any) => {
@@ -174,7 +171,7 @@ const FileStatus = (props: any) => {
               type: "append",
               documentInfo: await result.json(),
             };
-            updateLocalStorage(postSuccessResponse.documentInfo).then(() => {
+            addDocToLocalStorage(postSuccessResponse.documentInfo).then(() => {
               // update loc stor then set the global var to reflect that
               setDocData(getKeyValuePairsByDoc());
             });
@@ -213,11 +210,7 @@ const FileStatus = (props: any) => {
       docID &&
       thumbnailSrc.startsWith("data:image/png;base64,")
     ) {
-      updateThumbsLocalStorage(
-        docID,
-        updateThumbsActionTypes.add,
-        thumbnailSrc
-      );
+      addThumbsLocalStorage(docID, thumbnailSrc);
     }
   }, [thumbnailSrc, docID, props.fileWithPreview.file.type]);
 

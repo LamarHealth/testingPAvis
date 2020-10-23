@@ -13,17 +13,14 @@ import Typography from "@material-ui/core/Typography";
 import Chip from "@material-ui/core/Chip";
 
 import { FileContext, DocumentInfo, IsSelected } from "./DocViewer";
-import {
-  updateThumbsLocalStorage,
-  updateThumbsActionTypes,
-} from "./docThumbnails";
-import { KeyValuesByDoc } from "./KeyValuePairs";
+import { deleteThumbsLocalStorage } from "./docThumbnails";
+import { KeyValuesByDoc, getKeyValuePairsByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
 } from "./ScoreChiclet/functions";
 import { colors, colorSwitcher } from "../common/colors";
-import { DOC_CARD_HEIGHT } from "../common/constants";
+import { DOC_CARD_HEIGHT, LOCAL_MODE } from "../common/constants";
 
 const ButtonsBoxWrapper = styled.div`
   height: ${DOC_CARD_HEIGHT};
@@ -71,6 +68,10 @@ const StyledChip = styled(Chip)`
     )};
 `;
 
+const StyledATag = styled.a`
+  text-decoration: none;
+`;
+
 const StyledDeleteIcon = styled(DeleteIcon)`
   ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
 `;
@@ -80,19 +81,27 @@ const StyledGetAppIcon = styled(GetAppIcon)`
 `;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
-  const fileInfoContext = useContext(FileContext);
-  const setSelectedFile = useStore((state) => state.setSelectedFile);
+  const { fileDispatch } = useContext(FileContext);
+  const [setSelectedFile, setDocData] = [
+    useStore((state) => state.setSelectedFile),
+    useStore((state) => state.setDocData),
+  ];
 
-  const handleDelete = () => {
-    setSelectedFile(null);
-    fileInfoContext.fileDispatch({
-      type: "remove",
-      documentInfo: props.docInfo,
-    });
-    updateThumbsLocalStorage(
-      props.docInfo.docID.toString(),
-      updateThumbsActionTypes.delete
-    );
+  const handleDelete = (e: MouseEvent) => {
+    e.stopPropagation();
+    const deleteAsync = async () => {
+      setSelectedFile(null);
+      fileDispatch({
+        type: "remove",
+        documentInfo: props.docInfo,
+      });
+      deleteThumbsLocalStorage(props.docInfo.docID.toString());
+
+      return new Promise((resolve) => {
+        resolve();
+      });
+    };
+    deleteAsync().then(() => setDocData(getKeyValuePairsByDoc()));
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>
@@ -151,10 +160,11 @@ const ButtonsBox = memo(
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
-    const [docData, setSelectedFile, setKonvaModalOpen] = [
+    const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
       useStore((state) => state.docData),
       useStore((state) => state.setSelectedFile),
       useStore((state) => state.setKonvaModalOpen),
+      useStore((state) => state.openDocInNewTab),
     ];
     const docID = props.docInfo.docID.toString();
 
@@ -206,14 +216,32 @@ const ButtonsBox = memo(
                 variant="outlined"
                 isSelected={props.isSelected}
               />
-              <StyledChip
-                size="small"
-                label="View PDF"
-                variant="outlined"
-                onClick={handleViewPdfClick}
-                disabled={props.errorGettingFile}
-                isSelected={props.isSelected}
-              />
+              {openDocInNewTab ? (
+                <StyledATag
+                  href={LOCAL_MODE ? "" : chrome.runtime.getURL("docview.html")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <StyledChip
+                    size="small"
+                    label="View PDF"
+                    variant="outlined"
+                    onClick={handleViewPdfClick}
+                    disabled={props.errorGettingFile}
+                    isSelected={props.isSelected}
+                  />
+                </StyledATag>
+              ) : (
+                <StyledChip
+                  size="small"
+                  label="View PDF"
+                  variant="outlined"
+                  onClick={handleViewPdfClick}
+                  disabled={props.errorGettingFile}
+                  isSelected={props.isSelected}
+                />
+              )}
+
               <FlexIconButton
                 onClick={handleDeleteClick}
                 style={{ marginLeft: "-0.25em" }}

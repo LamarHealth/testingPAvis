@@ -18,7 +18,6 @@ import {
 import {
   assignTargetString,
   handleFreightTerms,
-  DOCIT_TAG,
 } from "../libertyInputsDictionary";
 
 export enum PopulateFormsActionTypes {
