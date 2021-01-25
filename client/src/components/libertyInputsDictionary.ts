@@ -10,7 +10,13 @@ interface LibertyInputsDictionary {
 }
 export const libertyInputsDictionary = {
   CMCarrierBookingRef: "Carrier Booking Ref",
-  // exclude forwarder, will already be there according to brandon
+  //////
+  // according to Brandon: exclude forwarder. But we will include it for now, for demo purposes
+  CMForwarderName: "Name",
+  CMForwarderEmail: "Email",
+  CMForwarderPhone: "Phone",
+  CMForwarderFax: "Fax",
+  //////
   CMConsignee: "Consignee",
   CMConsigneeName: "Name",
   CMConsigneeEmail: "Email",
@@ -31,20 +37,19 @@ export const libertyInputsDictionary = {
 } as LibertyInputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
-  const inputPlaceholder = $(inputEl).attr("placeholder");
   const inputID = $(inputEl).attr("id");
-  const inputLabel = $(`label[for=${inputID}]`)[0]?.innerText;
   const dictionaryLookup = inputID
     ? libertyInputsDictionary[inputID]
     : undefined;
+  if (dictionaryLookup) return dictionaryLookup;
 
-  return inputPlaceholder
-    ? inputPlaceholder
-    : inputLabel
-    ? inputLabel
-    : dictionaryLookup
-    ? dictionaryLookup
-    : "";
+  const inputPlaceholder = $(inputEl).attr("placeholder");
+  if (inputPlaceholder) return inputPlaceholder;
+
+  const inputLabel = $(`label[for=${inputID}]`)[0]?.innerText;
+  if (inputLabel) return inputLabel;
+
+  return "";
 };
 
 export const handleFreightTerms = (
