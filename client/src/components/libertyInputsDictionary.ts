@@ -31,17 +31,20 @@ export const libertyInputsDictionary = {
 } as LibertyInputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
-  let targetString;
-  const placeholderText = $(inputEl).attr("placeholder");
-  if (placeholderText) {
-    targetString = placeholderText;
-  } else {
-    const inputID = $(inputEl).attr("id");
-    inputID && libertyInputsDictionary[inputID]
-      ? (targetString = libertyInputsDictionary[inputID])
-      : (targetString = "");
-  }
-  return targetString;
+  const inputPlaceholder = $(inputEl).attr("placeholder");
+  const inputID = $(inputEl).attr("id");
+  const inputLabel = $(`label[for=${inputID}]`)[0]?.innerText;
+  const dictionaryLookup = inputID
+    ? libertyInputsDictionary[inputID]
+    : undefined;
+
+  return inputPlaceholder
+    ? inputPlaceholder
+    : inputLabel
+    ? inputLabel
+    : dictionaryLookup
+    ? dictionaryLookup
+    : "";
 };
 
 export const handleFreightTerms = (
