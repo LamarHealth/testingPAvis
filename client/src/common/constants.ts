@@ -65,6 +65,8 @@ export const ACC_SCORE_SMALL = 7;
 export const ADDL_LIBERTY_SITE_DEMO_TERMS = {
   CMPOL: "Port of Loading",
   CMPOD: "Port of Departure",
+  CMNRT: "Not Register Tonnage",
+  CMGRT: "Gross Register Tonnage",
   CMForwarderName: "Name",
   CMForwarderEmail: "Email",
   CMForwarderPhone: "Phone",

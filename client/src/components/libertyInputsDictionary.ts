@@ -49,7 +49,8 @@ export const assignTargetString = (inputEl: any): string => {
   const inputPlaceholder = $(inputEl).attr("placeholder");
   if (inputPlaceholder) return inputPlaceholder;
 
-  const inputLabel = $(`label[for=${inputID}]`)[0]?.innerText;
+  const inputLabel: string | undefined = $(`label[for=${inputID}]`)[0]
+    ?.innerText;
   if (inputLabel) return inputLabel;
 
   return "";
