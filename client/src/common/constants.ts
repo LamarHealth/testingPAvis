@@ -45,6 +45,7 @@ export const DEFAULT_ERROR_MESSAGE =
 
 // If LOCAL_MODE is enabled, then the app will render a mock dashboard for testing
 export const LOCAL_MODE = process.env.REACT_APP_LOCAL === envVars.LOCAL;
+export const LIBERTY_MODE = process.env.REACT_APP_LOCAL === envVars.LIBERTY;
 export const API_PATH =
   process.env.REACT_APP_LOCAL === envVars.LOCAL // App is deployed for local testing
     ? "" // Path will be default localhost
@@ -61,3 +62,11 @@ export const DOCIT_TAG = `input${filterName}, textarea${filterName}`;
 export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;
 export const ACC_SCORE_SMALL = 7;
+export const ADDL_LIBERTY_SITE_DEMO_TERMS = {
+  CMPOL: "Port of Loading",
+  CMPOD: "Port of Departure",
+  CMForwarderName: "Name",
+  CMForwarderEmail: "Email",
+  CMForwarderPhone: "Phone",
+  CMForwarderFax: "Fax",
+};

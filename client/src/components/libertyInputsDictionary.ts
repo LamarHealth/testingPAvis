@@ -4,19 +4,17 @@ import {
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import $ from "jquery";
+import {
+  LIBERTY_MODE,
+  ADDL_LIBERTY_SITE_DEMO_TERMS,
+} from "../common/constants";
 
-interface LibertyInputsDictionary {
+interface InputsDictionary {
   [key: string]: string;
 }
 export const libertyInputsDictionary = {
   CMCarrierBookingRef: "Carrier Booking Ref",
-  //////
-  // according to Brandon: exclude forwarder. But we will include it for now, for demo purposes
-  CMForwarderName: "Name",
-  CMForwarderEmail: "Email",
-  CMForwarderPhone: "Phone",
-  CMForwarderFax: "Fax",
-  //////
+  // according to Brandon: exclude forwarder
   CMConsignee: "Consignee",
   CMConsigneeName: "Name",
   CMConsigneeEmail: "Email",
@@ -34,13 +32,18 @@ export const libertyInputsDictionary = {
   CMNotifyEmail: "Email",
   CMNotifyPhone: "Phone",
   CMNotifyFax: "Fax",
-} as LibertyInputsDictionary;
+} as InputsDictionary;
+
+const inputsDictionary = (LIBERTY_MODE
+  ? libertyInputsDictionary
+  : {
+      ...ADDL_LIBERTY_SITE_DEMO_TERMS,
+      ...libertyInputsDictionary,
+    }) as InputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
   const inputID = $(inputEl).attr("id");
-  const dictionaryLookup = inputID
-    ? libertyInputsDictionary[inputID]
-    : undefined;
+  const dictionaryLookup = inputID ? inputsDictionary[inputID] : undefined;
   if (dictionaryLookup) return dictionaryLookup;
 
   const inputPlaceholder = $(inputEl).attr("placeholder");
