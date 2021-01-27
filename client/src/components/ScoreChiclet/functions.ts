@@ -15,10 +15,7 @@ import {
   getEditDistanceAndSort,
   hasGoodHighestMatch,
 } from "../KeyValuePairs";
-import {
-  assignTargetString,
-  handleFreightTerms,
-} from "../libertyInputsDictionary";
+import { assignTargetString, handleFreightTerms } from "../inputsDictionary";
 
 export enum PopulateFormsActionTypes {
   blankChiclets = "blank chiclets",

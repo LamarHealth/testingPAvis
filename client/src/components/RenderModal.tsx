@@ -9,7 +9,7 @@ import Popper from "@material-ui/core/Popper";
 import { SelectModal } from "./SelectModal";
 import { ManualSelect } from "./ManualSelect";
 import WrappedJssComponent from "./ShadowComponent";
-import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+import { getLibertyModalMutationsObserver } from "./inputsDictionary";
 import {
   renderChiclets,
   RenderChicletsActionTypes,

@@ -45,6 +45,7 @@ export const DEFAULT_ERROR_MESSAGE =
 
 // If LOCAL_MODE is enabled, then the app will render a mock dashboard for testing
 export const LOCAL_MODE = process.env.REACT_APP_LOCAL === envVars.LOCAL;
+export const LIBERTY_MODE = process.env.REACT_APP_LOCAL === envVars.LIBERTY;
 export const API_PATH =
   process.env.REACT_APP_LOCAL === envVars.LOCAL // App is deployed for local testing
     ? "" // Path will be default localhost

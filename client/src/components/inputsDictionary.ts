@@ -4,13 +4,14 @@ import {
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import $ from "jquery";
+import { LIBERTY_MODE } from "../common/constants";
 
-interface LibertyInputsDictionary {
+interface InputsDictionary {
   [key: string]: string;
 }
-export const libertyInputsDictionary = {
+const libertyInputsDictionary = {
   CMCarrierBookingRef: "Carrier Booking Ref",
-  // exclude forwarder, will already be there according to brandon
+  // according to Brandon: exclude forwarder
   CMConsignee: "Consignee",
   CMConsigneeName: "Name",
   CMConsigneeEmail: "Email",
@@ -28,20 +29,39 @@ export const libertyInputsDictionary = {
   CMNotifyEmail: "Email",
   CMNotifyPhone: "Phone",
   CMNotifyFax: "Fax",
-} as LibertyInputsDictionary;
+} as InputsDictionary;
+
+const addlLibertyDemoDictionary = {
+  CMPOL: "Port of Loading",
+  CMPOD: "Port of Departure",
+  CMNRT: "Not Register Tonnage",
+  CMGRT: "Gross Register Tonnage",
+  CMForwarderName: "Name",
+  CMForwarderEmail: "Email",
+  CMForwarderPhone: "Phone",
+  CMForwarderFax: "Fax",
+} as InputsDictionary;
+
+const inputsDictionary = (LIBERTY_MODE
+  ? libertyInputsDictionary
+  : {
+      ...addlLibertyDemoDictionary,
+      ...libertyInputsDictionary,
+    }) as InputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
-  let targetString;
-  const placeholderText = $(inputEl).attr("placeholder");
-  if (placeholderText) {
-    targetString = placeholderText;
-  } else {
-    const inputID = $(inputEl).attr("id");
-    inputID && libertyInputsDictionary[inputID]
-      ? (targetString = libertyInputsDictionary[inputID])
-      : (targetString = "");
-  }
-  return targetString;
+  const inputID = $(inputEl).attr("id");
+  const dictionaryLookup = inputID ? inputsDictionary[inputID] : undefined;
+  if (dictionaryLookup) return dictionaryLookup;
+
+  const inputPlaceholder = $(inputEl).attr("placeholder");
+  if (inputPlaceholder) return inputPlaceholder;
+
+  const inputLabel: string | undefined = $(`label[for=${inputID}]`)[0]
+    ?.innerText;
+  if (inputLabel) return inputLabel;
+
+  return "";
 };
 
 export const handleFreightTerms = (
