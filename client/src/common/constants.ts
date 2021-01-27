@@ -62,13 +62,3 @@ export const DOCIT_TAG = `input${filterName}, textarea${filterName}`;
 export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;
 export const ACC_SCORE_SMALL = 7;
-export const ADDL_LIBERTY_SITE_DEMO_TERMS = {
-  CMPOL: "Port of Loading",
-  CMPOD: "Port of Departure",
-  CMNRT: "Not Register Tonnage",
-  CMGRT: "Gross Register Tonnage",
-  CMForwarderName: "Name",
-  CMForwarderEmail: "Email",
-  CMForwarderPhone: "Phone",
-  CMForwarderFax: "Fax",
-};

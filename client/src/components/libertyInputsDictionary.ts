@@ -4,15 +4,12 @@ import {
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import $ from "jquery";
-import {
-  LIBERTY_MODE,
-  ADDL_LIBERTY_SITE_DEMO_TERMS,
-} from "../common/constants";
+import { LIBERTY_MODE } from "../common/constants";
 
 interface InputsDictionary {
   [key: string]: string;
 }
-export const libertyInputsDictionary = {
+const libertyInputsDictionary = {
   CMCarrierBookingRef: "Carrier Booking Ref",
   // according to Brandon: exclude forwarder
   CMConsignee: "Consignee",
@@ -34,10 +31,21 @@ export const libertyInputsDictionary = {
   CMNotifyFax: "Fax",
 } as InputsDictionary;
 
+const addlLibertyDemoDictionary = {
+  CMPOL: "Port of Loading",
+  CMPOD: "Port of Departure",
+  CMNRT: "Not Register Tonnage",
+  CMGRT: "Gross Register Tonnage",
+  CMForwarderName: "Name",
+  CMForwarderEmail: "Email",
+  CMForwarderPhone: "Phone",
+  CMForwarderFax: "Fax",
+} as InputsDictionary;
+
 const inputsDictionary = (LIBERTY_MODE
   ? libertyInputsDictionary
   : {
-      ...ADDL_LIBERTY_SITE_DEMO_TERMS,
+      ...addlLibertyDemoDictionary,
       ...libertyInputsDictionary,
     }) as InputsDictionary;
 
