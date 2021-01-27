@@ -14,7 +14,7 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import { DEFAULT } from "../common/themes";
 import { colors } from "../common/colors";
 import WrappedJssComponent from "./ShadowComponent";
-import { getLibertyModalMutationsObserver } from "./libertyInputsDictionary";
+import { getLibertyModalMutationsObserver } from "./inputsDictionary";
 
 import { DOCIT_TAG } from "../common/constants";
 

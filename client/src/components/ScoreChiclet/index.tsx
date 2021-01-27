@@ -20,7 +20,7 @@ import {
 } from "./functions";
 import { useStore } from "../../contexts/ZustandStore";
 import { KeyValuesWithDistance } from "../KeyValuePairs";
-import { assignTargetString } from "../libertyInputsDictionary";
+import { assignTargetString } from "../inputsDictionary";
 import WrappedJssComponent from "../ShadowComponent";
 
 export enum RenderChicletsActionTypes {
