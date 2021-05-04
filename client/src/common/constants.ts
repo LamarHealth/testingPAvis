@@ -55,9 +55,9 @@ export const API_PATH =
     ? "https://docit-web.herokuapp.com"
     : "https://docit-web.herokuapp.com"; // Default to live path
 
-const filterName = process.env.REACT_APP_FILTER
-  ? '[data-docit-input="true"]'
-  : "";
+const FILTER_ENABLED = process.env.REACT_APP_FILTER?.toLowerCase() === "true";
+
+const filterName = FILTER_ENABLED ? '[data-docit-input="true"]' : "";
 export const DOCIT_TAG = `input${filterName}, textarea${filterName}`;
 export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;
