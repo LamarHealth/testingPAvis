@@ -201,7 +201,6 @@ const ButtonsBox = memo(
         (doc: KeyValuesByDoc) => doc.docID === docID
       )[0];
       availableKeyValues &&
-        Object.keys(availableKeyValues.keyValuePairs).length > 0 &&
         populateForms(
           PopulateFormsActionTypes.overwriteBlank,
           availableKeyValues
