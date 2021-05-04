@@ -12,9 +12,8 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 
 import {
-  populateForms,
+  populateBlankChicklets,
   removeAllChiclets,
-  PopulateFormsActionTypes,
 } from "./ScoreChiclet/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import {
@@ -196,9 +195,7 @@ const DocCell = (props: DocumentInfo) => {
 
   const handleBoxClick = () => {
     setSelected();
-    isSelected
-      ? removeAllChiclets()
-      : populateForms(PopulateFormsActionTypes.blankChiclets);
+    isSelected ? removeAllChiclets() : populateBlankChicklets();
   };
 
   // set thumbnail

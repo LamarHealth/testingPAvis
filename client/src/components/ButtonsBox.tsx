@@ -197,10 +197,14 @@ const ButtonsBox = memo(
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      populateForms(
-        PopulateFormsActionTypes.bestGuess,
-        docData.filter((doc: KeyValuesByDoc) => doc.docID === docID)[0]
-      );
+      const availableKeyValues = docData.filter(
+        (doc: KeyValuesByDoc) => doc.docID === docID
+      )[0];
+      availableKeyValues &&
+        populateForms(
+          PopulateFormsActionTypes.overwriteBlank,
+          availableKeyValues
+        );
       setSelectedFile(props.docInfo.docID.toString());
     };
 

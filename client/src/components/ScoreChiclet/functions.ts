@@ -18,8 +18,8 @@ import {
 import { assignTargetString, handleFreightTerms } from "../inputsDictionary";
 
 export enum PopulateFormsActionTypes {
-  blankChiclets = "blank chiclets",
-  bestGuess = "best guess",
+  overwriteAll = "all",
+  overwriteBlank = "blank",
 }
 
 export enum ComputedDimensionTypes {
@@ -182,49 +182,56 @@ export const replaceAndSetNewMounter = (
   return { mounter, mounterID };
 };
 
+/**
+ * For each element on the pageg, render chiclets and populate fields
+ * with their respective kvp matches. This function will perform distance metric matching
+ * against the labels of the existing document and determine which string best matches with
+ * the corresponding text.
+ * @param {PopulateFormsActionTypes} action - Instruction whether or not to overwrite
+ * elements with existing text or overwrite all
+ * @param {KeyValuesByDoc} [keyValuePairs] - KVP values extracted from OCR
+ */
 export const populateForms = (
   action: PopulateFormsActionTypes,
-  keyValuePairs?: KeyValuesByDoc
+  keyValuePairs: KeyValuesByDoc
 ): void => {
+  if (Object.keys(keyValuePairs.keyValuePairs).length == 0) {
+    console.error("No Key Value Pairs found");
+    return;
+  }
   $(document).ready(() => {
-    switch (action) {
-      case PopulateFormsActionTypes.bestGuess:
-        if (keyValuePairs) {
-          $("select").each(function () {
-            handleFreightTerms(this, keyValuePairs);
-          });
-          $(DOCIT_TAG).each(function () {
-            const targetString = assignTargetString(this);
-            const areThereKVPairs =
-              Object.keys(keyValuePairs.keyValuePairs).length > 0;
-            if (areThereKVPairs) {
-              const sortedKeyValuePairs = getEditDistanceAndSort(
-                keyValuePairs,
-                targetString,
-                "lc substring"
-              );
-              if (hasGoodHighestMatch(sortedKeyValuePairs)) {
-                renderChiclets(
-                  RenderChicletsActionTypes.value,
-                  this,
-                  sortedKeyValuePairs[0]
-                );
-                $(this).prop("value", sortedKeyValuePairs[0]["value"]);
-              } else {
-                renderChiclets(RenderChicletsActionTypes.blank, this);
-                $(this).prop("value", null);
-              }
-            }
-          });
-        } else console.error("keyValuePairs is falsy");
-        break;
-      case PopulateFormsActionTypes.blankChiclets:
-        $(DOCIT_TAG).each(function () {
-          renderChiclets(RenderChicletsActionTypes.blank, this);
-        });
-        break;
-    }
+    $("select").each((ndx, el) => {
+      handleFreightTerms(el, keyValuePairs);
+    });
+    $(DOCIT_TAG).each((ndx, el) => {
+      const targetString = assignTargetString(el);
+      const sortedKeyValuePairs = getEditDistanceAndSort(
+        keyValuePairs,
+        targetString,
+        "lc substring"
+      );
+      const elText = $(el).prop("value");
+      if (!!!elText && action == PopulateFormsActionTypes.overwriteBlank) {
+        if (hasGoodHighestMatch(sortedKeyValuePairs)) {
+          renderChiclets(
+            RenderChicletsActionTypes.value,
+            el,
+            sortedKeyValuePairs[0]
+          );
+          $(el).prop("value", sortedKeyValuePairs[0]["value"]);
+        } else {
+          renderChiclets(RenderChicletsActionTypes.blank, el);
+          $(el).prop("value", null);
+        }
+      }
+    });
     window.addEventListener("resize", positionAllMounters); // no need remove listener, as identical listeners are automatically discarded
+  });
+};
+
+export const populateBlankChicklets = () => {
+  $(DOCIT_TAG).each(function () {
+    renderChiclets(RenderChicletsActionTypes.blank, this);
   });
 };
 
