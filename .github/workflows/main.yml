@@ -16,7 +16,7 @@ jobs:
       - name: npm install and build
         run: |
           cd lambda
-          yarn install --frozen-lockfile
+          yarn install
           yarn build
         env:
           CI: true
