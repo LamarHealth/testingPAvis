@@ -3,7 +3,6 @@
     "version": "1.0.0",
     "main": "index.js",
     "copyright": "© Copyright Alex Reibman",
-    "license": "UNLICENSED",
     "private": true,
     "dependencies": {
         "@babel/cli": "^7.10.3",
