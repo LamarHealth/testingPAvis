@@ -19,7 +19,11 @@
     "express-pino-logger": "^5.0.0",
     "gm": "^1.23.1",
     "multer": "^1.4.2",
-    "pino": "^6.4.0"
+    "pino": "^6.4.0",
+    "jade": "*",
+    "mysql": "*",
+    "async": "*",
+    "node-uuid": "*"
   },
   "scripts": {
     "build": "babel . --ignore node_modules,build --out-dir build",
