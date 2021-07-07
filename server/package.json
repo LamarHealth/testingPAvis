@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "copyright": "© Copyright Alex Reibman",
   "license": "UNLICENSED",
   "private": true,
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "build": "babel . --ignore node_modules,build --out-dir build",
-    "start": "nodemon --exec babel-node server.js",
+    "start": "node app.js",
     "start:prod": "node build/server.js",
     "test": "jest"
   },
