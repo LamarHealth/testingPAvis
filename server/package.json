@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "copyright": "© Copyright Alex Reibman",
+  "description": "DocIt backend server",
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
