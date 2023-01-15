@@ -1,26 +1,34 @@
 {
-  "short_name": "DocIt",
-  "name": "DocIt",
-  "version": "1.0.4",
-  "manifest_version": 2,
-  "description": "DocIt enables users to fill out web forms with OCR data",
-  "content_scripts": [
-    {
-      "matches": [
-        "*://*.herokuapp.com/*",
-        "*://*.libertygl.com/*",
-        "*://libertygl.com/*"
-      ],
-      "js": ["./main.js"],
-      "css": ["/main.css"]
-    }
-  ],
-  "browser_action": {
-    "default_title": "open the popup"
-  },
-  "background": {
-    "scripts": ["background.js"]
-  },
-  "permissions": ["storage"],
-  "web_accessible_resources": ["docview.html"]
+    "short_name": "DocIt",
+    "name": "DocIt",
+    "version": "1.0.4",
+    "manifest_version": 2,
+    "description": "DocIt enables users to fill out web forms with OCR data",
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "./main.js"
+            ],
+            "css": [
+                "/main.css"
+            ]
+        }
+    ],
+    "browser_action": {
+        "default_title": "open the popup"
+    },
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "permissions": [
+        "storage"
+    ],
+    "web_accessible_resources": [
+        "docview.html"
+    ]
 }

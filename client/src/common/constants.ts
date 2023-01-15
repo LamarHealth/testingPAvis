@@ -52,8 +52,8 @@ export const API_PATH =
     : process.env.REACT_APP_LOCAL === envVars.LIBERTY // Extension is packaged for Liberty
     ? "https://liberty-docit-demo.herokuapp.com"
     : process.env.REACT_APP_LOCAL === envVars.BUILD // Extension is packaged for general usage
-    ? "https://docit-web.herokuapp.com"
-    : "https://docit-web.herokuapp.com"; // Default to live path
+    ? "http://localhost:8080"
+    : "http://localhost:8080"; // Default to live path
 
 const FILTER_ENABLED = process.env.REACT_APP_FILTER?.toLowerCase() === "true";
 
