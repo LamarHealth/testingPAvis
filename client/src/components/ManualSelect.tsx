@@ -75,7 +75,25 @@ interface ManualSelectNewTabProps {
   docData?: KeyValuesByDoc[];
 }
 
-export const KonvaModalContext = createContext({} as any);
+interface KanvaModalContextProps {
+  image: CanvasImageSource | undefined;
+  currentLinesGeometry: LinesGeometry[];
+  docImageDimensions: DocImageDimensions;
+  linesSelection: LinesSelection;
+  inputVal: string;
+  docImageURL: DocImageURL;
+  errorLine: string | null;
+  linesSelectionDispatch: React.Dispatch<LinesSelectionReducerAction>;
+  inputValDispatch: React.Dispatch<InputValAction>;
+  handleSubmitAndClear: () => void;
+  handleClear: () => void;
+  setDocImageDimensions: React.Dispatch<
+    React.SetStateAction<DocImageDimensions>
+  >;
+  setErrorLine: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+export const KonvaModalContext = createContext({} as KanvaModalContextProps);
 
 const linesSelectionReducer = (
   state: LinesSelection,
@@ -157,12 +175,12 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   const konvaModalOpen = props.isInNewTab
     ? props.konvaModalOpen
     : konvaModalOpenFromStore;
-  const selectedFile = (props.isInNewTab
-    ? props.selectedFile
-    : selectedFileFromStore) as Uuid;
-  const docData = (props.isInNewTab
-    ? props.docData
-    : docDataFromStore) as KeyValuesByDoc[];
+  const selectedFile = (
+    props.isInNewTab ? props.selectedFile : selectedFileFromStore
+  ) as Uuid;
+  const docData = (
+    props.isInNewTab ? props.docData : docDataFromStore
+  ) as KeyValuesByDoc[];
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]

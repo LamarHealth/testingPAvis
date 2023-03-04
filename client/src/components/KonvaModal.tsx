@@ -179,31 +179,30 @@ const Polygon = ({
   );
 };
 
-function findMissingLine(
+const findMissingLine = (
   linesSelectionToCheck: LinesSelection,
   linesSelectionToCheckAgainst: LinesSelection
-) {
+) => {
   return Object.entries(linesSelectionToCheck).filter(
     (line) => !linesSelectionToCheckAgainst[line[0]]
   )[0][1];
-}
+};
 
-function usePreviousLinesSelection(value: LinesSelection) {
+const usePreviousLinesSelection = (value: LinesSelection) => {
   const ref = useRef(undefined as LinesSelection | undefined);
   useEffect(() => {
     ref.current = { ...value };
   });
   return ref.current as LinesSelection;
-}
+};
 
 const Header = ({
   docImageDimensions,
 }: {
   docImageDimensions: DocImageDimensions;
 }) => {
-  const { errorLine, handleSubmitAndClear, handleClear } = useContext(
-    KonvaModalContext
-  );
+  const { errorLine, handleSubmitAndClear, handleClear } =
+    useContext(KonvaModalContext);
   const {
     inputElRef,
     linesSelection,
