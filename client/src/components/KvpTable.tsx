@@ -145,9 +145,10 @@ const ButtonsCell = (props: {
     setUnalteredKeyValue,
     inputRef,
   } = useContext(TableContext);
-  const [targetString, setDocData] = [
+  const [targetString, setDocData, setKonvaModalOpen] = [
     useStore((state) => state.targetString),
     useStore((state) => state.setDocData),
+    useStore((state) => state.setKonvaModalOpen),
   ];
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
@@ -155,6 +156,19 @@ const ButtonsCell = (props: {
   const isSelected = props.isSelected;
 
   const fillButtonHandler = () => {
+    if (inputRef.current) {
+      inputRef.current.value = keyValue["value"]; // fill the kvp table input
+      setUnalteredKeyValue(keyValue); // let the parent component know what the original string is
+      inputRef.current.focus(); // focus on the text editor
+    }
+  };
+
+  const sourceViewerHandler = () => {
+    setKonvaModalOpen(true);
+
+    // set the highlighed polygon matching the text in the conva modal to the selected text
+    // const matchingGeometry =
+
     if (inputRef.current) {
       inputRef.current.value = keyValue["value"]; // fill the kvp table input
       setUnalteredKeyValue(keyValue); // let the parent component know what the original string is
@@ -220,12 +234,8 @@ const ButtonsCell = (props: {
     <>
       <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
         <FlexCell>
-          <IconButton
-            style={
-              isSelected ? { visibility: "visible" } : { visibility: "hidden" }
-            }
-          >
-            <VisibilityIcon />
+          <IconButton onClick={() => setKonvaModalOpen(true)}>
+            <VisibilityIcon onClick={sourceViewerHandler} />
           </IconButton>
           <FillButton onClick={fillButtonHandler}>Fill</FillButton>
           <IconButton onClick={() => setSoftCollapse(true)}>

@@ -66,9 +66,10 @@ const getChicletDimensions = (
 
 const removeMounter = (target: HTMLElement): void => {
   if (hasDocitMounter(target)) {
-    const oldMounterClassExec = /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
-      target.className
-    ) as RegExpExecArray;
+    const oldMounterClassExec =
+      /(has-docit-mounter-(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b))/.exec(
+        target.className
+      ) as RegExpExecArray;
     const oldMounterClassName = oldMounterClassExec[0];
     const oldMounterID = oldMounterClassName.replace("has-docit-mounter-", "");
     const oldMounter = document.getElementById(
@@ -132,10 +133,8 @@ function positionAllMounters() {
               el.id.includes("docit-accuracy-score-mounter")
             )[0] as HTMLSpanElement)
           : undefined;
-        const {
-          accuracyScoreElHeight,
-          accuracyScoreElWidth,
-        } = getChicletDimensions(inputHeight);
+        const { accuracyScoreElHeight, accuracyScoreElWidth } =
+          getChicletDimensions(inputHeight);
         mounter &&
           positionMounter(
             this,
@@ -157,9 +156,8 @@ export const replaceAndSetNewMounter = (
     inputStyle,
     ComputedDimensionTypes.height
   );
-  const { accuracyScoreElHeight, accuracyScoreElWidth } = getChicletDimensions(
-    inputHeight
-  );
+  const { accuracyScoreElHeight, accuracyScoreElWidth } =
+    getChicletDimensions(inputHeight);
   const positionedParent = target.offsetParent;
 
   // remove the old mounter
@@ -195,7 +193,7 @@ export const populateForms = (
   action: PopulateFormsActionTypes,
   keyValuePairs: KeyValuesByDoc
 ): void => {
-  if (Object.keys(keyValuePairs.keyValuePairs).length == 0) {
+  if (Object.keys(keyValuePairs.keyValuePairs).length === 0) {
     console.error("No Key Value Pairs found");
     return;
   }
@@ -211,7 +209,7 @@ export const populateForms = (
         "lc substring"
       );
       const elText = $(el).prop("value");
-      if (!!!elText && action == PopulateFormsActionTypes.overwriteBlank) {
+      if (!!!elText && action === PopulateFormsActionTypes.overwriteBlank) {
         if (hasGoodHighestMatch(sortedKeyValuePairs)) {
           renderChiclets(
             RenderChicletsActionTypes.value,

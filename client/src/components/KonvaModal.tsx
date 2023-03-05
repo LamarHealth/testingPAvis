@@ -117,7 +117,21 @@ const CursorPointerWrapper = styled.div`
   cursor: pointer;
 `;
 
-const CurrentSelectionContext = createContext({} as any);
+interface CurrentSelectionProps {
+  inputElRef: React.RefObject<HTMLInputElement>;
+  linesSelection: LinesSelection;
+  inputVal: string;
+  linesSelectionDispatch: React.Dispatch<{
+    type: LinesSelectionActionTypes;
+    line: { [key: string]: string };
+  }>;
+  inputValDispatch: React.Dispatch<{
+    type: InputValActionTypes;
+    val: string;
+  }>;
+}
+
+const CurrentSelectionContext = createContext({} as CurrentSelectionProps);
 
 const Polygon = ({
   lineGeometry,
