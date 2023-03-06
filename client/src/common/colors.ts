@@ -31,6 +31,7 @@ export const colors = {
   MANUAL_SELECT_HEADER: "hsla(72, 50%, 87%, 1)",
   MANUAL_SELECT_RECT_STROKE: "hsla(104, 74%, 33%, 1)",
   MANUAL_SELECT_RECT_FILL: "hsla(104, 74%, 33%, 0.4)",
+  MANUAL_SELECT_RECT_FILL_YELLOW: "hsla(60, 100%, 50%, 0.4)",
   MANUAL_SELECT_RECT_HOVER: "hsla(104, 74%, 33%, 0.15)",
   MANUAL_SELECT_RECT_FILL_MOUSEDOWN: "hsla(104, 74%, 33%, 0.65)",
   MANUAL_SELECT_POPOVER_BACKDROP: "hsla(0, 0%, 0%, 0.4)",
@@ -45,10 +46,14 @@ export const colorSwitcher = (
   cssAttribute: string,
   cssPrepends?: string,
   faintColor?: string,
-  accentColor?: string,
+  accentColor?: string
 ) =>
   `${cssAttribute}: ${
     isSelected
-      ? `${cssPrepends ? cssPrepends : ""} ${accentColor ? accentColor: colors.FONT_BLUE}`
-      : `${cssPrepends ? cssPrepends : ""} ${faintColor ? faintColor : colors.DROPZONE_TEXT_GREY}`
+      ? `${cssPrepends ? cssPrepends : ""} ${
+          accentColor ? accentColor : colors.FONT_BLUE
+        }`
+      : `${cssPrepends ? cssPrepends : ""} ${
+          faintColor ? faintColor : colors.DROPZONE_TEXT_GREY
+        }`
   }`;

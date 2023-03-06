@@ -38,7 +38,7 @@ export interface DocImageDimensions {
 }
 
 export interface LinesSelection {
-  [lineID: string]: string;
+  [lineID: string]: string | undefined;
 }
 
 interface RequestWithError {
@@ -220,6 +220,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
 
+  // TODO: Migrate this code so it fetches when we select the document in general, not just when we use manual select
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
     const docID = doc.docID;
@@ -284,7 +285,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     }
 
     // get geometry
-    const linesGeometryResponse: any = await fetch(
+    const linesGeometryResponse = await fetch(
       `${API_PATH}/api/lines-geometry/${docID}/${encodeURIComponent(`
     ${docName}`)}`,
       {
@@ -297,7 +298,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
         setErrorFiles({ [docID]: { geometry: false } });
         const linesGeometry = (
           await linesGeometryResponse.json()
-        ).linesGeometry.map((lineGeometry: any) => {
+        ).linesGeometry.map((lineGeometry: LinesGeometry[]) => {
           //@ts-ignore
           return { ...lineGeometry, ID: uuidv4() };
         });

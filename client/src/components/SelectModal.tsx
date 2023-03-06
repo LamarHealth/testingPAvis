@@ -28,7 +28,7 @@ const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
   z-index: 9;
   max-height: 380px;
-  overflow-x: hidden;
+  overflow-x: scroll;
   overflow-y: scroll;
   width: ${MAIN_MODAL_WIDTH}px;
   border: 1px solid ${colors.MODAL_BORDER};

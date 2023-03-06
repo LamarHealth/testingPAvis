@@ -17,6 +17,7 @@ import Collapse from "@material-ui/core/Collapse";
 import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import VisibilityIcon from "@material-ui/icons/Visibility";
+import { v4 as uuidv4 } from "uuid";
 
 import { colors } from "../common/colors";
 import { API_PATH } from "../common/constants";
@@ -27,6 +28,16 @@ import {
   KeyValuesWithDistance,
   deleteKVPairFromLocalStorage,
 } from "./KeyValuePairs";
+import {
+  KonvaModalContext,
+  LinesGeometry,
+  LinesSelection,
+  LinesSelectionActionTypes,
+  InputValActionTypes,
+} from "./ManualSelect";
+
+import { CurrentSelectionContext } from "./KonvaModal";
+
 import { useStore } from "../contexts/ZustandStore";
 
 const StyledTableCellLeft = styled(TableCell)`
@@ -92,7 +103,14 @@ const FlexCell = styled.div`
   justify-content: space-between;
 `;
 
-const TableHeadContext = createContext({} as any);
+interface TableContextProps {
+  matchArrow: string;
+  matchScoreSortHandler: () => void;
+  alphabetArrow: string;
+  alphabeticSortHandler: () => void;
+}
+
+const TableHeadContext = createContext({} as TableContextProps);
 
 const TableHeadComponent = () => {
   const {
@@ -145,15 +163,33 @@ const ButtonsCell = (props: {
     setUnalteredKeyValue,
     inputRef,
   } = useContext(TableContext);
-  const [targetString, setDocData, setKonvaModalOpen] = [
+
+  const [currentLinesGeometry, setCurrentLinesGeometry] = useState<
+    LinesGeometry[]
+  >([]);
+
+  // Fill polygon line in modal when text is selected
+  const [targetString, setDocData, setKonvaModalOpen, setSelectedLine] = [
     useStore((state) => state.targetString),
     useStore((state) => state.setDocData),
     useStore((state) => state.setKonvaModalOpen),
+    useStore((state) => state.setSelectedLine),
   ];
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
   const isSelected = props.isSelected;
+
+  const fillCurrentSelection = () => {
+    console.log("Getting fill???");
+
+    // Fetch geometry of lines from docdata from server
+    console.log("Beginning fetch...");
+    fetchGeometryData();
+
+    // open modal
+    setKonvaModalOpen(true);
+  };
 
   const fillButtonHandler = () => {
     if (inputRef.current) {
@@ -163,16 +199,52 @@ const ButtonsCell = (props: {
     }
   };
 
-  const sourceViewerHandler = () => {
-    setKonvaModalOpen(true);
+  const fetchGeometryData = async () => {
+    console.log("fetching geometry data");
+    // get geometry
+    const linesGeometryResponse = await fetch(
+      `${API_PATH}/api/lines-geometry/${
+        selectedDocData.docID
+      }/${encodeURIComponent(`
+        ${selectedDocData.docName}`)}`,
+      {
+        method: "GET",
+      }
+    );
+    // console.log("linesGeometryResponse", linesGeometryResponse);
 
-    // set the highlighed polygon matching the text in the conva modal to the selected text
-    // const matchingGeometry =
-
-    if (inputRef.current) {
-      inputRef.current.value = keyValue["value"]; // fill the kvp table input
-      setUnalteredKeyValue(keyValue); // let the parent component know what the original string is
-      inputRef.current.focus(); // focus on the text editor
+    switch (linesGeometryResponse.status) {
+      case 200:
+        console.log("200");
+        const linesGeometry = (
+          await linesGeometryResponse.json()
+        ).linesGeometry.map((lineGeometry: any) => {
+          console.log("mapping...");
+          return { ...lineGeometry, ID: uuidv4() };
+        });
+        console.log("set geometry to", linesGeometry);
+        setCurrentLinesGeometry(linesGeometry);
+        console.log("complete");
+        break;
+      case 410:
+        const statusMessage = (await linesGeometryResponse.json()).status;
+        // setErrorFiles({
+        //   [docID]: {
+        //     geometry: true,
+        //     errorMessage: statusMessage,
+        //     errorCode: linesGeometryResponse.status,
+        //   },
+        // });
+        console.log("ERROR SETTING GEOMETRY");
+        break;
+      default:
+        // setErrorFiles({
+        //   [docID]: {
+        //     geometry: true,
+        //     errorCode: linesGeometryResponse.status,
+        //   },
+        // });
+        console.log("BIGGER ERROR SETTING GEOMETRY");
     }
   };
 
@@ -190,6 +262,7 @@ const ButtonsCell = (props: {
     setSoftCollapse(false);
 
     // query server
+    // !!!! DOC NAME CAN BE USED HERE
     const docName = selectedDocData.docName;
     const docType = selectedDocData.docType;
     const docID = selectedDocData.docID;
@@ -223,6 +296,36 @@ const ButtonsCell = (props: {
     }
   };
 
+  // After the geometry is loaded, update the filled polygon
+  useEffect(() => {
+    console.log("Current lines geometry changed");
+
+    if (currentLinesGeometry.length > 0) {
+      console.log("currentLinesGeometry", currentLinesGeometry);
+      console.log("keyValue", keyValue);
+
+      const lineGeometry = currentLinesGeometry.find((line) =>
+        line.Text.includes(keyValue["value"])
+      );
+      console.log("lineGeometry", lineGeometry);
+      // set line in zustand store
+      if (lineGeometry) {
+        const line = { [lineGeometry.ID]: lineGeometry.Text };
+        console.log("the line", line);
+        setSelectedLine(line);
+      }
+
+      // if (lineGeometry) {
+      //   const line = { [lineGeometry.ID]: lineGeometry.Text };
+      //   linesSelectionDispatch({
+      //     type: LinesSelectionActionTypes.select,
+      //     line,
+      //   });
+      //   console.log("line", line);
+      // }
+    }
+  }, [currentLinesGeometry]);
+
   // cleanup
   useEffect(() => {
     setHardCollapse(false);
@@ -234,8 +337,8 @@ const ButtonsCell = (props: {
     <>
       <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
         <FlexCell>
-          <IconButton onClick={() => setKonvaModalOpen(true)}>
-            <VisibilityIcon onClick={sourceViewerHandler} />
+          <IconButton onClick={() => fillCurrentSelection()}>
+            <VisibilityIcon onClick={() => fillCurrentSelection()} />
           </IconButton>
           <FillButton onClick={fillButtonHandler}>Fill</FillButton>
           <IconButton onClick={() => setSoftCollapse(true)}>

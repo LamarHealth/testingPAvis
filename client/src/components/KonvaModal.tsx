@@ -131,7 +131,9 @@ interface CurrentSelectionProps {
   }>;
 }
 
-const CurrentSelectionContext = createContext({} as CurrentSelectionProps);
+export const CurrentSelectionContext = createContext(
+  {} as CurrentSelectionProps
+);
 
 const Polygon = ({
   lineGeometry,
@@ -141,10 +143,24 @@ const Polygon = ({
   docImageDimensions: DocImageDimensions;
 }) => {
   const [color, setColor] = useState("transparent");
+  const [isFilled, setIsFilled] = useState(false as boolean);
   const { inputElRef, linesSelection, linesSelectionDispatch } = useContext(
     CurrentSelectionContext
   );
-  const isFilled = linesSelection[lineGeometry.ID] ? true : false;
+
+  // useEffect for filled logic
+  useEffect(() => {
+    console.log("In the useeffect hook");
+    // const shouldFill = linesSelection[lineGeometry.ID] ? true : false;
+
+    console.log(Object.values(linesSelection)[0]);
+    const shouldFill = Object.values(linesSelection)[0] === lineGeometry.Text;
+
+    shouldFill && console.log("!!!!!!", linesSelection, lineGeometry);
+    shouldFill && setColor(colors.MANUAL_SELECT_RECT_FILL_YELLOW);
+    setIsFilled(linesSelection[lineGeometry.ID] ? true : false);
+  }, [linesSelection]);
+
   const [isMouseDown, setIsMouseDown] = useState(false as boolean);
 
   const fillAndSetCurrentSelection = () => {
@@ -339,8 +355,26 @@ export const KonvaModal = (props: KonvaModalProps) => {
     inputVal,
     inputValDispatch,
   } = useContext(KonvaModalContext);
-  const setKonvaModalOpen = useStore((state) => state.setKonvaModalOpen);
+  const [setKonvaModalOpen, selectedLine] = [
+    useStore((state) => state.setKonvaModalOpen),
+    useStore((state) => state.selectedLine),
+  ];
   const inputElRef = useRef(null as HTMLInputElement | null);
+
+  // if selectedLine is not null, then replace lineSelection with selectedLine
+  useEffect(() => {
+    console.log(
+      "in the use effect in KonvaModal. Detected a change to ",
+      selectedLine
+    );
+    if (selectedLine) {
+      console.log("Dispatching");
+      linesSelectionDispatch({
+        type: LinesSelectionActionTypes.select,
+        line: selectedLine,
+      });
+    }
+  }, [selectedLine, linesSelectionDispatch]);
 
   return (
     <>

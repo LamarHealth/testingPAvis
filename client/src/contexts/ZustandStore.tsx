@@ -6,6 +6,7 @@ import {
   getKeyValuePairsByDoc,
   KeyValuesByDoc,
 } from "../components/KeyValuePairs";
+import { LinesSelection } from "../components/ManualSelect";
 
 /** e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} } */
 export interface ErrorFile {
@@ -30,6 +31,7 @@ type State = {
   targetString: string;
   kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement;
   errorFiles: ErrorFile; // not just one error file, but an object of error files
+  selectedLine: LinesSelection;
   setOpenDocInNewTab: (openDocInNewTab: boolean) => void;
   setSelectedFile: (selectedFile: Uuid) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
@@ -44,6 +46,7 @@ type State = {
     kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement
   ) => void;
   setErrorFiles: (errorFile: ErrorFile) => void;
+  setSelectedLine: (selectedLine: LinesSelection) => void;
 };
 
 export const useStore = create<State>((set) => ({
@@ -57,6 +60,7 @@ export const useStore = create<State>((set) => ({
   targetString: "",
   kvpTableAnchorEl: null,
   errorFiles: {},
+  selectedLine: {},
   setOpenDocInNewTab: (openDocInNewTab) =>
     set((state) => ({ ...state, openDocInNewTab })),
   setSelectedFile: (selectedFile) =>
@@ -97,6 +101,8 @@ export const useStore = create<State>((set) => ({
       };
     });
   },
+  setSelectedLine: (selectedLine) =>
+    set((state) => ({ ...state, selectedLine })),
 }));
 
 export const checkFileError = (errorFiles: ErrorFile, selectedFile: Uuid) => {

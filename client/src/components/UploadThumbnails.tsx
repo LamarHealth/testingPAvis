@@ -173,7 +173,8 @@ const FileStatus = (props: any) => {
             };
             addDocToLocalStorage(postSuccessResponse.documentInfo).then(() => {
               // update loc stor then set the global var to reflect that
-              setDocData(getKeyValuePairsByDoc());
+              const keyValuePairsByDoc = getKeyValuePairsByDoc();
+              setDocData(keyValuePairsByDoc);
             });
             setDocID(postSuccessResponse.documentInfo.docID);
             fileDispatch(postSuccessResponse);
