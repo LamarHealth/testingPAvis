@@ -1,9 +1,9 @@
 {
-    "short_name": "DocIt",
-    "name": "DocIt",
-    "version": "1.0.4",
+    "short_name": "Speedify",
+    "name": "Speedify.ai",
+    "version": "2.0.0",
     "manifest_version": 2,
-    "description": "DocIt enables users to fill out web forms with OCR data",
+    "description": "Speedify gives your browser autofill everywhere. Upload any unstructured file (PDF, csv, etc.) and Speedify will automatically extract the data and fill it into any form.",
     "content_scripts": [
         {
             "matches": [

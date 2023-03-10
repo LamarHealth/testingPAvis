@@ -157,8 +157,7 @@ const Polygon = ({
     const shouldFill = Object.values(linesSelection)[0] === lineGeometry.Text;
 
     shouldFill && console.log("!!!!!!", linesSelection, lineGeometry);
-    shouldFill && setColor(colors.MANUAL_SELECT_RECT_FILL_YELLOW);
-    setIsFilled(linesSelection[lineGeometry.ID] ? true : false);
+    setIsFilled(shouldFill);
   }, [linesSelection]);
 
   const [isMouseDown, setIsMouseDown] = useState(false as boolean);
