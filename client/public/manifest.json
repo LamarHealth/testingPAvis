@@ -3,7 +3,7 @@
     "name": "Speedify.ai",
     "version": "2.0.0",
     "manifest_version": 2,
-    "description": "Speedify gives your browser autofill everywhere. Upload any unstructured file (PDF, csv, etc.) and Speedify will automatically extract the data and fill it into any form.",
+    "description": "Speedify gives your browser autofill everywhere. Sync your data, and automatically fill it to any form",
     "content_scripts": [
         {
             "matches": [
