@@ -52,6 +52,7 @@ const Container = styled.div`
 export interface IFileWithPreview {
   file: File;
   preview: string;
+  index: number;
 }
 
 export const StyledDropzone = () => {

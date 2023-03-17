@@ -1,4 +1,5 @@
 import React, {
+  Dispatch,
   useState,
   useEffect,
   useReducer,
@@ -59,7 +60,7 @@ const ThumbnailContainer = styled.div`
 
 const ThumbInner = styled.div`
   display: flex;
-  minwidth: 0;
+  min-width: 0;
   overflow: hidden;
   position: relative;
 `;
@@ -100,10 +101,15 @@ const RefreshIcon = styled(LoopIcon)`
   }
 `;
 
-const addDocToLocalStorage = (documentInfo: any) => {
+interface DocumentInfo {
+  docID: string;
+  [key: string]: any;
+}
+
+const addDocToLocalStorage = (documentInfo: DocumentInfo): Promise<void> => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let updatedList = Array.isArray(storedDocs)
-    ? storedDocs.filter((item: any) => {
+    ? storedDocs.filter((item: DocumentInfo) => {
         return typeof item === "object";
       })
     : [];
@@ -115,7 +121,12 @@ const addDocToLocalStorage = (documentInfo: any) => {
   });
 };
 
-const FileStatus = (props: any) => {
+interface FileStatusProps {
+  fileWithPreview: IFileWithPreview;
+  onComplete: Dispatch<Action>;
+}
+
+const FileStatus = (props: FileStatusProps) => {
   const currentFile = props.fileWithPreview.file;
   const index = props.fileWithPreview.index;
   const [setDocData] = [useStore((state) => state.setDocData)];
@@ -128,16 +139,11 @@ const FileStatus = (props: any) => {
   const [docID, setDocID] = useState(undefined as string | undefined);
 
   // canvas reference so usePdf hook can select the canvas
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const convertToImage = () => {
-    URL.revokeObjectURL(thumbnailSrc); // revoke URL to avoid memory leak
-    const shadowRootWrapper: any = document.querySelector(
-      ".shadow-root-for-sidebar"
-    );
-    const shadowRoot: any = shadowRootWrapper.children[0].shadowRoot;
-    const canvas: any = shadowRoot.querySelector(`#pdf-canvas${index}`);
-    const dataURL = canvas.toDataURL();
+    const canvas = canvasRef.current;
+    const dataURL = canvas ? canvas.toDataURL() : "";
     setThumbnailSrc(dataURL);
   };
 
@@ -167,7 +173,10 @@ const FileStatus = (props: any) => {
         switch (result.status) {
           case 200:
             // Add document info to list
-            const postSuccessResponse: any = {
+            const postSuccessResponse: {
+              type: string;
+              documentInfo: DocumentInfo;
+            } = {
               type: "append",
               documentInfo: await result.json(),
             };
@@ -238,9 +247,11 @@ const FileStatus = (props: any) => {
   );
 };
 
+type Action = "decrement" | "increment" | "reset";
+
 export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
   const progressInitialState = props.files.length;
-  const reducer = (state: number, action: string) => {
+  const reducer = (state: number, action: Action): number => {
     switch (action) {
       case "decrement":
         return state - 1;
