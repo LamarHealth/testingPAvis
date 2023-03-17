@@ -1,7 +1,7 @@
 {
     "short_name": "Speedify.ai",
     "name": "Speedify.ai: ChatPT + OCR + Autofill",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "manifest_version": 2,
     "description": "Speedify gives your browser autofill everywhere. Sync your data, and automatically fill it to any form",
     "content_scripts": [
@@ -18,7 +18,13 @@
         }
     ],
     "browser_action": {
-        "default_title": "open the popup"
+        "default_title": "open the popup",
+        "default_icon": "icon128.png"
+    },
+    "icons": {
+        "16": "./icon16.png",
+        "48": "./icon48.png",
+        "128": "./icon128.png"
     },
     "background": {
         "scripts": [
