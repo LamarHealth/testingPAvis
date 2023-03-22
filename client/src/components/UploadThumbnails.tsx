@@ -11,9 +11,7 @@ import styled from "styled-components";
 import Clear from "@material-ui/icons/Clear";
 import CheckIcon from "@material-ui/icons/Check";
 import LoopIcon from "@material-ui/icons/Loop";
-
 import LinearProgress from "@material-ui/core/LinearProgress";
-
 import Typography from "@material-ui/core/Typography";
 
 import { CountContext, FileContext } from "./DocViewer";
@@ -23,6 +21,17 @@ import { PAGE_SCALE, API_PATH } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { addThumbsLocalStorage } from "./docThumbnails";
+
+import { openDB } from "idb";
+
+async function setupIndexedDB() {
+  const db = await openDB("myDatabase", 1, {
+    upgrade(database) {
+      database.createObjectStore("files");
+    },
+  });
+  return db;
+}
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -128,6 +137,7 @@ interface FileStatusProps {
 
 const FileStatus = (props: FileStatusProps) => {
   const currentFile = props.fileWithPreview.file;
+  const currentFilePreview = props.fileWithPreview.preview;
   const index = props.fileWithPreview.index;
   const [setDocData] = [useStore((state) => state.setDocData)];
   const { countDispatch } = useContext(CountContext);
@@ -160,45 +170,80 @@ const FileStatus = (props: FileStatusProps) => {
   const uploadImageFile = useCallback(
     async (file: File) => {
       // Increment load counter
+      console.log("currentFilePreview");
+      console.log(currentFilePreview);
+
       countDispatch("increment");
 
-      const formData = new FormData();
-      formData.append("myfile", file);
+      console.log(file);
+
+      const fileURL = currentFilePreview;
+
+      // step 1:
+      // file to array buffer
+
+      const reader = new FileReader();
+
+      reader.onload = async (loadEvent: ProgressEvent<FileReader>) => {
+        const arrayBuffer = loadEvent.target!.result as ArrayBuffer;
+
+        const db = await setupIndexedDB();
+        const fileId = file.name;
+        await db.put("files", arrayBuffer, fileId);
+        db.close();
+
+        // notify when indexedDB is done saving and send to background script
+        chrome.runtime.sendMessage({ message: "fileUploaded", fileId: fileId });
+      };
+
+      // process file
+      reader.readAsArrayBuffer(file);
+
+      console.log(fileURL);
       try {
-        const result = await fetch(`${API_PATH}/api/upload_status`, {
-          method: "POST",
-          body: formData,
-        });
-        // Status code cases
-        switch (result.status) {
-          case 200:
-            // Add document info to list
-            const postSuccessResponse: {
-              type: string;
-              documentInfo: DocumentInfo;
-            } = {
-              type: "append",
-              documentInfo: await result.json(),
-            };
-            addDocToLocalStorage(postSuccessResponse.documentInfo).then(() => {
-              // update loc stor then set the global var to reflect that
-              const keyValuePairsByDoc = getKeyValuePairsByDoc();
-              setDocData(keyValuePairsByDoc);
-            });
-            setDocID(postSuccessResponse.documentInfo.docID);
-            fileDispatch(postSuccessResponse);
-            setUploadStatus(200);
-            break;
-          case 405:
-            setUploadStatus(405);
-            window.alert("file size exceeds > 5mb, cannot use OCR.");
-            break;
-          case 429:
-            setUploadStatus(429);
-            break;
-          default:
-            setUploadStatus(result.status);
-        }
+        // send to background script to upload
+        chrome.runtime.sendMessage(
+          {
+            type: "upload",
+            file: fileURL,
+          },
+
+          (response) => {
+            console.log("response", response);
+            // Status code cases
+            switch (response.status) {
+              case 200:
+                // Add document info to list
+                const postSuccessResponse: {
+                  type: string;
+                  documentInfo: DocumentInfo;
+                } = {
+                  type: "append",
+                  documentInfo: response.json(),
+                };
+                addDocToLocalStorage(postSuccessResponse.documentInfo).then(
+                  () => {
+                    // update loc stor then set the global var to reflect that
+                    const keyValuePairsByDoc = getKeyValuePairsByDoc();
+                    setDocData(keyValuePairsByDoc);
+                  }
+                );
+                setDocID(postSuccessResponse.documentInfo.docID);
+                fileDispatch(postSuccessResponse);
+                setUploadStatus(200);
+                break;
+              case 405:
+                setUploadStatus(405);
+                window.alert("file size exceeds > 5mb, cannot use OCR.");
+                break;
+              case 429:
+                setUploadStatus(429);
+                break;
+              default:
+                setUploadStatus(response.status);
+            }
+          }
+        );
       } catch {
         setUploadStatus(400);
       }

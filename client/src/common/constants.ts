@@ -55,7 +55,7 @@ export const API_PATH =
     ? "https://docit-server.fly.dev"
     : "http://localhost:8080"; // Default to live path
 
-const FILTER_ENABLED = process.env.REACT_APP_FILTER?.toLowerCase() === "true";
+const FILTER_ENABLED = process.env.REACT_APP_FILTER?.toLowerCase() === "false";
 
 const filterName = FILTER_ENABLED ? '[data-docit-input="true"]' : "";
 export const DOCIT_TAG = `input${filterName}, textarea${filterName}`;
