@@ -1,44 +1,46 @@
 /* global chrome */
-import { openDB } from "idb";
 
-async function setupIndexedDB() {
-  const db = await openDB("myDatabase", 1, {
-    upgrade(database) {
+function setupIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("myDatabase", 1);
+    request.onupgradeneeded = (event) => {
+      const database = event.target.result;
       database.createObjectStore("files");
-    },
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
-  return db;
 }
 
-async function postFile(file) {
-  const formData = new FormData();
-  formData.append("pdfFile", file);
-
-  const response = await fetch("https://your-api.example.com/upload", {
-    statusCode: 200,
-    method: "POST",
-    body: formData,
+async function getFileFromIndexedDB(fileId) {
+  const db = await setupIndexedDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["files"], "readonly");
+    const objectStore = transaction.objectStore("files");
+    const request = objectStore.get(fileId);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
-
-  return response;
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.message === "fileUploaded") {
     const fileId = request.fileId;
+    console.log(fileId);
 
     // Retrieve the ArrayBuffer from IndexedDB
-    const db = await setupIndexedDB();
-    const arrayBuffer = await db.get("files", fileId);
-    db.close();
-
+    const arrayBuffer = await getFileFromIndexedDB(fileId);
+    console.log(arrayBuffer);
     // Convert the ArrayBuffer back to a Blob (PDF)
     const pdfFile = new File([arrayBuffer], `${fileId}.pdf`, {
       type: "application/pdf",
     });
+    console.log("File uploaded to API:");
+    console.log(pdfFile);
 
+    // Create a FormData object and append the PDF file to it
     const formData = new FormData();
-    formData.append("pdfFile", pdfFile);
+    formData.append("pdf", pdfFile);
 
     // Send a POST request with the file to the API endpoint
     fetch(
@@ -46,7 +48,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       {
         statusCode: 200,
         method: "POST",
-        body: pdfFile,
+        body: formData,
       }
     )
       .then((res) => {
@@ -65,7 +67,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         console.log(err);
       });
 
-    console.log("File uploaded to API:", response);
+    console.log("File uploaded to API:");
+    return true;
   }
 });
 
