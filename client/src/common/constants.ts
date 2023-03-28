@@ -62,3 +62,5 @@ export const DOCIT_TAG = `input${filterName}, textarea${filterName}`;
 export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;
 export const ACC_SCORE_SMALL = 7;
+
+export const indexedDBName = "files_db";

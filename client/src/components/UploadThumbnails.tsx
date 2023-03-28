@@ -17,21 +17,21 @@ import Typography from "@material-ui/core/Typography";
 import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
-import { PAGE_SCALE, API_PATH } from "../common/constants";
+import { PAGE_SCALE, indexedDBName } from "../common/constants";
 import { useStore } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { addThumbsLocalStorage } from "./docThumbnails";
 
 import { openDB } from "idb";
 
-async function setupIndexedDB() {
-  const db = await openDB("myDatabase", 1, {
+const setupIndexedDB = async () => {
+  const db = await openDB(indexedDBName, 1, {
     upgrade(database) {
       database.createObjectStore("files");
     },
   });
   return db;
-}
+};
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -177,76 +177,80 @@ const FileStatus = (props: FileStatusProps) => {
 
       console.log(file);
 
-      const fileURL = currentFilePreview;
-
       // step 1:
       // file to array buffer
 
       const reader = new FileReader();
 
-      reader.onload = async (loadEvent: ProgressEvent<FileReader>) => {
-        const arrayBuffer = loadEvent.target!.result as ArrayBuffer;
+      reader.onloadend = async (loadEvent: ProgressEvent<FileReader>) => {
+        if (reader.readyState === FileReader.DONE) {
+          const arrayBuffer = reader.result as ArrayBuffer;
+          console.log(loadEvent);
+          console.log(loadEvent.target);
+          console.log(arrayBuffer);
+          const db = await setupIndexedDB();
+          const fileId = file.name;
+          await db.put("files", arrayBuffer, fileId);
+          db.close();
 
-        const db = await setupIndexedDB();
-        const fileId = file.name;
-        await db.put("files", arrayBuffer, fileId);
-        db.close();
-
-        // notify when indexedDB is done saving and send to background script
-        chrome.runtime.sendMessage({ message: "fileUploaded", fileId: fileId });
+          // notify when indexedDB is done saving and send to background script
+          chrome.runtime.sendMessage({
+            message: "fileUploaded",
+            fileId: fileId,
+          });
+        }
       };
 
-      // process file
       reader.readAsArrayBuffer(file);
 
-      console.log(fileURL);
-      try {
-        // send to background script to upload
-        chrome.runtime.sendMessage(
-          {
-            type: "upload",
-            file: fileURL,
-          },
+      // console.log(fileURL);
+      // try {
+      //   // send to background script to upload
+      //   chrome.runtime.sendMessage(
+      //     {
+      //       type: "upload",
+      //       file: fileURL,
+      //     },
 
-          (response) => {
-            console.log("response", response);
-            // Status code cases
-            switch (response.status) {
-              case 200:
-                // Add document info to list
-                const postSuccessResponse: {
-                  type: string;
-                  documentInfo: DocumentInfo;
-                } = {
-                  type: "append",
-                  documentInfo: response.json(),
-                };
-                addDocToLocalStorage(postSuccessResponse.documentInfo).then(
-                  () => {
-                    // update loc stor then set the global var to reflect that
-                    const keyValuePairsByDoc = getKeyValuePairsByDoc();
-                    setDocData(keyValuePairsByDoc);
-                  }
-                );
-                setDocID(postSuccessResponse.documentInfo.docID);
-                fileDispatch(postSuccessResponse);
-                setUploadStatus(200);
-                break;
-              case 405:
-                setUploadStatus(405);
-                window.alert("file size exceeds > 5mb, cannot use OCR.");
-                break;
-              case 429:
-                setUploadStatus(429);
-                break;
-              default:
-                setUploadStatus(response.status);
-            }
-          }
-        );
-      } catch {
-        setUploadStatus(400);
-      }
+      //     (response) => {
+      //       console.log("response", response);
+      //       // Status code cases
+      //       switch (response.status) {
+      //         case 200:
+      //           // Add document info to list
+      //           const postSuccessResponse: {
+      //             type: string;
+      //             documentInfo: DocumentInfo;
+      //           } = {
+      //             type: "append",
+      //             documentInfo: response.json(),
+      //           };
+      //           addDocToLocalStorage(postSuccessResponse.documentInfo).then(
+      //             () => {
+      //               // update loc stor then set the global var to reflect that
+      //               const keyValuePairsByDoc = getKeyValuePairsByDoc();
+      //               setDocData(keyValuePairsByDoc);
+      //             }
+      //           );
+      //           setDocID(postSuccessResponse.documentInfo.docID);
+      //           fileDispatch(postSuccessResponse);
+      //           setUploadStatus(200);
+      //           break;
+      //         case 405:
+      //           setUploadStatus(405);
+      //           window.alert("file size exceeds > 5mb, cannot use OCR.");
+      //           break;
+      //         case 429:
+      //           setUploadStatus(429);
+      //           break;
+      //         default:
+      //           setUploadStatus(response.status);
+      //       }
+      //     }
+      //   );
+      // } catch {
+      //   setUploadStatus(400);
+      // }
 
       // Decrement load counter
       countDispatch("decrement");
