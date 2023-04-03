@@ -1,9 +1,8 @@
 /* global chrome */
-import { indexedDBName } from "./constants";
 
 function setupIndexedDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(indexedDBName, 1);
+    const request = indexedDB.open('files_db', 1);
     request.onupgradeneeded = (event) => {
       const database = event.target.result;
       database.createObjectStore("files");

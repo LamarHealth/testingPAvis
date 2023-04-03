@@ -139,7 +139,7 @@ const FileStatus = (props: FileStatusProps) => {
   const currentFile = props.fileWithPreview.file;
   const currentFilePreview = props.fileWithPreview.preview;
   const index = props.fileWithPreview.index;
-  const [setDocData] = [useStore((state) => state.setDocData)];
+  const [setDocData] = [useStore((state: any) => state.setDocData)];
   const { countDispatch } = useContext(CountContext);
   const { fileDispatch } = useContext(FileContext);
   const [uploadStatus, setUploadStatus] = useState(Number);

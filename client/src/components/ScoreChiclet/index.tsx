@@ -59,11 +59,11 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
     setTargetString,
     setKvpTableAnchorEl,
   ] = [
-    useStore((state) => state.selectedChiclet),
-    useStore((state) => state.setSelectedChiclet),
-    useStore((state) => state.setEventTarget),
-    useStore((state) => state.setTargetString),
-    useStore((state) => state.setKvpTableAnchorEl),
+    useStore((state: any) => state.selectedChiclet),
+    useStore((state: any) => state.setSelectedChiclet),
+    useStore((state: any) => state.setEventTarget),
+    useStore((state: any) => state.setTargetString),
+    useStore((state: any) => state.setKvpTableAnchorEl),
   ];
 
   const wrapperClasses = wrapperFlexStyles();
@@ -130,11 +130,11 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
     setTargetString,
     setKvpTableAnchorEl,
   ] = [
-    useStore((state) => state.selectedChiclet),
-    useStore((state) => state.setSelectedChiclet),
-    useStore((state) => state.setEventTarget),
-    useStore((state) => state.setTargetString),
-    useStore((state) => state.setKvpTableAnchorEl),
+    useStore((state: any) => state.selectedChiclet),
+    useStore((state: any) => state.setSelectedChiclet),
+    useStore((state: any) => state.setEventTarget),
+    useStore((state: any) => state.setTargetString),
+    useStore((state: any) => state.setKvpTableAnchorEl),
   ];
 
   const wrapperClasses = wrapperFlexStyles();

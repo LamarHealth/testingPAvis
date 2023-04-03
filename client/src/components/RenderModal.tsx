@@ -62,13 +62,13 @@ export const RenderModal = () => {
     kvpTableAnchorEl,
     openDocInNewTab,
   ] = [
-    useStore((state) => state.docData),
-    useStore((state) => state.selectedFile),
-    useStore((state) => state.konvaModalOpen),
-    useStore((state) => state.eventTarget),
-    useStore((state) => state.setEventTarget),
-    useStore((state) => state.kvpTableAnchorEl),
-    useStore((state) => state.openDocInNewTab),
+    useStore((state: any) => state.docData),
+    useStore((state: any) => state.selectedFile),
+    useStore((state: any) => state.konvaModalOpen),
+    useStore((state: any) => state.eventTarget),
+    useStore((state: any) => state.setEventTarget),
+    useStore((state: any) => state.kvpTableAnchorEl),
+    useStore((state: any) => state.openDocInNewTab),
   ];
   const areThereDocs = docData.length > 0;
   const kvpTableOpen = Boolean(kvpTableAnchorEl);

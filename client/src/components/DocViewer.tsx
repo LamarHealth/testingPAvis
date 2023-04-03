@@ -157,7 +157,7 @@ const StyledCheckbox = styled(Checkbox)`
 `;
 
 const ErrorMessage = ({ docID }: { docID: string }) => {
-  const errorFiles = useStore((state) => state.errorFiles);
+  const errorFiles = useStore((state: any) => state.errorFiles);
   const errorMsg = errorFiles[docID].errorMessage
     ? errorFiles[docID].errorMessage
     : DEFAULT_ERROR_MESSAGE;
@@ -175,9 +175,9 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
 
 const DocCell = (props: DocumentInfo) => {
   const [selectedFile, setSelectedFile, errorFiles] = [
-    useStore((state) => state.selectedFile),
-    useStore((state) => state.setSelectedFile),
-    useStore((state) => state.errorFiles),
+    useStore((state: any) => state.selectedFile),
+    useStore((state: any) => state.setSelectedFile),
+    useStore((state: any) => state.errorFiles),
   ];
   const errorGettingFile = checkFileError(errorFiles, props.docID.toString());
   const [hovering, setHovering] = useState(false as boolean);
@@ -300,8 +300,8 @@ const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
   const [openDocInNewTab, setOpenDocInNewTab] = [
-    useStore((state) => state.openDocInNewTab),
-    useStore((state) => state.setOpenDocInNewTab),
+    useStore((state: any) => state.openDocInNewTab),
+    useStore((state: any) => state.setOpenDocInNewTab),
   ];
 
   return (
