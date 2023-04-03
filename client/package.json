@@ -6,6 +6,7 @@
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.6.1",
     "@blueprintjs/core": "^3.23.0",
+    "@hot-loader/react-dom": "18.2.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@mikecousins/react-pdf": "^5.5.1",
@@ -29,6 +30,7 @@
     "concurrently": "^5.0.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "fs": "^0.0.1-security",
     "idb": "^7.1.1",
     "install": "^0.13.0",
     "is-empty": "^1.2.0",
@@ -38,10 +40,12 @@
     "mongoose": "^5.8.9",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
+    "path-browserify": "^1.0.1",
     "pdfjs-dist": "^3.4.120",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-dropzone": "^10.2.1",
+    "react-hot-loader": "^4.13.1",
     "react-konva": "^16.13.0-3",
     "react-rnd": "^10.2.2",
     "react-scripts": "^3.4.1",
@@ -51,15 +55,12 @@
     "styled-components": "^5.1.1",
     "use-image": "^1.0.6",
     "uuid": "^8.3.1",
-    "validator": "^12.1.0",
-    "@hot-loader/react-dom": "18.2.0",
-    "react-hot-loader": "^4.13.1"
+    "validator": "^12.1.0"
   },
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
-
     "start:extension": "react-scripts start",
     "build:extension": "node ./scripts/build-non-split.js && yarn build:clean",
     "build:clean": "cd build && mv static/js/*.js main.js && mv static/css/*.css main.css && rm -r static",
@@ -82,17 +83,12 @@
     ]
   },
   "devDependencies": {
-    "@babel/preset-flow": "^7.10.4",
-    "@babel/preset-typescript": "^7.10.4",
-    "concurrently": "^5.0.2",
-    "nodemon": "^2.0.2",
-    "prettier": "^2.7.1",
-
-
     "@babel/core": "^7.20.2",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/preset-env": "^7.20.2",
+    "@babel/preset-flow": "^7.10.4",
     "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.10.4",
     "@types/chrome": "^0.0.202",
     "@types/react": "^17.0.52",
     "@types/react-dom": "^17.0.11",
@@ -100,6 +96,7 @@
     "babel-loader": "^8.3.0",
     "babel-preset-react-app": "^10.0.1",
     "clean-webpack-plugin": "^4.0.0",
+    "concurrently": "^5.0.2",
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^6.7.2",
     "eslint": "^8.27.0",
@@ -114,6 +111,8 @@
     "html-loader": "^3.1.0",
     "html-webpack-plugin": "^5.5.0",
     "node-sass": "^8.0.0",
+    "nodemon": "^2.0.2",
+    "prettier": "^2.7.1",
     "sass-loader": "^13.2.0",
     "source-map-loader": "^3.0.1",
     "style-loader": "^3.3.1",
@@ -123,7 +122,6 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1"
-
   },
   "jest": {
     "verbose": true
