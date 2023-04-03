@@ -78,8 +78,8 @@ const Message = ({ msg }: any) => {
 
 const ErrorLine = () => {
   const [selectedFile, errorFiles] = [
-    useStore((state) => state.selectedFile),
-    useStore((state) => state.errorFiles),
+    useStore((state: any) => state.selectedFile),
+    useStore((state: any) => state.errorFiles),
   ];
   const errorMsg =
     selectedFile &&
@@ -110,15 +110,15 @@ export const SelectModal = () => {
     errorFiles,
     setErrorFiles,
   ] = [
-    useStore((state) => state.selectedFile),
-    useStore((state) => state.docData),
-    useStore((state) => state.targetString),
-    useStore((state) => state.eventTarget),
-    useStore((state) => state.setKonvaModalOpen),
-    useStore((state) => state.setSelectedChiclet),
-    useStore((state) => state.setKvpTableAnchorEl),
-    useStore((state) => state.errorFiles),
-    useStore((state) => state.setErrorFiles),
+    useStore((state: any) => state.selectedFile),
+    useStore((state: any) => state.docData),
+    useStore((state: any) => state.targetString),
+    useStore((state: any) => state.eventTarget),
+    useStore((state: any) => state.setKonvaModalOpen),
+    useStore((state: any) => state.setSelectedChiclet),
+    useStore((state: any) => state.setKvpTableAnchorEl),
+    useStore((state: any) => state.errorFiles),
+    useStore((state: any) => state.setErrorFiles),
   ];
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile

@@ -62,36 +62,37 @@ export const useStore = create<State>((set) => ({
   errorFiles: {},
   selectedLine: {},
   setOpenDocInNewTab: (openDocInNewTab) =>
-    set((state) => ({ ...state, openDocInNewTab })),
+    set((state: any) => ({ ...state, openDocInNewTab })),
   setSelectedFile: (selectedFile) =>
-    set((state) => {
+    set((state: any) => {
       if (!LOCAL_MODE) {
         chrome.storage.local.set({ selectedFile });
       }
       return { ...state, selectedFile };
     }),
   setSelectedChiclet: (selectedChiclet) =>
-    set((state) => ({ ...state, selectedChiclet })),
+    set((state: any) => ({ ...state, selectedChiclet })),
   setDocData: (docData) =>
-    set((state) => {
+    set((state: any) => {
       if (!LOCAL_MODE) {
         chrome.storage.local.set({ docData });
       }
       return { ...state, docData };
     }),
   setKonvaModalOpen: (konvaModalOpen) =>
-    set((state) => ({ ...state, konvaModalOpen })),
+    set((state: any) => ({ ...state, konvaModalOpen })),
   setAutocompleteAnchor: (autocompleteAnchor) =>
-    set((state) => ({ ...state, autocompleteAnchor })),
-  setEventTarget: (eventTarget) => set((state) => ({ ...state, eventTarget })),
+    set((state: any) => ({ ...state, autocompleteAnchor })),
+  setEventTarget: (eventTarget) =>
+    set((state: any) => ({ ...state, eventTarget })),
   setTargetString: (targetString) =>
-    set((state) => ({ ...state, targetString })),
+    set((state: any) => ({ ...state, targetString })),
   setKvpTableAnchorEl: (kvpTableAnchorEl) =>
-    set((state) => ({ ...state, kvpTableAnchorEl })),
+    set((state: any) => ({ ...state, kvpTableAnchorEl })),
   setErrorFiles: (errorFile) => {
     const docID = Object.entries(errorFile)[0][0];
     const payload = Object.entries(errorFile)[0][1];
-    return set((state) => {
+    return set((state: any) => {
       return {
         ...state,
         errorFiles: {
@@ -102,7 +103,7 @@ export const useStore = create<State>((set) => ({
     });
   },
   setSelectedLine: (selectedLine) =>
-    set((state) => ({ ...state, selectedLine })),
+    set((state: any) => ({ ...state, selectedLine })),
 }));
 
 export const checkFileError = (errorFiles: ErrorFile, selectedFile: Uuid) => {

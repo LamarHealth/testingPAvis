@@ -355,8 +355,8 @@ export const KonvaModal = (props: KonvaModalProps) => {
     inputValDispatch,
   } = useContext(KonvaModalContext);
   const [setKonvaModalOpen, selectedLine] = [
-    useStore((state) => state.setKonvaModalOpen),
-    useStore((state) => state.selectedLine),
+    useStore((state: any) => state.setKonvaModalOpen),
+    useStore((state: any) => state.selectedLine),
   ];
   const inputElRef = useRef(null as HTMLInputElement | null);
 

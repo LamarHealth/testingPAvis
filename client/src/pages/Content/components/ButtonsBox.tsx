@@ -83,8 +83,8 @@ const StyledGetAppIcon = styled(GetAppIcon)`
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const { fileDispatch } = useContext(FileContext);
   const [setSelectedFile, setDocData] = [
-    useStore((state) => state.setSelectedFile),
-    useStore((state) => state.setDocData),
+    useStore((state: any) => state.setSelectedFile),
+    useStore((state: any) => state.setDocData),
   ];
 
   const handleDelete = (e: MouseEvent) => {
@@ -161,10 +161,10 @@ const ButtonsBox = memo(
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<'delete' | 'download'>();
     const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
-      useStore((state) => state.docData),
-      useStore((state) => state.setSelectedFile),
-      useStore((state) => state.setKonvaModalOpen),
-      useStore((state) => state.openDocInNewTab),
+      useStore((state: any) => state.docData),
+      useStore((state: any) => state.setSelectedFile),
+      useStore((state: any) => state.setKonvaModalOpen),
+      useStore((state: any) => state.openDocInNewTab),
     ];
     const docID = props.docInfo.docID.toString();
 

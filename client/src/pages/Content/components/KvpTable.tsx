@@ -170,10 +170,10 @@ const ButtonsCell = (props: {
 
   // Fill polygon line in modal when text is selected
   const [targetString, setDocData, setKonvaModalOpen, setSelectedLine] = [
-    useStore((state) => state.targetString),
-    useStore((state) => state.setDocData),
-    useStore((state) => state.setKonvaModalOpen),
-    useStore((state) => state.setSelectedLine),
+    useStore((state: any) => state.targetString),
+    useStore((state: any) => state.setDocData),
+    useStore((state: any) => state.setKonvaModalOpen),
+    useStore((state: any) => state.setSelectedLine),
   ];
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
@@ -433,7 +433,7 @@ export const TableContext = createContext({} as any);
 
 export const TableComponent = () => {
   const { selectedDocData } = useContext(TableContext);
-  const targetString = useStore((state) => state.targetString);
+  const targetString = useStore((state: any) => state.targetString);
   const sortedKeyValuePairs = getEditDistanceAndSort(
     selectedDocData,
     targetString,

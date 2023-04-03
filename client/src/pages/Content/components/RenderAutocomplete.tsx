@@ -17,6 +17,7 @@ import WrappedJssComponent from "./ShadowComponent";
 import { getLibertyModalMutationsObserver } from "./inputsDictionary";
 
 import { DOCIT_TAG } from "../common/constants";
+import { types } from "@babel/core";
 
 const Container = styled.div`
   max-height: 280px;
@@ -74,7 +75,8 @@ const handleMenuNavigation = (
             const nextEl = activeElementInShadowRoot.nextSibling as HTMLElement;
             nextEl && nextEl.focus();
           } else if (event.code === "ArrowUp") {
-            const prevEl = activeElementInShadowRoot.previousSibling as HTMLElement;
+            const prevEl =
+              activeElementInShadowRoot.previousSibling as HTMLElement;
             if (prevEl) {
               // if el above, focus
               prevEl.focus();
@@ -91,27 +93,29 @@ const handleMenuNavigation = (
 
 export const RenderAutocomplete = () => {
   const [docData, selectedFile, autocompleteAnchor, setAutocompleteAnchor] = [
-    useStore((state) => state.docData),
-    useStore((state) => state.selectedFile),
-    useStore((state) => state.autocompleteAnchor),
-    useStore((state) => state.setAutocompleteAnchor),
+    useStore((state: any) => state.docData),
+    useStore((state: any) => state.selectedFile),
+    useStore((state: any) => state.autocompleteAnchor),
+    useStore((state: any) => state.setAutocompleteAnchor),
   ];
   const [filter, setFilter] = useState("" as string);
   const open = Boolean(autocompleteAnchor);
 
   // doc data
   const selectedDocData = docData.filter(
-    (doc) => doc.docID === selectedFile
+    (doc: any) => doc.docID === selectedFile
   )[0];
   const isDocSelected = Boolean(selectedDocData);
-  const allLinesAndValues = isDocSelected
+  const allLinesAndValues: any = isDocSelected
     ? Array.from(
         new Set( // remove duplicates
           Object.entries(selectedDocData.keyValuePairs)
             .map((entry) => entry[1])
             .concat(selectedDocData.lines) // add non-kvp lines
             .filter((value) => value !== "") // filter out blanks
-            .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) // case insens. sort
+            .sort((a: any, b: any) =>
+              a.toLowerCase().localeCompare(b.toLowerCase())
+            ) // case insens. sort
         )
       )
     : [];
@@ -185,8 +189,9 @@ export const RenderAutocomplete = () => {
                       style={
                         autocompleteAnchor
                           ? {
-                              width: window.getComputedStyle(autocompleteAnchor)
-                                .width,
+                              width:
+                                window.getComputedStyle(autocompleteAnchor)
+                                  .width,
                             }
                           : {}
                       }
@@ -195,7 +200,7 @@ export const RenderAutocomplete = () => {
                         .filter((value: string) =>
                           value.toLowerCase().includes(filter.toLowerCase())
                         )
-                        .map((value, i) => {
+                        .map((value: string, i: number) => {
                           const handleClick = () => {
                             if (autocompleteAnchor) {
                               autocompleteAnchor.value = value;

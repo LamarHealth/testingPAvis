@@ -162,14 +162,14 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     errorFiles,
     setErrorFiles,
   ] = [
-    useStore((state) => state.eventTarget),
-    useStore((state) => state.selectedFile),
-    useStore((state) => state.docData),
-    useStore((state) => state.konvaModalOpen),
-    useStore((state) => state.setKvpTableAnchorEl),
-    useStore((state) => state.autocompleteAnchor),
-    useStore((state) => state.errorFiles),
-    useStore((state) => state.setErrorFiles),
+    useStore((state: any) => state.eventTarget),
+    useStore((state: any) => state.selectedFile),
+    useStore((state: any) => state.docData),
+    useStore((state: any) => state.konvaModalOpen),
+    useStore((state: any) => state.setKvpTableAnchorEl),
+    useStore((state: any) => state.autocompleteAnchor),
+    useStore((state: any) => state.errorFiles),
+    useStore((state: any) => state.setErrorFiles),
   ];
   // if in new tab, no access to same zustand store, so use props instead
   const konvaModalOpen = props.isInNewTab
