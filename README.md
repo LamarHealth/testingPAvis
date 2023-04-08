@@ -23,4 +23,4 @@ Copyrights © 2023. Speedify.ai by Speedify, LLC. All Rights Reserved.
 
 # Trademark:
 
-Our product will be rebranded soon.
+Our product will be rebrand soon.
