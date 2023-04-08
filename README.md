@@ -20,3 +20,7 @@ The results that get loaded on the page are real Textract outputs for one of the
 The Jquery code that fills in the forms is broadly applicable to almost every form on the Web (but the matching between fields wasn't something I tried to do for this project).
 
 Copyrights © 2023. Speedify.ai by Speedify, LLC. All Rights Reserved.
+
+# Trademark:
+
+Our product will be rebranded soon.
