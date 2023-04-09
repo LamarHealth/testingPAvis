@@ -1,14 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import $ from 'jquery';
 
-// Load dotenv
-// import dotenv from 'dotenv';
-// import { App } from './App';
-// import { ManualSelectNewTab } from './components/ManualSelectNewTab';
+import { App } from './App';
+import { ManualSelectNewTab } from './components/ManualSelectNewTab';
 
 import { LOCAL_MODE, Z_INDEX_ALLOCATOR } from './common/constants';
-// dotenv.config();
 
 // set the document body to 0 z-index in build, so that our sidebar and modal outrank them
 if (!LOCAL_MODE) {
