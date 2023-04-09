@@ -1,14 +1,9 @@
 {
-    "manifest_version": 3,
-    "short_name": "Foom",
-    "name": "Foom: ChatGPT + OCR + Autofill",
-    "version": "2.0.2",
-    "description": "Foom gives your browser autofill everywhere. Sync your data, and automatically fill it to any form",
-    "externally_connectable": {
-        "matches": [
-            "<all_urls>"
-        ]
-    },
+    "short_name": "Speedify.ai",
+    "name": "Speedify.ai: ChatGPT + OCR + Autofill",
+    "version": "2.0.1",
+    "manifest_version": 2,
+    "description": "Speedify gives your browser autofill everywhere. Sync your data, and automatically fill it to any form",
     "content_scripts": [
         {
             "matches": [
@@ -22,27 +17,22 @@
             ]
         }
     ],
-    "action": {
+    "browser_action": {
         "default_title": "open the popup",
-        "default_icon": "icon-128.png"
+        "default_icon": "./icon-128.png"
     },
     "icons": {
-        "128": "icon-128.png"
+        "128": "./icon-128.png"
     },
     "background": {
-        "service_worker": "background.bundle.js"
+        "scripts": [
+            "background.bundle.js"
+        ]
     },
     "permissions": [
         "storage"
     ],
     "web_accessible_resources": [
-        {
-            "resources": [
-                "docview.html"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
+        "docview.html"
     ]
 }
