@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
 // Load dotenv
-import dotenv from 'dotenv';
-import { App } from './App';
-import { ManualSelectNewTab } from './components/ManualSelectNewTab';
+// import dotenv from 'dotenv';
+// import { App } from './App';
+// import { ManualSelectNewTab } from './components/ManualSelectNewTab';
 
 import { LOCAL_MODE, Z_INDEX_ALLOCATOR } from './common/constants';
-dotenv.config();
+// dotenv.config();
 
 // set the document body to 0 z-index in build, so that our sidebar and modal outrank them
 if (!LOCAL_MODE) {
@@ -24,12 +24,13 @@ $(insertionPoint).insertBefore(document.body);
 
 const isDocViewOnly = Boolean(document.getElementById('DOCIT-DOCVIEW-ONLY'));
 
+const root = ReactDOM.createRoot(document.getElementById('insertion-point'));
+
 isDocViewOnly // makeshift react-router. can't use react-router bc docview.html is opened as a completely different URL; react-router can only render in relative URLs
-  ? ReactDOM.render(
-      <ManualSelectNewTab />,
-      document.getElementById('insertion-point')
-    )
-  : ReactDOM.render(<App />, document.getElementById('insertion-point'));
+  ? root.render(<ManualSelectNewTab />)
+  : root.render(<App />);
+
+if (module.hot) module.hot.accept();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

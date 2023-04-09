@@ -24,12 +24,10 @@
     ],
     "action": {
         "default_title": "open the popup",
-        "default_icon": "icon128.png"
+        "default_icon": "icon-128.png"
     },
     "icons": {
-        "16": "./icon-16.png",
-        "48": "./icon-48.png",
-        "128": "./icon-128.png"
+        "128": "icon-128.png"
     },
     "background": {
         "service_worker": "background.bundle.js"
@@ -38,6 +36,13 @@
         "storage"
     ],
     "web_accessible_resources": [
-        "docview.html"
+        {
+            "resources": [
+                "docview.html"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
     ]
 }
