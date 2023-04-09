@@ -1,24 +1,24 @@
 /*global chrome*/
-import React from "react";
+import React from 'react';
 
-import styled from "styled-components";
+import styled from 'styled-components';
 
-import { ThemeProvider } from "@material-ui/core/styles";
-import Popper from "@material-ui/core/Popper";
+import { ThemeProvider } from '@material-ui/core/styles';
+import Popper from '@material-ui/core/Popper';
 
-import { SelectModal } from "./SelectModal";
-import { ManualSelect } from "./ManualSelect";
-import WrappedJssComponent from "./ShadowComponent";
-import { getLibertyModalMutationsObserver } from "./inputsDictionary";
+import { SelectModal } from './SelectModal';
+import { ManualSelect } from './ManualSelect';
+import WrappedJssComponent from './ShadowComponent';
+import { getLibertyModalMutationsObserver } from './inputsDictionary';
 import {
   renderChiclets,
   RenderChicletsActionTypes,
-} from "./ScoreChiclet/index";
+} from './ScoreChiclet/index';
 
-import { DEFAULT } from "../common/themes";
-import { LOCAL_MODE, MAIN_MODAL_WIDTH, DOCIT_TAG } from "../common/constants";
-import { useStore } from "../contexts/ZustandStore";
-import { useEffect } from "react";
+import { DEFAULT } from '../common/themes';
+import { LOCAL_MODE, MAIN_MODAL_WIDTH, DOCIT_TAG } from '../common/constants';
+import { useStore } from '../contexts/ZustandStore';
+import { useEffect } from 'react';
 
 const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
@@ -41,7 +41,7 @@ const addClickListeners = (
   listener: EventListener
 ): void => {
   elements.forEach((el: Element) => {
-    el.addEventListener("click", listener);
+    el.addEventListener('click', listener);
   });
 };
 
@@ -49,7 +49,7 @@ const removeClickListeners = (
   elements: NodeListOf<Element>,
   listener: EventListener
 ): void => {
-  elements.forEach((el) => el.removeEventListener("click", listener));
+  elements.forEach((el) => el.removeEventListener('click', listener));
 };
 
 export const RenderModal = () => {
@@ -72,7 +72,7 @@ export const RenderModal = () => {
   ];
   const areThereDocs = docData.length > 0;
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
-  const id = kvpTableOpen ? "kvp-table-popover" : undefined;
+  const id = kvpTableOpen ? 'kvp-table-popover' : undefined;
 
   // set eventTarget (local mode)
   useEffect(() => {
@@ -117,7 +117,7 @@ export const RenderModal = () => {
             eventTarget.value = request.fillValue;
             renderChiclets(RenderChicletsActionTypes.blank, eventTarget);
           } else {
-            chrome.runtime.sendMessage({ error: "eventTarget is falsy" });
+            chrome.runtime.sendMessage({ error: 'eventTarget is falsy' });
           }
         }
       };
@@ -127,21 +127,21 @@ export const RenderModal = () => {
   }, [eventTarget]);
 
   return (
-    <ThemeProvider theme={DEFAULT}>
+    <>
       {areThereDocs && selectedFile && (
-        <>
+        <ThemeProvider theme={DEFAULT}>
           {eventTarget && (
             <Popper
               id={id}
               open={kvpTableOpen}
               anchorEl={kvpTableAnchorEl}
               keepMounted
-              placement={"bottom-end"}
-              container={() => document.getElementById("insertion-point")}
+              placement={'bottom-end'}
+              container={() => document.getElementById('insertion-point')}
               modifiers={{
                 preventOverflow: {
                   enabled: false,
-                  boundariesElement: "window",
+                  boundariesElement: 'window',
                 },
                 flip: { enabled: true },
                 hide: { enabled: false },
@@ -149,7 +149,7 @@ export const RenderModal = () => {
             >
               <Container>
                 <WrappedJssComponent
-                  wrapperClassName={"shadow-root-for-modals"}
+                  wrapperClassName={'shadow-root-for-modals'}
                 >
                   <SelectModal />
                 </WrappedJssComponent>
@@ -158,8 +158,8 @@ export const RenderModal = () => {
           )}
 
           {konvaModalOpen && !openDocInNewTab && <ManualSelect />}
-        </>
+        </ThemeProvider>
       )}
-    </ThemeProvider>
+    </>
   );
 };
