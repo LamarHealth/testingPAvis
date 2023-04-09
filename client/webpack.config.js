@@ -1,3 +1,5 @@
+const dotenv = require('dotenv').config({ path: __dirname + '/.env' });
+
 var webpack = require('webpack'),
   path = require('path'),
   fileSystem = require('fs-extra'),
@@ -10,7 +12,7 @@ var { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
 var alias = {
-  'react-dom': '@hot-loader/react-dom',
+  // 'react-dom': '@hot-loader/react-dom',
 };
 
 // load the secrets
@@ -113,6 +115,13 @@ var options = {
       .concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify(dotenv.parsed),
+      'process.env.REACT_APP_LOCAL': JSON.stringify(
+        process.env.REACT_APP_LOCAL
+      ),
+    }),
+
     new CleanWebpackPlugin({ verbose: false }),
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
