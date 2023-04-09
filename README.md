@@ -1,26 +1,30 @@
-# Instruction:
+# Docit Readme
 
-Drag and Doc Instructions:
+© COPYRIGHT ALEX REIBMAN, ALL RIGHTS RESERVED
 
-To run:
+## Running locally
 
-`cd ./client && yarn start`
-`cd ./server && yarn start`
+Make sure you're in the client directory
+`cd client`
 
-This will load the demo page in your browser
+Install dependencies
+`yarn install`
 
-# Note:
+Start the server
+`yarn start`
 
-All of the services function properly with AWS, but the "fill in form" button isn't entirely functional.
+The application now hot-reloads on any changes to the code. To load the Chrome extension, go to `chrome://extensions` and click "Load unpacked" and select the `build` folder. Be sure to refresh with the Update button each time you make changes.
 
-Express JS will send the correct Textract Key-value pair payload to the client from the document that got OCR'd, but the client doesn't actually load the page with a pre-processed payload since I didn't have the time to link the Textract results to a React Context.
+### Build
 
-The results that get loaded on the page are real Textract outputs for one of the demo documents that were processed using the `getKeyValues` function in `textractKeyValues.js`.
+Buliding the app as an extension requires an extra step.
 
-The Jquery code that fills in the forms is broadly applicable to almost every form on the Web (but the matching between fields wasn't something I tried to do for this project).
+First, change your `.env` file to include the proper configuration.
 
-Copyrights © 2023. Speedify.ai by Speedify, LLC. All Rights Reserved.
-
-# Trademark:
-
-Our product will be rebrand soon.
+```
+# Options: ["local", "build", "liberty"]
+REACT_APP_LOCAL=liberty
+# If enabled, the application will only fill in forms with a specific data- tag.
+# Options: [true, false]
+REACT_APP_FILTER=false
+```
