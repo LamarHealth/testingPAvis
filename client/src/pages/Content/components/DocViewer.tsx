@@ -1,30 +1,30 @@
-import React, { useReducer, useState, createContext } from "react";
-import styled from "styled-components";
-import { TransitionGroup, CSSTransition } from "react-transition-group";
+import React, { useReducer, useState, createContext } from 'react';
+import styled from 'styled-components';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
-import { StyledDropzone } from "./DocUploader";
-import { getThumbsFromLocalStorage } from "./docThumbnails";
+import { StyledDropzone } from './DocUploader';
+import { getThumbsFromLocalStorage } from './docThumbnails';
 
-import Card from "@material-ui/core/Card";
-import Typography from "@material-ui/core/Typography";
-import Link from "@material-ui/core/Link";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
+import Card from '@material-ui/core/Card';
+import Typography from '@material-ui/core/Typography';
+import Link from '@material-ui/core/Link';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import {
   populateBlankChicklets,
   removeAllChiclets,
-} from "./ScoreChiclet/functions";
-import { colors, colorSwitcher } from "../common/colors";
+} from './ScoreChiclet/functions';
+import { colors, colorSwitcher } from '../common/colors';
 import {
   DEFAULT_ERROR_MESSAGE,
   DOC_CARD_THUMBNAIL_WIDTH,
   DOC_CARD_HEIGHT,
-} from "../common/constants";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
+} from '../common/constants';
+import { useStore, checkFileError } from '../contexts/ZustandStore';
 
-import ButtonsBox from "./ButtonsBox";
-import { useEffect } from "react";
+import ButtonsBox from './ButtonsBox';
+import { useEffect } from 'react';
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
@@ -94,8 +94,8 @@ const Box = styled(Card)`
   ${(props: IsSelected) =>
     colorSwitcher(
       props.isSelected,
-      "border",
-      "1px solid",
+      'border',
+      '1px solid',
       `${colors.DROPZONE_TEXT_LIGHTGREY}`,
       `${colors.DOC_CARD_BORDER}`
     )}
@@ -108,8 +108,8 @@ const DocCard = styled.div`
   ${(props: IsSelected) =>
     colorSwitcher(
       props.isSelected,
-      "background",
-      "",
+      'background',
+      '',
       `${colors.DOC_CARD_BACKGROUND}`,
       `${colors.SELECTED_DOC_BACKGROUND}`
     )}
@@ -136,20 +136,20 @@ const NameAndButtonsWrapper = styled.div`
 
 const DocNameWrapper = styled.span`
   display: ${(props: { hovering: boolean }) =>
-    props.hovering ? "none" : "flex"};
+    props.hovering ? 'none' : 'flex'};
   max-height: ${DOC_CARD_HEIGHT};
   overflow: hidden;
 `;
 
 const Type = styled(Typography)`
   margin: 1em 0.5em;
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')}
 `;
 
 const StyledFormControlLabel = styled(FormControlLabel)`
   float: left;
   margin: 0.5em 1em;
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')}
 `;
 
 const StyledCheckbox = styled(Checkbox)`
@@ -164,7 +164,7 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
 
   return (
     <ErrorMessageWrapper>
-      <Typography variant={"body2"}>
+      <Typography variant={'body2'}>
         <i>
           <strong>Error</strong>: {errorMsg}
         </i>
@@ -208,7 +208,7 @@ const DocCell = (props: DocumentInfo) => {
 
   return (
     <Box
-      variant={isSelected ? "elevation" : "outlined"}
+      variant={isSelected ? 'elevation' : 'outlined'}
       onClick={handleBoxClick}
       onMouseOver={() => setHovering(true)}
       onMouseOut={() => setHovering(false)}
@@ -242,12 +242,12 @@ const InstructionsCell = () => {
 };
 
 const removeDocument = (docID: String) => {
-  const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
+  const newDocList = JSON.parse(localStorage.getItem('docList') || '[]').filter(
     (item: DocumentInfo) => item.docID !== docID
   );
-  localStorage.setItem("docList", JSON.stringify(newDocList));
+  localStorage.setItem('docList', JSON.stringify(newDocList));
   return {
-    documents: JSON.parse(localStorage.getItem("docList") || "[]"),
+    documents: JSON.parse(localStorage.getItem('docList') || '[]'),
   };
 };
 
@@ -256,11 +256,11 @@ export const fileReducer = (
   action: IFileDispatch
 ): IDocumentList => {
   switch (action.type) {
-    case "append":
+    case 'append':
       return {
-        documents: [...JSON.parse(localStorage.getItem("docList") || "[]")],
+        documents: [...JSON.parse(localStorage.getItem('docList') || '[]')],
       };
-    case "remove":
+    case 'remove':
       return removeDocument(action.documentInfo.docID);
     default:
       return state;
@@ -274,7 +274,7 @@ export const fileReducer = (
  */
 
 const initialState = {
-  documents: JSON.parse(localStorage.getItem("docList") || "[]"),
+  documents: JSON.parse(localStorage.getItem('docList') || '[]'),
 } as IDocumentList;
 
 const Feedback = () => {
@@ -282,14 +282,14 @@ const Feedback = () => {
     <FeedbackTypography>
       <i>
         <Link
-          href="https://forms.gle/4XBbuJnACkbaZ5578"
+          href="https://bit.ly/speedify-feedback"
           color="inherit"
           variant="body2"
           target="_blank"
           rel="noopener noreferrer"
           underline="always"
         >
-          {"Provide feedback"}
+          {'Provide feedback'}
         </Link>
       </i>
     </FeedbackTypography>
