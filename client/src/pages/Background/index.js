@@ -1,20 +1,16 @@
 /* global chrome */
 
-const base64ToBlob = (base64Data, contentType) => {
-  const byteCharacters = atob(base64Data);
-  const byteArrays = [];
+const base64ToBlob = (base64Data) => {
+  const splittedData = base64Data.split(',');
+  const contentType = splittedData[0].match(/:(.*?);/)[1];
+  const decodedData = atob(splittedData[1]);
+  const byteArray = new Uint8Array(decodedData.length);
 
-  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-    const slice = byteCharacters.slice(offset, offset + 512);
-    const byteNumbers = new Array(slice.length);
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    byteArrays.push(byteArray);
+  for (let i = 0; i < decodedData.length; i++) {
+    byteArray[i] = decodedData.charCodeAt(i);
   }
 
-  return new Blob(byteArrays, { type: contentType });
+  return new Blob([byteArray], { type: contentType });
 };
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
@@ -36,7 +32,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       `https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload`,
       {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pdfData: base64Data }),
       }
     )
       .then((res) => res.json())

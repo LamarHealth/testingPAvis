@@ -3,7 +3,6 @@ import time
 import boto3
 import base64
 import json
-import os
 import uuid
 from io import BytesIO
 
@@ -160,8 +159,12 @@ def lambda_handler(event, context):
     # Get binary PDF data from the request body
     print("In lambda")
     pdf_data_base64 = event["body"]
-    print(event)
-    print(pdf_data_base64)
+     
+    # Add padding to the Base64 string
+    padding = 4 - (len(pdf_data_base64) % 4)
+    if padding != 0:
+        pdf_data_base64 += "=" * padding
+    
     pdf_data = base64.b64decode(pdf_data_base64)
     pdf_data = BytesIO(pdf_data)
 
@@ -231,7 +234,7 @@ def lambda_handler(event, context):
 
     # Get lines
     lines = get_lines(blocks)
-    s3.put_object(Body=lines, Bucket=OUTPUT_BUCKET, Key=f"lines_{pdf_filename}.json")
+    s3.put_object(Body=json.dumps(lines), Bucket=OUTPUT_BUCKET, Key=f"lines_{pdf_filename}.json")
     print("Finished processing lines, saving to bucket...")
 
     # Get tables

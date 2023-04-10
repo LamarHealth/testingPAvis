@@ -104,14 +104,10 @@ interface DocumentInfo {
   [key: string]: any;
 }
 
-const blobToBase64 = async (blob: Blob): Promise<string> => {
+const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const base64Result = reader.result as string;
-      const base64Data = base64Result.split(',')[1];
-      resolve(base64Data);
-    };
+    reader.onloadend = () => resolve(reader.result as string);
     reader.onerror = (error) => reject(error);
     reader.readAsDataURL(blob);
   });
@@ -174,13 +170,10 @@ const FileStatus = (props: FileStatusProps) => {
       // 1. Increment load counter
       countDispatch('increment');
 
-      // 2. Read the PDF file as a Blob
-      const blob = new Blob([file], { type: 'application/pdf' });
+      // 2. Convert the Blob to Base64
+      const base64Data = await blobToBase64(file);
 
-      // 3. Convert the Blob to Base64
-      const base64Data = await blobToBase64(blob);
-
-      // 4. Send message to the background script with the PDF data (Base64)
+      // 3. Send message to the background script with the PDF data (Base64)
       chrome.runtime.sendMessage(
         { message: 'fileUploaded', data: base64Data },
         (response) => {
@@ -189,7 +182,7 @@ const FileStatus = (props: FileStatusProps) => {
         }
       );
 
-      // 5. Decrement load counter
+      // 4. Decrement load counter
       countDispatch('decrement');
     },
     [setDocData, setUploadStatus, countDispatch, fileDispatch]
