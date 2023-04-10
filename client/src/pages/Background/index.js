@@ -1,58 +1,55 @@
 /* global chrome */
-import { openDB } from 'idb';
-const indexDBName = process.env.INDEXED_DB;
 
-const getFileFromIndexedDB = async (fileId) => {
-  const db = await openDB(indexDBName, 1);
-  const file = await db.get('files', fileId);
-  return file;
+const base64ToBlob = (base64Data, contentType) => {
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  return new Blob(byteArrays, { type: contentType });
 };
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.message === 'fileUploaded') {
-    const fileId = request.fileId;
-    console.log(fileId);
+    // 1. Receive the Base64 PDF data
+    const base64Data = request.data;
+    console.log('Received Base64 data:', base64Data);
 
-    // Retrieve the ArrayBuffer from IndexedDB
-    const arrayBuffer = await getFileFromIndexedDB(fileId);
-    console.log(arrayBuffer);
-    // Convert the ArrayBuffer back to a Blob (PDF)
-    const pdfFile = new File([arrayBuffer], `${fileId}.pdf`, {
-      type: 'application/pdf',
-    });
-    console.log('File uploaded to API:');
+    // 2. Convert the Base64 data back to a Blob
+    const pdfFile = base64ToBlob(base64Data, 'application/pdf');
+
     console.log(pdfFile);
 
-    // Create a FormData object and append the PDF file to it
+    // 3. Upload the PDF file
     const formData = new FormData();
     formData.append('pdf', pdfFile);
 
-    // Send a POST request with the file to the API endpoint
     fetch(
       `https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload`,
       {
-        statusCode: 200,
         method: 'POST',
         body: formData,
       }
     )
-      .then((res) => {
-        return res.json();
-      })
-      .catch((err) => {
-        console.log('err1');
-        console.log(err);
-      })
+      .then((res) => res.json())
       .then((res) => {
         console.log(res);
         sendResponse(res);
       })
       .catch((err) => {
-        console.log('err2');
-        console.log(err);
+        console.error('Error uploading file to API:', err);
+        sendResponse({ error: err.message });
       });
 
-    console.log('File uploaded to API:');
+    // Indicate that the response will be sent asynchronously
     return true;
   }
 });

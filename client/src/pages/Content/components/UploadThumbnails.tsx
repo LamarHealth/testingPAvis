@@ -22,17 +22,6 @@ import { useStore } from '../contexts/ZustandStore';
 import { getKeyValuePairsByDoc } from './KeyValuePairs';
 import { addThumbsLocalStorage } from './docThumbnails';
 
-import { openDB } from 'idb';
-
-const setupIndexedDB = async () => {
-  const db = await openDB(indexedDBName, 1, {
-    upgrade(database) {
-      database.createObjectStore('files');
-    },
-  });
-  return db;
-};
-
 const UploadBufferContainer = styled.div`
   flex: 1;
   display: flex;
@@ -115,6 +104,19 @@ interface DocumentInfo {
   [key: string]: any;
 }
 
+const blobToBase64 = async (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Result = reader.result as string;
+      const base64Data = base64Result.split(',')[1];
+      resolve(base64Data);
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(blob);
+  });
+};
+
 const addDocToLocalStorage = (documentInfo: DocumentInfo): Promise<void> => {
   const storedDocs = JSON.parse(localStorage.getItem('docList') || '[]');
   let updatedList = Array.isArray(storedDocs)
@@ -169,90 +171,25 @@ const FileStatus = (props: FileStatusProps) => {
   // upload file
   const uploadImageFile = useCallback(
     async (file: File) => {
-      // Increment load counter
-      console.log('currentFilePreview');
-      console.log(currentFilePreview);
-
+      // 1. Increment load counter
       countDispatch('increment');
 
-      console.log(file);
+      // 2. Read the PDF file as a Blob
+      const blob = new Blob([file], { type: 'application/pdf' });
 
-      // step 1:
-      // file to array buffer
+      // 3. Convert the Blob to Base64
+      const base64Data = await blobToBase64(blob);
 
-      const reader = new FileReader();
-
-      reader.onloadend = async (loadEvent: ProgressEvent<FileReader>) => {
-        if (reader.readyState === FileReader.DONE) {
-          const arrayBuffer = reader.result as ArrayBuffer;
-          console.log(loadEvent);
-          console.log(loadEvent.target);
-          console.log(arrayBuffer);
-          const db = await setupIndexedDB();
-          const fileId = file.name;
-          await db.put('files', arrayBuffer, fileId);
-          db.close();
-
-          // notify when indexedDB is done saving and send to background script
-          chrome.runtime.sendMessage({
-            message: 'fileUploaded',
-            fileId: fileId,
-          });
+      // 4. Send message to the background script with the PDF data (Base64)
+      chrome.runtime.sendMessage(
+        { message: 'fileUploaded', data: base64Data },
+        (response) => {
+          // Handle response from the background script
+          console.log('Response from background script:', response);
         }
-      };
+      );
 
-      reader.readAsArrayBuffer(file);
-
-      // console.log(fileURL);
-      // try {
-      //   // send to background script to upload
-      //   chrome.runtime.sendMessage(
-      //     {
-      //       type: "upload",
-      //       file: fileURL,
-      //     },
-
-      //     (response) => {
-      //       console.log("response", response);
-      //       // Status code cases
-      //       switch (response.status) {
-      //         case 200:
-      //           // Add document info to list
-      //           const postSuccessResponse: {
-      //             type: string;
-      //             documentInfo: DocumentInfo;
-      //           } = {
-      //             type: "append",
-      //             documentInfo: response.json(),
-      //           };
-      //           addDocToLocalStorage(postSuccessResponse.documentInfo).then(
-      //             () => {
-      //               // update loc stor then set the global var to reflect that
-      //               const keyValuePairsByDoc = getKeyValuePairsByDoc();
-      //               setDocData(keyValuePairsByDoc);
-      //             }
-      //           );
-      //           setDocID(postSuccessResponse.documentInfo.docID);
-      //           fileDispatch(postSuccessResponse);
-      //           setUploadStatus(200);
-      //           break;
-      //         case 405:
-      //           setUploadStatus(405);
-      //           window.alert("file size exceeds > 5mb, cannot use OCR.");
-      //           break;
-      //         case 429:
-      //           setUploadStatus(429);
-      //           break;
-      //         default:
-      //           setUploadStatus(response.status);
-      //       }
-      //     }
-      //   );
-      // } catch {
-      //   setUploadStatus(400);
-      // }
-
-      // Decrement load counter
+      // 5. Decrement load counter
       countDispatch('decrement');
     },
     [setDocData, setUploadStatus, countDispatch, fileDispatch]
