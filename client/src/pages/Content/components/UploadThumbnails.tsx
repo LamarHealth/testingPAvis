@@ -6,28 +6,28 @@ import React, {
   useContext,
   useRef,
   useCallback,
-} from "react";
-import styled from "styled-components";
-import Clear from "@material-ui/icons/Clear";
-import CheckIcon from "@material-ui/icons/Check";
-import LoopIcon from "@material-ui/icons/Loop";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import Typography from "@material-ui/core/Typography";
+} from 'react';
+import styled from 'styled-components';
+import Clear from '@material-ui/icons/Clear';
+import CheckIcon from '@material-ui/icons/Check';
+import LoopIcon from '@material-ui/icons/Loop';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import Typography from '@material-ui/core/Typography';
 
-import { CountContext, FileContext } from "./DocViewer";
-import { IFileWithPreview } from "./DocUploader";
-import { usePdf } from "@mikecousins/react-pdf";
-import { PAGE_SCALE, indexedDBName } from "../common/constants";
-import { useStore } from "../contexts/ZustandStore";
-import { getKeyValuePairsByDoc } from "./KeyValuePairs";
-import { addThumbsLocalStorage } from "./docThumbnails";
+import { CountContext, FileContext } from './DocViewer';
+import { IFileWithPreview } from './DocUploader';
+import { usePdf } from '@mikecousins/react-pdf';
+import { PAGE_SCALE, indexedDBName } from '../common/constants';
+import { useStore } from '../contexts/ZustandStore';
+import { getKeyValuePairsByDoc } from './KeyValuePairs';
+import { addThumbsLocalStorage } from './docThumbnails';
 
-import { openDB } from "idb";
+import { openDB } from 'idb';
 
 const setupIndexedDB = async () => {
   const db = await openDB(indexedDBName, 1, {
     upgrade(database) {
-      database.createObjectStore("files");
+      database.createObjectStore('files');
     },
   });
   return db;
@@ -85,7 +85,7 @@ const Thumbnail = styled.img`
   display: block;
   width: auto;
   height: 100%;
-  filter: ${(props: { blur: boolean }) => (props.blur ? "blur(8px)" : 0)};
+  filter: ${(props: { blur: boolean }) => (props.blur ? 'blur(8px)' : 0)};
 `;
 
 const SuccessIcon = styled(CheckIcon)`
@@ -116,14 +116,14 @@ interface DocumentInfo {
 }
 
 const addDocToLocalStorage = (documentInfo: DocumentInfo): Promise<void> => {
-  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  const storedDocs = JSON.parse(localStorage.getItem('docList') || '[]');
   let updatedList = Array.isArray(storedDocs)
     ? storedDocs.filter((item: DocumentInfo) => {
-        return typeof item === "object";
+        return typeof item === 'object';
       })
     : [];
   updatedList.push(documentInfo);
-  localStorage.setItem("docList", JSON.stringify(updatedList));
+  localStorage.setItem('docList', JSON.stringify(updatedList));
 
   return new Promise((resolve) => {
     resolve();
@@ -153,7 +153,7 @@ const FileStatus = (props: FileStatusProps) => {
 
   const convertToImage = () => {
     const canvas = canvasRef.current;
-    const dataURL = canvas ? canvas.toDataURL() : "";
+    const dataURL = canvas ? canvas.toDataURL() : '';
     setThumbnailSrc(dataURL);
   };
 
@@ -170,10 +170,10 @@ const FileStatus = (props: FileStatusProps) => {
   const uploadImageFile = useCallback(
     async (file: File) => {
       // Increment load counter
-      console.log("currentFilePreview");
+      console.log('currentFilePreview');
       console.log(currentFilePreview);
 
-      countDispatch("increment");
+      countDispatch('increment');
 
       console.log(file);
 
@@ -190,12 +190,12 @@ const FileStatus = (props: FileStatusProps) => {
           console.log(arrayBuffer);
           const db = await setupIndexedDB();
           const fileId = file.name;
-          await db.put("files", arrayBuffer, fileId);
+          await db.put('files', arrayBuffer, fileId);
           db.close();
 
           // notify when indexedDB is done saving and send to background script
           chrome.runtime.sendMessage({
-            message: "fileUploaded",
+            message: 'fileUploaded',
             fileId: fileId,
           });
         }
@@ -253,7 +253,7 @@ const FileStatus = (props: FileStatusProps) => {
       // }
 
       // Decrement load counter
-      countDispatch("decrement");
+      countDispatch('decrement');
     },
     [setDocData, setUploadStatus, countDispatch, fileDispatch]
   );
@@ -265,9 +265,9 @@ const FileStatus = (props: FileStatusProps) => {
   useEffect(() => {
     const fileType = props.fileWithPreview.file.type;
     if (
-      fileType === "application/pdf" &&
+      fileType === 'application/pdf' &&
       docID &&
-      thumbnailSrc.startsWith("data:image/png;base64,")
+      thumbnailSrc.startsWith('data:image/png;base64,')
     ) {
       addThumbsLocalStorage(docID, thumbnailSrc);
     }
@@ -296,17 +296,17 @@ const FileStatus = (props: FileStatusProps) => {
   );
 };
 
-type Action = "decrement" | "increment" | "reset";
+type Action = 'decrement' | 'increment' | 'reset';
 
 export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
   const progressInitialState = props.files.length;
   const reducer = (state: number, action: Action): number => {
     switch (action) {
-      case "decrement":
+      case 'decrement':
         return state - 1;
-      case "increment":
+      case 'increment':
         return state + 1;
-      case "reset":
+      case 'reset':
         return progressInitialState;
       default:
         return state;
@@ -322,7 +322,7 @@ export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
       <UploadBufferContainer>
         <ThumbnailList>
           <Typography>
-            {count === 0 ? "Files Uploaded" : <LinearProgress />}
+            {count === 0 ? 'Files Uploaded' : <LinearProgress />}
           </Typography>
           {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
             return (
