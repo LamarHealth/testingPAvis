@@ -1,31 +1,12 @@
 /* global chrome */
-// import { indexedDBName } from "./constants";
+import { openDB } from 'idb';
+const indexDBName = process.env.INDEXED_DB;
 
-function setupIndexedDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('file_db', 1);
-    request.onupgradeneeded = (event) => {
-      const database = event.target.result;
-      database.createObjectStore('files');
-      event.target.transaction.oncomplete = () => {
-        resolve(database);
-      };
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function getFileFromIndexedDB(fileId) {
-  const db = await setupIndexedDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(['files'], 'readonly');
-    const objectStore = transaction.objectStore('files');
-    const request = objectStore.get(fileId);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
+const getFileFromIndexedDB = async (fileId) => {
+  const db = await openDB(indexDBName, 1);
+  const file = await db.get('files', fileId);
+  return file;
+};
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.message === 'fileUploaded') {
