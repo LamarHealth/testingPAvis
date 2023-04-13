@@ -13,12 +13,11 @@ const base64ToBlob = (base64Data) => {
   return new Blob([byteArray], { type: contentType });
 };
 
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.message === 'fileUploaded') {
     // 1. Receive the Base64 PDF data
     const base64Data = request.data;
     console.log('Received Base64 data:', base64Data);
-
     // 2. Convert the Base64 data back to a Blob
     const pdfFile = base64ToBlob(base64Data, 'application/pdf');
 
@@ -44,9 +43,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       .catch((err) => {
         console.error('Error uploading file to API:', err);
         sendResponse({ error: err.message });
-      });
-
-    // Indicate that the response will be sent asynchronously
+      })
+      .finally(() => {});
+    // Return true to indicate that you will send the response asynchronously
     return true;
   }
 });

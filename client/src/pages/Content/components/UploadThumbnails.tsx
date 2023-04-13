@@ -104,6 +104,11 @@ interface DocumentInfo {
   [key: string]: any;
 }
 
+enum StatusCodes {
+  SUCCESS = 200,
+  FAILURE = 400,
+}
+
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -166,24 +171,59 @@ const FileStatus = (props: FileStatusProps) => {
 
   // upload file
   const uploadImageFile = useCallback(
-    async (file: File) => {
+    (file: File) => {
       // 1. Increment load counter
       countDispatch('increment');
 
       // 2. Convert the Blob to Base64
-      const base64Data = await blobToBase64(file);
+      blobToBase64(file)
+        .then((base64Data) => {
+          // 3. Send message to the background script with the PDF data (Base64)
+          chrome.runtime.sendMessage(
+            { message: 'fileUploaded', data: base64Data },
+            (response) => {
+              // Handle response from the background script
+              console.log('Response from background script:', response);
 
-      // 3. Send message to the background script with the PDF data (Base64)
-      chrome.runtime.sendMessage(
-        { message: 'fileUploaded', data: base64Data },
-        (response) => {
-          // Handle response from the background script
-          console.log('Response from background script:', response);
-        }
-      );
-
-      // 4. Decrement load counter
-      countDispatch('decrement');
+              switch (response.status) {
+                case 200:
+                  // Add document info to list
+                  const postSuccessResponse: {
+                    type: string;
+                    documentInfo: DocumentInfo;
+                  } = {
+                    type: 'append',
+                    documentInfo: response.json(),
+                  };
+                  addDocToLocalStorage(postSuccessResponse.documentInfo).then(
+                    () => {
+                      // update loc stor then set the global var to reflect that
+                      const keyValuePairsByDoc = getKeyValuePairsByDoc();
+                      setDocData(keyValuePairsByDoc);
+                    }
+                  );
+                  setDocID(postSuccessResponse.documentInfo.docID);
+                  fileDispatch(postSuccessResponse);
+                  setUploadStatus(StatusCodes.SUCCESS);
+                  break;
+                case 400:
+                  setUploadStatus(StatusCodes.FAILURE);
+                  break;
+                default:
+                  setUploadStatus(StatusCodes.FAILURE);
+                  break;
+              }
+            }
+          );
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+          setUploadStatus(StatusCodes.FAILURE);
+        })
+        .finally(() => {
+          // 4. Decrement load counter
+          countDispatch('decrement');
+        });
     },
     [setDocData, setUploadStatus, countDispatch, fileDispatch]
   );
@@ -208,7 +248,7 @@ const FileStatus = (props: FileStatusProps) => {
       <ThumbInner>
         {!uploadStatus ? (
           <RefreshIcon />
-        ) : uploadStatus === 200 ? (
+        ) : uploadStatus === StatusCodes.SUCCESS ? (
           <SuccessIcon />
         ) : (
           <FailureIcon />
@@ -218,7 +258,7 @@ const FileStatus = (props: FileStatusProps) => {
           <Thumbnail
             id={`thumbnail${index}`}
             src={thumbnailSrc}
-            blur={uploadStatus === 400}
+            blur={uploadStatus === StatusCodes.FAILURE}
           />
         </div>
       </ThumbInner>
