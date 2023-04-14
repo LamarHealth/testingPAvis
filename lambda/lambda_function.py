@@ -256,12 +256,15 @@ def lambda_handler(event, context):
     # Save KVP json
     kvp_json_string = json.dumps(kvps)
     s3.put_object(
-        Body=kvp_json_string, Bucket=OUTPUT_BUCKET, Key=f"kvp_{pdf_filename}.json"
+        Body=kvp_json_string, Bucket=OUTPUT_BUCKET, Key=f"{pdf_filename}.json"
     )
     print("Finished processing document, saving to bucket...")
 
     # Create CSV of tables
     # print('Creating CSV of tables...')
+
+    # Add document id to body
+    response_body = {**kvps, "document_id": pdf_filename}
 
     return {
         "statusCode": 200,
@@ -270,5 +273,5 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
         },
-        "body": json.dumps(kvps),
+        "body": json.dumps(response_body),
     }

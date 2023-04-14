@@ -99,6 +99,17 @@ const RefreshIcon = styled(LoopIcon)`
   }
 `;
 
+interface OCRMessageRequest {
+  message: string;
+  data: string;
+}
+
+interface OCRMessageResponse {
+  status: number;
+  message: string;
+  documentInfo: DocumentInfo;
+}
+
 interface DocumentInfo {
   docID: string;
   [key: string]: any;
@@ -181,32 +192,25 @@ const FileStatus = (props: FileStatusProps) => {
           // 3. Send message to the background script with the PDF data (Base64)
           chrome.runtime.sendMessage(
             { message: 'fileUploaded', data: base64Data },
-            (response) => {
+            (response: OCRMessageResponse) => {
               // Handle response from the background script
               console.log('Response from background script:', response);
 
               switch (response.status) {
-                case 200:
-                  // Add document info to list
-                  const postSuccessResponse: {
-                    type: string;
-                    documentInfo: DocumentInfo;
-                  } = {
+                case StatusCodes.SUCCESS:
+                  addDocToLocalStorage(response.documentInfo).then(() => {
+                    // update loc stor then set the global var to reflect that
+                    const keyValuePairsByDoc = getKeyValuePairsByDoc();
+                    setDocData(keyValuePairsByDoc);
+                  });
+                  setDocID(response.documentInfo.docID);
+                  fileDispatch({
                     type: 'append',
-                    documentInfo: response.json(),
-                  };
-                  addDocToLocalStorage(postSuccessResponse.documentInfo).then(
-                    () => {
-                      // update loc stor then set the global var to reflect that
-                      const keyValuePairsByDoc = getKeyValuePairsByDoc();
-                      setDocData(keyValuePairsByDoc);
-                    }
-                  );
-                  setDocID(postSuccessResponse.documentInfo.docID);
-                  fileDispatch(postSuccessResponse);
+                    documentInfo: response.documentInfo,
+                  });
                   setUploadStatus(StatusCodes.SUCCESS);
                   break;
-                case 400:
+                case StatusCodes.FAILURE:
                   setUploadStatus(StatusCodes.FAILURE);
                   break;
                 default:

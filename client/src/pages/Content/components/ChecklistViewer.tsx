@@ -1,11 +1,11 @@
-import * as React from "react";
-import styled from "styled-components";
-import { Icon } from "@blueprintjs/core";
+import * as React from 'react';
+import styled from 'styled-components';
+import { Icon } from '@blueprintjs/core';
 
 export interface IDetail {
-  statusIcon: "error" | "tick-circle" | "warning-sign";
-  fieldName: String;
-  detail?: String;
+  statusIcon: 'error' | 'tick-circle' | 'warning-sign';
+  fieldName: string;
+  detail?: string;
 }
 
 interface IDetailList {
@@ -48,10 +48,10 @@ class Detail extends React.PureComponent<IDetail> {
           <Icon
             icon={this.props.statusIcon}
             iconSize={25}
-            style={{ padding: "0.5em", marginRight: "1.5em" }}
+            style={{ padding: '0.5em', marginRight: '1.5em' }}
           />
         }
-        {this.props.fieldName} {this.props.detail || "Unknown"}
+        {this.props.fieldName} {this.props.detail || 'Unknown'}
       </Box>
     );
   }
@@ -65,7 +65,7 @@ export const ChecklistViewer = (props: IDetailList) => {
           <Detail
             statusIcon={detail.statusIcon}
             fieldName={detail.fieldName}
-            detail={detail.detail || ""}
+            detail={detail.detail || ''}
             key={ndx}
           ></Detail>
         );

@@ -31,16 +31,16 @@ interface IDocumentList {
 }
 
 export interface DocumentInfo {
-  docType: String;
-  docName: String;
-  docClass: String;
-  filePath: String;
-  docID: String;
+  docType: string;
+  docName: string;
+  docClass: string;
+  filePath: string;
+  docID: string;
   keyValuePairs: Object;
 }
 
 export interface IFileDispatch {
-  type: String;
+  type: string;
   documentInfo: DocumentInfo;
 }
 
@@ -179,7 +179,7 @@ const DocCell = (props: DocumentInfo) => {
     useStore((state: any) => state.setSelectedFile),
     useStore((state: any) => state.errorFiles),
   ];
-  const errorGettingFile = checkFileError(errorFiles, props.docID.toString());
+  const errorGettingFile = checkFileError(errorFiles, props.docID);
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
   const [docThumbnail, setDocThumbnail] = useState(
@@ -200,10 +200,12 @@ const DocCell = (props: DocumentInfo) => {
 
   // set thumbnail
   useEffect(() => {
-    const thumb = getThumbsFromLocalStorage()[props.docID.toString()];
-    if (thumb) {
-      setDocThumbnail(thumb);
-    }
+    getThumbsFromLocalStorage((thumbnails) => {
+      const thumb = thumbnails[props.docID];
+      if (thumb) {
+        setDocThumbnail(thumb);
+      }
+    });
   }, [props.docID]);
 
   return (
@@ -241,7 +243,7 @@ const InstructionsCell = () => {
   return <Instructions>Add files to get started</Instructions>;
 };
 
-const removeDocument = (docID: String) => {
+const removeDocument = (docID: string) => {
   const newDocList = JSON.parse(localStorage.getItem('docList') || '[]').filter(
     (item: DocumentInfo) => item.docID !== docID
   );
@@ -323,7 +325,7 @@ const DocViewer = () => {
           return (
             <CSSTransition
               // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'
-              key={doc.docID.toString()}
+              key={doc.docID}
               classNames="doccell"
               timeout={{ enter: 500, exit: 300 }}
               onEnter={() => setNumDocs(numDocs + 1)}
