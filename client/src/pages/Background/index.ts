@@ -7,6 +7,17 @@ type MessageRequest = {
   error?: boolean;
 };
 
+interface DocumentInfo {
+  docID: string;
+  [key: string]: any;
+}
+
+interface OCRMessageResponse {
+  status: number;
+  message: string;
+  documentInfo?: DocumentInfo;
+}
+
 const base64ToBlob = (base64Data: string): Blob => {
   const splittedData = base64Data.split(',');
   const contentType = splittedData[0].match(/:(.*?);/)?.[1] || '';
@@ -46,7 +57,7 @@ chrome.runtime.onMessage.addListener(
         .then((res) => res.json())
         .then((res) => {
           console.log(res);
-          const response = {
+          const response: OCRMessageResponse = {
             status: 200,
             message: 'success',
             documentInfo: res,
