@@ -1,10 +1,10 @@
 /* global chrome */
 
 type MessageRequest = {
-  message?: string,
-  data?: string,
-  fillValue?: boolean,
-  error?: boolean,
+  message?: string;
+  data?: string;
+  fillValue?: boolean;
+  error?: boolean;
 };
 
 const base64ToBlob = (base64Data: string): Blob => {
@@ -67,7 +67,9 @@ chrome.runtime.onMessage.addListener(
 
 // listen for ext button click
 chrome.browserAction.onClicked.addListener(function (tab) {
-  chrome.tabs.sendMessage(tab.id, { message: 'open sidebar' });
+  if (tab.id !== undefined) {
+    chrome.tabs.sendMessage(tab.id, { message: 'open sidebar' });
+  }
 });
 
 // listen for ManualSelect in other tab sending fill value
@@ -75,7 +77,11 @@ chrome.runtime.onMessage.addListener(function (request: MessageRequest) {
   if (request.fillValue) {
     // i.e. if sent from ManualSelect tab
     chrome.tabs.query({}, (tabs) => {
-      tabs.forEach((tab) => chrome.tabs.sendMessage(tab.id, { ...request }));
+      tabs.forEach((tab) => {
+        if (tab.id !== undefined) {
+          chrome.tabs.sendMessage(tab.id, { ...request });
+        }
+      });
     });
   }
 });
@@ -85,7 +91,11 @@ chrome.runtime.onMessage.addListener(function (request: MessageRequest) {
   if (request.error) {
     // i.e. if sent from RenderModal, saying that eventTarget is falsy
     chrome.tabs.query({}, (tabs) => {
-      tabs.forEach((tab) => chrome.tabs.sendMessage(tab.id, { ...request }));
+      tabs.forEach((tab) => {
+        if (tab.id !== undefined) {
+          chrome.tabs.sendMessage(tab.id, { ...request });
+        }
+      });
     });
   }
 });
