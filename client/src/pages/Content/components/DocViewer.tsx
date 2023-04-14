@@ -190,7 +190,7 @@ const DocCell = (props: DocumentInfo) => {
   const setSelected = () => {
     selectedFile === props.docID
       ? setSelectedFile(null)
-      : setSelectedFile(props.docID.toString());
+      : setSelectedFile(props.docID);
   };
 
   const handleBoxClick = () => {
@@ -232,7 +232,7 @@ const DocCell = (props: DocumentInfo) => {
             errorGettingFile={errorGettingFile}
             isSelected={isSelected}
           />
-          {errorGettingFile && <ErrorMessage docID={props.docID.toString()} />}
+          {errorGettingFile && <ErrorMessage docID={props.docID} />}
         </NameAndButtonsWrapper>
       </DocCard>
     </Box>
@@ -338,7 +338,7 @@ const DocViewer = () => {
                 docClass={doc.docClass}
                 docID={doc.docID}
                 keyValuePairs={doc.keyValuePairs}
-                key={doc.docID.toString()}
+                key={doc.docID}
               />
             </CSSTransition>
           );

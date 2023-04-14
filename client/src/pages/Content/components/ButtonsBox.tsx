@@ -95,7 +95,7 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
         type: 'remove',
         documentInfo: props.docInfo,
       });
-      deleteThumbsLocalStorage(props.docInfo.docID.toString());
+      deleteThumbsLocalStorage(props.docInfo.docID);
 
       return new Promise((resolve) => {
         resolve(() => {});
@@ -166,7 +166,7 @@ const ButtonsBox = memo(
       useStore((state: any) => state.setKonvaModalOpen),
       useStore((state: any) => state.openDocInNewTab),
     ];
-    const docID = props.docInfo.docID.toString();
+    const docID = props.docInfo.docID;
 
     // click away
     const handleClickAway = () => {
@@ -205,7 +205,7 @@ const ButtonsBox = memo(
           PopulateFormsActionTypes.overwriteBlank,
           availableKeyValues
         );
-      setSelectedFile(props.docInfo.docID.toString());
+      setSelectedFile(props.docInfo.docID);
     };
 
     return (

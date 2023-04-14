@@ -17,7 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import { CountContext, FileContext } from './DocViewer';
 import { IFileWithPreview } from './DocUploader';
 import { usePdf } from '@mikecousins/react-pdf';
-import { PAGE_SCALE, indexedDBName } from '../common/constants';
+import { PAGE_SCALE } from '../common/constants';
 import { useStore } from '../contexts/ZustandStore';
 import { getKeyValuePairsByDoc } from './KeyValuePairs';
 import { addThumbsLocalStorage } from './docThumbnails';
