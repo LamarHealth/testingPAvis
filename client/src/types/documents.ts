@@ -1,6 +1,10 @@
-export interface DocumentInfo {
+export interface OCRDocumentInfo {
   docID: string;
   keyValuePairs: KeyValuePairs;
+}
+export interface DocumentInfo extends OCRDocumentInfo {
+  docType: string;
+  docName: string;
 }
 
 export interface KeyValuePairs {

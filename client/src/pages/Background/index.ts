@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { DocumentInfo } from '../../types/documents';
+import { OCRDocumentInfo } from "../../types/documents";
 
 type MessageRequest = {
   message?: string;
@@ -12,12 +12,12 @@ type MessageRequest = {
 export interface OCRMessageResponse {
   status: number;
   message: string;
-  documentInfo: DocumentInfo;
+  documentInfo: OCRDocumentInfo;
 }
 
 const base64ToBlob = (base64Data: string): Blob => {
-  const splittedData = base64Data.split(',');
-  const contentType = splittedData[0].match(/:(.*?);/)?.[1] || '';
+  const splittedData = base64Data.split(",");
+  const contentType = splittedData[0].match(/:(.*?);/)?.[1] || "";
   const decodedData = atob(splittedData[1]);
   const byteArray = new Uint8Array(decodedData.length);
 
@@ -30,10 +30,10 @@ const base64ToBlob = (base64Data: string): Blob => {
 
 chrome.runtime.onMessage.addListener(
   (request: MessageRequest, sender, sendResponse) => {
-    if (request.message === 'fileUploaded') {
+    if (request.message === "fileUploaded") {
       // 1. Receive the Base64 PDF data
-      const base64Data = request.data || '';
-      console.log('Received Base64 data:', base64Data);
+      const base64Data = request.data || "";
+      console.log("Received Base64 data:", base64Data);
       // 2. Convert the Base64 data back to a Blob
       const pdfFile = base64ToBlob(base64Data);
 
@@ -41,13 +41,13 @@ chrome.runtime.onMessage.addListener(
 
       // 3. Upload the PDF file
       const formData = new FormData();
-      formData.append('pdf', pdfFile);
+      formData.append("pdf", pdfFile);
 
       fetch(
         `https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pdfData: base64Data }),
         }
       )
@@ -56,13 +56,13 @@ chrome.runtime.onMessage.addListener(
           console.log(res);
           const response: OCRMessageResponse = {
             status: 200,
-            message: 'success',
+            message: "success",
             documentInfo: res,
           };
           sendResponse(response);
         })
         .catch((err) => {
-          console.error('Error uploading file to API:', err);
+          console.error("Error uploading file to API:", err);
           const response = { status: 400, message: err };
           sendResponse(response);
         })
@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener(
 // listen for ext button click
 chrome.browserAction.onClicked.addListener(function (tab) {
   if (tab.id !== undefined) {
-    chrome.tabs.sendMessage(tab.id, { message: 'open sidebar' });
+    chrome.tabs.sendMessage(tab.id, { message: "open sidebar" });
   }
 });
 

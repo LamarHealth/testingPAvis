@@ -6,24 +6,24 @@ import React, {
   useContext,
   useRef,
   useCallback,
-} from 'react';
-import styled from 'styled-components';
-import Clear from '@material-ui/icons/Clear';
-import CheckIcon from '@material-ui/icons/Check';
-import LoopIcon from '@material-ui/icons/Loop';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import Typography from '@material-ui/core/Typography';
+} from "react";
+import styled from "styled-components";
+import Clear from "@material-ui/icons/Clear";
+import CheckIcon from "@material-ui/icons/Check";
+import LoopIcon from "@material-ui/icons/Loop";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import Typography from "@material-ui/core/Typography";
 
-import { CountContext, FileContext } from './DocViewer';
-import { IFileWithPreview } from './DocUploader';
-import { usePdf } from '@mikecousins/react-pdf';
-import { PAGE_SCALE } from '../common/constants';
-import { useStore } from '../contexts/ZustandStore';
-import { getKeyValuePairsByDoc } from './KeyValuePairs';
-import { addThumbsLocalStorage } from './docThumbnails';
+import { CountContext, FileContext } from "./DocViewer";
+import { IFileWithPreview } from "./DocUploader";
+import { usePdf } from "@mikecousins/react-pdf";
+import { PAGE_SCALE } from "../common/constants";
+import { useStore } from "../contexts/ZustandStore";
+import { getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { addThumbsLocalStorage } from "./docThumbnails";
 
-import { DocumentInfo } from '../../../types/documents';
-import { OCRMessageResponse } from '../../Background';
+import { DocumentInfo } from "../../../types/documents";
+import { OCRMessageResponse } from "../../Background";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -77,7 +77,7 @@ const Thumbnail = styled.img`
   display: block;
   width: auto;
   height: 100%;
-  filter: ${(props: { blur: boolean }) => (props.blur ? 'blur(8px)' : 0)};
+  filter: ${(props: { blur: boolean }) => (props.blur ? "blur(8px)" : 0)};
 `;
 
 const SuccessIcon = styled(CheckIcon)`
@@ -117,14 +117,14 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
 };
 
 const addDocToLocalStorage = (documentInfo: DocumentInfo): Promise<void> => {
-  const storedDocs = JSON.parse(localStorage.getItem('docList') || '[]');
+  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
   let updatedList = Array.isArray(storedDocs)
     ? storedDocs.filter((item: DocumentInfo) => {
-        return typeof item === 'object';
+        return typeof item === "object";
       })
     : [];
   updatedList.push(documentInfo);
-  localStorage.setItem('docList', JSON.stringify(updatedList));
+  localStorage.setItem("docList", JSON.stringify(updatedList));
 
   return new Promise((resolve) => {
     resolve();
@@ -154,7 +154,7 @@ const FileStatus = (props: FileStatusProps) => {
 
   const convertToImage = () => {
     const canvas = canvasRef.current;
-    const dataURL = canvas ? canvas.toDataURL() : '';
+    const dataURL = canvas ? canvas.toDataURL() : "";
     setThumbnailSrc(dataURL);
   };
 
@@ -171,28 +171,35 @@ const FileStatus = (props: FileStatusProps) => {
   const uploadImageFile = useCallback(
     (file: File) => {
       // 1. Increment load counter
-      countDispatch('increment');
-
+      countDispatch("increment");
       // 2. Convert the Blob to Base64
       blobToBase64(file)
         .then((base64Data) => {
           // 3. Send message to the background script with the PDF data (Base64)
           chrome.runtime.sendMessage(
-            { message: 'fileUploaded', data: base64Data },
+            { message: "fileUploaded", data: base64Data },
             (response: OCRMessageResponse) => {
               // Handle response from the background script
-              console.log('Response from background script:', response);
+              console.log("Response from background script:", response);
 
               switch (response.status) {
                 case StatusCodes.SUCCESS:
-                  addDocToLocalStorage(response.documentInfo).then(() => {
+                  // Create full document info
+                  const documentInfo: DocumentInfo = {
+                    docID: response.documentInfo.docID,
+                    keyValuePairs: response.documentInfo.keyValuePairs,
+                    docName: file.name,
+                    docType: file.type,
+                  };
+
+                  addDocToLocalStorage(documentInfo).then(() => {
                     // update loc stor then set the global var to reflect that
                     const keyValuePairsByDoc = getKeyValuePairsByDoc();
                     setDocData(keyValuePairsByDoc);
                   });
                   setDocID(response.documentInfo.docID);
                   fileDispatch({
-                    type: 'append',
+                    type: "append",
                     documentInfo: response.documentInfo,
                   });
                   setUploadStatus(StatusCodes.SUCCESS);
@@ -208,12 +215,12 @@ const FileStatus = (props: FileStatusProps) => {
           );
         })
         .catch((error) => {
-          console.log('Error:', error);
+          console.log("Error:", error);
           setUploadStatus(StatusCodes.FAILURE);
         })
         .finally(() => {
           // 4. Decrement load counter
-          countDispatch('decrement');
+          countDispatch("decrement");
         });
     },
     [setDocData, setUploadStatus, countDispatch, fileDispatch]
@@ -226,9 +233,9 @@ const FileStatus = (props: FileStatusProps) => {
   useEffect(() => {
     const fileType = props.fileWithPreview.file.type;
     if (
-      fileType === 'application/pdf' &&
+      fileType === "application/pdf" &&
       docID &&
-      thumbnailSrc.startsWith('data:image/png;base64,')
+      thumbnailSrc.startsWith("data:image/png;base64,")
     ) {
       addThumbsLocalStorage(docID, thumbnailSrc);
     }
@@ -257,17 +264,17 @@ const FileStatus = (props: FileStatusProps) => {
   );
 };
 
-type Action = 'decrement' | 'increment' | 'reset';
+type Action = "decrement" | "increment" | "reset";
 
 export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
   const progressInitialState = props.files.length;
   const reducer = (state: number, action: Action): number => {
     switch (action) {
-      case 'decrement':
+      case "decrement":
         return state - 1;
-      case 'increment':
+      case "increment":
         return state + 1;
-      case 'reset':
+      case "reset":
         return progressInitialState;
       default:
         return state;
@@ -283,7 +290,7 @@ export const UploadingList = (props: { files: Array<IFileWithPreview> }) => {
       <UploadBufferContainer>
         <ThumbnailList>
           <Typography>
-            {count === 0 ? 'Files Uploaded' : <LinearProgress />}
+            {count === 0 ? "Files Uploaded" : <LinearProgress />}
           </Typography>
           {props.files.map((fileWithPreview: IFileWithPreview, ndx: number) => {
             return (

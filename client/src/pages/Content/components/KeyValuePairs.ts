@@ -200,7 +200,7 @@ export const hasGoodHighestMatch = (
   sortedKeyValuePairs[0].value !== "";
 
 // helper functions
-const lowercaseKeys = (initialObject: any) => {
+const lowercaseKeys = (initialObject: KeyValuePairs) => {
   const lowercasedObject = {} as any;
   Object.keys(initialObject).forEach((key) => {
     lowercasedObject[key.toLowerCase()] = initialObject[key];
