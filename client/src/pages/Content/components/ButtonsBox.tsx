@@ -142,7 +142,7 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
       </Button>{" "}
       <Button
         size="small"
-        download={props.docInfo.docName}
+        download={`${props.docInfo.docName}.csv`}
         variant="outlined"
         href={makeCSVDownloadable(props.docInfo.keyValuePairs)}
       >
