@@ -9,7 +9,7 @@ from typing import List
 
 from urllib.parse import unquote_plus
 
-BUCKET_NAME = "plumbus-ocr-pdf-bucket"
+PDF_UPLOAD_BUCKET = "plumbus-ocr-pdf-bucket"
 OUTPUT_BUCKET = "plumbus-ocr-output-bucket"
 
 
@@ -19,7 +19,7 @@ def get_lines(block_list: List) -> List[dict]:
     """
     lines = [block for block in block_list if block.get("BlockType", "") == "LINE"]
     lines = [
-        {line["Text"]: {"Geometry": line["Geometry"], "Page": line["Page"]}}
+        {"Geometry": line["Geometry"], "Page": line["Page"], "Text": line["Text"] }
         for line in lines if line.get("Text")
     ]
     return lines
@@ -172,17 +172,17 @@ def lambda_handler(event, context):
 
     # Upload the PDF file to the S3 bucket
     s3 = boto3.client("s3")
-    s3.put_object(Bucket=BUCKET_NAME, Key=pdf_filename, Body=pdf_data)
+    s3.put_object(Bucket=PDF_UPLOAD_BUCKET, Key=pdf_filename, Body=pdf_data)
 
     ## S3 Upload complete
     # Start the Textract job
     textract = boto3.client("textract")
 
     # Get filename from event
-    print(f"Bucket: {BUCKET_NAME} ::: Key: {pdf_filename}")
+    print(f"Bucket: {PDF_UPLOAD_BUCKET} ::: Key: {pdf_filename}")
 
     job_id = textract.start_document_analysis(
-        DocumentLocation={"S3Object": {"Bucket": BUCKET_NAME, "Name": pdf_filename}},
+        DocumentLocation={"S3Object": {"Bucket": PDF_UPLOAD_BUCKET, "Name": pdf_filename}},
         FeatureTypes=["FORMS", "TABLES"],
     )["JobId"]
 
@@ -237,7 +237,7 @@ def lambda_handler(event, context):
     s3.put_object(Body=json.dumps(lines), Bucket=OUTPUT_BUCKET, Key=f"lines_{file_id}.json")
 
     # Get lines text
-    lines_text = [list(line.keys())[0] for line in lines]
+    lines_text = [line.get('Text') for line in lines]
 
 
     print("Finished processing lines, saving to bucket...")
@@ -269,7 +269,11 @@ def lambda_handler(event, context):
     # print('Creating CSV of tables...')
 
     # Add document id to body
-    response_body = {'keyValuePairs': kvps, 'lines': lines_text, "docID": file_id}
+    response_body = {'keyValuePairs': kvps,
+                     'lines': lines_text,
+                     "docID": file_id,
+                    #  "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{key}'
+                     }
 
     return {
         "statusCode": 200,
