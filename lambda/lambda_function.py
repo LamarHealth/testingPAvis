@@ -20,7 +20,7 @@ def get_lines(block_list: List) -> List[dict]:
     lines = [block for block in block_list if block.get("BlockType", "") == "LINE"]
     lines = [
         {line["Text"]: {"Geometry": line["Geometry"], "Page": line["Page"]}}
-        for line in lines
+        for line in lines if line.get("Text")
     ]
     return lines
 
@@ -73,7 +73,7 @@ def get_kvps(block_list: list) -> dict:
                         for item in filter(
                             lambda x: x["Id"] in value_child_refs,
                             block_list,
-                        )
+                        ) if item.get("Text")
                     ]
                 )
                 # Vals
@@ -123,11 +123,8 @@ def get_rows_columns_map(table_result, blocks_map):
     return rows
 
 
-def generate_table_csv(table_result, blocks_map, table_index):
+def generate_table_csv(table_result, blocks_map):
     rows = get_rows_columns_map(table_result, blocks_map)
-
-    table_id = "Table_" + str(table_index)
-
     # get cells.
     csv = ""
 
@@ -152,7 +149,7 @@ def get_table_csv_results(blocks):
 
     csv = ""
     for index, table in enumerate(table_blocks):
-        csv += generate_table_csv(table, blocks_map, index + 1)
+        csv += generate_table_csv(table, blocks_map)
     return csv
 
 
