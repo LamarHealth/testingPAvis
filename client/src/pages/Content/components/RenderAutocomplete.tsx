@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-import $ from 'jquery';
-import styled from 'styled-components';
+import $ from "jquery";
+import styled from "styled-components";
 
-import { useStore } from '../contexts/ZustandStore';
+import { useStore } from "../contexts/ZustandStore";
 
-import Popper from '@material-ui/core/Popper';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import { ThemeProvider } from '@material-ui/core/styles';
+import Popper from "@material-ui/core/Popper";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuList from "@material-ui/core/MenuList";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import { ThemeProvider } from "@material-ui/core/styles";
 
-import { DEFAULT } from '../common/themes';
-import { colors } from '../common/colors';
-import WrappedJssComponent from './ShadowComponent';
-import { getLibertyModalMutationsObserver } from './inputsDictionary';
+import { DEFAULT } from "../common/themes";
+import { colors } from "../common/colors";
+import WrappedJssComponent from "./ShadowComponent";
+import { getLibertyModalMutationsObserver } from "./inputsDictionary";
 
-import { DOCIT_TAG } from '../common/constants';
-import { types } from '@babel/core';
+import { DOCIT_TAG } from "../common/constants";
 
 const Container = styled.div`
   max-height: 280px;
@@ -28,10 +27,10 @@ const Container = styled.div`
 
 const findActiveElInShadowRoot = () => {
   const container = document.querySelector(
-    '#container-for-autocomplete-dropdown'
+    "#container-for-autocomplete-dropdown"
   );
   const shadowRoot = container?.children[0].children[0].shadowRoot;
-  const menuList = shadowRoot?.querySelector('ul') as HTMLElement;
+  const menuList = shadowRoot?.querySelector("ul") as HTMLElement;
   const activeElementInShadowRoot = shadowRoot?.activeElement as HTMLElement;
   return { activeElementInShadowRoot, menuList };
 };
@@ -44,37 +43,37 @@ const handleMenuNavigation = (
   const { activeElementInShadowRoot, menuList } = findActiveElInShadowRoot();
 
   if (
-    event.code === 'ArrowDown' ||
-    event.code === 'ArrowUp' ||
-    event.code === 'Tab'
+    event.code === "ArrowDown" ||
+    event.code === "ArrowUp" ||
+    event.code === "Tab"
   ) {
-    if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
+    if (event.code === "ArrowDown" || event.code === "ArrowUp") {
       // cancel the arrow key press, because is doing some mui jankiness
       event.stopImmediatePropagation();
       event.stopPropagation();
       event.preventDefault();
     }
-    if (!activeElementInShadowRoot && event.code !== 'ArrowUp') {
+    if (!activeElementInShadowRoot && event.code !== "ArrowUp") {
       // if not in the menu yet, then focus on the menu
       menuList?.focus();
     } else {
-      if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
+      if (event.code === "ArrowDown" || event.code === "ArrowUp") {
         if (
           // if focused on whole menu, focus on the first LI
           activeElementInShadowRoot &&
-          activeElementInShadowRoot.nodeName === 'UL'
+          activeElementInShadowRoot.nodeName === "UL"
         ) {
           const firstLi = menuList.children[0] as HTMLElement;
           firstLi.focus();
         } else if (
           // else go up or down the LIs
           activeElementInShadowRoot &&
-          activeElementInShadowRoot.nodeName === 'LI'
+          activeElementInShadowRoot.nodeName === "LI"
         ) {
-          if (event.code === 'ArrowDown') {
+          if (event.code === "ArrowDown") {
             const nextEl = activeElementInShadowRoot.nextSibling as HTMLElement;
             nextEl && nextEl.focus();
-          } else if (event.code === 'ArrowUp') {
+          } else if (event.code === "ArrowUp") {
             const prevEl =
               activeElementInShadowRoot.previousSibling as HTMLElement;
             if (prevEl) {
@@ -98,7 +97,7 @@ export const RenderAutocomplete = () => {
     useStore((state: any) => state.autocompleteAnchor),
     useStore((state: any) => state.setAutocompleteAnchor),
   ];
-  const [filter, setFilter] = useState('' as string);
+  const [filter, setFilter] = useState("" as string);
   const open = Boolean(autocompleteAnchor);
 
   // doc data
@@ -112,7 +111,7 @@ export const RenderAutocomplete = () => {
           Object.entries(selectedDocData.keyValuePairs)
             .map((entry) => entry[1])
             .concat(selectedDocData.lines) // add non-kvp lines
-            .filter((value) => value !== '') // filter out blanks
+            .filter((value) => value !== "") // filter out blanks
             .sort((a: any, b: any) =>
               a.toLowerCase().localeCompare(b.toLowerCase())
             ) // case insens. sort
@@ -128,7 +127,7 @@ export const RenderAutocomplete = () => {
   // handle input typing
   const listenForInputTypying = () => {
     $(document).ready(() => {
-      $(DOCIT_TAG).on('input', function () {
+      $(DOCIT_TAG).on("input", function () {
         const inputEl = this as HTMLInputElement | HTMLTextAreaElement;
         setFilter(inputEl.value);
         setAutocompleteAnchor(inputEl);
@@ -155,9 +154,9 @@ export const RenderAutocomplete = () => {
         handleMenuNavigation(event, autocompleteAnchor);
       }
     }
-    document.addEventListener('keydown', arrowKeyListener, true);
+    document.addEventListener("keydown", arrowKeyListener, true);
     return () => {
-      document.removeEventListener('keydown', arrowKeyListener, true);
+      document.removeEventListener("keydown", arrowKeyListener, true);
     };
   }, [autocompleteAnchor]);
 
@@ -177,11 +176,11 @@ export const RenderAutocomplete = () => {
           <Popper
             anchorEl={autocompleteAnchor}
             open={open}
-            container={() => document.getElementById('insertion-point')}
-            placement={'bottom-start'}
+            container={() => document.getElementById("insertion-point")}
+            placement={"bottom-start"}
           >
-            <Container id={'container-for-autocomplete-dropdown'}>
-              <WrappedJssComponent wrapperClassName={'shadow-root-for-modals'}>
+            <Container id={"container-for-autocomplete-dropdown"}>
+              <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
                 <ClickAwayListener onClickAway={handleClose}>
                   {areThereFilteredEntries ? (
                     <MenuList
@@ -213,7 +212,7 @@ export const RenderAutocomplete = () => {
                               key={i}
                               tabIndex={0}
                               onClick={handleClick}
-                              style={{ whiteSpace: 'normal' }} // for text wrapping
+                              style={{ whiteSpace: "normal" }} // for text wrapping
                             >
                               {value}
                             </MenuItem>
