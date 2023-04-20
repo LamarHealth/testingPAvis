@@ -1,12 +1,12 @@
 /* global chrome */
-import { create } from 'zustand';
+import { create } from "zustand";
 
-import { LOCAL_MODE } from '../common/constants';
+import { LOCAL_MODE } from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   KeyValuesByDoc,
-} from '../components/KeyValuePairs';
-import { LinesSelection } from '../components/ManualSelect';
+} from "../components/KeyValuePairs";
+import { LinesSelection } from "../components/ManualSelect";
 
 /** e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} } */
 export interface ErrorFile {
@@ -20,7 +20,7 @@ export interface ErrorFile {
 
 export type Uuid = string | null;
 
-type State = {
+export type State = {
   openDocInNewTab: boolean;
   selectedFile: Uuid;
   selectedChiclet: Uuid;
@@ -57,7 +57,7 @@ export const useStore = create<State>((set) => ({
   konvaModalOpen: false,
   autocompleteAnchor: null,
   eventTarget: null,
-  targetString: '',
+  targetString: "",
   kvpTableAnchorEl: null,
   errorFiles: {},
   selectedLine: {},

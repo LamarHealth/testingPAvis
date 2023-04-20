@@ -94,16 +94,17 @@ export const getEditDistanceAndSort = (
 
   const interpretedKeyValues = Object.keys(docData.interpretedKeys).map(
     (key) => {
-      let entry: any = {};
-      entry["key"] = docData.interpretedKeys[key];
-      entry["value"] = lowercaseKeys(docData.keyValuePairs)[key];
-      entry["distanceFromTarget"] = getDistancePercentage(
-        docData.interpretedKeys[key],
-        longestKeyLength,
-        targetString,
-        method
-      );
-      entry["interpretedFrom"] = key;
+      const entry = {
+        key: docData.interpretedKeys[key],
+        value: lowercaseKeys(docData.keyValuePairs)[key],
+        distanceFromTarget: getDistancePercentage(
+          docData.interpretedKeys[key],
+          longestKeyLength,
+          targetString,
+          method
+        ),
+        interpretedFrom: key,
+      };
       return entry;
     }
   );

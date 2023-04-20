@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import $ from "jquery";
 import styled from "styled-components";
 
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, State } from "../contexts/ZustandStore";
 
 import Popper from "@material-ui/core/Popper";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -92,10 +92,10 @@ const handleMenuNavigation = (
 
 export const RenderAutocomplete = () => {
   const [docData, selectedFile, autocompleteAnchor, setAutocompleteAnchor] = [
-    useStore((state: any) => state.docData),
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.autocompleteAnchor),
-    useStore((state: any) => state.setAutocompleteAnchor),
+    useStore((state: State) => state.docData),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.autocompleteAnchor),
+    useStore((state: State) => state.setAutocompleteAnchor),
   ];
   const [filter, setFilter] = useState("" as string);
   const open = Boolean(autocompleteAnchor);
@@ -105,19 +105,22 @@ export const RenderAutocomplete = () => {
     (doc: any) => doc.docID === selectedFile
   )[0];
   const isDocSelected = Boolean(selectedDocData);
-  const allLinesAndValues: any = isDocSelected
+  const allLinesAndValues: string[] = isDocSelected
     ? Array.from(
         new Set( // remove duplicates
           Object.entries(selectedDocData.keyValuePairs)
             .map((entry) => entry[1])
             .concat(selectedDocData.lines) // add non-kvp lines
-            .filter((value) => value !== "") // filter out blanks
-            .sort((a: any, b: any) =>
+            .filter((value) => !!value) // filter out blanks and undefined values
+            .sort((a: string, b: string) =>
               a.toLowerCase().localeCompare(b.toLowerCase())
             ) // case insens. sort
         )
       )
     : [];
+  console.log("*****");
+  console.log(isDocSelected);
+  console.log(allLinesAndValues);
   const areThereFilteredEntries = isDocSelected
     ? allLinesAndValues.filter((value: string) =>
         value.toLowerCase().includes(filter.toLowerCase())
