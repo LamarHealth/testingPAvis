@@ -22,7 +22,7 @@ import { useStore, State } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { addThumbsLocalStorage } from "./docThumbnails";
 
-import { DocumentInfo } from "../../../types/documents";
+import { DocumentInfo, StatusCodes } from "../../../types/documents";
 import { OCRMessageResponse } from "../../Background";
 
 const UploadBufferContainer = styled.div`
@@ -101,11 +101,6 @@ const RefreshIcon = styled(LoopIcon)`
     }
   }
 `;
-
-enum StatusCodes {
-  SUCCESS = 200,
-  FAILURE = 400,
-}
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {

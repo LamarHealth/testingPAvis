@@ -14,7 +14,7 @@ import Typography from "@material-ui/core/Typography";
 
 import { colors } from "../common/colors";
 import { KONVA_MODAL_STICKY_HEADER_SHADOW } from "../common/constants";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, State } from "../contexts/ZustandStore";
 import {
   KonvaModalContext,
   LinesGeometry,
@@ -355,8 +355,8 @@ export const KonvaModal = (props: KonvaModalProps) => {
     inputValDispatch,
   } = useContext(KonvaModalContext);
   const [setKonvaModalOpen, selectedLine] = [
-    useStore((state: any) => state.setKonvaModalOpen),
-    useStore((state: any) => state.selectedLine),
+    useStore((state: State) => state.setKonvaModalOpen),
+    useStore((state: State) => state.selectedLine),
   ];
   const inputElRef = useRef(null as HTMLInputElement | null);
 

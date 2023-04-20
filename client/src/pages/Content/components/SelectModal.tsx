@@ -22,7 +22,7 @@ import {
 } from "./ScoreChiclet/index";
 
 import { TableComponent, TableContext } from "./KvpTable";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
+import { useStore, checkFileError, State } from "../contexts/ZustandStore";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -78,8 +78,8 @@ const Message = ({ msg }: any) => {
 
 const ErrorLine = () => {
   const [selectedFile, errorFiles] = [
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.errorFiles),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.errorFiles),
   ];
   const errorMsg =
     selectedFile &&
@@ -110,15 +110,15 @@ export const SelectModal = () => {
     errorFiles,
     setErrorFiles,
   ] = [
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.docData),
-    useStore((state: any) => state.targetString),
-    useStore((state: any) => state.eventTarget),
-    useStore((state: any) => state.setKonvaModalOpen),
-    useStore((state: any) => state.setSelectedChiclet),
-    useStore((state: any) => state.setKvpTableAnchorEl),
-    useStore((state: any) => state.errorFiles),
-    useStore((state: any) => state.setErrorFiles),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.docData),
+    useStore((state: State) => state.targetString),
+    useStore((state: State) => state.eventTarget),
+    useStore((state: State) => state.setKonvaModalOpen),
+    useStore((state: State) => state.setSelectedChiclet),
+    useStore((state: State) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.errorFiles),
+    useStore((state: State) => state.setErrorFiles),
   ];
   const selectedDocData = docData.filter(
     (doc: KeyValuesByDoc) => doc.docID === selectedFile

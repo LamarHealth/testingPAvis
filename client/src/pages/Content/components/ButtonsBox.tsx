@@ -1,7 +1,7 @@
 import React, { useState, useContext, memo, MouseEvent } from "react";
 
 import styled from "styled-components";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, State } from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -84,8 +84,8 @@ const StyledGetAppIcon = styled(GetAppIcon)`
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
   const { fileDispatch } = useContext(FileContext);
   const [setSelectedFile, setDocData] = [
-    useStore((state: any) => state.setSelectedFile),
-    useStore((state: any) => state.setDocData),
+    useStore((state: State) => state.setSelectedFile),
+    useStore((state: State) => state.setDocData),
   ];
 
   const handleDelete = (e: MouseEvent) => {
@@ -162,10 +162,10 @@ const ButtonsBox = memo(
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
     const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
-      useStore((state: any) => state.docData),
-      useStore((state: any) => state.setSelectedFile),
-      useStore((state: any) => state.setKonvaModalOpen),
-      useStore((state: any) => state.openDocInNewTab),
+      useStore((state: State) => state.docData),
+      useStore((state: State) => state.setSelectedFile),
+      useStore((state: State) => state.setKonvaModalOpen),
+      useStore((state: State) => state.openDocInNewTab),
     ];
     const docID = props.docInfo.docID;
 

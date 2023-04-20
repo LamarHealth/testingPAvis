@@ -18,7 +18,7 @@ import {
   getComputedDimension,
   ComputedDimensionTypes,
 } from "./functions";
-import { useStore } from "../../contexts/ZustandStore";
+import { useStore, State } from "../../contexts/ZustandStore";
 import { KeyValuesWithDistance } from "../KeyValuePairs";
 import { assignTargetString } from "../inputsDictionary";
 import WrappedJssComponent from "../ShadowComponent";
@@ -59,11 +59,11 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
     setTargetString,
     setKvpTableAnchorEl,
   ] = [
-    useStore((state: any) => state.selectedChiclet),
-    useStore((state: any) => state.setSelectedChiclet),
-    useStore((state: any) => state.setEventTarget),
-    useStore((state: any) => state.setTargetString),
-    useStore((state: any) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.selectedChiclet),
+    useStore((state: State) => state.setSelectedChiclet),
+    useStore((state: State) => state.setEventTarget),
+    useStore((state: State) => state.setTargetString),
+    useStore((state: State) => state.setKvpTableAnchorEl),
   ];
 
   const wrapperClasses = wrapperFlexStyles();
@@ -130,11 +130,11 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
     setTargetString,
     setKvpTableAnchorEl,
   ] = [
-    useStore((state: any) => state.selectedChiclet),
-    useStore((state: any) => state.setSelectedChiclet),
-    useStore((state: any) => state.setEventTarget),
-    useStore((state: any) => state.setTargetString),
-    useStore((state: any) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.selectedChiclet),
+    useStore((state: State) => state.setSelectedChiclet),
+    useStore((state: State) => state.setEventTarget),
+    useStore((state: State) => state.setTargetString),
+    useStore((state: State) => state.setKvpTableAnchorEl),
   ];
 
   const wrapperClasses = wrapperFlexStyles();

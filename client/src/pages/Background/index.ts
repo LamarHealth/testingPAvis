@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { OCRDocumentInfo } from "../../types/documents";
+import { OCRDocumentInfo, StatusCodes } from "../../types/documents";
 
 type MessageRequest = {
   message?: string;
@@ -52,18 +52,31 @@ chrome.runtime.onMessage.addListener(
         }
       )
         .then((res) => res.json())
-        .then((res) => {
+        .then((res: OCRDocumentInfo) => {
+          console.log("Result");
           console.log(res);
-          const response: OCRMessageResponse = {
-            status: 200,
-            message: "success",
-            documentInfo: res,
-          };
+
+          const docID = res.docID;
+
+          // If docID is not on the response, then there was an error
+
+          const response: OCRMessageResponse = !!docID
+            ? {
+                status: StatusCodes.SUCCESS,
+                message: "success",
+                documentInfo: res,
+              }
+            : {
+                status: StatusCodes.FAILURE,
+                message: res.message,
+                documentInfo: res,
+              };
+
           sendResponse(response);
         })
         .catch((err) => {
           console.error("Error uploading file to API:", err);
-          const response = { status: 400, message: err };
+          const response = { status: StatusCodes.FAILURE, message: err };
           sendResponse(response);
         })
         .finally(() => {});

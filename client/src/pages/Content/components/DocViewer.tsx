@@ -21,7 +21,7 @@ import {
   DOC_CARD_THUMBNAIL_WIDTH,
   DOC_CARD_HEIGHT,
 } from "../common/constants";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
+import { useStore, checkFileError, State } from "../contexts/ZustandStore";
 import ButtonsBox from "./ButtonsBox";
 import { DocumentInfo } from "../../../types/documents";
 
@@ -147,7 +147,7 @@ const StyledCheckbox = styled(Checkbox)`
 `;
 
 const ErrorMessage = ({ docID }: { docID: string }) => {
-  const errorFiles = useStore((state: any) => state.errorFiles);
+  const errorFiles = useStore((state: State) => state.errorFiles);
   const errorMsg = errorFiles[docID].errorMessage
     ? errorFiles[docID].errorMessage
     : DEFAULT_ERROR_MESSAGE;
@@ -165,9 +165,9 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
 
 const DocCell = (props: DocumentInfo) => {
   const [selectedFile, setSelectedFile, errorFiles] = [
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.setSelectedFile),
-    useStore((state: any) => state.errorFiles),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.setSelectedFile),
+    useStore((state: State) => state.errorFiles),
   ];
   const errorGettingFile = checkFileError(errorFiles, props.docID);
   const [hovering, setHovering] = useState(false as boolean);
@@ -292,8 +292,8 @@ const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
   const [openDocInNewTab, setOpenDocInNewTab] = [
-    useStore((state: any) => state.openDocInNewTab),
-    useStore((state: any) => state.setOpenDocInNewTab),
+    useStore((state: State) => state.openDocInNewTab),
+    useStore((state: State) => state.setOpenDocInNewTab),
   ];
 
   return (

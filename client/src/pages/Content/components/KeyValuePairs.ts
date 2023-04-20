@@ -39,7 +39,7 @@ export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
     const docType = doc.docType;
     const docID = doc.docID;
     const keyValuePairs: KeyValuePairs = doc.keyValuePairs;
-    const interpretedKeys = doc.interpretedKeys;
+    const interpretedKeys = doc.keyValuePairs; // TODO: Replace interpretation logic with GPT
     const lines = doc.lines;
     const docObj = {
       docName,
@@ -72,6 +72,11 @@ export const getEditDistanceAndSort = (
   targetString: string,
   method: "lc substring" | "leven"
 ): KeyValuesWithDistance[] => {
+  console.log("getEditDistanceAndSort() called");
+  console.log("docData", docData);
+  console.log("targetString", targetString);
+  console.log("method", method);
+
   const longestKeyLength = Object.keys(docData.keyValuePairs).reduce(
     (acc, cv) => (acc.length > cv.length ? acc : cv)
   ).length;
