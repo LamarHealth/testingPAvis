@@ -22,6 +22,9 @@ import { useStore } from '../contexts/ZustandStore';
 import { getKeyValuePairsByDoc } from './KeyValuePairs';
 import { addThumbsLocalStorage } from './docThumbnails';
 
+import { DocumentInfo } from '../../../types/documents';
+import { OCRMessageResponse } from '../../Background';
+
 const UploadBufferContainer = styled.div`
   flex: 1;
   display: flex;
@@ -98,22 +101,6 @@ const RefreshIcon = styled(LoopIcon)`
     }
   }
 `;
-
-interface OCRMessageRequest {
-  message: string;
-  data: string;
-}
-
-interface OCRMessageResponse {
-  status: number;
-  message: string;
-  documentInfo: DocumentInfo;
-}
-
-interface DocumentInfo {
-  docID: string;
-  [key: string]: any;
-}
 
 enum StatusCodes {
   SUCCESS = 200,

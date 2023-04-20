@@ -1,5 +1,7 @@
 /* global chrome */
 
+import { DocumentInfo } from '../../types/documents';
+
 type MessageRequest = {
   message?: string;
   data?: string;
@@ -7,15 +9,10 @@ type MessageRequest = {
   error?: boolean;
 };
 
-interface DocumentInfo {
-  docID: string;
-  [key: string]: any;
-}
-
-interface OCRMessageResponse {
+export interface OCRMessageResponse {
   status: number;
   message: string;
-  documentInfo?: DocumentInfo;
+  documentInfo: DocumentInfo;
 }
 
 const base64ToBlob = (base64Data: string): Blob => {
