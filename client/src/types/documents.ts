@@ -1,6 +1,7 @@
 export interface OCRDocumentInfo {
   docID: string;
   keyValuePairs: KeyValuePairs;
+  lines: string[];
 }
 export interface DocumentInfo extends OCRDocumentInfo {
   docType: string;

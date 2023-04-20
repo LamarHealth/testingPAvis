@@ -236,7 +236,13 @@ def lambda_handler(event, context):
 
     # Get lines
     lines = get_lines(blocks)
+    # Save lines to bucket
     s3.put_object(Body=json.dumps(lines), Bucket=OUTPUT_BUCKET, Key=f"lines_{file_id}.json")
+
+    # Get lines text
+    lines_text = [list(line.keys())[0] for line in lines]
+
+
     print("Finished processing lines, saving to bucket...")
 
     # Get tables
@@ -266,7 +272,7 @@ def lambda_handler(event, context):
     # print('Creating CSV of tables...')
 
     # Add document id to body
-    response_body = {'keyValuePairs': kvps, "docID": file_id}
+    response_body = {'keyValuePairs': kvps, 'lines': lines_text, "docID": file_id}
 
     return {
         "statusCode": 200,

@@ -18,7 +18,7 @@ import { CountContext, FileContext } from "./DocViewer";
 import { IFileWithPreview } from "./DocUploader";
 import { usePdf } from "@mikecousins/react-pdf";
 import { PAGE_SCALE } from "../common/constants";
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, State } from "../contexts/ZustandStore";
 import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { addThumbsLocalStorage } from "./docThumbnails";
 
@@ -140,7 +140,7 @@ const FileStatus = (props: FileStatusProps) => {
   const currentFile = props.fileWithPreview.file;
   const currentFilePreview = props.fileWithPreview.preview;
   const index = props.fileWithPreview.index;
-  const [setDocData] = [useStore((state: any) => state.setDocData)];
+  const [setDocData] = [useStore((state: State) => state.setDocData)];
   const { countDispatch } = useContext(CountContext);
   const { fileDispatch } = useContext(FileContext);
   const [uploadStatus, setUploadStatus] = useState(Number);
@@ -188,6 +188,7 @@ const FileStatus = (props: FileStatusProps) => {
                   const documentInfo: DocumentInfo = {
                     docID: response.documentInfo.docID,
                     keyValuePairs: response.documentInfo.keyValuePairs,
+                    lines: response.documentInfo.lines,
                     docName: file.name,
                     docType: file.type,
                   };

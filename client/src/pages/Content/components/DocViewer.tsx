@@ -327,6 +327,7 @@ const DocViewer = () => {
                 docType={doc.docType}
                 docID={doc.docID}
                 keyValuePairs={doc.keyValuePairs}
+                lines={doc.lines}
                 key={doc.docID}
               />
             </CSSTransition>
