@@ -1,17 +1,17 @@
 enum envVars {
-  LOCAL = 'local',
-  LIBERTY = 'liberty',
-  BUILD = 'build',
+  LOCAL = "local",
+  LIBERTY = "liberty",
+  BUILD = "build",
 }
-export const SIDEBAR_WIDTH = '25em';
-export const SIDEBAR_HEIGHT = '40em';
-export const SIDEBAR_TRANSITION_TIME = '0.5s';
-export const DOC_CARD_THUMBNAIL_WIDTH = '50px';
-export const DOC_CARD_HEIGHT = '70px';
+export const SIDEBAR_WIDTH = "25em";
+export const SIDEBAR_HEIGHT = "40em";
+export const SIDEBAR_TRANSITION_TIME = "0.5s";
+export const DOC_CARD_THUMBNAIL_WIDTH = "50px";
+export const DOC_CARD_HEIGHT = "70px";
 export const PAGE_SCALE = 0.1;
-export const MODAL_SHADOW = '-1px 1px 6px 2px rgba(102, 102, 102, 0.30)';
+export const MODAL_SHADOW = "-1px 1px 6px 2px rgba(102, 102, 102, 0.30)";
 export const KONVA_MODAL_STICKY_HEADER_SHADOW =
-  '0px 8px 15px -8px rgba(102, 102, 102, 0.15)';
+  "0px 8px 15px -8px rgba(102, 102, 102, 0.15)";
 export const MAIN_MODAL_WIDTH = 700;
 export const MAIN_MODAL_OFFSET_Y = 100;
 export const MAIN_MODAL_OFFSET_X = (window.innerWidth - MAIN_MODAL_WIDTH) / 2;
@@ -41,24 +41,26 @@ export const Z_INDEX_ALLOCATOR = {
   },
 };
 export const DEFAULT_ERROR_MESSAGE =
-  'Unable to fetch resources from server. Try again later.';
+  "Unable to fetch resources from server. Try again later.";
 
 // If LOCAL_MODE is enabled, then the app will render a mock dashboard for testing
 export const LOCAL_MODE = process.env.REACT_APP_LOCAL === envVars.LOCAL;
 export const LIBERTY_MODE = process.env.REACT_APP_LOCAL === envVars.LIBERTY;
 export const API_PATH =
   process.env.REACT_APP_LOCAL === envVars.LOCAL // App is deployed for local testing
-    ? '' // Path will be default localhost
+    ? "" // Path will be default localhost
     : process.env.REACT_APP_LOCAL === envVars.LIBERTY // Extension is packaged for Liberty
-    ? 'https://liberty-docit-demo.herokuapp.com'
+    ? "https://liberty-docit-demo.herokuapp.com"
     : process.env.REACT_APP_LOCAL === envVars.BUILD // Extension is packaged for general usage
-    ? 'https://docit-server.fly.dev'
-    : 'http://localhost:8080'; // Default to live path
+    ? "https://docit-server.fly.dev"
+    : "http://localhost:8080"; // Default to live path
 
-const FILTER_ENABLED = process.env.REACT_APP_FILTER?.toLowerCase() === 'false';
+const FILTER_ENABLED = process.env.REACT_APP_FILTER?.toLowerCase() === "false";
 
-const filterName = FILTER_ENABLED ? '[data-docit-input="true"]' : '';
+const filterName = FILTER_ENABLED ? '[data-docit-input="true"]' : "";
 export const DOCIT_TAG = `input${filterName}, textarea${filterName}`;
 export const ACC_SCORE_LARGE = 14;
 export const ACC_SCORE_MEDIUM = 10;
 export const ACC_SCORE_SMALL = 7;
+
+export const PDF_UPLOAD_BUCKET = "plumbus-ocr-pdf-bucket";

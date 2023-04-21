@@ -1,6 +1,7 @@
 /* global chrome */
 
 import { OCRDocumentInfo, StatusCodes } from "../../types/documents";
+import { PDF_UPLOAD_BUCKET } from "../Content/common/constants";
 
 type MessageRequest = {
   message?: string;
@@ -28,6 +29,7 @@ const base64ToBlob = (base64Data: string): Blob => {
   return new Blob([byteArray], { type: contentType });
 };
 
+// Post PDF to API
 chrome.runtime.onMessage.addListener(
   (request: MessageRequest, sender, sendResponse) => {
     if (request.message === "fileUploaded") {
@@ -76,6 +78,31 @@ chrome.runtime.onMessage.addListener(
         })
         .catch((err) => {
           console.error("Error uploading file to API:", err);
+          const response = { status: StatusCodes.FAILURE, message: err };
+          sendResponse(response);
+        })
+        .finally(() => {});
+      // Return true to indicate that you will send the response asynchronously
+      return true;
+    }
+  }
+);
+
+// Get PDF from API
+chrome.runtime.onMessage.addListener(
+  (request: MessageRequest, sender, sendResponse) => {
+    if (request.message === "fileRequest") {
+      // 1. Receive the docID
+      const docID = request.data || "";
+      console.log("Received docID:", docID);
+      // 2. Get the PDF file
+      fetch(`https://${PDF_UPLOAD_BUCKET}.s3.amazonaws.com/${docID}`, {
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then(() => {})
+        .catch((err) => {
+          console.error("Error fetching file from API:", err);
           const response = { status: StatusCodes.FAILURE, message: err };
           sendResponse(response);
         })
