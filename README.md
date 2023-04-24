@@ -4,18 +4,10 @@
 
 ## Running locally
 
-First, change your `.env` file to include the proper configuration. To create a `.env`, you can `cp .env.sample .env`.
-
-```
-# Options: ["local", "build", "liberty"]
-REACT_APP_LOCAL=liberty
-# If enabled, the application will only fill in forms with a specific data- tag.
-# Options: [true, false]
-REACT_APP_FILTER=false
-```
-
 Make sure you're in the client directory
 `cd client`
+
+Next, change your `.env` file to include the proper configuration. To create a `.env`, you can `cp .env.sample .env`.
 
 Install dependencies
 `yarn install`
