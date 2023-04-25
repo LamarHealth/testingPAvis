@@ -172,7 +172,7 @@ const FileStatus = (props: FileStatusProps) => {
         .then((base64Data) => {
           // 3. Send message to the background script with the PDF data (Base64)
           chrome.runtime.sendMessage(
-            { message: "fileUploaded", data: base64Data },
+            { message: "fileUploaded", data: base64Data, fileName: file.name },
             (response: OCRMessageResponse) => {
               // Handle response from the background script
               console.log("Response from background script:", response);
