@@ -15,11 +15,15 @@ OUTPUT_BUCKET = "plumbus-ocr-output-bucket"
 
 def get_lines(block_list: List) -> List[dict]:
     """
-    Given a textract dictionary, returns a dictionary of all the lines and their coordinate bounding boxes
+    Given a textract dictionary, returns a dictionary of all the lines
+    and their coordinate bounding boxes
     """
-    lines = [block for block in block_list if block.get("BlockType", "") == "LINE"]
+    lines = [block for block in block_list
+             if block.get("BlockType", "") == "LINE"]
     lines = [
-        {"Geometry": line["Geometry"], "Page": line["Page"], "Text": line["Text"] }
+        {"Geometry": line["Geometry"],
+            "Page": line["Page"],
+            "Text": line["Text"]}
         for line in lines if line.get("Text")
     ]
     return lines
@@ -37,7 +41,8 @@ def get_kvps(block_list: list) -> dict:
     for kvp in key_value_sets:
         if kvp["EntityTypes"][0] == "KEY":
             # Get Key IDs
-            child_ids = [val for val in kvp["Relationships"] if val["Type"] == "CHILD"]
+            child_ids = [val for val in kvp["Relationships"]
+                         if val["Type"] == "CHILD"]
             if len(child_ids) == 0:
                 print("no kids")
                 continue
@@ -49,9 +54,8 @@ def get_kvps(block_list: list) -> dict:
                     key_text += blocks[0].get("Text", "") + " "
 
             # Get Value IDs
-            value_ids = [val for val in kvp["Relationships"] if val["Type"] == "VALUE"][
-                0
-            ]["Ids"]
+            value_ids = [val for val in kvp["Relationships"]
+                         if val["Type"] == "VALUE"][0]["Ids"]
             value_child_refs = ""
 
             for value_id in value_ids:
@@ -157,14 +161,15 @@ def lambda_handler(event, context):
     # Get binary PDF data from the request body
     print("In lambda")
     pdf_data_base64 = event["body"]
-     
+
     # Add padding to the Base64 string
     padding = 4 - (len(pdf_data_base64) % 4)
     if padding != 0:
         pdf_data_base64 += "=" * padding
-    
+
     pdf_data = base64.b64decode(pdf_data_base64)
     pdf_data = BytesIO(pdf_data)
+    print(event)
 
     # Generate a unique name for the uploaded PDF file
     file_id = str(uuid.uuid4())
@@ -174,7 +179,7 @@ def lambda_handler(event, context):
     s3 = boto3.client("s3")
     s3.put_object(Bucket=PDF_UPLOAD_BUCKET, Key=pdf_filename, Body=pdf_data)
 
-    ## S3 Upload complete
+    # S3 Upload complete
     # Start the Textract job
     textract = boto3.client("textract")
 
@@ -182,7 +187,9 @@ def lambda_handler(event, context):
     print(f"Bucket: {PDF_UPLOAD_BUCKET} ::: Key: {pdf_filename}")
 
     job_id = textract.start_document_analysis(
-        DocumentLocation={"S3Object": {"Bucket": PDF_UPLOAD_BUCKET, "Name": pdf_filename}},
+        DocumentLocation={"S3Object": {
+            "Bucket": PDF_UPLOAD_BUCKET,
+            "Name": pdf_filename}},
         FeatureTypes=["FORMS", "TABLES"],
     )["JobId"]
 
@@ -234,11 +241,12 @@ def lambda_handler(event, context):
     # Get lines
     lines = get_lines(blocks)
     # Save lines to bucket
-    s3.put_object(Body=json.dumps(lines), Bucket=OUTPUT_BUCKET, Key=f"lines_{file_id}.json")
+    s3.put_object(Body=json.dumps(lines),
+                  Bucket=OUTPUT_BUCKET,
+                  Key=f"lines_{file_id}.json")
 
     # Get lines text
     lines_text = [line.get('Text') for line in lines]
-
 
     print("Finished processing lines, saving to bucket...")
 
@@ -246,7 +254,9 @@ def lambda_handler(event, context):
     table_csv += get_table_csv_results(blocks)
 
     # Save table CSV
-    s3.put_object(Body=table_csv, Bucket=OUTPUT_BUCKET, Key=f"table_{file_id}.csv")
+    s3.put_object(Body=table_csv,
+                  Bucket=OUTPUT_BUCKET,
+                  Key=f"table_{file_id}.csv")
     print("Finished processing table document, saving to bucket...")
 
     # Get key-value pairs
@@ -261,7 +271,9 @@ def lambda_handler(event, context):
     # Save KVP json
     kvp_json_string = json.dumps(kvps)
     s3.put_object(
-        Body=kvp_json_string, Bucket=OUTPUT_BUCKET, Key=f"kvps_{file_id}.json"
+        Body=kvp_json_string,
+        Bucket=OUTPUT_BUCKET,
+        Key=f"kvps_{file_id}.json"
     )
     print("Finished processing document, saving to bucket...")
 
@@ -272,7 +284,7 @@ def lambda_handler(event, context):
     response_body = {'keyValuePairs': kvps,
                      'lines': lines_text,
                      "docID": file_id,
-                    #  "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{key}'
+                     #  "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{key}'
                      }
 
     return {
