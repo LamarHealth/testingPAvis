@@ -45,8 +45,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "body": json.dumps({"message": "Missing body in the request"}),
         }
 
-    request_data = json.loads(event["body"])
-    if "object_key" not in request_data:
+    request_data = event["queryStringParameters"]
+    if not request_data.get("object_key", False):
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
