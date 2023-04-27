@@ -73,43 +73,24 @@ chrome.runtime.onMessage.addListener(
       )
         .then((res) => res.json())
         .then((res: PressignedURLResponse) => {
-          console.log("res");
-          console.log(res);
-
           const postURL = res.presigned_post.url;
           const postFields = res.presigned_post.fields;
           // Create form data
-          // const formData = new FormData();
-          // formData.append("file", pdfFile);
-          console.log("---");
-          // @ts-ignore
-          // for (const [key, value] of formData.entries()) {
-          //   console.log(`${key}: ${value}`);
-          // }
-          console.log("---");
-          console.log(pdfFile);
-          console.log("formData.entries()");
+          const formData = new FormData();
           console.log("postfields", postFields);
 
-          const poostFields = {
-            key: "GetFile (1).pdf",
-            AWSAccessKeyId: "ASIAUTAAG3ND3PRJQVHK",
-            "x-amz-security-token": "IQoJb3JpZ2luX2VjE...",
-            policy: "eyJleHBpc...",
-            signature: "FCqonUrxgiOcR6huzWUptP8I1l0=",
-          };
-          const formData = new FormData();
-
           // Add field data to formData
-          Object.entries(poostFields).forEach(([key, value]) => {
-            console.log("key", key);
-            console.log("value", value);
+          Object.entries(postFields).forEach(([key, value]) => {
             formData.append(key, value);
+            console.log(formData.getAll(key));
           });
-          console.log("***");
+          // Add file to formData
+          formData.append("file", pdfFile);
+          console.log("********");
           // @ts-ignore
-          for (const [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
+          for (const pair of formData.entries()) {
+            console.log("in for loop");
+            console.log(`${pair[0]}, ${pair[1]}`);
           }
           console.log("***");
 
@@ -118,28 +99,52 @@ chrome.runtime.onMessage.addListener(
             method: "POST",
             body: formData,
           })
-            .then((res) => res.json())
-            .then((res: OCRDocumentInfo) => {
+            .then((res) => res)
+            .then((res) => {
               console.log("Result");
               console.log(res);
 
-              const docID = res.docID;
+              // Trigger lambda function to process the PDF in bucket
+              // attach filename to request
+              const lambdaURL =
+                "https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload";
 
-              // If docID is not on the response, then there was an error
+              fetch(lambdaURL, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  filename: pdfFile.name,
+                }),
+              })
+                .then((res) => res.json())
+                .then((res) => {
+                  console.log("Result");
+                  console.log(res);
+                  const response: OCRMessageResponse = !!res.docID
+                    ? {
+                        status: StatusCodes.SUCCESS,
+                        message: "success",
+                        documentInfo: res,
+                      }
+                    : {
+                        status: StatusCodes.FAILURE,
+                        message: res.message,
+                        documentInfo: res,
+                      };
 
-              const response: OCRMessageResponse = !!docID
-                ? {
-                    status: StatusCodes.SUCCESS,
-                    message: "success",
-                    documentInfo: res,
-                  }
-                : {
+                  sendResponse(response);
+                })
+                .catch((err) => {
+                  console.error("Error fetching file from API:", err);
+                  const response = {
                     status: StatusCodes.FAILURE,
-                    message: res.message,
-                    documentInfo: res,
+                    message: err,
                   };
-
-              sendResponse(response);
+                  sendResponse(response);
+                })
+                .finally(() => {});
             })
             .catch((err) => {
               console.error("Error uploading file to API:", err);

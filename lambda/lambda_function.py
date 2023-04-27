@@ -11,6 +11,7 @@ from urllib.parse import unquote_plus
 
 PDF_UPLOAD_BUCKET = "plumbus-ocr-pdf-bucket"
 OUTPUT_BUCKET = "plumbus-ocr-output-bucket"
+s3 = boto3.client("s3")
 
 
 def get_lines(block_list: List) -> List[dict]:
@@ -158,28 +159,12 @@ def get_table_csv_results(blocks):
 
 
 def lambda_handler(event, context):
-    # Get binary PDF data from the request body
-    print("In lambda")
-    pdf_data_base64 = event["body"]
-
-    # Add padding to the Base64 string
-    padding = 4 - (len(pdf_data_base64) % 4)
-    if padding != 0:
-        pdf_data_base64 += "=" * padding
-
-    pdf_data = base64.b64decode(pdf_data_base64)
-    pdf_data = BytesIO(pdf_data)
-    print(event)
-
     # Generate a unique name for the uploaded PDF file
-    file_id = str(uuid.uuid4())
-    pdf_filename = f"{file_id}.pdf"
+    # get filename from body
+    print(event)
+    body = json.loads(event["body"])
+    pdf_filename = body["filename"]
 
-    # Upload the PDF file to the S3 bucket
-    s3 = boto3.client("s3")
-    s3.put_object(Bucket=PDF_UPLOAD_BUCKET, Key=pdf_filename, Body=pdf_data)
-
-    # S3 Upload complete
     # Start the Textract job
     textract = boto3.client("textract")
 
@@ -243,7 +228,7 @@ def lambda_handler(event, context):
     # Save lines to bucket
     s3.put_object(Body=json.dumps(lines),
                   Bucket=OUTPUT_BUCKET,
-                  Key=f"lines_{file_id}.json")
+                  Key=f"lines_{pdf_filename}.json")
 
     # Get lines text
     lines_text = [line.get('Text') for line in lines]
@@ -256,7 +241,7 @@ def lambda_handler(event, context):
     # Save table CSV
     s3.put_object(Body=table_csv,
                   Bucket=OUTPUT_BUCKET,
-                  Key=f"table_{file_id}.csv")
+                  Key=f"table_{pdf_filename}.csv")
     print("Finished processing table document, saving to bucket...")
 
     # Get key-value pairs
@@ -273,7 +258,7 @@ def lambda_handler(event, context):
     s3.put_object(
         Body=kvp_json_string,
         Bucket=OUTPUT_BUCKET,
-        Key=f"kvps_{file_id}.json"
+        Key=f"kvps_{pdf_filename}.json"
     )
     print("Finished processing document, saving to bucket...")
 
@@ -283,8 +268,8 @@ def lambda_handler(event, context):
     # Add document id to body
     response_body = {'keyValuePairs': kvps,
                      'lines': lines_text,
-                     "docID": file_id,
-                     #  "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{key}'
+                     "docID": pdf_filename,
+                     "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{pdf_filename}'
                      }
 
     return {
