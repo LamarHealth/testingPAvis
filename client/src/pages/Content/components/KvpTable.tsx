@@ -181,8 +181,6 @@ const ButtonsCell = (props: {
   const isSelected = props.isSelected;
 
   const fillCurrentSelection = () => {
-    console.log("Getting fill???");
-
     // Fetch geometry of lines from docdata from server
     console.log("Beginning fetch...");
     fetchGeometryData();

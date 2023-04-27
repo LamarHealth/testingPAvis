@@ -150,13 +150,11 @@ const Polygon = ({
 
   // useEffect for filled logic
   useEffect(() => {
-    console.log("In the useeffect hook");
     // const shouldFill = linesSelection[lineGeometry.ID] ? true : false;
 
     console.log(Object.values(linesSelection)[0]);
     const shouldFill = Object.values(linesSelection)[0] === lineGeometry.Text;
 
-    shouldFill && console.log("!!!!!!", linesSelection, lineGeometry);
     setIsFilled(shouldFill);
   }, [linesSelection]);
 
@@ -367,7 +365,6 @@ export const KonvaModal = (props: KonvaModalProps) => {
       selectedLine
     );
     if (selectedLine) {
-      console.log("Dispatching");
       linesSelectionDispatch({
         type: LinesSelectionActionTypes.select,
         line: selectedLine,

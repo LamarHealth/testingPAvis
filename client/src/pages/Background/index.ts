@@ -49,7 +49,6 @@ chrome.runtime.onMessage.addListener(
     if (request.message === "fileUploaded") {
       // Receive the Base64 PDF data
       const base64Data = request.data || "";
-      console.log("Received Base64 data:", base64Data);
       // Convert the Base64 data back to a Blob
       const fileBlob = base64ToBlob(base64Data);
 
@@ -58,8 +57,6 @@ chrome.runtime.onMessage.addListener(
 
       // Convert blob to File
       const pdfFile = new File([fileBlob], fileName);
-
-      console.log(pdfFile);
 
       // First step:
       // Get presigned POST URL from API
@@ -77,22 +74,13 @@ chrome.runtime.onMessage.addListener(
           const postFields = res.presigned_post.fields;
           // Create form data
           const formData = new FormData();
-          console.log("postfields", postFields);
 
           // Add field data to formData
           Object.entries(postFields).forEach(([key, value]) => {
             formData.append(key, value);
-            console.log(formData.getAll(key));
           });
           // Add file to formData
           formData.append("file", pdfFile);
-          console.log("********");
-          // @ts-ignore
-          for (const pair of formData.entries()) {
-            console.log("in for loop");
-            console.log(`${pair[0]}, ${pair[1]}`);
-          }
-          console.log("***");
 
           // Second step: Upload the file to the presigned POST URL
           fetch(postURL, {

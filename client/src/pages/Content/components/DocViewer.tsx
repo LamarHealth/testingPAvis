@@ -312,7 +312,6 @@ const DocViewer = () => {
       {numDocs === 0 && <InstructionsCell />}
       <TransitionGroup component={DocCellTransitionGroup}>
         {fileList.documents.map((doc: DocumentInfo) => {
-          console.log("doc", doc);
           return (
             <CSSTransition
               // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'

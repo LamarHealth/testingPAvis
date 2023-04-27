@@ -119,9 +119,7 @@ export const RenderAutocomplete = () => {
         )
       )
     : [];
-  console.log("*****");
-  console.log(isDocSelected);
-  console.log(allLinesAndValues);
+
   const areThereFilteredEntries = isDocSelected
     ? allLinesAndValues.filter((value: string) =>
         value.toLowerCase().includes(filter.toLowerCase())
