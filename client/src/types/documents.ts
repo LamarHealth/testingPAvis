@@ -23,6 +23,7 @@ export enum StatusCodes {
   SUCCESS = 200,
   FAILURE = 400,
   ACCEPTED = 204,
+  GATEWAY_TIMEOUT = 504,
 }
 
 interface Point {

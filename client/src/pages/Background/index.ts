@@ -1,7 +1,7 @@
 /* global chrome */
 
 import { OCRDocumentInfo, StatusCodes } from "../../types/documents";
-import { PDF_UPLOAD_BUCKET } from "../Content/common/constants";
+import { PDF_UPLOAD_BUCKET, OUTPUT_BUCKET } from "../Content/common/constants";
 
 type PressignedURLResponse = {
   presigned_post: {
@@ -101,10 +101,10 @@ chrome.runtime.onMessage.addListener(
           })
             .then((res) => res)
             .then((res) => {
-              console.log("Result");
+              console.log("Uploading to S3...");
               console.log(res);
 
-              // Trigger lambda function to process the PDF in bucket
+              // Third step: Trigger lambda function to process the PDF in bucket
               // attach filename to request
               const lambdaURL =
                 "https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload";
@@ -118,9 +118,47 @@ chrome.runtime.onMessage.addListener(
                   filename: pdfFile.name,
                 }),
               })
-                .then((res) => res.json())
                 .then((res) => {
-                  console.log("Result");
+                  console.log(res);
+                  if (res.status === StatusCodes.GATEWAY_TIMEOUT) {
+                    console.log("Gateway timeout. Waiting 10 seconds...");
+                    setTimeout(() => {
+                      fetch(
+                        `https://${OUTPUT_BUCKET}.s3.amazonaws.com/response_${pdfFile.name}.json`,
+                        {
+                          method: "GET",
+                        }
+                      )
+                        .then((res) => res.json())
+                        .then((res) => {
+                          console.log("Got bucket cached respnse");
+                          console.log(res);
+                          const response: OCRMessageResponse = {
+                            status: StatusCodes.SUCCESS,
+                            message: "success",
+                            documentInfo: res,
+                          };
+                          sendResponse(response);
+                        })
+                        .catch((err) => {
+                          console.error("Error fetching file from API:", err);
+                          const response = {
+                            status: StatusCodes.FAILURE,
+                            message: err,
+                          };
+                          sendResponse(response);
+                        })
+                        .finally(() => {});
+                    }, 15000);
+                  }
+                  return res.json();
+                })
+                .then((res) => {
+                  // Fourth step: Poll bucket for document info,
+                  // as it may take a while to process
+
+                  // Otherwise, return status code as normal
+                  console.log("Completed processing document.");
                   console.log(res);
                   const response: OCRMessageResponse = !!res.docID
                     ? {

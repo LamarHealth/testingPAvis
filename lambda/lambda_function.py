@@ -1,10 +1,8 @@
 import json
 import time
 import boto3
-import base64
 import json
 import uuid
-from io import BytesIO
 from typing import List
 
 from urllib.parse import unquote_plus
@@ -271,6 +269,15 @@ def lambda_handler(event, context):
                      "docID": pdf_filename,
                      "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{pdf_filename}'
                      }
+
+    # Save response to bucket
+    response_json_string = json.dumps(response_body)
+    response_bucket_key = f"response_{pdf_filename}.json"
+    s3.put_object(
+        Body=response_json_string,
+        Bucket=OUTPUT_BUCKET,
+        Key=response_bucket_key
+    )
 
     return {
         "statusCode": 200,
