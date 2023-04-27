@@ -64,3 +64,4 @@ export const ACC_SCORE_MEDIUM = 10;
 export const ACC_SCORE_SMALL = 7;
 
 export const PDF_UPLOAD_BUCKET = "plumbus-ocr-pdf-bucket";
+export const OUTPUT_BUCKET = "plumbus-ocr-output-bucket";
