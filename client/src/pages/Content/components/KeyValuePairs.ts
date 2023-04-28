@@ -72,11 +72,6 @@ export const getEditDistanceAndSort = (
   targetString: string,
   method: "lc substring" | "leven"
 ): KeyValuesWithDistance[] => {
-  console.log("getEditDistanceAndSort() called");
-  console.log("docData", docData);
-  console.log("targetString", targetString);
-  console.log("method", method);
-
   const longestKeyLength = Object.keys(docData.keyValuePairs).reduce(
     (acc, cv) => (acc.length > cv.length ? acc : cv)
   ).length;
