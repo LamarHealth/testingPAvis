@@ -14,7 +14,12 @@ import {
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore, checkFileError, Uuid } from "../contexts/ZustandStore";
+import {
+  useStore,
+  checkFileError,
+  Uuid,
+  State,
+} from "../contexts/ZustandStore";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -162,14 +167,14 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     errorFiles,
     setErrorFiles,
   ] = [
-    useStore((state: any) => state.eventTarget),
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.docData),
-    useStore((state: any) => state.konvaModalOpen),
-    useStore((state: any) => state.setKvpTableAnchorEl),
-    useStore((state: any) => state.autocompleteAnchor),
-    useStore((state: any) => state.errorFiles),
-    useStore((state: any) => state.setErrorFiles),
+    useStore((state: State) => state.eventTarget),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.docData),
+    useStore((state: State) => state.konvaModalOpen),
+    useStore((state: State) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.autocompleteAnchor),
+    useStore((state: State) => state.errorFiles),
+    useStore((state: State) => state.setErrorFiles),
   ];
   // if in new tab, no access to same zustand store, so use props instead
   const konvaModalOpen = props.isInNewTab

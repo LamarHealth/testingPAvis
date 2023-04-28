@@ -1,46 +1,36 @@
-import React, { useReducer, useState, createContext } from 'react';
-import styled from 'styled-components';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import React, { useReducer, useState, createContext, useEffect } from "react";
+import styled from "styled-components";
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 
-import { StyledDropzone } from './DocUploader';
-import { getThumbsFromLocalStorage } from './docThumbnails';
+import { StyledDropzone } from "./DocUploader";
+import { getThumbsFromLocalStorage } from "./docThumbnails";
 
-import Card from '@material-ui/core/Card';
-import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import Card from "@material-ui/core/Card";
+import Typography from "@material-ui/core/Typography";
+import Link from "@material-ui/core/Link";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 
 import {
   populateBlankChicklets,
   removeAllChiclets,
-} from './ScoreChiclet/functions';
-import { colors, colorSwitcher } from '../common/colors';
+} from "./ScoreChiclet/functions";
+import { colors, colorSwitcher } from "../common/colors";
 import {
   DEFAULT_ERROR_MESSAGE,
   DOC_CARD_THUMBNAIL_WIDTH,
   DOC_CARD_HEIGHT,
-} from '../common/constants';
-import { useStore, checkFileError } from '../contexts/ZustandStore';
-
-import ButtonsBox from './ButtonsBox';
-import { useEffect } from 'react';
+} from "../common/constants";
+import { useStore, checkFileError, State } from "../contexts/ZustandStore";
+import ButtonsBox from "./ButtonsBox";
+import { DocumentInfo } from "../../../types/documents";
 
 interface IDocumentList {
   documents: Array<DocumentInfo>;
 }
 
-export interface DocumentInfo {
-  docType: String;
-  docName: String;
-  docClass: String;
-  filePath: String;
-  docID: String;
-  keyValuePairs: Object;
-}
-
 export interface IFileDispatch {
-  type: String;
+  type: string;
   documentInfo: DocumentInfo;
 }
 
@@ -94,8 +84,8 @@ const Box = styled(Card)`
   ${(props: IsSelected) =>
     colorSwitcher(
       props.isSelected,
-      'border',
-      '1px solid',
+      "border",
+      "1px solid",
       `${colors.DROPZONE_TEXT_LIGHTGREY}`,
       `${colors.DOC_CARD_BORDER}`
     )}
@@ -108,8 +98,8 @@ const DocCard = styled.div`
   ${(props: IsSelected) =>
     colorSwitcher(
       props.isSelected,
-      'background',
-      '',
+      "background",
+      "",
       `${colors.DOC_CARD_BACKGROUND}`,
       `${colors.SELECTED_DOC_BACKGROUND}`
     )}
@@ -136,20 +126,20 @@ const NameAndButtonsWrapper = styled.div`
 
 const DocNameWrapper = styled.span`
   display: ${(props: { hovering: boolean }) =>
-    props.hovering ? 'none' : 'flex'};
+    props.hovering ? "none" : "flex"};
   max-height: ${DOC_CARD_HEIGHT};
   overflow: hidden;
 `;
 
 const Type = styled(Typography)`
   margin: 1em 0.5em;
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')}
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
 `;
 
 const StyledFormControlLabel = styled(FormControlLabel)`
   float: left;
   margin: 0.5em 1em;
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')}
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")}
 `;
 
 const StyledCheckbox = styled(Checkbox)`
@@ -157,14 +147,14 @@ const StyledCheckbox = styled(Checkbox)`
 `;
 
 const ErrorMessage = ({ docID }: { docID: string }) => {
-  const errorFiles = useStore((state: any) => state.errorFiles);
+  const errorFiles = useStore((state: State) => state.errorFiles);
   const errorMsg = errorFiles[docID].errorMessage
     ? errorFiles[docID].errorMessage
     : DEFAULT_ERROR_MESSAGE;
 
   return (
     <ErrorMessageWrapper>
-      <Typography variant={'body2'}>
+      <Typography variant={"body2"}>
         <i>
           <strong>Error</strong>: {errorMsg}
         </i>
@@ -175,11 +165,11 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
 
 const DocCell = (props: DocumentInfo) => {
   const [selectedFile, setSelectedFile, errorFiles] = [
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.setSelectedFile),
-    useStore((state: any) => state.errorFiles),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.setSelectedFile),
+    useStore((state: State) => state.errorFiles),
   ];
-  const errorGettingFile = checkFileError(errorFiles, props.docID.toString());
+  const errorGettingFile = checkFileError(errorFiles, props.docID);
   const [hovering, setHovering] = useState(false as boolean);
   const isSelected = selectedFile === props.docID;
   const [docThumbnail, setDocThumbnail] = useState(
@@ -190,7 +180,7 @@ const DocCell = (props: DocumentInfo) => {
   const setSelected = () => {
     selectedFile === props.docID
       ? setSelectedFile(null)
-      : setSelectedFile(props.docID.toString());
+      : setSelectedFile(props.docID);
   };
 
   const handleBoxClick = () => {
@@ -200,15 +190,17 @@ const DocCell = (props: DocumentInfo) => {
 
   // set thumbnail
   useEffect(() => {
-    const thumb = getThumbsFromLocalStorage()[props.docID.toString()];
-    if (thumb) {
-      setDocThumbnail(thumb);
-    }
+    getThumbsFromLocalStorage((thumbnails) => {
+      const thumb = thumbnails[props.docID];
+      if (thumb) {
+        setDocThumbnail(thumb);
+      }
+    });
   }, [props.docID]);
 
   return (
     <Box
-      variant={isSelected ? 'elevation' : 'outlined'}
+      variant={isSelected ? "elevation" : "outlined"}
       onClick={handleBoxClick}
       onMouseOver={() => setHovering(true)}
       onMouseOut={() => setHovering(false)}
@@ -230,7 +222,7 @@ const DocCell = (props: DocumentInfo) => {
             errorGettingFile={errorGettingFile}
             isSelected={isSelected}
           />
-          {errorGettingFile && <ErrorMessage docID={props.docID.toString()} />}
+          {errorGettingFile && <ErrorMessage docID={props.docID} />}
         </NameAndButtonsWrapper>
       </DocCard>
     </Box>
@@ -241,13 +233,13 @@ const InstructionsCell = () => {
   return <Instructions>Add files to get started</Instructions>;
 };
 
-const removeDocument = (docID: String) => {
-  const newDocList = JSON.parse(localStorage.getItem('docList') || '[]').filter(
+const removeDocument = (docID: string) => {
+  const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
     (item: DocumentInfo) => item.docID !== docID
   );
-  localStorage.setItem('docList', JSON.stringify(newDocList));
+  localStorage.setItem("docList", JSON.stringify(newDocList));
   return {
-    documents: JSON.parse(localStorage.getItem('docList') || '[]'),
+    documents: JSON.parse(localStorage.getItem("docList") || "[]"),
   };
 };
 
@@ -256,11 +248,11 @@ export const fileReducer = (
   action: IFileDispatch
 ): IDocumentList => {
   switch (action.type) {
-    case 'append':
+    case "append":
       return {
-        documents: [...JSON.parse(localStorage.getItem('docList') || '[]')],
+        documents: [...JSON.parse(localStorage.getItem("docList") || "[]")],
       };
-    case 'remove':
+    case "remove":
       return removeDocument(action.documentInfo.docID);
     default:
       return state;
@@ -274,7 +266,7 @@ export const fileReducer = (
  */
 
 const initialState = {
-  documents: JSON.parse(localStorage.getItem('docList') || '[]'),
+  documents: JSON.parse(localStorage.getItem("docList") || "[]"),
 } as IDocumentList;
 
 const Feedback = () => {
@@ -289,7 +281,7 @@ const Feedback = () => {
           rel="noopener noreferrer"
           underline="always"
         >
-          {'Provide feedback'}
+          {"Provide feedback"}
         </Link>
       </i>
     </FeedbackTypography>
@@ -300,8 +292,8 @@ const DocViewer = () => {
   const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
   const [numDocs, setNumDocs] = useState(fileList.documents.length);
   const [openDocInNewTab, setOpenDocInNewTab] = [
-    useStore((state: any) => state.openDocInNewTab),
-    useStore((state: any) => state.setOpenDocInNewTab),
+    useStore((state: State) => state.openDocInNewTab),
+    useStore((state: State) => state.setOpenDocInNewTab),
   ];
 
   return (
@@ -323,7 +315,7 @@ const DocViewer = () => {
           return (
             <CSSTransition
               // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'
-              key={doc.docID.toString()}
+              key={doc.docID}
               classNames="doccell"
               timeout={{ enter: 500, exit: 300 }}
               onEnter={() => setNumDocs(numDocs + 1)}
@@ -332,11 +324,10 @@ const DocViewer = () => {
               <DocCell
                 docName={doc.docName}
                 docType={doc.docType}
-                filePath={doc.filePath}
-                docClass={doc.docClass}
                 docID={doc.docID}
                 keyValuePairs={doc.keyValuePairs}
-                key={doc.docID.toString()}
+                lines={doc.lines}
+                key={doc.docID}
               />
             </CSSTransition>
           );

@@ -1,18 +1,13 @@
 import { getDistancePercentage } from "./LevenshteinField";
-
-///// INTERFACES /////
-// interface returned from getAllKeyValuePairs() .
-export interface KeyValues {
-  [key: string]: string; //e.g. "Date": "7/5/2015"
-}
+import { KeyValuePairs, DocumentInfo } from "../../../types/documents";
 
 // interface returned from getKeyValuePairsByDoc()
 export interface KeyValuesByDoc {
   docName: string;
   docType: string;
   docID: string;
-  keyValuePairs: KeyValues;
-  interpretedKeys: KeyValues;
+  keyValuePairs: KeyValuePairs;
+  interpretedKeys: KeyValuePairs;
   lines: string[];
 }
 
@@ -25,15 +20,26 @@ export interface KeyValuesWithDistance {
 }
 
 ///// FUNCTIONS /////
+
 export const getKeyValuePairsByDoc = (): KeyValuesByDoc[] => {
+  /**
+   * Returns all documents from local storage as an array of objects.
+   * Each object has the following properties:
+   * - docName: string
+   * - docType: string
+   * - docID: string
+   * - keyValuePairs: KeyValuePairs
+   * - interpretedKeys: KeyValuePairs
+   * - lines: string[]
+   */
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-  const docDataByDoc: any = [];
-  storedDocs.forEach((doc: any) => {
+  const docDataByDoc: KeyValuesByDoc[] = [];
+  storedDocs.forEach((doc: KeyValuesByDoc) => {
     const docName = doc.docName;
     const docType = doc.docType;
     const docID = doc.docID;
-    const keyValuePairs = doc.keyValuePairs;
-    const interpretedKeys = doc.interpretedKeys;
+    const keyValuePairs: KeyValuePairs = doc.keyValuePairs;
+    const interpretedKeys = doc.keyValuePairs; // TODO: Replace interpretation logic with GPT
     const lines = doc.lines;
     const docObj = {
       docName,
@@ -88,16 +94,17 @@ export const getEditDistanceAndSort = (
 
   const interpretedKeyValues = Object.keys(docData.interpretedKeys).map(
     (key) => {
-      let entry: any = {};
-      entry["key"] = docData.interpretedKeys[key];
-      entry["value"] = lowercaseKeys(docData.keyValuePairs)[key];
-      entry["distanceFromTarget"] = getDistancePercentage(
-        docData.interpretedKeys[key],
-        longestKeyLength,
-        targetString,
-        method
-      );
-      entry["interpretedFrom"] = key;
+      const entry = {
+        key: docData.interpretedKeys[key],
+        value: lowercaseKeys(docData.keyValuePairs)[key],
+        distanceFromTarget: getDistancePercentage(
+          docData.interpretedKeys[key],
+          longestKeyLength,
+          targetString,
+          method
+        ),
+        interpretedFrom: key,
+      };
       return entry;
     }
   );
@@ -162,7 +169,9 @@ export const deleteKVPairFromLocalStorage = (
   faultyKey: string,
   faultyValue: string
 ) => {
-  let storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
+  let storedDocs: DocumentInfo[] = JSON.parse(
+    localStorage.getItem("docList") || "[]"
+  );
 
   let index = undefined as any;
   let selectedDoc = storedDocs.filter((doc: any, i: any) => {
@@ -192,10 +201,12 @@ export const hasGoodHighestMatch = (
   sortedKeyValuePairs[0].value !== "";
 
 // helper functions
-const lowercaseKeys = (initialObject: any) => {
-  const lowercasedObject = {} as any;
-  Object.keys(initialObject).forEach((key) => {
-    lowercasedObject[key.toLowerCase()] = initialObject[key];
-  });
-  return lowercasedObject;
+const lowercaseKeys = (initialObject: KeyValuePairs): KeyValuePairs => {
+  return Object.entries(initialObject).reduce(
+    (lowercasedObject, [key, value]) => {
+      lowercasedObject[key.toLowerCase()] = value;
+      return lowercasedObject;
+    },
+    {} as KeyValuePairs
+  );
 };

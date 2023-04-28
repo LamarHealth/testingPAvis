@@ -38,7 +38,7 @@ import {
 
 import { CurrentSelectionContext } from "./KonvaModal";
 
-import { useStore } from "../contexts/ZustandStore";
+import { useStore, State } from "../contexts/ZustandStore";
 
 const StyledTableCellLeft = styled(TableCell)`
   padding: 5px 5px 5px 10px;
@@ -170,10 +170,10 @@ const ButtonsCell = (props: {
 
   // Fill polygon line in modal when text is selected
   const [targetString, setDocData, setKonvaModalOpen, setSelectedLine] = [
-    useStore((state: any) => state.targetString),
-    useStore((state: any) => state.setDocData),
-    useStore((state: any) => state.setKonvaModalOpen),
-    useStore((state: any) => state.setSelectedLine),
+    useStore((state: State) => state.targetString),
+    useStore((state: State) => state.setDocData),
+    useStore((state: State) => state.setKonvaModalOpen),
+    useStore((state: State) => state.setSelectedLine),
   ];
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
@@ -181,8 +181,6 @@ const ButtonsCell = (props: {
   const isSelected = props.isSelected;
 
   const fillCurrentSelection = () => {
-    console.log("Getting fill???");
-
     // Fetch geometry of lines from docdata from server
     console.log("Beginning fetch...");
     fetchGeometryData();
@@ -433,7 +431,7 @@ export const TableContext = createContext({} as any);
 
 export const TableComponent = () => {
   const { selectedDocData } = useContext(TableContext);
-  const targetString = useStore((state: any) => state.targetString);
+  const targetString = useStore((state: State) => state.targetString);
   const sortedKeyValuePairs = getEditDistanceAndSort(
     selectedDocData,
     targetString,

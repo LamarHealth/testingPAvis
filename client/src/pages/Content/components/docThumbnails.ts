@@ -2,21 +2,28 @@ export interface DocThumbsReference {
   [docID: string]: string;
 }
 
-export const getThumbsFromLocalStorage = (): DocThumbsReference =>
-  JSON.parse(localStorage.getItem("docThumbnails") || "{}");
+export const getThumbsFromLocalStorage = (
+  callback: (thumbnails: DocThumbsReference) => void
+): void => {
+  chrome.storage.local.get('docThumbnails', (result) => {
+    callback(result.docThumbnails || {});
+  });
+};
 
 const setThumbsToLocalStorage = (thumbnails: DocThumbsReference) => {
-  localStorage.setItem("docThumbnails", JSON.stringify(thumbnails));
+  chrome.storage.local.set({ docThumbnails: thumbnails });
 };
 
 export const addThumbsLocalStorage = (docID: string, dataURL: string) => {
-  const storedThumbs = getThumbsFromLocalStorage();
-  storedThumbs[docID] = dataURL;
-  setThumbsToLocalStorage(storedThumbs);
+  getThumbsFromLocalStorage((storedThumbs) => {
+    storedThumbs[docID] = dataURL;
+    setThumbsToLocalStorage(storedThumbs);
+  });
 };
 
 export const deleteThumbsLocalStorage = (docID: string) => {
-  const storedThumbs = getThumbsFromLocalStorage();
-  delete storedThumbs[docID];
-  setThumbsToLocalStorage(storedThumbs);
+  getThumbsFromLocalStorage((storedThumbs) => {
+    delete storedThumbs[docID];
+    setThumbsToLocalStorage(storedThumbs);
+  });
 };

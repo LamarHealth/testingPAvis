@@ -1,27 +1,27 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import styled from 'styled-components';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import styled from "styled-components";
 
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
 
-import { colors } from '../../common/colors';
+import { colors } from "../../common/colors";
 import {
   ACC_SCORE_LARGE,
   ACC_SCORE_SMALL,
   ACC_SCORE_MEDIUM,
-} from '../../common/constants';
+} from "../../common/constants";
 import {
   replaceAndSetNewMounter,
   getComputedDimension,
   ComputedDimensionTypes,
-} from './functions';
-import { useStore } from '../../contexts/ZustandStore';
-import { KeyValuesWithDistance } from '../KeyValuePairs';
-import { assignTargetString } from '../inputsDictionary';
-import WrappedJssComponent from '../ShadowComponent';
+} from "./functions";
+import { useStore, State } from "../../contexts/ZustandStore";
+import { KeyValuesWithDistance } from "../KeyValuePairs";
+import { assignTargetString } from "../inputsDictionary";
+import WrappedJssComponent from "../ShadowComponent";
 
 export enum RenderChicletsActionTypes {
   blank,
@@ -40,16 +40,16 @@ const StyledCircularProgress = styled(CircularProgress)`
 
 const wrapperFlexStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
-    '& > * + *': {
+    display: "flex",
+    "& > * + *": {
       marginLeft: theme.spacing(0.5),
     },
   },
 }));
 
-const greenCircleStyles = makeStyles({ colorPrimary: { color: 'green' } });
-const yellowCircleStyles = makeStyles({ colorPrimary: { color: 'goldenrod' } });
-const redCircleStyles = makeStyles({ colorPrimary: { color: 'red' } });
+const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
+const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
+const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
 const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
   const [
@@ -59,11 +59,11 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
     setTargetString,
     setKvpTableAnchorEl,
   ] = [
-    useStore((state: any) => state.selectedChiclet),
-    useStore((state: any) => state.setSelectedChiclet),
-    useStore((state: any) => state.setEventTarget),
-    useStore((state: any) => state.setTargetString),
-    useStore((state: any) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.selectedChiclet),
+    useStore((state: State) => state.setSelectedChiclet),
+    useStore((state: State) => state.setEventTarget),
+    useStore((state: State) => state.setTargetString),
+    useStore((state: State) => state.setKvpTableAnchorEl),
   ];
 
   const wrapperClasses = wrapperFlexStyles();
@@ -96,10 +96,10 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
     <ChicletBox
       className={wrapperClasses.root}
       onClick={handleClick}
-      style={selectedChiclet === mounterID ? { border: '1px solid black' } : {}}
+      style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
     >
       <Box>
-        <WrappedJssComponent wrapperClassName={'shadow-root-for-chiclets'}>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
             {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
           </style>
@@ -113,7 +113,7 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
       <StyledCircularProgress
         variant="static"
         value={value}
-        color={'primary'}
+        color={"primary"}
         size={`${size}px`}
         thickness={10}
         classes={colorClasses}
@@ -130,11 +130,11 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
     setTargetString,
     setKvpTableAnchorEl,
   ] = [
-    useStore((state: any) => state.selectedChiclet),
-    useStore((state: any) => state.setSelectedChiclet),
-    useStore((state: any) => state.setEventTarget),
-    useStore((state: any) => state.setTargetString),
-    useStore((state: any) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.selectedChiclet),
+    useStore((state: State) => state.setSelectedChiclet),
+    useStore((state: State) => state.setEventTarget),
+    useStore((state: State) => state.setTargetString),
+    useStore((state: State) => state.setKvpTableAnchorEl),
   ];
 
   const wrapperClasses = wrapperFlexStyles();
@@ -160,10 +160,10 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
     <ChicletBox
       className={wrapperClasses.root}
       onClick={handleClick}
-      style={selectedChiclet === mounterID ? { border: '1px solid black' } : {}}
+      style={selectedChiclet === mounterID ? { border: "1px solid black" } : {}}
     >
       <Box>
-        <WrappedJssComponent wrapperClassName={'shadow-root-for-chiclets'}>
+        <WrappedJssComponent wrapperClassName={"shadow-root-for-chiclets"}>
           <style>
             {`* {font-family: Roboto, Helvetica, Arial, sans-serif; color: ${colors.FONT_BLUE}; font-size: ${size}px; font-weight: 400; line-height: 1em;}`}
           </style>
@@ -173,7 +173,7 @@ const BlankChiclet = ({ inputHeight, mounterID }: any) => {
             color="textSecondary"
             style={{ marginLeft: `${size}px`, marginRight: `${size}px` }}
           >
-            {'?'}
+            {"?"}
           </Typography>
         </WrappedJssComponent>
       </Box>
@@ -200,20 +200,20 @@ export const renderChiclets = (
     switch (action) {
       case RenderChicletsActionTypes.value:
         if (keyValue) {
-          ReactDOM.render(
+          const chicletRoot = ReactDOM.createRoot(mounter);
+          chicletRoot.render(
             <ScoreChiclet
               value={keyValue.distanceFromTarget * 100}
               inputHeight={inputHeight}
               mounterID={mounterID}
-            />,
-            mounter
+            />
           );
-        } else console.error('Unable to render score. Key Value not declared.');
+        } else console.error("Unable to render score. Key Value not declared.");
         break;
       case RenderChicletsActionTypes.blank:
-        ReactDOM.render(
-          <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />,
-          mounter
+        const chicletRoot = ReactDOM.createRoot(mounter);
+        chicletRoot.render(
+          <BlankChiclet inputHeight={inputHeight} mounterID={mounterID} />
         );
         break;
     }
