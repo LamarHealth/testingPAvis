@@ -1,9 +1,12 @@
+"""
+Listens to S3 events and starts a Textract job on the uploaded PDF.
+"""
 import json
 import time
 import boto3
 import json
-import uuid
 from typing import List
+
 
 from urllib.parse import unquote_plus
 
@@ -157,11 +160,9 @@ def get_table_csv_results(blocks):
 
 
 def lambda_handler(event, context):
-    # Generate a unique name for the uploaded PDF file
-    # get filename from body
+    # Listen to S3 events and start Textract job from filename
     print(event)
-    body = json.loads(event["body"])
-    pdf_filename = body["filename"]
+    pdf_filename = event["Records"][0]["s3"]["object"]["key"]
 
     # Start the Textract job
     textract = boto3.client("textract")

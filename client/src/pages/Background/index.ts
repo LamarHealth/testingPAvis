@@ -1,7 +1,12 @@
 /* global chrome */
 
 import { OCRDocumentInfo, StatusCodes } from "../../types/documents";
-import { PDF_UPLOAD_BUCKET, OUTPUT_BUCKET } from "../Content/common/constants";
+import {
+  PDF_UPLOAD_BUCKET,
+  OUTPUT_BUCKET,
+  POST_GENERATOR_API,
+  OCR_URL,
+} from "../Content/common/constants";
 
 type PressignedURLResponse = {
   presigned_post: {
@@ -60,8 +65,7 @@ chrome.runtime.onMessage.addListener(
 
       // First step:
       // Get presigned POST URL from API
-      const presignedGeneratorURL =
-        "https://kuzoktnlpa.execute-api.us-east-1.amazonaws.com/default/doc-upload-url-generator";
+      const presignedGeneratorURL = POST_GENERATOR_API;
 
       fetch(
         `${presignedGeneratorURL}?object_key=${encodeURIComponent(
@@ -94,8 +98,7 @@ chrome.runtime.onMessage.addListener(
 
               // Third step: Trigger lambda function to process the PDF in bucket
               // attach filename to request
-              const lambdaURL =
-                "https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload";
+              const lambdaURL = OCR_URL;
 
               fetch(lambdaURL, {
                 method: "POST",

@@ -65,3 +65,8 @@ export const ACC_SCORE_SMALL = 7;
 
 export const PDF_UPLOAD_BUCKET = "plumbus-ocr-pdf-bucket";
 export const OUTPUT_BUCKET = "plumbus-ocr-output-bucket";
+
+export const POST_GENERATOR_API =
+  "https://kuzoktnlpa.execute-api.us-east-1.amazonaws.com/default/doc-upload-url-generator";
+export const OCR_URL =
+  "https://c4lcvj97v5.execute-api.us-east-1.amazonaws.com/default/plumbus-doc-upload";
