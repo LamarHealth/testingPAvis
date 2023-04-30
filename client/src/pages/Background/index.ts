@@ -3,12 +3,12 @@
 import { OCRDocumentInfo, StatusCodes } from "../../types/documents";
 import {
   PDF_UPLOAD_BUCKET,
-  OUTPUT_BUCKET,
   POST_GENERATOR_API,
-  OCR_URL,
 } from "../Content/common/constants";
 
-type PressignedURLResponse = {
+import { fetchAndReturnData } from "./query";
+
+type PresignedURLResponse = {
   presigned_post: {
     url: string;
     fields: {
@@ -19,6 +19,10 @@ type PressignedURLResponse = {
       "x-amz-security-token": string;
     };
   };
+  pdf: string;
+  kvps: string;
+  table: string;
+  lines: string;
 };
 
 type MessageRequest = {
@@ -73,9 +77,16 @@ chrome.runtime.onMessage.addListener(
         )}`
       )
         .then((res) => res.json())
-        .then((res: PressignedURLResponse) => {
+        .then((res: PresignedURLResponse) => {
+          // Presigned POST
           const postURL = res.presigned_post.url;
           const postFields = res.presigned_post.fields;
+          // Presigned GETs
+          const pdfURL = res.pdf;
+          const kvpsURL = res.kvps;
+          const tableURL = res.table;
+          const linesURL = res.lines;
+
           // Create form data
           const formData = new FormData();
 
@@ -96,77 +107,25 @@ chrome.runtime.onMessage.addListener(
               console.log("Uploading to S3...");
               console.log(res);
 
-              // Third step: Trigger lambda function to process the PDF in bucket
-              // attach filename to request
-              const lambdaURL = OCR_URL;
-
-              fetch(lambdaURL, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  filename: pdfFile.name,
-                }),
-              })
+              // Third step: Poll all other URLs and send them to the content script
+              const urls = [pdfURL, kvpsURL, tableURL, linesURL];
+              fetchAndReturnData(urls)
                 .then((res) => {
-                  console.log(res);
-                  if (res.status === StatusCodes.GATEWAY_TIMEOUT) {
-                    console.log("Gateway timeout. Waiting 10 seconds...");
-                    setTimeout(() => {
-                      fetch(
-                        `https://${OUTPUT_BUCKET}.s3.amazonaws.com/response_${pdfFile.name}.json`,
-                        {
-                          method: "GET",
-                        }
-                      )
-                        .then((res) => res.json())
-                        .then((res) => {
-                          console.log("Got bucket cached respnse");
-                          console.log(res);
-                          const response: OCRMessageResponse = {
-                            status: StatusCodes.SUCCESS,
-                            message: "success",
-                            documentInfo: res,
-                          };
-                          sendResponse(response);
-                        })
-                        .catch((err) => {
-                          console.error("Error fetching file from API:", err);
-                          const response = {
-                            status: StatusCodes.FAILURE,
-                            message: err,
-                          };
-                          sendResponse(response);
-                        })
-                        .finally(() => {});
-                    }, 15000);
-                  }
-                  return res.json();
-                })
-                .then((res) => {
-                  // Fourth step: Poll bucket for document info,
-                  // as it may take a while to process
-
-                  // Otherwise, return status code as normal
-                  console.log("Completed processing document.");
-                  console.log(res);
-                  const response: OCRMessageResponse = !!res.docID
-                    ? {
-                        status: StatusCodes.SUCCESS,
-                        message: "success",
-                        documentInfo: res,
-                      }
-                    : {
-                        status: StatusCodes.FAILURE,
-                        message: res.message,
-                        documentInfo: res,
-                      };
-
+                  console.log("Sending response to content script...");
+                  const response = {
+                    status: StatusCodes.SUCCESS,
+                    message: "File uploaded successfully",
+                    documentInfo: {
+                      pdf: res.response1,
+                      kvps: res.response2,
+                      table: res.response3,
+                      lines: res.response4,
+                    },
+                  };
                   sendResponse(response);
                 })
                 .catch((err) => {
-                  console.error("Error fetching file from API:", err);
+                  console.error("Error fetching data from API:", err);
                   const response = {
                     status: StatusCodes.FAILURE,
                     message: err,
