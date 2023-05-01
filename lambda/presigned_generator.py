@@ -20,6 +20,7 @@ def generate_presigned_post(bucket: str, object_key: str, expiration: int = 3600
     :param expiration: Expiration time in seconds for the presigned post
     :return: presigned post as a dictionary
     """
+    print(f"Generating presigned post for: s3://{bucket}/{object_key}")
     try:
         response = s3.generate_presigned_post(
             Bucket=bucket,
@@ -70,8 +71,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "body": json.dumps({"message": "Missing body in the request"}),
         }
 
-    request_data = event["queryStringParameters"]
-    object_key = request_data.get("object_key", False)
+    object_key = event.get("body", '')
     if not object_key:
         return {
             "statusCode": 400,
@@ -79,15 +79,13 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "body": json.dumps({"message": "Missing object_key in the request body"}),
         }
 
-    object_key = request_data["object_key"]
-
-    # Post for uploading
+    # Post for uploadin
 
     urls = {"presigned_post": generate_presigned_post(PDF_UPLOAD_BUCKET, object_key),
             "pdf": create_presigned_get(PDF_UPLOAD_BUCKET, object_key),
-            "kvps": create_presigned_get(OUTPUT_BUCKET, f"kvps_{object_key}.json"),
-            "table": create_presigned_get(OUTPUT_BUCKET, f"table_{object_key}.csv"),
-            "lines": create_presigned_get(OUTPUT_BUCKET, f"lines_{object_key}.json")}
+            "kvps": create_presigned_get(OUTPUT_BUCKET, f"{object_key}/kvps.json"),
+            "table": create_presigned_get(OUTPUT_BUCKET, f"{object_key}/table.csv"),
+            "lines": create_presigned_get(OUTPUT_BUCKET, f"{object_key}/lines.json")}
 
     return {
         "statusCode": 200,
