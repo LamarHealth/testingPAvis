@@ -2,8 +2,16 @@ export interface OCRDocumentInfo {
   docID: string;
   keyValuePairs: KeyValuePairs;
   lines: Line[];
-  message: string;
+  pdf: string;
+  table: Table;
 }
+
+export interface OCRMessageResponse {
+  status: number;
+  message: string;
+  documentInfo: OCRDocumentInfo;
+}
+
 export interface DocumentInfo {
   docType: string;
   docName: string;
@@ -18,6 +26,8 @@ export interface KeyValuePairs {
    */
   [key: string]: string;
 }
+
+export type Table = string;
 
 export enum StatusCodes {
   SUCCESS = 200,

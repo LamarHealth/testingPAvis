@@ -25,6 +25,8 @@ import { addThumbsLocalStorage } from "./docThumbnails";
 import { DocumentInfo, StatusCodes } from "../../../types/documents";
 import { OCRMessageResponse } from "../../Background";
 
+import { blobToBase64 } from "../../../utils/functions";
+
 const UploadBufferContainer = styled.div`
   flex: 1;
   display: flex;
@@ -101,15 +103,6 @@ const RefreshIcon = styled(LoopIcon)`
     }
   }
 `;
-
-const blobToBase64 = (blob: Blob): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-    reader.readAsDataURL(blob);
-  });
-};
 
 const addDocToLocalStorage = (documentInfo: DocumentInfo): Promise<void> => {
   const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
