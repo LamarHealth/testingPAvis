@@ -111,7 +111,7 @@ export const RenderAutocomplete = () => {
         new Set( // remove duplicates
           Object.entries(selectedDocData.keyValuePairs)
             .map((entry) => entry[1])
-            .concat(selectedDocData.lines) // add non-kvp lines
+            .concat(selectedDocData.lines.map((line) => line["Text"])) // add non-kvp lines
             .filter((value) => !!value) // filter out blanks and undefined values
             .sort((a: string, b: string) =>
               a.toLowerCase().localeCompare(b.toLowerCase())

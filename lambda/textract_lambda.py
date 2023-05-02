@@ -1,11 +1,14 @@
+"""
+Listens to S3 events and starts a Textract job on the uploaded PDF.
+"""
 import json
 import time
 import boto3
 import json
-import uuid
 from typing import List
 
 from urllib.parse import unquote_plus
+
 
 PDF_UPLOAD_BUCKET = "plumbus-ocr-pdf-bucket"
 OUTPUT_BUCKET = "plumbus-ocr-output-bucket"
@@ -157,22 +160,20 @@ def get_table_csv_results(blocks):
 
 
 def lambda_handler(event, context):
-    # Generate a unique name for the uploaded PDF file
-    # get filename from body
+    # Listen to S3 events and start Textract job from filename
     print(event)
-    body = json.loads(event["body"])
-    pdf_filename = body["filename"]
+    upload_filename = unquote_plus(event["Records"][0]["s3"]["object"]["key"])
 
     # Start the Textract job
     textract = boto3.client("textract")
 
     # Get filename from event
-    print(f"Bucket: {PDF_UPLOAD_BUCKET} ::: Key: {pdf_filename}")
+    print(f"Bucket: {PDF_UPLOAD_BUCKET} ::: Key: {upload_filename}")
 
     job_id = textract.start_document_analysis(
         DocumentLocation={"S3Object": {
             "Bucket": PDF_UPLOAD_BUCKET,
-            "Name": pdf_filename}},
+            "Name": upload_filename}},
         FeatureTypes=["FORMS", "TABLES"],
     )["JobId"]
 
@@ -226,10 +227,9 @@ def lambda_handler(event, context):
     # Save lines to bucket
     s3.put_object(Body=json.dumps(lines),
                   Bucket=OUTPUT_BUCKET,
-                  Key=f"lines_{pdf_filename}.json")
-
-    # Get lines text
-    lines_text = [line.get('Text') for line in lines]
+                  Key=f"{upload_filename}/lines.json",
+                  ContentType="application/json"
+                  )
 
     print("Finished processing lines, saving to bucket...")
 
@@ -239,7 +239,9 @@ def lambda_handler(event, context):
     # Save table CSV
     s3.put_object(Body=table_csv,
                   Bucket=OUTPUT_BUCKET,
-                  Key=f"table_{pdf_filename}.csv")
+                  Key=f"{upload_filename}/table.csv",
+                  ContentType="text/csv"
+                  )
     print("Finished processing table document, saving to bucket...")
 
     # Get key-value pairs
@@ -256,35 +258,7 @@ def lambda_handler(event, context):
     s3.put_object(
         Body=kvp_json_string,
         Bucket=OUTPUT_BUCKET,
-        Key=f"kvps_{pdf_filename}.json"
+        Key=f"{upload_filename}/kvps.json",
+        ContentType="application/json",
     )
-    print("Finished processing document, saving to bucket...")
-
-    # Create CSV of tables
-    # print('Creating CSV of tables...')
-
-    # Add document id to body
-    response_body = {'keyValuePairs': kvps,
-                     'lines': lines_text,
-                     "docID": pdf_filename,
-                     "pdfURL": f'https://{PDF_UPLOAD_BUCKET}.s3.amazonaws.com/{pdf_filename}'
-                     }
-
-    # Save response to bucket
-    response_json_string = json.dumps(response_body)
-    response_bucket_key = f"response_{pdf_filename}.json"
-    s3.put_object(
-        Body=response_json_string,
-        Bucket=OUTPUT_BUCKET,
-        Key=response_bucket_key
-    )
-
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-        },
-        "body": json.dumps(response_body),
-    }
+    print("Finished processing document...")
