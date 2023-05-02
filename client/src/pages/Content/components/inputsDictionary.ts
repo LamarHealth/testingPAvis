@@ -42,12 +42,14 @@ const addlLibertyDemoDictionary = {
   CMForwarderFax: "Fax",
 } as InputsDictionary;
 
-const inputsDictionary = (LIBERTY_MODE
-  ? libertyInputsDictionary
-  : {
-      ...addlLibertyDemoDictionary,
-      ...libertyInputsDictionary,
-    }) as InputsDictionary;
+const inputsDictionary = (
+  LIBERTY_MODE
+    ? libertyInputsDictionary
+    : {
+        ...addlLibertyDemoDictionary,
+        ...libertyInputsDictionary,
+      }
+) as InputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
   const inputID = $(inputEl).attr("id");

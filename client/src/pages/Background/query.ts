@@ -40,6 +40,16 @@ const withTimeout = <T>(
     }
   });
 };
+const parseResponse = async (response: Response): Promise<any> => {
+  const contentType = response.headers.get("content-type");
+  console.log("Content type:", contentType);
+  console.log("Response:", response);
+  return contentType && contentType.includes("application/json")
+    ? response.json()
+    : contentType && contentType.includes("text/csv")
+    ? response.text()
+    : response.blob();
+};
 
 export const fetchAndReturnData = async (
   urls: string[]
@@ -62,14 +72,14 @@ export const fetchAndReturnData = async (
         continue;
       }
 
-      // Convert the responses to JSON
-      const jsonResponses = await Promise.all(
-        responses.map((res) => res.json())
+      // Parse the responses based on their content type (JSON, CSV, or PDF)
+      const parsedResponses = await Promise.all(
+        responses.map((res) => parseResponse(res))
       );
 
-      // Attach the JSON responses to an object
-      responseObject = jsonResponses.reduce((acc, json, index) => {
-        acc[`response${index + 1}`] = json;
+      // Attach the parsed responses to an object
+      responseObject = parsedResponses.reduce((acc, data, index) => {
+        acc[`response${index + 1}`] = data;
         return acc;
       }, {});
 

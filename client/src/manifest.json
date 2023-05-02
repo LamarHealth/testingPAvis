@@ -21,6 +21,6 @@
   "background": {
     "scripts": ["background.bundle.js"]
   },
-  "permissions": ["storage", "unlimitedStorage"],
+  "permissions": ["storage"],
   "web_accessible_resources": ["docview.html"]
 }

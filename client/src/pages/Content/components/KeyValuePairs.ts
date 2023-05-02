@@ -1,5 +1,5 @@
 import { getDistancePercentage } from "./LevenshteinField";
-import { KeyValuePairs, DocumentInfo } from "../../../types/documents";
+import { KeyValuePairs, DocumentInfo, Line } from "../../../types/documents";
 
 // interface returned from getKeyValuePairsByDoc()
 export interface KeyValuesByDoc {
@@ -8,7 +8,7 @@ export interface KeyValuesByDoc {
   docID: string;
   keyValuePairs: KeyValuePairs;
   interpretedKeys: KeyValuePairs;
-  lines: string[];
+  lines: Line[];
 }
 
 // interface returned from getEditDistanceAndSort()
@@ -16,6 +16,7 @@ export interface KeyValuesWithDistance {
   key: string;
   value: string;
   distanceFromTarget: number;
+  secondaryDistanceFromTarget?: number;
   interpretedFrom?: string;
 }
 
@@ -72,42 +73,45 @@ export const getEditDistanceAndSort = (
   targetString: string,
   method: "lc substring" | "leven"
 ): KeyValuesWithDistance[] => {
-  const longestKeyLength = Object.keys(docData.keyValuePairs).reduce(
-    (acc, cv) => (acc.length > cv.length ? acc : cv)
+  const keyValuePairs = docData.keyValuePairs;
+  const longestKeyLength = Object.keys(keyValuePairs).reduce((acc, cv) =>
+    acc.length > cv.length ? acc : cv
   ).length;
 
-  const docKeyValuePairs = Object.keys(docData.keyValuePairs).map((key) => {
-    let entry: any = {};
-    entry["key"] = key;
-    entry["value"] = docData.keyValuePairs[key];
-
+  const docKeyValuePairs: KeyValuesWithDistance[] = Object.keys(
+    keyValuePairs
+  ).map((key) => {
     const distPercentage = getDistancePercentage(
       key,
       longestKeyLength,
       targetString,
       method
     );
-    entry["distanceFromTarget"] = distPercentage > 0 ? distPercentage : 0;
+
+    const entry = {
+      key: key,
+      value: keyValuePairs[key],
+      distanceFromTarget: distPercentage > 0 ? distPercentage : 0,
+    };
 
     return entry;
   });
 
-  const interpretedKeyValues = Object.keys(docData.interpretedKeys).map(
-    (key) => {
-      const entry = {
-        key: docData.interpretedKeys[key],
-        value: lowercaseKeys(docData.keyValuePairs)[key],
-        distanceFromTarget: getDistancePercentage(
-          docData.interpretedKeys[key],
-          longestKeyLength,
-          targetString,
-          method
-        ),
-        interpretedFrom: key,
-      };
-      return entry;
-    }
-  );
+  const interpretedKeys = docData.interpretedKeys;
+  const interpretedKeyValues = Object.keys(interpretedKeys).map((key) => {
+    const entry = {
+      key: interpretedKeys[key],
+      value: lowercaseKeys(keyValuePairs)[key.toLowerCase()],
+      distanceFromTarget: getDistancePercentage(
+        interpretedKeys[key],
+        longestKeyLength,
+        targetString,
+        method
+      ),
+      interpretedFrom: key,
+    };
+    return entry;
+  });
 
   const combinedKeyValuePairs = docKeyValuePairs.concat(interpretedKeyValues);
 
@@ -117,19 +121,21 @@ export const getEditDistanceAndSort = (
       a.distanceFromTarget === b.distanceFromTarget &&
       method === "lc substring"
     ) {
-      a.secondaryDistFromTarget = getDistancePercentage(
+      a.secondaryDistanceFromTarget = getDistancePercentage(
         a.key,
         longestKeyLength,
         targetString,
         "leven"
       );
-      b.secondaryDistFromTarget = getDistancePercentage(
+      b.secondaryDistanceFromTarget = getDistancePercentage(
         b.key,
         longestKeyLength,
         targetString,
         "leven"
       );
-      return a.secondaryDistFromTarget > b.secondaryDistFromTarget ? -1 : 1;
+      return a.secondaryDistanceFromTarget > b.secondaryDistanceFromTarget
+        ? -1
+        : 1;
     } else return a.distanceFromTarget > b.distanceFromTarget ? -1 : 1;
   });
 

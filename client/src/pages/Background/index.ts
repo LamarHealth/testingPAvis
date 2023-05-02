@@ -1,12 +1,13 @@
 /* global chrome */
 
-import { OCRDocumentInfo, StatusCodes } from "../../types/documents";
+import { OCRMessageResponse, StatusCodes } from "../../types/documents";
 import {
   PDF_UPLOAD_BUCKET,
   POST_GENERATOR_API,
 } from "../Content/common/constants";
 
 import { fetchAndReturnData } from "./query";
+import { base64ToBlob, blobToBase64 } from "../../utils/functions";
 
 type PresignedURLResponse = {
   presigned_post: {
@@ -33,25 +34,6 @@ type MessageRequest = {
   fileName?: string;
 };
 
-export interface OCRMessageResponse {
-  status: number;
-  message: string;
-  documentInfo: OCRDocumentInfo;
-}
-
-const base64ToBlob = (base64Data: string): Blob => {
-  const splittedData = base64Data.split(",");
-  const contentType = splittedData[0].match(/:(.*?);/)?.[1] || "";
-  const decodedData = atob(splittedData[1]);
-  const byteArray = new Uint8Array(decodedData.length);
-
-  for (let i = 0; i < decodedData.length; i++) {
-    byteArray[i] = decodedData.charCodeAt(i);
-  }
-
-  return new Blob([byteArray], { type: contentType });
-};
-
 // Post PDF to API
 chrome.runtime.onMessage.addListener(
   (request: MessageRequest, sender, sendResponse) => {
@@ -63,21 +45,21 @@ chrome.runtime.onMessage.addListener(
 
       // Get filename from blob
       const fileName = request.fileName || "";
+      console.log(fileName);
+      console.log(fileName);
 
       // Convert blob to File
       const pdfFile = new File([fileBlob], fileName);
-
       // First step:
       // Get presigned POST URL from API
       const presignedGeneratorURL = POST_GENERATOR_API;
-
-      fetch(
-        `${presignedGeneratorURL}?object_key=${encodeURIComponent(
-          pdfFile.name
-        )}`
-      )
+      fetch(presignedGeneratorURL, {
+        method: "POST",
+        body: fileName,
+      })
         .then((res) => res.json())
         .then((res: PresignedURLResponse) => {
+          console.log("Received POST/GET URLs", res);
           // Presigned POST
           const postURL = res.presigned_post.url;
           const postFields = res.presigned_post.fields;
@@ -104,7 +86,7 @@ chrome.runtime.onMessage.addListener(
           })
             .then((res) => res)
             .then((res) => {
-              console.log("Uploading to S3...");
+              console.log("Uploading to S3...!", postURL);
               console.log(res);
 
               // Third step: Poll all other URLs and send them to the content script
@@ -112,16 +94,18 @@ chrome.runtime.onMessage.addListener(
               fetchAndReturnData(urls)
                 .then((res) => {
                   console.log("Sending response to content script...");
-                  const response = {
+                  const response: OCRMessageResponse = {
                     status: StatusCodes.SUCCESS,
                     message: "File uploaded successfully",
                     documentInfo: {
-                      pdf: res.response1,
-                      kvps: res.response2,
-                      table: res.response3,
+                      docID: fileName,
+                      keyValuePairs: res.response2,
                       lines: res.response4,
+                      pdf: res.response1,
+                      table: res.response3,
                     },
                   };
+                  console.log(response);
                   sendResponse(response);
                 })
                 .catch((err) => {

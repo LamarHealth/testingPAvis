@@ -21,7 +21,7 @@ import {
 } from "./ScoreChiclet/functions";
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT, LOCAL_MODE } from "../common/constants";
-import { DocumentInfo } from "../../../types/documents";
+import { DocumentInfo, KeyValuePairs } from "../../../types/documents";
 
 const ButtonsBoxWrapper = styled.div`
   height: ${DOC_CARD_HEIGHT};
@@ -119,7 +119,7 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
     );
   };
 
-  const makeCSVDownloadable = (keyValuePairs: any) => {
+  const makeCSVDownloadable = (keyValuePairs: KeyValuePairs) => {
     let csv = "Key:,Value:\n";
     Object.keys(keyValuePairs).forEach((key: string) => {
       const value = keyValuePairs[key].includes(",")

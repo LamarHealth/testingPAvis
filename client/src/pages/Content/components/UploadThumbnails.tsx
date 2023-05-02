@@ -23,7 +23,7 @@ import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import { addThumbsLocalStorage } from "./docThumbnails";
 
 import { DocumentInfo, StatusCodes } from "../../../types/documents";
-import { OCRMessageResponse } from "../../Background";
+import { OCRMessageResponse } from "../../../types/documents";
 
 import { blobToBase64 } from "../../../utils/functions";
 
