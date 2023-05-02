@@ -87,7 +87,6 @@ chrome.runtime.onMessage.addListener(
             .then((res) => res)
             .then((res) => {
               console.log("Uploading to S3...!", postURL);
-              console.log(res);
 
               // Third step: Poll all other URLs and send them to the content script
               const urls = [pdfURL, kvpsURL, tableURL, linesURL];
@@ -105,7 +104,6 @@ chrome.runtime.onMessage.addListener(
                       table: res.response3,
                     },
                   };
-                  console.log(response);
                   sendResponse(response);
                 })
                 .catch((err) => {

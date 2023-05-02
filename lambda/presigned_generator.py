@@ -79,7 +79,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "body": json.dumps({"message": "Missing object_key in the request body"}),
         }
 
-    # Post for uploadin
+    # Post for uploading
 
     urls = {"presigned_post": generate_presigned_post(PDF_UPLOAD_BUCKET, object_key),
             "pdf": create_presigned_get(PDF_UPLOAD_BUCKET, object_key),
