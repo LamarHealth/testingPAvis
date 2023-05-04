@@ -1,41 +1,71 @@
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect, useRef } from "react";
+import styled from "styled-components";
 import { degrees, PDFDocument, rgb } from "pdf-lib";
-import { Table, Line } from "../../../types/documents";
+import WrappedJssComponent from "./ShadowComponent";
+import { RndComponent } from "./KonvaRndDraggable";
+import { useStore, State } from "../contexts/ZustandStore";
 
-export const Modal = ({ children }: { children: React.ReactNode }) => {
-  const modalRoot = document.createElement("div");
-  modalRoot.id = "modal-root";
-  modalRoot.style.position = "fixed";
-  modalRoot.style.top = "0";
-  modalRoot.style.left = "0";
-  modalRoot.style.width = "100%";
-  modalRoot.style.height = "100%";
-  modalRoot.style.zIndex = "1000";
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em 1em;
+  border-bottom: 1px solid #ccc;
+`;
 
-  useEffect(() => {
-    document.body.appendChild(modalRoot);
-    console.log("hola??");
-    return () => {
-      document.body.removeChild(modalRoot);
-    };
-  }, []);
+const PdfContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  border: solid 1px #ccc;
+`;
 
-  return createPortal(children, modalRoot);
-};
+interface PdfViewerProps {
+  pdfUrl: string;
+  jsonUrl: string;
+}
 
-const PdfViewer = () => {
-  async function modifyPdf(pdfUrl: string, jsonUrl: string) {
+export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
+  const { selectedFile } = useStore((state: State) => state);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const modifyPdf = async (pdfUrl: string, jsonUrl: string) => {
     // Fetch an existing PDF document
     console.log("getting pdf");
     const existingPdfBytes = await fetch(pdfUrl)
-      .then((res) => res.arrayBuffer())
+      .then((res) => {
+        console.log("res", res);
+        return res.arrayBuffer();
+      })
       .catch((err) => console.log("pdf", err));
 
     console.log("getting json");
-    const json = await fetch(jsonUrl)
-      .then((res) => res.json())
-      .catch((err) => console.log("json", err));
+    // const json = await fetch(jsonUrl)
+    //   .then((res) => res.json())
+    //   .catch((err) => console.log("json", err));
+
+    const json = [
+      {
+        Geometry: {
+          BoundingBox: {
+            Width: 0.2198616862297058,
+            Height: 0.01800365000963211,
+            Left: 0.07170820236206055,
+            Top: 0.03975728154182434,
+          },
+          Polygon: [
+            { X: 0.07205525040626526, Y: 0.03975728154182434 },
+            { X: 0.29156988859176636, Y: 0.04220118001103401 },
+            { X: 0.2912239134311676, Y: 0.05776093155145645 },
+            { X: 0.07170820236206055, Y: 0.05531776696443558 },
+          ],
+        },
+        Page: 1,
+        Text: "OLD MAN CARGO LINES",
+      },
+    ];
 
     // Load a PDFDocument from the existing PDF bytes
     // @ts-ignore
@@ -78,21 +108,32 @@ const PdfViewer = () => {
 
     pdfNode.setAttribute("src", fileURL + "#page=4");
 
-    document.querySelector("#pdf").appendChild(pdfNode);
-  }
+    // Replace the query selector with a React ref
+    const container = containerRef.current;
+    if (container) {
+      container.appendChild(pdfNode);
+    }
+  };
 
-  function callModify() {
-    modifyPdf("/estrada.pdf", "../estrada.json");
-  }
+  useEffect(() => {
+    console.log("selected", selectedFile);
+    selectedFile && modifyPdf("https://arxiv.org/pdf/1706.03762.pdf", "");
+  }, [selectedFile]);
 
   return (
-    <div className="App">
-      <p>
-        Click the button to modify an existing PDF document with{" "}
-        <code>pdf-lib</code>
-      </p>
-      <button onClick={callModify}>Modify PDF</button>
-      <div id="pdf"></div>
-    </div>
+    <>
+      {selectedFile && (
+        <React.Fragment>
+          <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
+            <RndComponent>
+              <Header id="header" />
+              <PdfContainer>
+                <div id="pdf" ref={containerRef} />
+              </PdfContainer>
+            </RndComponent>
+          </WrappedJssComponent>
+        </React.Fragment>
+      )}
+    </>
   );
 };

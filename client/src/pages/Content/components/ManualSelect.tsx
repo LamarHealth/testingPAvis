@@ -424,7 +424,9 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
               inputValDispatch,
             }}
           >
-            <RndComponent isInNewTab={props.isInNewTab} />
+            <RndComponent>
+              <></>
+            </RndComponent>
           </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}
