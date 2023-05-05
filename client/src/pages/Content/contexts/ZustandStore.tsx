@@ -23,6 +23,7 @@ export type Uuid = string | null;
 export type State = {
   openDocInNewTab: boolean;
   selectedFile: Uuid;
+  fileUrl: string;
   selectedChiclet: Uuid;
   docData: KeyValuesByDoc[];
   konvaModalOpen: boolean;
@@ -34,6 +35,7 @@ export type State = {
   selectedLine: LinesSelection;
   setOpenDocInNewTab: (openDocInNewTab: boolean) => void;
   setSelectedFile: (selectedFile: Uuid) => void;
+  setFileUrl: (fileUrl: string) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
   setDocData: (docData: KeyValuesByDoc[]) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
@@ -52,6 +54,7 @@ export type State = {
 export const useStore = create<State>((set) => ({
   openDocInNewTab: false,
   selectedFile: null,
+  fileUrl: "",
   selectedChiclet: null,
   docData: getKeyValuePairsByDoc(),
   konvaModalOpen: false,
@@ -70,6 +73,7 @@ export const useStore = create<State>((set) => ({
       }
       return { ...state, selectedFile };
     }),
+  setFileUrl: (fileUrl) => set((state: State) => ({ ...state, fileUrl })),
   setSelectedChiclet: (selectedChiclet) =>
     set((state: State) => ({ ...state, selectedChiclet })),
   setDocData: (docData) =>

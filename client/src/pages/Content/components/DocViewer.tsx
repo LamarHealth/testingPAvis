@@ -328,6 +328,7 @@ const DocViewer = () => {
                 keyValuePairs={doc.keyValuePairs}
                 lines={doc.lines}
                 key={doc.docID}
+                pdf={doc.pdf}
               />
             </CSSTransition>
           );

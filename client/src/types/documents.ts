@@ -11,6 +11,11 @@ export interface OCRMessageResponse {
   message: string;
   documentInfo: OCRDocumentInfo;
 }
+export interface FileRequestResponse {
+  status: number;
+  message: string;
+  base64file: string;
+}
 
 export interface DocumentInfo {
   docType: string;
@@ -18,6 +23,7 @@ export interface DocumentInfo {
   docID: string;
   keyValuePairs: KeyValuePairs;
   lines: Line[];
+  pdf: string;
 }
 
 export interface KeyValuePairs {

@@ -1,6 +1,10 @@
 /* global chrome */
 
-import { OCRMessageResponse, StatusCodes } from "../../types/documents";
+import {
+  OCRMessageResponse,
+  StatusCodes,
+  FileRequestResponse,
+} from "../../types/documents";
 import {
   PDF_UPLOAD_BUCKET,
   POST_GENERATOR_API,
@@ -100,7 +104,7 @@ chrome.runtime.onMessage.addListener(
                       docID: fileName,
                       keyValuePairs: res.response2,
                       lines: res.response4,
-                      pdf: res.response1,
+                      pdf: pdfURL,
                       table: res.response3,
                     },
                   };
@@ -141,17 +145,41 @@ chrome.runtime.onMessage.addListener(
   (request: MessageRequest, sender, sendResponse) => {
     if (request.message === "fileRequest") {
       // 1. Receive the docID
-      const docID = request.data || "";
-      console.log("Received docID:", docID);
+      const pdfUrl = request.data || "";
+      console.log("Received docID:", pdfUrl);
       // 2. Get the PDF file
-      fetch(`https://${PDF_UPLOAD_BUCKET}.s3.amazonaws.com/${docID}`, {
+      fetch(pdfUrl, {
         method: "GET",
       })
-        .then((res) => res.json())
-        .then(() => {})
+        .then((res) => {
+          console.log("Received PDF file from S3");
+          return res.blob();
+        })
+        .then((res) => {
+          // 3. Convert the PDF file to Base64
+          console.log("Converting PDF file to Base64...");
+          console.log(res);
+          return blobToBase64(res);
+        })
+        .then((base64file) => {
+          // 4. Send the Base64 PDF data to the content script
+          console.log("Sending response to content script...");
+          const response: FileRequestResponse = {
+            status: StatusCodes.SUCCESS,
+            message: "File received successfully",
+            base64file: base64file,
+          };
+
+          sendResponse(response);
+        })
         .catch((err) => {
           console.error("Error fetching file from API:", err);
-          const response = { status: StatusCodes.FAILURE, message: err };
+          const response: FileRequestResponse = {
+            status: StatusCodes.FAILURE,
+            message: err,
+            base64file: "",
+          };
+
           sendResponse(response);
         })
         .finally(() => {});

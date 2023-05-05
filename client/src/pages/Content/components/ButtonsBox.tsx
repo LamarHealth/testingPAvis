@@ -161,13 +161,22 @@ const ButtonsBox = memo(
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
-    const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
+    const [
+      docData,
+      setSelectedFile,
+      setFileUrl,
+      setKonvaModalOpen,
+      openDocInNewTab,
+    ] = [
       useStore((state: State) => state.docData),
       useStore((state: State) => state.setSelectedFile),
+      useStore((state: State) => state.setFileUrl),
       useStore((state: State) => state.setKonvaModalOpen),
       useStore((state: State) => state.openDocInNewTab),
     ];
+    console.log("props.docinfo", props.docInfo);
     const docID = props.docInfo.docID;
+    const fileUrl = props.docInfo.pdf;
 
     // click away
     const handleClickAway = () => {
@@ -192,6 +201,7 @@ const ButtonsBox = memo(
     const handleViewPdfClick = (e: MouseEvent) => {
       e.stopPropagation();
       setSelectedFile(docID);
+      setFileUrl(fileUrl);
       setKonvaModalOpen(true);
     };
 

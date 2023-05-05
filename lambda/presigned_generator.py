@@ -82,7 +82,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     # Post for uploading
 
     urls = {"presigned_post": generate_presigned_post(PDF_UPLOAD_BUCKET, object_key),
-            "pdf": create_presigned_get(PDF_UPLOAD_BUCKET, object_key),
+            "pdf": create_presigned_get(PDF_UPLOAD_BUCKET, object_key, expiration=604800),
             "kvps": create_presigned_get(OUTPUT_BUCKET, f"{object_key}/kvps.json"),
             "table": create_presigned_get(OUTPUT_BUCKET, f"{object_key}/table.csv"),
             "lines": create_presigned_get(OUTPUT_BUCKET, f"{object_key}/lines.json")}

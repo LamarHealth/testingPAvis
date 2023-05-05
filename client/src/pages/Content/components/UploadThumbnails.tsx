@@ -179,6 +179,7 @@ const FileStatus = (props: FileStatusProps) => {
                     lines: response.documentInfo.lines,
                     docName: file.name,
                     docType: file.type,
+                    pdf: response.documentInfo.pdf,
                   };
 
                   addDocToLocalStorage(documentInfo).then(() => {
