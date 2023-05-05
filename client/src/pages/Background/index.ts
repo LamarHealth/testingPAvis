@@ -5,10 +5,7 @@ import {
   StatusCodes,
   FileRequestResponse,
 } from "../../types/documents";
-import {
-  PDF_UPLOAD_BUCKET,
-  POST_GENERATOR_API,
-} from "../Content/common/constants";
+import { POST_GENERATOR_API } from "../Content/common/constants";
 
 import { fetchAndReturnData } from "./query";
 import { base64ToBlob, blobToBase64 } from "../../utils/functions";

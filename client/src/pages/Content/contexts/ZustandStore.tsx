@@ -7,6 +7,7 @@ import {
   KeyValuesByDoc,
 } from "../components/KeyValuePairs";
 import { LinesSelection } from "../components/ManualSelect";
+import { Line } from "../../../types/documents";
 
 /** e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} } */
 export interface ErrorFile {
@@ -24,6 +25,7 @@ export type State = {
   openDocInNewTab: boolean;
   selectedFile: Uuid;
   fileUrl: string;
+  lines: Line[];
   selectedChiclet: Uuid;
   docData: KeyValuesByDoc[];
   konvaModalOpen: boolean;
@@ -36,6 +38,7 @@ export type State = {
   setOpenDocInNewTab: (openDocInNewTab: boolean) => void;
   setSelectedFile: (selectedFile: Uuid) => void;
   setFileUrl: (fileUrl: string) => void;
+  setLines: (lines: Line[]) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
   setDocData: (docData: KeyValuesByDoc[]) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
@@ -55,6 +58,7 @@ export const useStore = create<State>((set) => ({
   openDocInNewTab: false,
   selectedFile: null,
   fileUrl: "",
+  lines: [],
   selectedChiclet: null,
   docData: getKeyValuePairsByDoc(),
   konvaModalOpen: false,
@@ -73,6 +77,7 @@ export const useStore = create<State>((set) => ({
       }
       return { ...state, selectedFile };
     }),
+  setLines: (lines) => set((state: State) => ({ ...state, lines })),
   setFileUrl: (fileUrl) => set((state: State) => ({ ...state, fileUrl })),
   setSelectedChiclet: (selectedChiclet) =>
     set((state: State) => ({ ...state, selectedChiclet })),

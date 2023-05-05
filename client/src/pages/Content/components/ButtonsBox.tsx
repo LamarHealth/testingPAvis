@@ -165,18 +165,21 @@ const ButtonsBox = memo(
       docData,
       setSelectedFile,
       setFileUrl,
+      setLines,
       setKonvaModalOpen,
       openDocInNewTab,
     ] = [
       useStore((state: State) => state.docData),
       useStore((state: State) => state.setSelectedFile),
       useStore((state: State) => state.setFileUrl),
+      useStore((state: State) => state.setLines),
       useStore((state: State) => state.setKonvaModalOpen),
       useStore((state: State) => state.openDocInNewTab),
     ];
     console.log("props.docinfo", props.docInfo);
     const docID = props.docInfo.docID;
     const fileUrl = props.docInfo.pdf;
+    const lines = props.docInfo.lines;
 
     // click away
     const handleClickAway = () => {
@@ -202,6 +205,7 @@ const ButtonsBox = memo(
       e.stopPropagation();
       setSelectedFile(docID);
       setFileUrl(fileUrl);
+      setLines(lines);
       setKonvaModalOpen(true);
     };
 

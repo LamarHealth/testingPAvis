@@ -6,7 +6,7 @@ import { useStore, State } from "../contexts/ZustandStore";
 import { degrees, PDFDocument, rgb } from "pdf-lib";
 
 import WrappedJssComponent from "./ShadowComponent";
-import { FileRequestResponse } from "../../../types/documents";
+import { FileRequestResponse, Line } from "../../../types/documents";
 import { base64ToBlob } from "../../../utils/functions";
 
 const Header = styled.div`
@@ -31,13 +31,13 @@ interface PdfViewerProps {
 }
 
 export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
-  const { selectedFile, fileUrl, setSelectedFile } = useStore(
+  const { selectedFile, fileUrl, lines, setSelectedFile } = useStore(
     (state: State) => state
   );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const modifyPdf = async (pdfUrl: string, jsonUrl: string) => {
+  const modifyPdf = async (pdfUrl: string, lines: Line[]) => {
     try {
       // Fetch an existing PDF document
       console.log("getting pdf");
@@ -57,27 +57,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
 
           console.log("pdfDoc", pdfDoc);
 
-          const json = [
-            {
-              Geometry: {
-                BoundingBox: {
-                  Width: 0.2198616862297058,
-                  Height: 0.01800365000963211,
-                  Left: 0.07170820236206055,
-                  Top: 0.03975728154182434,
-                },
-                Polygon: [
-                  { X: 0.07205525040626526, Y: 0.03975728154182434 },
-                  { X: 0.29156988859176636, Y: 0.04220118001103401 },
-                  { X: 0.2912239134311676, Y: 0.05776093155145645 },
-                  { X: 0.07170820236206055, Y: 0.05531776696443558 },
-                ],
-              },
-              Page: 1,
-              Text: "OLD MAN CARGO LINES",
-            },
-          ];
-          json.forEach((entry: any) => {
+          lines.forEach((entry: Line) => {
             const pages = pdfDoc.getPages();
             const currentPage = pages[entry.Page - 1];
             const { width, height } = currentPage.getSize();
@@ -111,7 +91,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
           pdfNode.style.zIndex = "9999";
           pdfNode.style.border = "solid 1px #ccc";
 
-          pdfNode.setAttribute("src", fileURL + "#page=4");
+          // To give a page number, use + `fileURL+"#page=4"`
+          pdfNode.setAttribute("src", fileURL);
 
           // Replace the query selector with a React ref
           const container = containerRef.current;
@@ -128,7 +109,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
 
   useEffect(() => {
     console.log("selected", selectedFile);
-    selectedFile && modifyPdf(fileUrl, "https://arxiv.org/abs/1706.03762");
+    selectedFile && modifyPdf(fileUrl, lines);
   }, [selectedFile]);
 
   const handleOnClick = () => {

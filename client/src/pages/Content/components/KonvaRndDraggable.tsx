@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from "react";
+import React, { useState } from "react";
 
 import styled from "styled-components";
 import { Rnd, RndResizeCallback, DraggableData } from "react-rnd";
