@@ -46,8 +46,6 @@ chrome.runtime.onMessage.addListener(
 
       // Get filename from blob
       const fileName = request.fileName || "";
-      console.log(fileName);
-      console.log(fileName);
 
       // Convert blob to File
       const pdfFile = new File([fileBlob], fileName);
