@@ -9,7 +9,7 @@ import { PdfViewer } from "./components/PdfViewer";
 export const App = () => {
   return (
     <>
-      <PdfViewer pdfUrl="" jsonUrl="" />
+      <PdfViewer />
       <RenderAutocomplete />
       <Sidebar />
       {LOCAL_MODE && (
