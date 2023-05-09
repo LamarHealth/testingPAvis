@@ -25,17 +25,23 @@ const PdfContainer = styled.div`
   border: solid 1px #ccc;
 `;
 
-interface PdfViewerProps {
-  pdfUrl: string;
-  jsonUrl: string;
+interface EmbedWrapperProps {
+  handleClose: () => void;
+  containerRef: React.RefObject<HTMLDivElement>;
+  fileUrl: string;
+  lines: Line[];
 }
 
-export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
-  const { selectedFile, fileUrl, lines, setSelectedFile } = useStore(
-    (state: State) => state
-  );
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
+const EmbedWrapper = ({
+  handleClose,
+  containerRef,
+  fileUrl,
+  lines,
+}: EmbedWrapperProps) => {
+  useEffect(() => {
+    console.log("selected");
+    modifyPdf(fileUrl, lines);
+  }, []);
 
   const modifyPdf = async (pdfUrl: string, lines: Line[]) => {
     try {
@@ -107,30 +113,42 @@ export const PdfViewer: React.FC<PdfViewerProps> = (pdfUrl, jsonUrl) => {
     }
   };
 
-  useEffect(() => {
-    console.log("selected", selectedFile);
-    selectedFile && modifyPdf(fileUrl, lines);
-  }, [selectedFile]);
+  return (
+    <React.Fragment>
+      <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
+        <RndComponent>
+          <Header id="header">
+            <CloseIcon style={{ width: "20px" }} onClick={handleClose} />
+          </Header>
+          <PdfContainer>
+            <div id="pdf" ref={containerRef} />
+          </PdfContainer>
+        </RndComponent>
+      </WrappedJssComponent>
+    </React.Fragment>
+  );
+};
 
-  const handleOnClick = () => {
-    setSelectedFile(null);
+export const PdfViewer = () => {
+  const { konvaModalOpen, fileUrl, lines, setKonvaModalOpen } = useStore(
+    (state: State) => state
+  );
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleClose = () => {
+    setKonvaModalOpen(false);
   };
 
   return (
     <>
-      {selectedFile && (
-        <React.Fragment>
-          <WrappedJssComponent wrapperClassName={"shadow-root-for-modals"}>
-            <RndComponent>
-              <Header id="header">
-                <CloseIcon style={{ width: "20px" }} onClick={handleOnClick} />
-              </Header>
-              <PdfContainer>
-                <div id="pdf" ref={containerRef} />
-              </PdfContainer>
-            </RndComponent>
-          </WrappedJssComponent>
-        </React.Fragment>
+      {konvaModalOpen && (
+        <EmbedWrapper
+          handleClose={handleClose}
+          containerRef={containerRef}
+          fileUrl={fileUrl}
+          lines={lines}
+        />
       )}
     </>
   );
