@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import { getDocListFromLocalStorage } from "./docList";
 
 import {
   populateBlankChicklets,
@@ -264,8 +265,7 @@ const DocViewer = () => {
 
   // set fileList initially
   useEffect(() => {
-    chrome.storage.local.get("docList", (result) => {
-      const storedDocs: DocumentInfo[] = result.docList || [];
+    getDocListFromLocalStorage().then((storedDocs) => {
       setFileList(storedDocs);
     });
   }, []);
