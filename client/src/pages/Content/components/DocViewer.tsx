@@ -25,10 +25,6 @@ import { useStore, checkFileError, State } from "../contexts/ZustandStore";
 import ButtonsBox from "./ButtonsBox";
 import { DocumentInfo } from "../../../types/documents";
 
-interface IDocumentList {
-  documents: Array<DocumentInfo>;
-}
-
 export interface IFileDispatch {
   type: string;
   documentInfo: DocumentInfo;
@@ -259,12 +255,8 @@ const Feedback = () => {
 };
 
 const DocViewer = () => {
-  const [fileList, setFileList] = useState(
-    undefined as IDocumentList | undefined
-  );
-  const [numDocs, setNumDocs] = useState(
-    fileList ? fileList.documents.length : 0
-  );
+  const [fileList, setFileList] = useState([] as DocumentInfo[]);
+  const [numDocs, setNumDocs] = useState(fileList.length);
   const [openDocInNewTab, setOpenDocInNewTab] = [
     useStore((state: State) => state.openDocInNewTab),
     useStore((state: State) => state.setOpenDocInNewTab),
@@ -273,8 +265,8 @@ const DocViewer = () => {
   // set fileList initially
   useEffect(() => {
     chrome.storage.local.get("docList", (result) => {
-      const storedDocs = result.docList || [];
-      setFileList({ documents: storedDocs });
+      const storedDocs: DocumentInfo[] = result.docList || [];
+      setFileList(storedDocs);
     });
   }, []);
 
@@ -292,9 +284,9 @@ const DocViewer = () => {
         <Feedback />
       </div>
       {numDocs === 0 && <InstructionsCell />}
-      {fileList && (
+      {!!fileList.length && (
         <TransitionGroup component={DocCellTransitionGroup}>
-          {fileList.documents.map((doc: DocumentInfo) => {
+          {fileList.map((doc: DocumentInfo) => {
             return (
               <CSSTransition
                 // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'

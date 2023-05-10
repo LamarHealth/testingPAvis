@@ -170,7 +170,7 @@ const FileStatus = (props: FileStatusProps) => {
                   addDocToLocalStorage(documentInfo).then((updatedList) => {
                     // update loc store
                     // set fileList
-                    setFileList({ documents: updatedList });
+                    setFileList(updatedList);
 
                     // set the global var to reflect that
                     getKeyValuePairsByDoc().then((keyValuePairsByDoc) =>

@@ -94,7 +94,7 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
     setSelectedFile(null);
     deleteThumbsLocalStorage(props.docInfo.docID);
     const newDocList = await deleteDocFromLocalStorage(props.docInfo.docID);
-    setFileList({ documents: newDocList });
+    setFileList(newDocList);
     const keyValuesByDoc = await getKeyValuePairsByDoc();
     setDocData(keyValuesByDoc);
   };
