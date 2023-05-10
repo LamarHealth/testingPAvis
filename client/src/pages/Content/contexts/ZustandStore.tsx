@@ -53,7 +53,7 @@ export const useStore = create<State>((set) => ({
   openDocInNewTab: false,
   selectedFile: null,
   selectedChiclet: null,
-  docData: getKeyValuePairsByDoc(),
+  docData: [],
   konvaModalOpen: false,
   autocompleteAnchor: null,
   eventTarget: null,
@@ -105,6 +105,11 @@ export const useStore = create<State>((set) => ({
   setSelectedLine: (selectedLine) =>
     set((state: State) => ({ ...state, selectedLine })),
 }));
+
+// initializing docData has to be done this way, because getKeyValuePairsByDoc is async
+getKeyValuePairsByDoc().then((keyValuesByDoc) => {
+  useStore((state: State) => state.setDocData(keyValuesByDoc));
+});
 
 export const checkFileError = (errorFiles: ErrorFile, selectedFile: Uuid) => {
   return Boolean(

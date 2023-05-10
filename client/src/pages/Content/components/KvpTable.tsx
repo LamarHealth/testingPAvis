@@ -248,14 +248,15 @@ const ButtonsCell = (props: {
 
   const reportKVPair = async (remove: boolean = false) => {
     if (remove) {
-      deleteKVPairFromLocalStorage(
+      await deleteKVPairFromLocalStorage(
         selectedDocData.docID,
         keyValue["key"],
         keyValue["value"]
       );
     }
 
-    setDocData(getKeyValuePairsByDoc());
+    const keyValuesByDoc = await getKeyValuePairsByDoc();
+    setDocData(keyValuesByDoc);
     setHardCollapse(true);
     setSoftCollapse(false);
 

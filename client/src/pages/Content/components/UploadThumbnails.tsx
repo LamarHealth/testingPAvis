@@ -26,6 +26,7 @@ import { DocumentInfo, StatusCodes } from "../../../types/documents";
 import { OCRMessageResponse } from "../../../types/documents";
 
 import { blobToBase64 } from "../../../utils/functions";
+import { addDocToLocalStorage } from "./docList";
 
 const UploadBufferContainer = styled.div`
   flex: 1;
@@ -104,21 +105,6 @@ const RefreshIcon = styled(LoopIcon)`
   }
 `;
 
-const addDocToLocalStorage = (documentInfo: DocumentInfo): Promise<void> => {
-  const storedDocs = JSON.parse(localStorage.getItem("docList") || "[]");
-  let updatedList = Array.isArray(storedDocs)
-    ? storedDocs.filter((item: DocumentInfo) => {
-        return typeof item === "object";
-      })
-    : [];
-  updatedList.push(documentInfo);
-  localStorage.setItem("docList", JSON.stringify(updatedList));
-
-  return new Promise((resolve) => {
-    resolve();
-  });
-};
-
 interface FileStatusProps {
   fileWithPreview: IFileWithPreview;
   onComplete: Dispatch<Action>;
@@ -130,7 +116,7 @@ const FileStatus = (props: FileStatusProps) => {
   const index = props.fileWithPreview.index;
   const [setDocData] = [useStore((state: State) => state.setDocData)];
   const { countDispatch } = useContext(CountContext);
-  const { fileDispatch } = useContext(FileContext);
+  const { setFileList } = useContext(FileContext);
   const [uploadStatus, setUploadStatus] = useState(Number);
   const [thumbnailSrc, setThumbnailSrc] = useState(
     props.fileWithPreview.preview
@@ -181,16 +167,17 @@ const FileStatus = (props: FileStatusProps) => {
                     docType: file.type,
                   };
 
-                  addDocToLocalStorage(documentInfo).then(() => {
-                    // update loc stor then set the global var to reflect that
-                    const keyValuePairsByDoc = getKeyValuePairsByDoc();
-                    setDocData(keyValuePairsByDoc);
+                  addDocToLocalStorage(documentInfo).then((updatedList) => {
+                    // update loc store
+                    // set fileList
+                    setFileList(updatedList);
+
+                    // set the global var to reflect that
+                    getKeyValuePairsByDoc().then((keyValuePairsByDoc) =>
+                      setDocData(keyValuePairsByDoc)
+                    );
                   });
                   setDocID(response.documentInfo.docID);
-                  fileDispatch({
-                    type: "append",
-                    documentInfo: response.documentInfo,
-                  });
                   setUploadStatus(StatusCodes.SUCCESS);
                   break;
                 case StatusCodes.FAILURE:
@@ -212,7 +199,7 @@ const FileStatus = (props: FileStatusProps) => {
           countDispatch("decrement");
         });
     },
-    [setDocData, setUploadStatus, countDispatch, fileDispatch]
+    [setDocData, setUploadStatus, countDispatch, setFileList]
   );
 
   useEffect(() => {
