@@ -225,7 +225,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     (doc: KeyValuesByDoc) => doc.docID === selectedFile
   )[0];
 
-  // TODO: Migrate this code so it fetches when we select the document in general, not just when we use manual select
+  // TODO: Update this code so it fetches when we select the document in general, not just when we use manual select
   const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
     const docName = doc.docName;
     const docID = doc.docID;
@@ -234,7 +234,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     setCurrentDocID(docID);
 
     // get image
-    const docImageResponse: any = await fetch(
+    const docImageResponse: Response = await fetch(
       `${API_PATH}/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {

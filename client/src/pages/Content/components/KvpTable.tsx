@@ -17,10 +17,8 @@ import Collapse from "@material-ui/core/Collapse";
 import Chip from "@material-ui/core/Chip";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import VisibilityIcon from "@material-ui/icons/Visibility";
-import { v4 as uuidv4 } from "uuid";
 
 import { colors } from "../common/colors";
-import { API_PATH } from "../common/constants";
 import {
   getKeyValuePairsByDoc,
   getEditDistanceAndSort,
@@ -28,17 +26,9 @@ import {
   KeyValuesWithDistance,
   deleteKVPairFromLocalStorage,
 } from "./KeyValuePairs";
-import {
-  KonvaModalContext,
-  LinesGeometry,
-  LinesSelection,
-  LinesSelectionActionTypes,
-  InputValActionTypes,
-} from "./ManualSelect";
-
-import { CurrentSelectionContext } from "./KonvaModal";
 
 import { useStore, State } from "../contexts/ZustandStore";
+import { Line } from "../../../types/documents";
 
 const StyledTableCellLeft = styled(TableCell)`
   padding: 5px 5px 5px 10px;
@@ -152,10 +142,7 @@ const TableHeadComponent = () => {
   );
 };
 
-const ButtonsCell = (props: {
-  keyValue: KeyValuesWithDistance;
-  isSelected: Boolean;
-}) => {
+const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const {
     selectedDocData,
     setRemoveKVMessage,
@@ -164,27 +151,36 @@ const ButtonsCell = (props: {
     inputRef,
   } = useContext(TableContext);
 
-  const [currentLinesGeometry, setCurrentLinesGeometry] = useState<
-    LinesGeometry[]
-  >([]);
-
   // Fill polygon line in modal when text is selected
-  const [targetString, setDocData, setKonvaModalOpen, setSelectedLine] = [
+  const [
+    targetString,
+    selectedLines,
+    lines,
+    setDocData,
+    setKonvaModalOpen,
+    setSelectedLines,
+  ] = [
     useStore((state: State) => state.targetString),
+    useStore((state: State) => state.selectedLines),
+    useStore((state: State) => state.lines),
     useStore((state: State) => state.setDocData),
     useStore((state: State) => state.setKonvaModalOpen),
-    useStore((state: State) => state.setSelectedLine),
+    useStore((state: State) => state.setSelectedLines),
   ];
   const [softCollapse, setSoftCollapse] = useState(false);
   const [hardCollapse, setHardCollapse] = useState(false);
   const keyValue = props.keyValue;
-  const isSelected = props.isSelected;
-
   const fillCurrentSelection = () => {
     // Fetch geometry of lines from docdata from server
-    console.log("Beginning fetch...");
-    fetchGeometryData();
+    // TODO: change line geometry so only the selected line is returned
+    console.log("running search for ", keyValue["value"], "in", lines);
+    const keySearch = lines.find((line) =>
+      line.Text.includes(keyValue["value"])
+    );
+    const lineGeometry = keySearch ? [keySearch] : [];
 
+    console.log("filling");
+    setSelectedLines(lineGeometry);
     // open modal
     setKonvaModalOpen(true);
   };
@@ -194,55 +190,6 @@ const ButtonsCell = (props: {
       inputRef.current.value = keyValue["value"]; // fill the kvp table input
       setUnalteredKeyValue(keyValue); // let the parent component know what the original string is
       inputRef.current.focus(); // focus on the text editor
-    }
-  };
-
-  const fetchGeometryData = async () => {
-    console.log("fetching geometry data");
-    // get geometry
-    const linesGeometryResponse = await fetch(
-      `${API_PATH}/api/lines-geometry/${
-        selectedDocData.docID
-      }/${encodeURIComponent(`
-        ${selectedDocData.docName}`)}`,
-      {
-        method: "GET",
-      }
-    );
-    // console.log("linesGeometryResponse", linesGeometryResponse);
-
-    switch (linesGeometryResponse.status) {
-      case 200:
-        console.log("200");
-        const linesGeometry = (
-          await linesGeometryResponse.json()
-        ).linesGeometry.map((lineGeometry: any) => {
-          console.log("mapping...");
-          return { ...lineGeometry, ID: uuidv4() };
-        });
-        console.log("set geometry to", linesGeometry);
-        setCurrentLinesGeometry(linesGeometry);
-        console.log("complete");
-        break;
-      case 410:
-        const statusMessage = (await linesGeometryResponse.json()).status;
-        // setErrorFiles({
-        //   [docID]: {
-        //     geometry: true,
-        //     errorMessage: statusMessage,
-        //     errorCode: linesGeometryResponse.status,
-        //   },
-        // });
-        console.log("ERROR SETTING GEOMETRY");
-        break;
-      default:
-        // setErrorFiles({
-        //   [docID]: {
-        //     geometry: true,
-        //     errorCode: linesGeometryResponse.status,
-        //   },
-        // });
-        console.log("BIGGER ERROR SETTING GEOMETRY");
     }
   };
 
@@ -259,70 +206,17 @@ const ButtonsCell = (props: {
     setHardCollapse(true);
     setSoftCollapse(false);
 
-    // query server
-    // !!!! DOC NAME CAN BE USED HERE
-    const docName = selectedDocData.docName;
-    const docType = selectedDocData.docType;
-    const docID = selectedDocData.docID;
-
-    const result = await fetch(
-      `${API_PATH}/api/report-kv-pair/${docID}/${encodeURIComponent(`
-        ${docName}.${docType}`)}`,
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({
-          targetString,
-          key: keyValue["key"],
-          value: keyValue["value"],
-        }),
-      }
+    // TODO: Create new reporting system for key value pairs
+    setRemoveKVMessage(
+      "The faulty key / value pair has been removed from your browser, but we are unable to pass this note on to the server at this time."
     );
 
     // set message
     setMessageCollapse(true);
-    switch (result.status) {
-      case 202:
-        const statusMessage = (await result.json()).status;
-        setRemoveKVMessage(statusMessage);
-        break;
-      default:
-        setRemoveKVMessage(
-          "The faulty key / value pair has been removed from your browser, but we are unable to pass this note on to the server at this time."
-        );
-        break;
-    }
   };
 
+  // Handle drawing highlights
   // After the geometry is loaded, update the filled polygon
-  useEffect(() => {
-    console.log("Current lines geometry changed");
-
-    if (currentLinesGeometry.length > 0) {
-      console.log("currentLinesGeometry", currentLinesGeometry);
-      console.log("keyValue", keyValue);
-
-      const lineGeometry = currentLinesGeometry.find((line) =>
-        line.Text.includes(keyValue["value"])
-      );
-      console.log("lineGeometry", lineGeometry);
-      // set line in zustand store
-      if (lineGeometry) {
-        const line = { [lineGeometry.ID]: lineGeometry.Text };
-        console.log("the line", line);
-        setSelectedLine(line);
-      }
-
-      // if (lineGeometry) {
-      //   const line = { [lineGeometry.ID]: lineGeometry.Text };
-      //   linesSelectionDispatch({
-      //     type: LinesSelectionActionTypes.select,
-      //     line,
-      //   });
-      //   console.log("line", line);
-      // }
-    }
-  }, [currentLinesGeometry]);
 
   // cleanup
   useEffect(() => {
@@ -336,7 +230,7 @@ const ButtonsCell = (props: {
       <Collapse in={!softCollapse} timeout={hardCollapse ? 0 : "auto"}>
         <FlexCell>
           <IconButton onClick={() => fillCurrentSelection()}>
-            <VisibilityIcon onClick={() => fillCurrentSelection()} />
+            <VisibilityIcon />
           </IconButton>
           <FillButton onClick={fillButtonHandler}>Fill</FillButton>
           <IconButton onClick={() => setSoftCollapse(true)}>
@@ -370,7 +264,12 @@ const ButtonsCell = (props: {
   );
 };
 
-const TableRowContext = createContext({} as any);
+const TableRowContext = createContext(
+  {} as {
+    selectedRow: number | null;
+    setSelectedRow: React.Dispatch<React.SetStateAction<number | null>>;
+  }
+);
 
 const TableRowComponent = (props: {
   keyValue: KeyValuesWithDistance;
@@ -421,7 +320,7 @@ const TableRowComponent = (props: {
         <Typography>{keyValue["value"]}</Typography>
       </StyledTableCellMiddle>
       <StyledTableCellRight>
-        <ButtonsCell keyValue={keyValue} isSelected={isSelected} />
+        <ButtonsCell keyValue={keyValue} />
       </StyledTableCellRight>
     </TableRow>
   );
@@ -472,9 +371,6 @@ export const TableComponent = () => {
     }
   };
 
-  // selected row
-  const [selectedRow, setSelectedRow] = useState(null as null | number);
-
   return (
     <Table>
       <TableHeadContext.Provider
@@ -488,15 +384,16 @@ export const TableComponent = () => {
         <TableHeadComponent />
       </TableHeadContext.Provider>
       <TableBody>
-        <TableRowContext.Provider value={{ selectedRow, setSelectedRow }}>
-          {dynamicallySortedKeyValuePairs.map((keyValue: any, i: number) => (
+        {dynamicallySortedKeyValuePairs.map(
+          (keyValue: KeyValuesWithDistance, i: number) => (
             <TableRowComponent
               keyValue={keyValue}
               bestMatch={bestMatch}
               i={i}
+              key={i}
             />
-          ))}
-        </TableRowContext.Provider>
+          )
+        )}
       </TableBody>
     </Table>
   );

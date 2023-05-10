@@ -34,7 +34,7 @@ export type State = {
   targetString: string;
   kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement;
   errorFiles: ErrorFile; // not just one error file, but an object of error files
-  selectedLine: LinesSelection;
+  selectedLines: Line[];
   setOpenDocInNewTab: (openDocInNewTab: boolean) => void;
   setSelectedFile: (selectedFile: Uuid) => void;
   setFileUrl: (fileUrl: string) => void;
@@ -51,7 +51,7 @@ export type State = {
     kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement
   ) => void;
   setErrorFiles: (errorFile: ErrorFile) => void;
-  setSelectedLine: (selectedLine: LinesSelection) => void;
+  setSelectedLines: (selectedLines: Line[]) => void;
 };
 
 export const useStore = create<State>((set) => ({
@@ -67,7 +67,7 @@ export const useStore = create<State>((set) => ({
   targetString: "",
   kvpTableAnchorEl: null,
   errorFiles: {},
-  selectedLine: {},
+  selectedLines: [],
   setOpenDocInNewTab: (openDocInNewTab) =>
     set((state: State) => ({ ...state, openDocInNewTab })),
   setSelectedFile: (selectedFile) =>
@@ -111,8 +111,8 @@ export const useStore = create<State>((set) => ({
       };
     });
   },
-  setSelectedLine: (selectedLine) =>
-    set((state: State) => ({ ...state, selectedLine })),
+  setSelectedLines: (selectedLines) =>
+    set((state: State) => ({ ...state, selectedLines })),
 }));
 
 export const checkFileError = (errorFiles: ErrorFile, selectedFile: Uuid) => {

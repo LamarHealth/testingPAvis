@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import CloseIcon from "@material-ui/icons/Close";
 import { RndComponent } from "./KonvaRndDraggable";
@@ -130,15 +130,32 @@ const EmbedWrapper = ({
 };
 
 export const PdfViewer = () => {
-  const { konvaModalOpen, fileUrl, lines, setKonvaModalOpen } = useStore(
-    (state: State) => state
-  );
+  const {
+    konvaModalOpen,
+    fileUrl,
+    selectedLines,
+    lines,
+    setSelectedLines,
+    setKonvaModalOpen,
+  } = useStore((state: State) => state);
 
+  // Line to highlight in PDF
+  const [highlightSelection, setHighlightSelection] = useState<Line[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleClose = () => {
     setKonvaModalOpen(false);
+    setSelectedLines([]);
   };
+
+  // Set the lines to highlight in PDF.
+  // If selectedLine is not defined, defaults to all lines
+  useEffect(() => {
+    console.log("setting highlights ", selectedLines);
+    selectedLines?.length
+      ? setHighlightSelection(selectedLines)
+      : setHighlightSelection(lines);
+  }, [selectedLines]);
 
   return (
     <>
@@ -147,7 +164,7 @@ export const PdfViewer = () => {
           handleClose={handleClose}
           containerRef={containerRef}
           fileUrl={fileUrl}
-          lines={lines}
+          lines={highlightSelection}
         />
       )}
     </>

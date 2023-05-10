@@ -51,7 +51,13 @@ const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
 const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
-const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
+interface ScoreChicletProps {
+  value: number;
+  inputHeight: number;
+  mounterID: string;
+}
+
+const ScoreChiclet = ({ value, inputHeight, mounterID }: ScoreChicletProps) => {
   const [
     selectedChiclet,
     setSelectedChiclet,
@@ -89,6 +95,7 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
     ) as HTMLInputElement | HTMLTextAreaElement;
     setEventTarget(eventTarget);
     setTargetString(assignTargetString(eventTarget));
+    console.log("setting target", eventTarget);
     setKvpTableAnchorEl(eventTarget);
   };
 
