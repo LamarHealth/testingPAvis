@@ -22,6 +22,7 @@ import {
 import { colors, colorSwitcher } from "../common/colors";
 import { DOC_CARD_HEIGHT, LOCAL_MODE } from "../common/constants";
 import { DocumentInfo, KeyValuePairs } from "../../../types/documents";
+import { deleteDocFromLocalStorage } from "./docList";
 
 const ButtonsBoxWrapper = styled.div`
   height: ${DOC_CARD_HEIGHT};
@@ -82,27 +83,20 @@ const StyledGetAppIcon = styled(GetAppIcon)`
 `;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
-  const { fileDispatch } = useContext(FileContext);
+  const { setFileList } = useContext(FileContext);
   const [setSelectedFile, setDocData] = [
     useStore((state: State) => state.setSelectedFile),
     useStore((state: State) => state.setDocData),
   ];
 
-  const handleDelete = (e: MouseEvent) => {
+  const handleDelete = async (e: MouseEvent) => {
     e.stopPropagation();
-    const deleteAsync = async () => {
-      setSelectedFile(null);
-      fileDispatch({
-        type: "remove",
-        documentInfo: props.docInfo,
-      });
-      deleteThumbsLocalStorage(props.docInfo.docID);
-
-      return new Promise((resolve) => {
-        resolve(() => {});
-      });
-    };
-    deleteAsync().then(() => setDocData(getKeyValuePairsByDoc()));
+    setSelectedFile(null);
+    deleteThumbsLocalStorage(props.docInfo.docID);
+    const newDocList = await deleteDocFromLocalStorage(props.docInfo.docID);
+    setFileList(newDocList);
+    const keyValuesByDoc = await getKeyValuePairsByDoc();
+    setDocData(keyValuesByDoc);
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>

@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import { getDocListFromLocalStorage } from "./docList";
 
 import {
   populateBlankChicklets,
@@ -24,10 +25,6 @@ import {
 import { useStore, checkFileError, State } from "../contexts/ZustandStore";
 import ButtonsBox from "./ButtonsBox";
 import { DocumentInfo } from "../../../types/documents";
-
-interface IDocumentList {
-  documents: Array<DocumentInfo>;
-}
 
 export interface IFileDispatch {
   type: string;
@@ -233,41 +230,11 @@ const InstructionsCell = () => {
   return <Instructions>Add files to get started</Instructions>;
 };
 
-const removeDocument = (docID: string) => {
-  const newDocList = JSON.parse(localStorage.getItem("docList") || "[]").filter(
-    (item: DocumentInfo) => item.docID !== docID
-  );
-  localStorage.setItem("docList", JSON.stringify(newDocList));
-  return {
-    documents: JSON.parse(localStorage.getItem("docList") || "[]"),
-  };
-};
-
-export const fileReducer = (
-  state: IDocumentList,
-  action: IFileDispatch
-): IDocumentList => {
-  switch (action.type) {
-    case "append":
-      return {
-        documents: [...JSON.parse(localStorage.getItem("docList") || "[]")],
-      };
-    case "remove":
-      return removeDocument(action.documentInfo.docID);
-    default:
-      return state;
-  }
-};
-
 /**
  * Stateful Componenet Sidebar that contains a list of the docs the user has uploaded
  * @constructor
  * @param {[DocumentInfo]} docs List of documents to show
  */
-
-const initialState = {
-  documents: JSON.parse(localStorage.getItem("docList") || "[]"),
-} as IDocumentList;
 
 const Feedback = () => {
   return (
@@ -289,15 +256,22 @@ const Feedback = () => {
 };
 
 const DocViewer = () => {
-  const [fileList, fileDispatch] = useReducer(fileReducer, initialState);
-  const [numDocs, setNumDocs] = useState(fileList.documents.length);
+  const [fileList, setFileList] = useState([] as DocumentInfo[]);
+  const [numDocs, setNumDocs] = useState(fileList.length);
   const [openDocInNewTab, setOpenDocInNewTab] = [
     useStore((state: State) => state.openDocInNewTab),
     useStore((state: State) => state.setOpenDocInNewTab),
   ];
 
+  // set fileList initially
+  useEffect(() => {
+    getDocListFromLocalStorage().then((storedDocs) => {
+      setFileList(storedDocs);
+    });
+  }, []);
+
   return (
-    <FileContext.Provider value={{ fileList, fileDispatch }}>
+    <FileContext.Provider value={{ fileList, setFileList }}>
       <div>
         <StyledFormControlLabel
           value="newTab"
@@ -310,30 +284,32 @@ const DocViewer = () => {
         <Feedback />
       </div>
       {numDocs === 0 && <InstructionsCell />}
-      <TransitionGroup component={DocCellTransitionGroup}>
-        {fileList.documents.map((doc: DocumentInfo) => {
-          return (
-            <CSSTransition
-              // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'
-              key={doc.docID}
-              classNames="doccell"
-              timeout={{ enter: 500, exit: 300 }}
-              onEnter={() => setNumDocs(numDocs + 1)}
-              onExited={() => setNumDocs(numDocs - 1)}
-            >
-              <DocCell
-                docName={doc.docName}
-                docType={doc.docType}
-                docID={doc.docID}
-                keyValuePairs={doc.keyValuePairs}
-                lines={doc.lines}
+      {!!fileList.length && (
+        <TransitionGroup component={DocCellTransitionGroup}>
+          {fileList.map((doc: DocumentInfo) => {
+            return (
+              <CSSTransition
+                // React transition groups need a unique key that doesn't get re-indexed upon render. toString() to convert js type 'String' to ts type 'string'
                 key={doc.docID}
-                pdf={doc.pdf}
-              />
-            </CSSTransition>
-          );
-        })}
-      </TransitionGroup>
+                classNames="doccell"
+                timeout={{ enter: 500, exit: 300 }}
+                onEnter={() => setNumDocs(numDocs + 1)}
+                onExited={() => setNumDocs(numDocs - 1)}
+              >
+                <DocCell
+                  docName={doc.docName}
+                  docType={doc.docType}
+                  docID={doc.docID}
+                  keyValuePairs={doc.keyValuePairs}
+                  lines={doc.lines}
+                  key={doc.docID}
+                  pdf={doc.pdf}
+                />
+              </CSSTransition>
+            );
+          })}
+        </TransitionGroup>
+      )}
       <StyledDropzone />
     </FileContext.Provider>
   );
