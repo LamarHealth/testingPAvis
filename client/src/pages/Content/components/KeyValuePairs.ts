@@ -29,36 +29,31 @@ export interface KeyValuesWithDistance {
 export const getKeyValuePairsByDoc = (): Promise<KeyValuesByDoc[]> => {
   /**
    * Returns all documents from local storage as an array of objects.
-   * Each object has the following properties:
-   * - docName: string
-   * - docType: string
-   * - docID: string
-   * - keyValuePairs: KeyValuePairs
-   * - interpretedKeys: KeyValuePairs
-   * - lines: string[]
-   */
+   **/
   return new Promise((resolve, reject) => {
-    getDocListFromLocalStorage().then((storedDocs) => {
-      const docDataByDoc: KeyValuesByDoc[] = [];
-      storedDocs.forEach((doc: DocumentInfo) => {
-        const docName = doc.docName;
-        const docType = doc.docType;
-        const docID = doc.docID;
-        const keyValuePairs: KeyValuePairs = doc.keyValuePairs;
-        const interpretedKeys = doc.keyValuePairs; // TODO: Replace interpretation logic with GPT
-        const lines = doc.lines;
-        const docObj = {
-          docName,
-          docType,
-          docID,
-          keyValuePairs,
-          interpretedKeys,
-          lines,
-        };
-        docDataByDoc.push(docObj);
-      });
-      resolve(docDataByDoc);
-    });
+    getDocListFromLocalStorage()
+      .then((storedDocs) => {
+        const docDataByDoc: KeyValuesByDoc[] = [];
+        storedDocs.forEach((doc: DocumentInfo) => {
+          const docName = doc.docName;
+          const docType = doc.docType;
+          const docID = doc.docID;
+          const keyValuePairs: KeyValuePairs = doc.keyValuePairs;
+          const interpretedKeys = doc.keyValuePairs; // TODO: Replace interpretation logic with GPT
+          const lines = doc.lines;
+          const docObj = {
+            docName,
+            docType,
+            docID,
+            keyValuePairs,
+            interpretedKeys,
+            lines,
+          };
+          docDataByDoc.push(docObj);
+        });
+        resolve(docDataByDoc);
+      })
+      .catch((err) => reject(err));
   });
 };
 
@@ -170,30 +165,32 @@ export const deleteKVPairFromLocalStorage = (
   faultyValue: string
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
-    getDocListFromLocalStorage().then((storedDocs) => {
-      let index = undefined as any;
-      let selectedDoc = storedDocs.filter((doc: any, i: any) => {
-        const itMatches = doc.docID === selectedDocID;
-        if (itMatches) index = i;
-        return itMatches;
-      })[0];
+    getDocListFromLocalStorage()
+      .then((storedDocs) => {
+        let index = undefined as any;
+        let selectedDoc = storedDocs.filter((doc: DocumentInfo, i: number) => {
+          const itMatches = doc.docID === selectedDocID;
+          if (itMatches) index = i;
+          return itMatches;
+        })[0];
 
-      const newKVPairs = {} as any;
-      Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
-        if (
-          key !== faultyKey &&
-          selectedDoc.keyValuePairs[key] !== faultyValue
-        ) {
-          newKVPairs[key] = selectedDoc.keyValuePairs[key];
-        }
-      });
+        const newKVPairs = {} as any;
+        Object.keys(selectedDoc.keyValuePairs).forEach((key: string) => {
+          if (
+            key !== faultyKey &&
+            selectedDoc.keyValuePairs[key] !== faultyValue
+          ) {
+            newKVPairs[key] = selectedDoc.keyValuePairs[key];
+          }
+        });
 
-      selectedDoc.keyValuePairs = newKVPairs;
+        selectedDoc.keyValuePairs = newKVPairs;
 
-      storedDocs[index] = selectedDoc;
+        storedDocs[index] = selectedDoc;
 
-      setDocListToLocalStorage(storedDocs).then(() => resolve());
-    });
+        setDocListToLocalStorage(storedDocs).then(() => resolve());
+      })
+      .catch((err) => reject(err));
   });
 };
 

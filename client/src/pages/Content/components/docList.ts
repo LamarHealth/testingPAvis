@@ -23,7 +23,9 @@ export const addDocToLocalStorage = (
   return new Promise((resolve) => {
     getDocListFromLocalStorage().then((storedDocs) => {
       storedDocs.push(documentInfo);
-      setDocListToLocalStorage(storedDocs).then(() => resolve(storedDocs));
+      setDocListToLocalStorage(storedDocs)
+        .then(() => resolve(storedDocs))
+        .catch((err) => console.log(err));
     });
   });
 };
