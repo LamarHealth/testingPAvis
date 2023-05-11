@@ -214,7 +214,10 @@ const ButtonsBox = memo(
           PopulateFormsActionTypes.overwriteBlank,
           availableKeyValues
         );
-      setSelectedFile(props.docInfo.docID);
+
+      setSelectedFile(docID);
+      setFileUrl(fileUrl);
+      setLines(lines);
     };
 
     return (
