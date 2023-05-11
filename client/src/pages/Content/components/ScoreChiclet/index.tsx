@@ -32,6 +32,8 @@ const ChicletBox = styled.div`
   background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
   padding: 4px;
   border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
 `;
 
 const StyledCircularProgress = styled(CircularProgress)`
