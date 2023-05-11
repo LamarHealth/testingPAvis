@@ -58,11 +58,10 @@ export const getKeyValuePairsByDoc = (): Promise<KeyValuesByDoc[]> => {
 };
 
 export const getEditDistanceAndSort = (
-  docData: KeyValuesByDoc,
+  keyValuePairs: KeyValuePairs,
   targetString: string,
   method: "lc substring" | "leven"
 ): KeyValuesWithDistance[] => {
-  const keyValuePairs = docData.keyValuePairs;
   const longestKeyLength = Object.keys(keyValuePairs).reduce((acc, cv) =>
     acc.length > cv.length ? acc : cv
   ).length;
@@ -86,23 +85,8 @@ export const getEditDistanceAndSort = (
     return entry;
   });
 
-  const interpretedKeys = docData.interpretedKeys;
-  const interpretedKeyValues = Object.keys(interpretedKeys).map((key) => {
-    const entry = {
-      key: interpretedKeys[key],
-      value: lowercaseKeys(keyValuePairs)[key.toLowerCase()],
-      distanceFromTarget: getDistancePercentage(
-        interpretedKeys[key],
-        longestKeyLength,
-        targetString,
-        method
-      ),
-      interpretedFrom: key,
-    };
-    return entry;
-  });
-
-  const combinedKeyValuePairs = docKeyValuePairs.concat(interpretedKeyValues);
+  // TODO: Replace interpretation logic with GPT
+  const combinedKeyValuePairs = docKeyValuePairs;
 
   combinedKeyValuePairs.sort((a, b) => {
     if (
