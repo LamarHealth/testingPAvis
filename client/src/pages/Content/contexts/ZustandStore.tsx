@@ -2,12 +2,8 @@
 import { create } from "zustand";
 
 import { LOCAL_MODE } from "../common/constants";
-import {
-  getKeyValuePairsByDoc,
-  KeyValuesByDoc,
-} from "../components/KeyValuePairs";
-import { LinesSelection } from "../components/ManualSelect";
-import { Line } from "../../../types/documents";
+import { getKeyValuePairsByDoc } from "../components/KeyValuePairs";
+import { DocumentInfo, Line } from "../../../types/documents";
 
 /** e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} } */
 export interface ErrorFile {
@@ -27,7 +23,7 @@ export type State = {
   fileUrl: string;
   lines: Line[];
   selectedChiclet: Uuid;
-  docData: KeyValuesByDoc[];
+  docData: DocumentInfo[];
   konvaModalOpen: boolean;
   autocompleteAnchor: null | HTMLInputElement | HTMLTextAreaElement;
   eventTarget: null | HTMLInputElement | HTMLTextAreaElement;
@@ -40,7 +36,7 @@ export type State = {
   setFileUrl: (fileUrl: string) => void;
   setLines: (lines: Line[]) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
-  setDocData: (docData: KeyValuesByDoc[]) => void;
+  setDocData: (docData: DocumentInfo[]) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
   setAutocompleteAnchor: (
     autocompleteAnchorEl: null | HTMLInputElement | HTMLTextAreaElement

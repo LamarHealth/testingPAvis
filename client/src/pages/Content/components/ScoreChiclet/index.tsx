@@ -120,7 +120,7 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: ScoreChicletProps) => {
         </WrappedJssComponent>
       </Box>
       <StyledCircularProgress
-        variant="static"
+        variant="determinate"
         value={value}
         color={"primary"}
         size={`${size}px`}
