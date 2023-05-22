@@ -70,6 +70,10 @@ export const RenderModal = () => {
     useStore((state: State) => state.kvpTableAnchorEl),
     useStore((state: State) => state.openDocInNewTab),
   ];
+  console.log("In render modal");
+  console.log(docData);
+  console.log(selectedFile);
+
   const areThereDocs = docData.length > 0;
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;

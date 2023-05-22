@@ -1,4 +1,5 @@
-import React, { useReducer, useState, createContext, useEffect } from "react";
+// Sidebar component
+import React, { useState, createContext, useEffect } from "react";
 import styled from "styled-components";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 
@@ -22,7 +23,13 @@ import {
   DOC_CARD_THUMBNAIL_WIDTH,
   DOC_CARD_HEIGHT,
 } from "../common/constants";
-import { useStore, checkFileError, State } from "../contexts/ZustandStore";
+import {
+  useStore,
+  useSelectedDocumentStore,
+  SelectedDocumentStoreState,
+  checkFileError,
+  State,
+} from "../contexts/ZustandStore";
 import ButtonsBox from "./ButtonsBox";
 import { DocumentInfo } from "../../../types/documents";
 
@@ -161,32 +168,55 @@ const ErrorMessage = ({ docID }: { docID: string }) => {
 };
 
 const DocCell = (props: DocumentInfo) => {
-  const [selectedFile, setSelectedFile, errorFiles] = [
-    useStore((state: State) => state.selectedFile),
+  const [setSelectedFile, errorFiles] = [
     useStore((state: State) => state.setSelectedFile),
     useStore((state: State) => state.errorFiles),
   ];
+
+  const [selectedDocument, setSelectedDocument] = [
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.selectedDocument
+    ),
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.setSelectedDocument
+    ),
+  ];
+
   const errorGettingFile = checkFileError(errorFiles, props.docID);
   const [hovering, setHovering] = useState(false as boolean);
-  const isSelected = selectedFile === props.docID;
+  const isSelected = selectedDocument?.docID === props.docID;
   const [docThumbnail, setDocThumbnail] = useState(
     undefined as string | undefined
   );
 
-  // handle click to select doc
+  // Handle click to select doc in global store
+  // Used to deterimine which PDF to open in PDF viewer and which doc to show in chiclets
   const setSelected = () => {
-    selectedFile === props.docID
+    selectedDocument?.docID === props.docID
       ? setSelectedFile(null)
       : setSelectedFile(props.docID);
+
+    getDocListFromLocalStorage()
+      .then((docList) => {
+        const doc = docList.find((doc) => doc.docID === props.docID);
+        setSelectedDocument(doc || null);
+      })
+      .catch((err) => {
+        console.warn("Error retrieving documents", err);
+      });
   };
 
   const handleBoxClick = () => {
+    // Sets global selected doc
     setSelected();
+    console.log("box was clicked");
+    // Toggle chiclets
     isSelected ? removeAllChiclets() : populateBlankChicklets();
   };
 
   // set thumbnail
   useEffect(() => {
+    // TODO: Refactor this code so thumbnail is passed in as a prop
     getThumbsFromLocalStorage((thumbnails) => {
       const thumb = thumbnails[props.docID];
       if (thumb) {

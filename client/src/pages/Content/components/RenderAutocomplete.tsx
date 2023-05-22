@@ -17,7 +17,7 @@ import WrappedJssComponent from "./ShadowComponent";
 import { getLibertyModalMutationsObserver } from "./inputsDictionary";
 
 import { DOCIT_TAG } from "../common/constants";
-import { KeyValuesByDoc } from "./KeyValuePairs";
+import { DocumentInfo } from "../../../types/documents";
 
 const Container = styled.div`
   max-height: 280px;
@@ -103,7 +103,7 @@ export const RenderAutocomplete = () => {
 
   // doc data
   const selectedDocData = docData.filter(
-    (doc: KeyValuesByDoc) => doc.docID === selectedFile
+    (doc: DocumentInfo) => doc.docID === selectedFile
   )[0];
   const isDocSelected = Boolean(selectedDocData);
   const allLinesAndValues: string[] = isDocSelected

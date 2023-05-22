@@ -17,6 +17,19 @@ export interface ErrorFile {
 
 export type Uuid = string | null;
 
+export type SelectedDocumentStoreState = {
+  selectedDocument: DocumentInfo | null;
+  setSelectedDocument: (selectedDocument: DocumentInfo | null) => void;
+};
+
+export const useSelectedDocumentStore = create<SelectedDocumentStoreState>(
+  (set) => ({
+    selectedDocument: null,
+    setSelectedDocument: (selectedDocument) =>
+      set((state) => ({ ...state, selectedDocument })),
+  })
+);
+
 export type State = {
   openDocInNewTab: boolean;
   selectedFile: Uuid;

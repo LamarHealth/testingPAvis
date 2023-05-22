@@ -1,4 +1,4 @@
-import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
+import { getEditDistanceAndSort } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,

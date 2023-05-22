@@ -13,7 +13,7 @@ import {
   renderChiclets,
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
-import { KeyValuesByDoc } from "./KeyValuePairs";
+import { DocumentInfo } from "../../../types/documents";
 import {
   useStore,
   checkFileError,
@@ -77,7 +77,7 @@ interface ManualSelectNewTabProps {
   isInNewTab?: boolean;
   konvaModalOpen?: boolean;
   selectedFile?: string;
-  docData?: KeyValuesByDoc[];
+  docData?: DocumentInfo[];
 }
 
 interface KanvaModalContextProps {
@@ -185,7 +185,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   ) as Uuid;
   const docData = (
     props.isInNewTab ? props.docData : docDataFromStore
-  ) as KeyValuesByDoc[];
+  ) as DocumentInfo[];
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
@@ -222,11 +222,11 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
 
   // data from server
   const selectedDocData = docData.filter(
-    (doc: KeyValuesByDoc) => doc.docID === selectedFile
+    (doc: DocumentInfo) => doc.docID === selectedFile
   )[0];
 
   // TODO: Update this code so it fetches when we select the document in general, not just when we use manual select
-  const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
+  const getImageAndGeometryFromServer = async (doc: DocumentInfo) => {
     const docName = doc.docName;
     const docID = doc.docID;
     doc.docType = doc.docType === "pdf" ? "png" : doc.docType;

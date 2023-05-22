@@ -152,16 +152,7 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   } = useContext(TableContext);
 
   // Fill polygon line in modal when text is selected
-  const [
-    targetString,
-    selectedLines,
-    lines,
-    setDocData,
-    setKonvaModalOpen,
-    setSelectedLines,
-  ] = [
-    useStore((state: State) => state.targetString),
-    useStore((state: State) => state.selectedLines),
+  const [lines, setDocData, setKonvaModalOpen, setSelectedLines] = [
     useStore((state: State) => state.lines),
     useStore((state: State) => state.setDocData),
     useStore((state: State) => state.setKonvaModalOpen),
@@ -311,11 +302,6 @@ const TableRowComponent = (props: {
       </StyledTableCellLeft>
       <StyledTableCellMiddle>
         <Typography>{keyValue["key"]}</Typography>
-        {keyValue.interpretedFrom && (
-          <Typography variant="caption">
-            <i>Interpreted from: {keyValue["interpretedFrom"]}</i>
-          </Typography>
-        )}
       </StyledTableCellMiddle>
       <StyledTableCellMiddle>
         <Typography>{keyValue["value"]}</Typography>

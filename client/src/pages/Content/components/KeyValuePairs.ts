@@ -1,19 +1,9 @@
 import { getDistancePercentage } from "./LevenshteinField";
-import { KeyValuePairs, DocumentInfo, Line } from "../../../types/documents";
+import { KeyValuePairs, DocumentInfo } from "../../../types/documents";
 import {
   getDocListFromLocalStorage,
   setDocListToLocalStorage,
 } from "./docList";
-
-// interface returned from getKeyValuePairsByDoc()
-export interface KeyValuesByDoc {
-  docName: string;
-  docType: string;
-  docID: string;
-  keyValuePairs: KeyValuePairs;
-  interpretedKeys: KeyValuePairs;
-  lines: Line[];
-}
 
 // interface returned from getEditDistanceAndSort()
 export interface KeyValuesWithDistance {
@@ -26,30 +16,16 @@ export interface KeyValuesWithDistance {
 
 ///// FUNCTIONS /////
 
-export const getKeyValuePairsByDoc = (): Promise<KeyValuesByDoc[]> => {
+export const getKeyValuePairsByDoc = (): Promise<DocumentInfo[]> => {
   /**
    * Returns all documents from local storage as an array of objects.
    **/
   return new Promise((resolve, reject) => {
     getDocListFromLocalStorage()
       .then((storedDocs) => {
-        const docDataByDoc: KeyValuesByDoc[] = [];
+        const docDataByDoc: DocumentInfo[] = [];
         storedDocs.forEach((doc: DocumentInfo) => {
-          const docName = doc.docName;
-          const docType = doc.docType;
-          const docID = doc.docID;
-          const keyValuePairs: KeyValuePairs = doc.keyValuePairs;
-          const interpretedKeys = doc.keyValuePairs; // TODO: Replace interpretation logic with GPT
-          const lines = doc.lines;
-          const docObj = {
-            docName,
-            docType,
-            docID,
-            keyValuePairs,
-            interpretedKeys,
-            lines,
-          };
-          docDataByDoc.push(docObj);
+          docDataByDoc.push(doc);
         });
         resolve(docDataByDoc);
       })

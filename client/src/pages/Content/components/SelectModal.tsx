@@ -15,7 +15,7 @@ import {
   MODAL_SHADOW,
   DEFAULT_ERROR_MESSAGE,
 } from "../common/constants";
-import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
+import { KeyValuesWithDistance } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
@@ -23,6 +23,7 @@ import {
 
 import { TableComponent, TableContext } from "./KvpTable";
 import { useStore, checkFileError, State } from "../contexts/ZustandStore";
+import { DocumentInfo } from "../../../types/documents";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -121,7 +122,7 @@ export const SelectModal = () => {
     useStore((state: State) => state.setErrorFiles),
   ];
   const selectedDocData = docData.filter(
-    (doc: KeyValuesByDoc) => doc.docID === selectedFile
+    (doc: DocumentInfo) => doc.docID === selectedFile
   )[0];
   const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(

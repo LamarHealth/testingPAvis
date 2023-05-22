@@ -39,7 +39,7 @@ const EmbedWrapper = ({
   lines,
 }: EmbedWrapperProps) => {
   useEffect(() => {
-    console.log("selected");
+    console.log("drawing lines", lines);
     modifyPdf(fileUrl, lines);
   }, []);
 
@@ -63,6 +63,7 @@ const EmbedWrapper = ({
 
           console.log("pdfDoc", pdfDoc);
 
+          console.log("lines", lines);
           lines.forEach((entry: Line) => {
             const pages = pdfDoc.getPages();
             const currentPage = pages[entry.Page - 1];
@@ -140,22 +141,12 @@ export const PdfViewer = () => {
   } = useStore((state: State) => state);
 
   // Line to highlight in PDF
-  const [highlightSelection, setHighlightSelection] = useState<Line[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleClose = () => {
     setKonvaModalOpen(false);
     setSelectedLines([]);
   };
-
-  // Set the lines to highlight in PDF.
-  // If selectedLine is not defined, defaults to all lines
-  useEffect(() => {
-    console.log("setting highlights ", selectedLines);
-    selectedLines?.length
-      ? setHighlightSelection(selectedLines)
-      : setHighlightSelection(lines);
-  }, [selectedLines]);
 
   return (
     <>
@@ -164,7 +155,7 @@ export const PdfViewer = () => {
           handleClose={handleClose}
           containerRef={containerRef}
           fileUrl={fileUrl}
-          lines={highlightSelection}
+          lines={selectedLines?.length ? selectedLines : lines}
         />
       )}
     </>
