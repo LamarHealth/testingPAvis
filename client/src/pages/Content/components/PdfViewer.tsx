@@ -44,31 +44,23 @@ const EmbedWrapper = ({
   lines,
 }: EmbedWrapperProps) => {
   useEffect(() => {
-    console.log("drawing lines", lines);
     modifyPdf(fileUrl, lines);
   }, []);
 
   const modifyPdf = async (pdfUrl: string, lines: Line[]) => {
     try {
       // Fetch an existing PDF document
-      console.log("getting pdf");
-
       chrome.runtime.sendMessage(
         { message: "fileRequest", data: pdfUrl },
 
         async (response: FileRequestResponse) => {
-          console.log("response", response);
           const pdfBlob = base64ToBlob(response.base64file);
-          console.log("pdfBlob", pdfBlob);
 
           const buffer = await pdfBlob.arrayBuffer();
 
           // Load a PDFDocument from the existing PDF bytes
           const pdfDoc = await PDFDocument.load(buffer);
 
-          console.log("pdfDoc", pdfDoc);
-
-          console.log("lines", lines);
           lines.forEach((entry: Line) => {
             const pages = pdfDoc.getPages();
             const currentPage = pages[entry.Page - 1];
@@ -111,11 +103,10 @@ const EmbedWrapper = ({
           if (container) {
             container.appendChild(pdfNode);
           }
-          console.log("complete...");
         }
       );
     } catch (err) {
-      console.log("Error getting pdf arraybuffer", err);
+      console.warn("Error getting pdf arraybuffer", err);
     }
   };
 
@@ -169,7 +160,7 @@ export const PdfViewer = () => {
           handleClose={handleClose}
           containerRef={containerRef}
           fileUrl={selectedDocument.pdf}
-          lines={selectedDocument.lines}
+          lines={selectedLines.length ? selectedLines : selectedDocument.lines}
         />
       )}
     </>

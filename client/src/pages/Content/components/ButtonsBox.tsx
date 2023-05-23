@@ -239,10 +239,6 @@ const ButtonsBox = memo(
       // set selected document
       setSelectedDocument(props.docInfo);
 
-      console.log("fileUrl", fileUrl);
-      console.log("lines", lines);
-      console.log("filling docData", keyValuePairs);
-
       !!Object.keys(keyValuePairs).length &&
         populateForms(PopulateFormsActionTypes.overwriteBlank, keyValuePairs);
     };

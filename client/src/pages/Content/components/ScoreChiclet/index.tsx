@@ -97,7 +97,6 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: ScoreChicletProps) => {
     ) as HTMLInputElement | HTMLTextAreaElement;
     setEventTarget(eventTarget);
     setTargetString(assignTargetString(eventTarget));
-    console.log("setting target", eventTarget);
     setKvpTableAnchorEl(eventTarget);
   };
 

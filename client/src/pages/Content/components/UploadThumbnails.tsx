@@ -174,7 +174,6 @@ const FileStatus = (props: FileStatusProps) => {
 
                     // set the global var to reflect that
                     getKeyValuePairsByDoc().then((keyValuePairsByDoc) => {
-                      console.log("setting doc data", keyValuePairsByDoc);
                       setDocData(keyValuePairsByDoc);
                     });
                   });

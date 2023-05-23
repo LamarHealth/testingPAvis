@@ -209,7 +209,7 @@ const DocCell = (props: DocumentInfo) => {
   const handleBoxClick = () => {
     // Sets global selected doc
     setSelected();
-    console.log("box was clicked");
+
     // Toggle chiclets
     isSelected ? removeAllChiclets() : populateBlankChicklets();
   };

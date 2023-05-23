@@ -164,13 +164,11 @@ const ButtonsCell = (props: { keyValue: KeyValuesWithDistance }) => {
   const fillCurrentSelection = () => {
     // Fetch geometry of lines from docdata from server
     // TODO: change line geometry so only the selected line is returned
-    console.log("running search for ", keyValue["value"], "in", lines);
     const keySearch = lines.find((line) =>
       line.Text.includes(keyValue["value"])
     );
     const lineGeometry = keySearch ? [keySearch] : [];
 
-    console.log("filling");
     setSelectedLines(lineGeometry);
     // open modal
     setKonvaModalOpen(true);

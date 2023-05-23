@@ -26,9 +26,9 @@ export const addDocToLocalStorage = (
         storedDocs.push(documentInfo);
         setDocListToLocalStorage(storedDocs)
           .then(() => resolve(storedDocs))
-          .catch((err) => console.log(err));
+          .catch((err) => console.error(err));
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   });
 };
 

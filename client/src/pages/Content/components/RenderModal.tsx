@@ -74,9 +74,6 @@ export const RenderModal = () => {
     ),
   ];
 
-  console.log("In render modal with selectedDocument:");
-  console.log(selectedDocument);
-
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
 
