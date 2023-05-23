@@ -193,7 +193,6 @@ const ButtonsBox = memo(
     ];
 
     const keyValuePairs = props.docInfo.keyValuePairs;
-    const docID = props.docInfo.docID;
     const fileUrl = props.docInfo.pdf;
     const lines = props.docInfo.lines;
 

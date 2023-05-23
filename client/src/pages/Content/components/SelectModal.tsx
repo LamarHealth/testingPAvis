@@ -97,12 +97,15 @@ const ErrorLine = () => {
   );
 };
 
-export const SelectModal = () => {
+type SelectModalProps = {
+  document: DocumentInfo;
+};
+
+export const SelectModal = ({ document }: SelectModalProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
   const [
     selectedFile,
-    docData,
     targetString,
     eventTarget,
     setKonvaModalOpen,
@@ -112,7 +115,6 @@ export const SelectModal = () => {
     setErrorFiles,
   ] = [
     useStore((state: State) => state.selectedFile),
-    useStore((state: State) => state.docData),
     useStore((state: State) => state.targetString),
     useStore((state: State) => state.eventTarget),
     useStore((state: State) => state.setKonvaModalOpen),
@@ -121,10 +123,7 @@ export const SelectModal = () => {
     useStore((state: State) => state.errorFiles),
     useStore((state: State) => state.setErrorFiles),
   ];
-  const selectedDocData = docData.filter(
-    (doc: DocumentInfo) => doc.docID === selectedFile
-  )[0];
-  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(
     null as KeyValuesWithDistance | null
   );
@@ -182,7 +181,7 @@ export const SelectModal = () => {
           <CloseIcon />
         </CloseButton>
         <DocName id="doc-name-typography" variant="subtitle1">
-          {selectedDocData.docName}
+          {document.docName}
         </DocName>
         <TextInputContainer>
           <TextField
@@ -212,17 +211,17 @@ export const SelectModal = () => {
         </Collapse>
       </StickyWrapper>
 
-      {areThereKVPairs ? (
+      {document ? (
         <TableContext.Provider
           value={{
-            selectedDocData,
+            document,
             setRemoveKVMessage,
             setMessageCollapse,
             setUnalteredKeyValue,
             inputRef,
           }}
         >
-          <TableComponent />
+          <TableComponent document={document} />
         </TableContext.Provider>
       ) : (
         <Message

@@ -28,7 +28,7 @@ import {
 } from "./KeyValuePairs";
 
 import { useStore, State } from "../contexts/ZustandStore";
-import { Line } from "../../../types/documents";
+import { DocumentInfo, Line } from "../../../types/documents";
 
 const StyledTableCellLeft = styled(TableCell)`
   padding: 5px 5px 5px 10px;
@@ -315,11 +315,13 @@ const TableRowComponent = (props: {
 
 export const TableContext = createContext({} as any);
 
-export const TableComponent = () => {
-  const { selectedDocData } = useContext(TableContext);
+interface TableComponentProps {
+  document: DocumentInfo;
+}
+export const TableComponent = ({ document }: TableComponentProps) => {
   const targetString = useStore((state: State) => state.targetString);
   const sortedKeyValuePairs = getEditDistanceAndSort(
-    selectedDocData,
+    document.keyValuePairs,
     targetString,
     "lc substring"
   );
