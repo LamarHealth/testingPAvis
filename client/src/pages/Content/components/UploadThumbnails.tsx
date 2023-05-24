@@ -191,7 +191,7 @@ const FileStatus = (props: FileStatusProps) => {
           );
         })
         .catch((error) => {
-          console.log("Error:", error);
+          console.warn("Error uploading file:", error);
           setUploadStatus(StatusCodes.FAILURE);
         })
         .finally(() => {

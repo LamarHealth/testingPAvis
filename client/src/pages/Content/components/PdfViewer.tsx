@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import CloseIcon from "@material-ui/icons/Close";
 import { RndComponent } from "./KonvaRndDraggable";
@@ -64,15 +64,28 @@ const EmbedWrapper = ({
           lines.forEach((entry: Line) => {
             const pages = pdfDoc.getPages();
             const currentPage = pages[entry.Page - 1];
-            const { width, height } = currentPage.getSize();
             const box = entry.Geometry.BoundingBox;
 
+            const { width, height } = currentPage.getSize();
+
+            // Some documents have a weird 270 degree rotation
+            // and need to have the bounding box geometry adjusted
+            const adjustedX =
+              currentPage.getRotation().angle === 270
+                ? width - width * box.Top
+                : width * box.Left;
+
+            const adjustedY =
+              currentPage.getRotation().angle === 270
+                ? height - height * box.Left
+                : height - height * box.Top;
+
             currentPage.drawRectangle({
-              x: width * box.Left,
-              y: height - height * box.Top,
+              x: adjustedX,
+              y: adjustedY,
               width: width * box.Width,
               height: -height * box.Height,
-              rotate: degrees(0),
+              rotate: degrees(currentPage.getRotation().angle),
               borderWidth: 1,
               borderColor: rgb(1, 0, 0),
               color: rgb(1, 0, 0),
@@ -127,21 +140,12 @@ const EmbedWrapper = ({
 };
 
 export const PdfViewer = () => {
-  const {
-    konvaModalOpen,
-    fileUrl,
-    selectedLines,
-    lines,
-    setSelectedLines,
-    setKonvaModalOpen,
-  } = useStore((state: State) => state);
+  const { konvaModalOpen, selectedLines, setSelectedLines, setKonvaModalOpen } =
+    useStore((state: State) => state);
 
-  const [selectedDocument, setSelectedDocument] = [
+  const [selectedDocument] = [
     useSelectedDocumentStore(
       (state: SelectedDocumentStoreState) => state.selectedDocument
-    ),
-    useSelectedDocumentStore(
-      (state: SelectedDocumentStoreState) => state.setSelectedDocument
     ),
   ];
 
