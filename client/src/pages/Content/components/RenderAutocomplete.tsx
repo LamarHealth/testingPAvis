@@ -3,7 +3,12 @@ import React, { useState, useEffect } from "react";
 import $ from "jquery";
 import styled from "styled-components";
 
-import { useStore, State } from "../contexts/ZustandStore";
+import {
+  useStore,
+  State,
+  useSelectedDocumentStore,
+  SelectedDocumentStoreState,
+} from "../contexts/ZustandStore";
 
 import Popper from "@material-ui/core/Popper";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -17,7 +22,7 @@ import WrappedJssComponent from "./ShadowComponent";
 import { getLibertyModalMutationsObserver } from "./inputsDictionary";
 
 import { DOCIT_TAG } from "../common/constants";
-import { KeyValuesByDoc } from "./KeyValuePairs";
+import { DocumentInfo } from "../../../types/documents";
 
 const Container = styled.div`
   max-height: 280px;
@@ -98,20 +103,22 @@ export const RenderAutocomplete = () => {
     useStore((state: State) => state.autocompleteAnchor),
     useStore((state: State) => state.setAutocompleteAnchor),
   ];
+
+  const [selectedDocument] = [
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.selectedDocument
+    ),
+  ];
+
   const [filter, setFilter] = useState("" as string);
   const open = Boolean(autocompleteAnchor);
 
-  // doc data
-  const selectedDocData = docData.filter(
-    (doc: KeyValuesByDoc) => doc.docID === selectedFile
-  )[0];
-  const isDocSelected = Boolean(selectedDocData);
-  const allLinesAndValues: string[] = isDocSelected
+  const allLinesAndValues: string[] = selectedDocument
     ? Array.from(
         new Set( // remove duplicates
-          Object.entries(selectedDocData.keyValuePairs)
+          Object.entries(selectedDocument.keyValuePairs)
             .map((entry) => entry[1])
-            .concat(selectedDocData.lines.map((line) => line["Text"])) // add non-kvp lines
+            .concat(selectedDocument.lines.map((line) => line["Text"])) // add non-kvp lines
             .filter((value) => !!value) // filter out blanks and undefined values
             .sort((a: string, b: string) =>
               a.toLowerCase().localeCompare(b.toLowerCase())
@@ -120,7 +127,7 @@ export const RenderAutocomplete = () => {
       )
     : [];
 
-  const areThereFilteredEntries = isDocSelected
+  const areThereFilteredEntries = selectedDocument
     ? allLinesAndValues.filter((value: string) =>
         value.toLowerCase().includes(filter.toLowerCase())
       ).length > 0
@@ -173,7 +180,7 @@ export const RenderAutocomplete = () => {
 
   return (
     <>
-      {isDocSelected && (
+      {selectedDocument && (
         <ThemeProvider theme={DEFAULT}>
           <Popper
             anchorEl={autocompleteAnchor}

@@ -32,6 +32,8 @@ const ChicletBox = styled.div`
   background: ${colors.ACCURACY_SCORE_LIGHTBLUE};
   padding: 4px;
   border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
 `;
 
 const StyledCircularProgress = styled(CircularProgress)`
@@ -51,7 +53,13 @@ const greenCircleStyles = makeStyles({ colorPrimary: { color: "green" } });
 const yellowCircleStyles = makeStyles({ colorPrimary: { color: "goldenrod" } });
 const redCircleStyles = makeStyles({ colorPrimary: { color: "red" } });
 
-const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
+interface ScoreChicletProps {
+  value: number;
+  inputHeight: number;
+  mounterID: string;
+}
+
+const ScoreChiclet = ({ value, inputHeight, mounterID }: ScoreChicletProps) => {
   const [
     selectedChiclet,
     setSelectedChiclet,
@@ -111,7 +119,7 @@ const ScoreChiclet = ({ value, inputHeight, mounterID }: any) => {
         </WrappedJssComponent>
       </Box>
       <StyledCircularProgress
-        variant="static"
+        variant="determinate"
         value={value}
         color={"primary"}
         size={`${size}px`}

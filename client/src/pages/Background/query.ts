@@ -62,7 +62,7 @@ export const fetchAndReturnData = async (
     try {
       // Fetch the URLs with short polls and wait for their responses
       const responses = await withTimeout(
-        Promise.all(urls.map((url) => fetchData(url, 60000, 10000))),
+        Promise.all(urls.map((url) => fetchData(url, 1200000, 10000))),
         60000
       );
 

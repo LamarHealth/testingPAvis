@@ -17,17 +17,18 @@ import {
 
 import { DEFAULT } from "../common/themes";
 import { LOCAL_MODE, MAIN_MODAL_WIDTH, DOCIT_TAG } from "../common/constants";
-import { useStore, State } from "../contexts/ZustandStore";
+import {
+  useStore,
+  State,
+  useSelectedDocumentStore,
+  SelectedDocumentStoreState,
+} from "../contexts/ZustandStore";
+
 import { useEffect } from "react";
 
 const Container = styled.div`
   width: ${MAIN_MODAL_WIDTH}px;
 `;
-
-export interface DocImageDimensions {
-  width: number;
-  height: number;
-}
 
 interface RequestWithFillValue {
   fillValue: string;
@@ -54,23 +55,25 @@ const removeClickListeners = (
 
 export const RenderModal = () => {
   const [
-    docData,
-    selectedFile,
     konvaModalOpen,
     eventTarget,
     setEventTarget,
     kvpTableAnchorEl,
     openDocInNewTab,
   ] = [
-    useStore((state: State) => state.docData),
-    useStore((state: State) => state.selectedFile),
     useStore((state: State) => state.konvaModalOpen),
     useStore((state: State) => state.eventTarget),
     useStore((state: State) => state.setEventTarget),
     useStore((state: State) => state.kvpTableAnchorEl),
     useStore((state: State) => state.openDocInNewTab),
   ];
-  const areThereDocs = docData.length > 0;
+
+  const [selectedDocument] = [
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.selectedDocument
+    ),
+  ];
+
   const kvpTableOpen = Boolean(kvpTableAnchorEl);
   const id = kvpTableOpen ? "kvp-table-popover" : undefined;
 
@@ -87,6 +90,7 @@ export const RenderModal = () => {
     };
   });
 
+  // TODO: Remove this
   // set eventTarget (liberty modal)
   useEffect(() => {
     const handleInputClick = (event: Event) => {
@@ -108,6 +112,7 @@ export const RenderModal = () => {
     };
   });
 
+  // TODO: Remove this
   // listen for ManualSelect submit in other tab
   useEffect(() => {
     if (!LOCAL_MODE) {
@@ -128,7 +133,7 @@ export const RenderModal = () => {
 
   return (
     <>
-      {areThereDocs && selectedFile && (
+      {!!selectedDocument && (
         <ThemeProvider theme={DEFAULT}>
           {eventTarget && (
             <Popper
@@ -151,7 +156,7 @@ export const RenderModal = () => {
                 <WrappedJssComponent
                   wrapperClassName={"shadow-root-for-modals"}
                 >
-                  <SelectModal />
+                  <SelectModal document={selectedDocument} />
                 </WrappedJssComponent>
               </Container>
             </Popper>

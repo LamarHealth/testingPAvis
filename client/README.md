@@ -28,3 +28,6 @@ REACT_APP_LOCAL=liberty
 # Options: [true, false]
 REACT_APP_FILTER=false
 ```
+
+### Debugging
+To view Chrome local storage, open the background script's console and run: `chrome.storage.local.get(function(result){console.log(result)})`

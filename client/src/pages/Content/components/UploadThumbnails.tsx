@@ -112,9 +112,8 @@ interface FileStatusProps {
 
 const FileStatus = (props: FileStatusProps) => {
   const currentFile = props.fileWithPreview.file;
-  const currentFilePreview = props.fileWithPreview.preview;
   const index = props.fileWithPreview.index;
-  const [setDocData] = [useStore((state: State) => state.setDocData)];
+  const setDocData = useStore((state: State) => state.setDocData);
   const { countDispatch } = useContext(CountContext);
   const { setFileList } = useContext(FileContext);
   const [uploadStatus, setUploadStatus] = useState(Number);
@@ -165,6 +164,7 @@ const FileStatus = (props: FileStatusProps) => {
                     lines: response.documentInfo.lines,
                     docName: file.name,
                     docType: file.type,
+                    pdf: response.documentInfo.pdf,
                   };
 
                   addDocToLocalStorage(documentInfo).then((updatedList) => {
@@ -173,9 +173,9 @@ const FileStatus = (props: FileStatusProps) => {
                     setFileList(updatedList);
 
                     // set the global var to reflect that
-                    getKeyValuePairsByDoc().then((keyValuePairsByDoc) =>
-                      setDocData(keyValuePairsByDoc)
-                    );
+                    getKeyValuePairsByDoc().then((keyValuePairsByDoc) => {
+                      setDocData(keyValuePairsByDoc);
+                    });
                   });
                   setDocID(response.documentInfo.docID);
                   setUploadStatus(StatusCodes.SUCCESS);
@@ -191,7 +191,7 @@ const FileStatus = (props: FileStatusProps) => {
           );
         })
         .catch((error) => {
-          console.log("Error:", error);
+          console.warn("Error uploading file:", error);
           setUploadStatus(StatusCodes.FAILURE);
         })
         .finally(() => {

@@ -1,7 +1,12 @@
 import React, { useState, useContext, memo, MouseEvent } from "react";
 
 import styled from "styled-components";
-import { useStore, State } from "../contexts/ZustandStore";
+import {
+  useStore,
+  State,
+  useSelectedDocumentStore,
+  SelectedDocumentStoreState,
+} from "../contexts/ZustandStore";
 
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import IconButton from "@material-ui/core/IconButton";
@@ -14,7 +19,7 @@ import Chip from "@material-ui/core/Chip";
 
 import { FileContext, IsSelected } from "./DocViewer";
 import { deleteThumbsLocalStorage } from "./docThumbnails";
-import { KeyValuesByDoc, getKeyValuePairsByDoc } from "./KeyValuePairs";
+import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
@@ -89,11 +94,27 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
     useStore((state: State) => state.setDocData),
   ];
 
+  const [selectedDocument, setSelectedDocument] = [
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.selectedDocument
+    ),
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.setSelectedDocument
+    ),
+  ];
+
   const handleDelete = async (e: MouseEvent) => {
     e.stopPropagation();
     setSelectedFile(null);
+
+    // set the selected document to null
+    setSelectedDocument(null);
+
+    // Cleanup local storage
     deleteThumbsLocalStorage(props.docInfo.docID);
     const newDocList = await deleteDocFromLocalStorage(props.docInfo.docID);
+
+    // Update available docs
     setFileList(newDocList);
     const keyValuesByDoc = await getKeyValuePairsByDoc();
     setDocData(keyValuesByDoc);
@@ -155,13 +176,25 @@ const ButtonsBox = memo(
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogType, setDialog] = useState<"delete" | "download">();
-    const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
-      useStore((state: State) => state.docData),
-      useStore((state: State) => state.setSelectedFile),
+    const [setFileUrl, setLines, setKonvaModalOpen, openDocInNewTab] = [
+      useStore((state: State) => state.setFileUrl),
+      useStore((state: State) => state.setLines),
       useStore((state: State) => state.setKonvaModalOpen),
       useStore((state: State) => state.openDocInNewTab),
     ];
-    const docID = props.docInfo.docID;
+
+    const [selectedDocument, setSelectedDocument] = [
+      useSelectedDocumentStore(
+        (state: SelectedDocumentStoreState) => state.selectedDocument
+      ),
+      useSelectedDocumentStore(
+        (state: SelectedDocumentStoreState) => state.setSelectedDocument
+      ),
+    ];
+
+    const keyValuePairs = props.docInfo.keyValuePairs;
+    const fileUrl = props.docInfo.pdf;
+    const lines = props.docInfo.lines;
 
     // click away
     const handleClickAway = () => {
@@ -171,6 +204,7 @@ const ButtonsBox = memo(
     // handle delete click
     const handleDeleteClick = (e: MouseEvent) => {
       e.stopPropagation();
+      // Change dialog text and open dialog
       setDialogOpen(true);
       setDialog("delete");
     };
@@ -185,22 +219,28 @@ const ButtonsBox = memo(
     // handle view pdf click
     const handleViewPdfClick = (e: MouseEvent) => {
       e.stopPropagation();
-      setSelectedFile(docID);
+
+      // Set selected doc, as this button is still in the dialog box
+      setSelectedDocument(props.docInfo);
+
+      // Set data for PdfViewer
+      setFileUrl(fileUrl);
+      setLines(lines);
       setKonvaModalOpen(true);
     };
 
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      const availableKeyValues = docData.filter(
-        (doc: KeyValuesByDoc) => doc.docID === docID
-      )[0];
-      availableKeyValues &&
-        populateForms(
-          PopulateFormsActionTypes.overwriteBlank,
-          availableKeyValues
-        );
-      setSelectedFile(props.docInfo.docID);
+
+      setFileUrl(fileUrl);
+      setLines(lines);
+
+      // set selected document
+      setSelectedDocument(props.docInfo);
+
+      !!Object.keys(keyValuePairs).length &&
+        populateForms(PopulateFormsActionTypes.overwriteBlank, keyValuePairs);
     };
 
     return (
