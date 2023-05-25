@@ -282,7 +282,7 @@ const Feedback = () => {
     <FeedbackTypography>
       <i>
         <Link
-          href="https://bit.ly/speedify-feedback"
+          href="https://forms.gle/4XBbuJnACkbaZ5578"
           color="inherit"
           variant="body2"
           target="_blank"
