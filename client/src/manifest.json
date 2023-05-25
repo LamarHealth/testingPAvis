@@ -1,9 +1,9 @@
 {
-    "short_name": "Speedify.ai",
-    "name": "Speedify.ai: ChatGPT + OCR + Autofill",
+    "short_name": "AutoPhil",
+    "name": "AutoPhil: Autofill + ChatGPT + OCR",
     "version": "2.0.1",
     "manifest_version": 2,
-    "description": "Speedify gives your browser autofill everywhere. Sync your data, and automatically fill it to any form",
+    "description": "Never copy and paste data again. Our AI-powered autofill extracts information and fills it everywhere that you need it.",
     "content_scripts": [
         {
             "matches": [

@@ -1,7 +1,11 @@
 {
   "name": "docit",
-  "version": "0.1.0",
+  "repository": "git@github.com:areibman/Docit.git",
+  "author": "areibman <meta.alex.r@gmail.com>",
+  "license": "All rights reserved",
+  "copyright": "© Copyright Alex Reibman",
   "private": true,
+  "version": "0.2.0",
   "proxy": "http://localhost:3001/",
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.6.1",
