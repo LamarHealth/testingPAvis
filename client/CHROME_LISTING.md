@@ -1,15 +1,18 @@
-**Detailed Description:**
-With AutoPhil, you will never need to copy ✂️ + paste 📋 data again.
+Never copy ✂️ + paste 📋 data again with AutoPhil
 
-Automate your data entry and form completion today with AI-powered autofill. 
+Automate your data entry and form completion today with AI-powered autofill. Autofill data from any source to any webpage instantly.
 
-Users save up to 80% of their time when compared to traditional copy and paste.
+AutoPhil works over 80% faster compared to traditional copy and paste.
 
-Our tool works for any form, with any data. Here are some ways our users benefit from AutoPhil:
+Here are some ways to use AutoPhil:
 
-🌟 Personal: Streamline travel bookings and repetitive tasks
-🌟 Healthcare: Accelerate report generation
+🌟 Personal: Streamline travel bookings and account creation forms
+🌟 Healthcare: Instantly scan, extract, and fill report data
 🌟 Logistics: Instantly populate orders and documents
 🌟 Finance: Accurate and efficient data management
 
-Autophil automates data entry across industries, boosting productivity and efficiency. Simply drag and drop your document and our extension automates online form-filling.
+Simply drag and drop your document and our extension automates online form-filling.
+
+➤TLDR 📚 
+Drag and drop your PDFs onto AutoPhill and automatically fill out any form on the web.
+What will you do with 80% more time⌛?
