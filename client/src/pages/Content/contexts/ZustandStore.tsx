@@ -1,12 +1,9 @@
 /* global chrome */
-import { create } from 'zustand';
+import { create } from "zustand";
 
-import { LOCAL_MODE } from '../common/constants';
-import {
-  getKeyValuePairsByDoc,
-  KeyValuesByDoc,
-} from '../components/KeyValuePairs';
-import { LinesSelection } from '../components/ManualSelect';
+import { LOCAL_MODE } from "../common/constants";
+import { getKeyValuePairsByDoc } from "../components/KeyValuePairs";
+import { DocumentInfo, Line } from "../../../types/documents";
 
 /** e.g. { some-uuid-34q4-jkdkjf-342fdfsf: {image: true, errorMessage: "some message", errorCode: 404} } */
 export interface ErrorFile {
@@ -20,22 +17,39 @@ export interface ErrorFile {
 
 export type Uuid = string | null;
 
-type State = {
+export type SelectedDocumentStoreState = {
+  selectedDocument: DocumentInfo | null;
+  setSelectedDocument: (selectedDocument: DocumentInfo | null) => void;
+};
+
+export const useSelectedDocumentStore = create<SelectedDocumentStoreState>(
+  (set) => ({
+    selectedDocument: null,
+    setSelectedDocument: (selectedDocument) =>
+      set((state) => ({ ...state, selectedDocument })),
+  })
+);
+
+export type State = {
   openDocInNewTab: boolean;
   selectedFile: Uuid;
+  fileUrl: string;
+  lines: Line[];
   selectedChiclet: Uuid;
-  docData: KeyValuesByDoc[];
+  docData: DocumentInfo[];
   konvaModalOpen: boolean;
   autocompleteAnchor: null | HTMLInputElement | HTMLTextAreaElement;
   eventTarget: null | HTMLInputElement | HTMLTextAreaElement;
   targetString: string;
   kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement;
   errorFiles: ErrorFile; // not just one error file, but an object of error files
-  selectedLine: LinesSelection;
+  selectedLines: Line[];
   setOpenDocInNewTab: (openDocInNewTab: boolean) => void;
   setSelectedFile: (selectedFile: Uuid) => void;
+  setFileUrl: (fileUrl: string) => void;
+  setLines: (lines: Line[]) => void;
   setSelectedChiclet: (selectedChiclet: Uuid) => void;
-  setDocData: (docData: KeyValuesByDoc[]) => void;
+  setDocData: (docData: DocumentInfo[]) => void;
   setKonvaModalOpen: (konvaModalOpen: boolean) => void;
   setAutocompleteAnchor: (
     autocompleteAnchorEl: null | HTMLInputElement | HTMLTextAreaElement
@@ -46,53 +60,57 @@ type State = {
     kvpTableAnchorEl: null | HTMLInputElement | HTMLTextAreaElement
   ) => void;
   setErrorFiles: (errorFile: ErrorFile) => void;
-  setSelectedLine: (selectedLine: LinesSelection) => void;
+  setSelectedLines: (selectedLines: Line[]) => void;
 };
 
 export const useStore = create<State>((set) => ({
   openDocInNewTab: false,
   selectedFile: null,
+  fileUrl: "",
+  lines: [],
   selectedChiclet: null,
-  docData: getKeyValuePairsByDoc(),
+  docData: [],
   konvaModalOpen: false,
   autocompleteAnchor: null,
   eventTarget: null,
-  targetString: '',
+  targetString: "",
   kvpTableAnchorEl: null,
   errorFiles: {},
-  selectedLine: {},
+  selectedLines: [],
   setOpenDocInNewTab: (openDocInNewTab) =>
-    set((state: any) => ({ ...state, openDocInNewTab })),
+    set((state: State) => ({ ...state, openDocInNewTab })),
   setSelectedFile: (selectedFile) =>
-    set((state: any) => {
+    set((state: State) => {
       if (!LOCAL_MODE) {
         chrome.storage.local.set({ selectedFile });
       }
       return { ...state, selectedFile };
     }),
+  setLines: (lines) => set((state: State) => ({ ...state, lines })),
+  setFileUrl: (fileUrl) => set((state: State) => ({ ...state, fileUrl })),
   setSelectedChiclet: (selectedChiclet) =>
-    set((state: any) => ({ ...state, selectedChiclet })),
+    set((state: State) => ({ ...state, selectedChiclet })),
   setDocData: (docData) =>
-    set((state: any) => {
+    set((state: State) => {
       if (!LOCAL_MODE) {
         chrome.storage.local.set({ docData });
       }
       return { ...state, docData };
     }),
   setKonvaModalOpen: (konvaModalOpen) =>
-    set((state: any) => ({ ...state, konvaModalOpen })),
+    set((state: State) => ({ ...state, konvaModalOpen })),
   setAutocompleteAnchor: (autocompleteAnchor) =>
-    set((state: any) => ({ ...state, autocompleteAnchor })),
+    set((state: State) => ({ ...state, autocompleteAnchor })),
   setEventTarget: (eventTarget) =>
-    set((state: any) => ({ ...state, eventTarget })),
+    set((state: State) => ({ ...state, eventTarget })),
   setTargetString: (targetString) =>
-    set((state: any) => ({ ...state, targetString })),
+    set((state: State) => ({ ...state, targetString })),
   setKvpTableAnchorEl: (kvpTableAnchorEl) =>
-    set((state: any) => ({ ...state, kvpTableAnchorEl })),
+    set((state: State) => ({ ...state, kvpTableAnchorEl })),
   setErrorFiles: (errorFile) => {
     const docID = Object.entries(errorFile)[0][0];
     const payload = Object.entries(errorFile)[0][1];
-    return set((state: any) => {
+    return set((state: State) => {
       return {
         ...state,
         errorFiles: {
@@ -102,9 +120,14 @@ export const useStore = create<State>((set) => ({
       };
     });
   },
-  setSelectedLine: (selectedLine) =>
-    set((state: any) => ({ ...state, selectedLine })),
+  setSelectedLines: (selectedLines) =>
+    set((state: State) => ({ ...state, selectedLines })),
 }));
+
+// initializing docData has to be done this way, because getKeyValuePairsByDoc is async
+getKeyValuePairsByDoc().then((keyValuesByDoc) => {
+  useStore((state: State) => state.setDocData(keyValuesByDoc));
+});
 
 export const checkFileError = (errorFiles: ErrorFile, selectedFile: Uuid) => {
   return Boolean(

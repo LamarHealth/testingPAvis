@@ -15,14 +15,15 @@ import {
   MODAL_SHADOW,
   DEFAULT_ERROR_MESSAGE,
 } from "../common/constants";
-import { KeyValuesWithDistance, KeyValuesByDoc } from "./KeyValuePairs";
+import { KeyValuesWithDistance } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 
 import { TableComponent, TableContext } from "./KvpTable";
-import { useStore, checkFileError } from "../contexts/ZustandStore";
+import { useStore, checkFileError, State } from "../contexts/ZustandStore";
+import { DocumentInfo } from "../../../types/documents";
 
 const ModalWrapper = styled.div`
   background-color: ${colors.DROPDOWN_TABLE_BACKGROUND};
@@ -78,8 +79,8 @@ const Message = ({ msg }: any) => {
 
 const ErrorLine = () => {
   const [selectedFile, errorFiles] = [
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.errorFiles),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.errorFiles),
   ];
   const errorMsg =
     selectedFile &&
@@ -96,12 +97,15 @@ const ErrorLine = () => {
   );
 };
 
-export const SelectModal = () => {
+type SelectModalProps = {
+  document: DocumentInfo;
+};
+
+export const SelectModal = ({ document }: SelectModalProps) => {
   const [removeKVMessage, setRemoveKVMessage] = useState("" as string);
   const [messageCollapse, setMessageCollapse] = useState(false);
   const [
     selectedFile,
-    docData,
     targetString,
     eventTarget,
     setKonvaModalOpen,
@@ -110,20 +114,16 @@ export const SelectModal = () => {
     errorFiles,
     setErrorFiles,
   ] = [
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.docData),
-    useStore((state: any) => state.targetString),
-    useStore((state: any) => state.eventTarget),
-    useStore((state: any) => state.setKonvaModalOpen),
-    useStore((state: any) => state.setSelectedChiclet),
-    useStore((state: any) => state.setKvpTableAnchorEl),
-    useStore((state: any) => state.errorFiles),
-    useStore((state: any) => state.setErrorFiles),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.targetString),
+    useStore((state: State) => state.eventTarget),
+    useStore((state: State) => state.setKonvaModalOpen),
+    useStore((state: State) => state.setSelectedChiclet),
+    useStore((state: State) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.errorFiles),
+    useStore((state: State) => state.setErrorFiles),
   ];
-  const selectedDocData = docData.filter(
-    (doc: KeyValuesByDoc) => doc.docID === selectedFile
-  )[0];
-  const areThereKVPairs = Object.keys(selectedDocData.keyValuePairs).length > 0;
+
   const [unalteredKeyValue, setUnalteredKeyValue] = useState(
     null as KeyValuesWithDistance | null
   );
@@ -181,7 +181,7 @@ export const SelectModal = () => {
           <CloseIcon />
         </CloseButton>
         <DocName id="doc-name-typography" variant="subtitle1">
-          {selectedDocData.docName}
+          {document.docName}
         </DocName>
         <TextInputContainer>
           <TextField
@@ -211,17 +211,17 @@ export const SelectModal = () => {
         </Collapse>
       </StickyWrapper>
 
-      {areThereKVPairs ? (
+      {document ? (
         <TableContext.Provider
           value={{
-            selectedDocData,
+            document,
             setRemoveKVMessage,
             setMessageCollapse,
             setUnalteredKeyValue,
             inputRef,
           }}
         >
-          <TableComponent />
+          <TableComponent document={document} />
         </TableContext.Provider>
       ) : (
         <Message

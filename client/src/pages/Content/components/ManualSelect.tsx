@@ -13,8 +13,13 @@ import {
   renderChiclets,
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
-import { KeyValuesByDoc } from "./KeyValuePairs";
-import { useStore, checkFileError, Uuid } from "../contexts/ZustandStore";
+import { DocumentInfo } from "../../../types/documents";
+import {
+  useStore,
+  checkFileError,
+  Uuid,
+  State,
+} from "../contexts/ZustandStore";
 import { RndComponent } from "./KonvaRndDraggable";
 import WrappedJssComponent from "./ShadowComponent";
 
@@ -72,7 +77,7 @@ interface ManualSelectNewTabProps {
   isInNewTab?: boolean;
   konvaModalOpen?: boolean;
   selectedFile?: string;
-  docData?: KeyValuesByDoc[];
+  docData?: DocumentInfo[];
 }
 
 interface KanvaModalContextProps {
@@ -162,14 +167,14 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     errorFiles,
     setErrorFiles,
   ] = [
-    useStore((state: any) => state.eventTarget),
-    useStore((state: any) => state.selectedFile),
-    useStore((state: any) => state.docData),
-    useStore((state: any) => state.konvaModalOpen),
-    useStore((state: any) => state.setKvpTableAnchorEl),
-    useStore((state: any) => state.autocompleteAnchor),
-    useStore((state: any) => state.errorFiles),
-    useStore((state: any) => state.setErrorFiles),
+    useStore((state: State) => state.eventTarget),
+    useStore((state: State) => state.selectedFile),
+    useStore((state: State) => state.docData),
+    useStore((state: State) => state.konvaModalOpen),
+    useStore((state: State) => state.setKvpTableAnchorEl),
+    useStore((state: State) => state.autocompleteAnchor),
+    useStore((state: State) => state.errorFiles),
+    useStore((state: State) => state.setErrorFiles),
   ];
   // if in new tab, no access to same zustand store, so use props instead
   const konvaModalOpen = props.isInNewTab
@@ -180,7 +185,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
   ) as Uuid;
   const docData = (
     props.isInNewTab ? props.docData : docDataFromStore
-  ) as KeyValuesByDoc[];
+  ) as DocumentInfo[];
   const [docImageURL, setDocImageURL] = useState({} as DocImageURL);
   const [currentLinesGeometry, setCurrentLinesGeometry] = useState(
     [] as LinesGeometry[]
@@ -217,11 +222,11 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
 
   // data from server
   const selectedDocData = docData.filter(
-    (doc: KeyValuesByDoc) => doc.docID === selectedFile
+    (doc: DocumentInfo) => doc.docID === selectedFile
   )[0];
 
-  // TODO: Migrate this code so it fetches when we select the document in general, not just when we use manual select
-  const getImageAndGeometryFromServer = async (doc: KeyValuesByDoc) => {
+  // TODO: Update this code so it fetches when we select the document in general, not just when we use manual select
+  const getImageAndGeometryFromServer = async (doc: DocumentInfo) => {
     const docName = doc.docName;
     const docID = doc.docID;
     doc.docType = doc.docType === "pdf" ? "png" : doc.docType;
@@ -229,7 +234,7 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
     setCurrentDocID(docID);
 
     // get image
-    const docImageResponse: any = await fetch(
+    const docImageResponse: Response = await fetch(
       `${API_PATH}/api/doc-image/${docID}/${encodeURIComponent(`
         ${docName}.${docType}`)}`,
       {
@@ -419,7 +424,9 @@ export const ManualSelect = (props: ManualSelectNewTabProps) => {
               inputValDispatch,
             }}
           >
-            <RndComponent isInNewTab={props.isInNewTab} />
+            <RndComponent>
+              <></>
+            </RndComponent>
           </KonvaModalContext.Provider>
         </WrappedJssComponent>
       )}

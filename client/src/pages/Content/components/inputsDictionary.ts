@@ -1,10 +1,11 @@
-import { getEditDistanceAndSort, KeyValuesByDoc } from "./KeyValuePairs";
+import { getEditDistanceAndSort } from "./KeyValuePairs";
 import {
   renderChiclets,
   RenderChicletsActionTypes,
 } from "./ScoreChiclet/index";
 import $ from "jquery";
 import { LIBERTY_MODE } from "../common/constants";
+import { KeyValuePairs } from "../../../types/documents";
 
 interface InputsDictionary {
   [key: string]: string;
@@ -42,12 +43,14 @@ const addlLibertyDemoDictionary = {
   CMForwarderFax: "Fax",
 } as InputsDictionary;
 
-const inputsDictionary = (LIBERTY_MODE
-  ? libertyInputsDictionary
-  : {
-      ...addlLibertyDemoDictionary,
-      ...libertyInputsDictionary,
-    }) as InputsDictionary;
+const inputsDictionary = (
+  LIBERTY_MODE
+    ? libertyInputsDictionary
+    : {
+        ...addlLibertyDemoDictionary,
+        ...libertyInputsDictionary,
+      }
+) as InputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
   const inputID = $(inputEl).attr("id");
@@ -66,7 +69,7 @@ export const assignTargetString = (inputEl: any): string => {
 
 export const handleFreightTerms = (
   selectEl: any,
-  keyValuePairs: KeyValuesByDoc
+  keyValuePairs: KeyValuePairs
 ) => {
   if ($(selectEl).attr("id") === "CMGeneralFreightTerms") {
     const sortedKeyValuePairs = getEditDistanceAndSort(

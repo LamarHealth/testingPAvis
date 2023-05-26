@@ -10,12 +10,9 @@ import {
   DOCIT_TAG,
 } from "../../common/constants";
 import { renderChiclets, RenderChicletsActionTypes } from "./index";
-import {
-  KeyValuesByDoc,
-  getEditDistanceAndSort,
-  hasGoodHighestMatch,
-} from "../KeyValuePairs";
+import { getEditDistanceAndSort, hasGoodHighestMatch } from "../KeyValuePairs";
 import { assignTargetString, handleFreightTerms } from "../inputsDictionary";
+import { KeyValuePairs } from "../../../../types/documents";
 
 export enum PopulateFormsActionTypes {
   overwriteAll = "all",
@@ -191,9 +188,9 @@ export const replaceAndSetNewMounter = (
  */
 export const populateForms = (
   action: PopulateFormsActionTypes,
-  keyValuePairs: KeyValuesByDoc
+  keyValuePairs: KeyValuePairs
 ): void => {
-  if (Object.keys(keyValuePairs.keyValuePairs).length === 0) {
+  if (Object.keys(keyValuePairs).length === 0) {
     console.error("No Key Value Pairs found");
     return;
   }
