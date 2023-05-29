@@ -1,7 +1,7 @@
 {
   "short_name": "AutoPhil",
   "name": "AutoPhil: Autofill + ChatGPT + OCR",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "manifest_version": 2,
   "description": "Never copy and paste data again. Extract and autofill data from any PDF autofill it anywhere you need it.",
   "content_scripts": [
