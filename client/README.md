@@ -23,8 +23,11 @@ First, change your `.env` file to include the proper configuration.
 
 ```
 # Options: ["local", "build", "liberty"]
-REACT_APP_LOCAL=liberty
+REACT_APP_LOCAL=test
 # If enabled, the application will only fill in forms with a specific data- tag.
 # Options: [true, false]
 REACT_APP_FILTER=false
 ```
+
+### Debugging
+To view Chrome local storage, open the background script's console and run: `chrome.storage.local.get(function(result){console.log(result)})`

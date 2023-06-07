@@ -1,38 +1,26 @@
 {
-    "short_name": "Speedify.ai",
-    "name": "Speedify.ai: ChatGPT + OCR + Autofill",
-    "version": "2.0.1",
-    "manifest_version": 2,
-    "description": "Speedify gives your browser autofill everywhere. Sync your data, and automatically fill it to any form",
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "contentScript.bundle.js"
-            ],
-            "css": [
-                "content.styles.css"
-            ]
-        }
-    ],
-    "browser_action": {
-        "default_title": "open the popup",
-        "default_icon": "./icon-128.png"
-    },
-    "icons": {
-        "128": "./icon-128.png"
-    },
-    "background": {
-        "scripts": [
-            "background.bundle.js"
-        ]
-    },
-    "permissions": [
-        "storage"
-    ],
-    "web_accessible_resources": [
-        "docview.html"
-    ]
+  "short_name": "AutoPhil",
+  "name": "AutoPhil: Autofill + ChatGPT + OCR",
+  "version": "2.1.1",
+  "manifest_version": 2,
+  "description": "Never copy and paste data again. Extract and autofill data from any PDF autofill it anywhere you need it.",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.bundle.js"],
+      "css": ["content.styles.css"]
+    }
+  ],
+  "browser_action": {
+    "default_title": "open the popup",
+    "default_icon": "./icon-128.png"
+  },
+  "icons": {
+    "128": "./icon-128.png"
+  },
+  "background": {
+    "scripts": ["background.bundle.js"]
+  },
+  "permissions": ["storage", "unlimitedStorage"],
+  "web_accessible_resources": ["docview.html"]
 }

@@ -1,32 +1,39 @@
-import React, { useState, useContext, memo, MouseEvent } from 'react';
+import React, { useState, useContext, memo, MouseEvent } from "react";
 
-import styled from 'styled-components';
-import { useStore } from '../contexts/ZustandStore';
+import styled from "styled-components";
+import {
+  useStore,
+  State,
+  useSelectedDocumentStore,
+  SelectedDocumentStoreState,
+} from "../contexts/ZustandStore";
 
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import Collapse from '@material-ui/core/Collapse';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import Chip from '@material-ui/core/Chip';
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import Collapse from "@material-ui/core/Collapse";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import Chip from "@material-ui/core/Chip";
 
-import { FileContext, DocumentInfo, IsSelected } from './DocViewer';
-import { deleteThumbsLocalStorage } from './docThumbnails';
-import { KeyValuesByDoc, getKeyValuePairsByDoc } from './KeyValuePairs';
+import { FileContext, IsSelected } from "./DocViewer";
+import { deleteThumbsLocalStorage } from "./docThumbnails";
+import { getKeyValuePairsByDoc } from "./KeyValuePairs";
 import {
   populateForms,
   PopulateFormsActionTypes,
-} from './ScoreChiclet/functions';
-import { colors, colorSwitcher } from '../common/colors';
-import { DOC_CARD_HEIGHT, LOCAL_MODE } from '../common/constants';
+} from "./ScoreChiclet/functions";
+import { colors, colorSwitcher } from "../common/colors";
+import { DOC_CARD_HEIGHT, LOCAL_MODE } from "../common/constants";
+import { DocumentInfo, KeyValuePairs } from "../../../types/documents";
+import { deleteDocFromLocalStorage } from "./docList";
 
 const ButtonsBoxWrapper = styled.div`
   height: ${DOC_CARD_HEIGHT};
   width: 100%;
   display: ${(props: { hovering: boolean }) =>
-    props.hovering ? 'inherit' : 'none'};
+    props.hovering ? "inherit" : "none"};
   flex-grow: 100;
 `;
 
@@ -57,12 +64,12 @@ const FlexIconButton = styled(IconButton)`
 `;
 
 const StyledChip = styled(Chip)`
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')};
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
   ${(props: IsSelected) =>
     colorSwitcher(
       props.isSelected,
-      'border',
-      '1px solid',
+      "border",
+      "1px solid",
       `${colors.DROPZONE_TEXT_LIGHTGREY}`,
       `${colors.DOC_CARD_BORDER}`
     )};
@@ -73,35 +80,44 @@ const StyledATag = styled.a`
 `;
 
 const StyledDeleteIcon = styled(DeleteIcon)`
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')};
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
 `;
 
 const StyledGetAppIcon = styled(GetAppIcon)`
-  ${(props: IsSelected) => colorSwitcher(props.isSelected, 'color')};
+  ${(props: IsSelected) => colorSwitcher(props.isSelected, "color")};
 `;
 
 const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
-  const { fileDispatch } = useContext(FileContext);
+  const { setFileList } = useContext(FileContext);
   const [setSelectedFile, setDocData] = [
-    useStore((state: any) => state.setSelectedFile),
-    useStore((state: any) => state.setDocData),
+    useStore((state: State) => state.setSelectedFile),
+    useStore((state: State) => state.setDocData),
   ];
 
-  const handleDelete = (e: MouseEvent) => {
-    e.stopPropagation();
-    const deleteAsync = async () => {
-      setSelectedFile(null);
-      fileDispatch({
-        type: 'remove',
-        documentInfo: props.docInfo,
-      });
-      deleteThumbsLocalStorage(props.docInfo.docID.toString());
+  const [selectedDocument, setSelectedDocument] = [
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.selectedDocument
+    ),
+    useSelectedDocumentStore(
+      (state: SelectedDocumentStoreState) => state.setSelectedDocument
+    ),
+  ];
 
-      return new Promise((resolve) => {
-        resolve(() => {});
-      });
-    };
-    deleteAsync().then(() => setDocData(getKeyValuePairsByDoc()));
+  const handleDelete = async (e: MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+
+    // set the selected document to null
+    setSelectedDocument(null);
+
+    // Cleanup local storage
+    deleteThumbsLocalStorage(props.docInfo.docID);
+    const newDocList = await deleteDocFromLocalStorage(props.docInfo.docID);
+
+    // Update available docs
+    setFileList(newDocList);
+    const keyValuesByDoc = await getKeyValuePairsByDoc();
+    setDocData(keyValuesByDoc);
   };
   return (
     <Button variant="contained" color="secondary" onClick={handleDelete}>
@@ -113,20 +129,20 @@ const DeleteConfirm = (props: { docInfo: DocumentInfo }) => {
 const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
   const makeJSONDownloadable = (keyValuePairs: Object) => {
     return (
-      'data:text/json;charset=utf-8,' +
+      "data:text/json;charset=utf-8," +
       encodeURIComponent(JSON.stringify(keyValuePairs))
     );
   };
 
-  const makeCSVDownloadable = (keyValuePairs: any) => {
-    let csv = 'Key:,Value:\n';
+  const makeCSVDownloadable = (keyValuePairs: KeyValuePairs) => {
+    let csv = "Key:,Value:\n";
     Object.keys(keyValuePairs).forEach((key: string) => {
-      const value = keyValuePairs[key].includes(',')
+      const value = keyValuePairs[key].includes(",")
         ? `"${keyValuePairs[key]}"`
         : keyValuePairs[key];
-      csv += key + ',' + value + '\n';
+      csv += key + "," + value + "\n";
     });
-    return 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    return "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
   };
   return (
     <>
@@ -138,10 +154,10 @@ const DownloadConfirm = (props: { docInfo: DocumentInfo }) => {
         href={makeJSONDownloadable(props.docInfo.keyValuePairs)}
       >
         JSON
-      </Button>{' '}
+      </Button>{" "}
       <Button
         size="small"
-        download={props.docInfo.docName}
+        download={`${props.docInfo.docName}.csv`}
         variant="outlined"
         href={makeCSVDownloadable(props.docInfo.keyValuePairs)}
       >
@@ -159,14 +175,26 @@ const ButtonsBox = memo(
     isSelected: boolean;
   }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogType, setDialog] = useState<'delete' | 'download'>();
-    const [docData, setSelectedFile, setKonvaModalOpen, openDocInNewTab] = [
-      useStore((state: any) => state.docData),
-      useStore((state: any) => state.setSelectedFile),
-      useStore((state: any) => state.setKonvaModalOpen),
-      useStore((state: any) => state.openDocInNewTab),
+    const [dialogType, setDialog] = useState<"delete" | "download">();
+    const [setFileUrl, setLines, setKonvaModalOpen, openDocInNewTab] = [
+      useStore((state: State) => state.setFileUrl),
+      useStore((state: State) => state.setLines),
+      useStore((state: State) => state.setKonvaModalOpen),
+      useStore((state: State) => state.openDocInNewTab),
     ];
-    const docID = props.docInfo.docID.toString();
+
+    const [selectedDocument, setSelectedDocument] = [
+      useSelectedDocumentStore(
+        (state: SelectedDocumentStoreState) => state.selectedDocument
+      ),
+      useSelectedDocumentStore(
+        (state: SelectedDocumentStoreState) => state.setSelectedDocument
+      ),
+    ];
+
+    const keyValuePairs = props.docInfo.keyValuePairs;
+    const fileUrl = props.docInfo.pdf;
+    const lines = props.docInfo.lines;
 
     // click away
     const handleClickAway = () => {
@@ -176,43 +204,50 @@ const ButtonsBox = memo(
     // handle delete click
     const handleDeleteClick = (e: MouseEvent) => {
       e.stopPropagation();
+      // Change dialog text and open dialog
       setDialogOpen(true);
-      setDialog('delete');
+      setDialog("delete");
     };
 
     // handle download click
     const handleDownloadClick = (e: MouseEvent) => {
       e.stopPropagation();
       setDialogOpen(true);
-      setDialog('download');
+      setDialog("download");
     };
 
     // handle view pdf click
     const handleViewPdfClick = (e: MouseEvent) => {
       e.stopPropagation();
-      setSelectedFile(docID);
+
+      // Set selected doc, as this button is still in the dialog box
+      setSelectedDocument(props.docInfo);
+
+      // Set data for PdfViewer
+      setFileUrl(fileUrl);
+      setLines(lines);
       setKonvaModalOpen(true);
     };
 
     // handle complete forms click
     const handleCompleteFormsClick = (e: MouseEvent) => {
       e.stopPropagation();
-      const availableKeyValues = docData.filter(
-        (doc: KeyValuesByDoc) => doc.docID === docID
-      )[0];
-      availableKeyValues &&
-        populateForms(
-          PopulateFormsActionTypes.overwriteBlank,
-          availableKeyValues
-        );
-      setSelectedFile(props.docInfo.docID.toString());
+
+      setFileUrl(fileUrl);
+      setLines(lines);
+
+      // set selected document
+      setSelectedDocument(props.docInfo);
+
+      !!Object.keys(keyValuePairs).length &&
+        populateForms(PopulateFormsActionTypes.overwriteBlank, keyValuePairs);
     };
 
     return (
       <ButtonsBoxWrapper hovering={props.hovering}>
         <Collapse in={!dialogOpen}>
           <CollapseInnerWrapper>
-            <ButtonsFlexContainer className={'flex-container'}>
+            <ButtonsFlexContainer className={"flex-container"}>
               <StyledChip
                 size="small"
                 label="Complete Forms"
@@ -222,7 +257,7 @@ const ButtonsBox = memo(
               />
               {openDocInNewTab ? (
                 <StyledATag
-                  href={LOCAL_MODE ? '' : chrome.runtime.getURL('docview.html')}
+                  href={LOCAL_MODE ? "" : chrome.runtime.getURL("docview.html")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -248,11 +283,11 @@ const ButtonsBox = memo(
 
               <FlexIconButton
                 onClick={handleDeleteClick}
-                style={{ marginLeft: '-0.25em' }}
+                style={{ marginLeft: "-0.25em" }}
               >
                 <StyledDeleteIcon isSelected={props.isSelected} />
               </FlexIconButton>
-              <FlexIconButton onClick={handleDownloadClick} edge={'start'}>
+              <FlexIconButton onClick={handleDownloadClick} edge={"start"}>
                 <StyledGetAppIcon isSelected={props.isSelected} />
               </FlexIconButton>
             </ButtonsFlexContainer>
@@ -267,7 +302,7 @@ const ButtonsBox = memo(
           <Collapse in={dialogOpen}>
             <CollapseInnerWrapper>
               <ButtonsFlexContainer>
-                {dialogType === 'delete' ? (
+                {dialogType === "delete" ? (
                   <DeleteConfirm docInfo={props.docInfo} />
                 ) : (
                   <div>

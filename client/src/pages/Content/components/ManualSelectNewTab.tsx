@@ -2,17 +2,17 @@
 import React, { useEffect, useState } from "react";
 import { LOCAL_MODE } from "../common/constants";
 import { ManualSelect } from "./ManualSelect";
-import { KeyValuesByDoc } from "./KeyValuePairs";
+import { DocumentInfo } from "../../../types/documents";
 
 interface ChromeStorage {
   selectedFile?: string;
-  docData?: KeyValuesByDoc[];
+  docData?: DocumentInfo[];
 }
 
 export const ManualSelectNewTab = () => {
   const [docID, setDocID] = useState(undefined as string | undefined);
   const [docData, setDocData] = useState(
-    undefined as KeyValuesByDoc[] | undefined
+    undefined as DocumentInfo[] | undefined
   );
 
   useEffect(() => {

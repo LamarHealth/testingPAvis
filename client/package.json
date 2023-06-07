@@ -1,7 +1,11 @@
 {
   "name": "docit",
-  "version": "0.1.0",
+  "repository": "git@github.com:areibman/Docit.git",
+  "author": "areibman <meta.alex.r@gmail.com>",
+  "license": "All rights reserved",
+  "copyright": "© Copyright Alex Reibman",
   "private": true,
+  "version": "0.2.0",
   "proxy": "http://localhost:3001/",
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.6.1",
@@ -25,7 +29,6 @@
     "concurrently": "^5.0.2",
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
-    "idb": "^7.1.1",
     "install": "^0.13.0",
     "is-empty": "^1.2.0",
     "jquery": "^3.5.0",
@@ -34,6 +37,7 @@
     "mongoose": "^5.8.9",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
+    "pdf-lib": "^1.17.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^10.2.1",

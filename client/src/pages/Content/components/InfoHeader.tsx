@@ -1,18 +1,18 @@
-import * as React from "react";
-import styled from "styled-components";
-import { Icon, Intent } from "@blueprintjs/core";
+import * as React from 'react';
+import styled from 'styled-components';
+import { Icon, Intent } from '@blueprintjs/core';
 
 interface IHeaderContainer {
-  departurePoint: String;
-  destinationPoint: String;
+  departurePoint: string;
+  destinationPoint: string;
   isGood: Boolean;
   damages?: Array<Damages>;
 }
 
 export interface Damages {
-  type: String;
+  type: string;
   amount: number;
-  description?: String;
+  description?: string;
 }
 
 const Arrow = (props: IHeaderContainer) => {
@@ -59,9 +59,9 @@ class ItineraryContainer extends React.Component<IHeaderContainer> {
 
 const DamagesSubsection = (props: Damages) => {
   return (
-    <h3 style={{ margin: "0.25em 0em" }}>
-      Estimated <u>${props.amount.toString()}</u> {props.type}.{" "}
-      {props.description || ""}
+    <h3 style={{ margin: '0.25em 0em' }}>
+      Estimated <u>${props.amount.toString()}</u> {props.type}.{' '}
+      {props.description || ''}
     </h3>
   );
 };
@@ -84,15 +84,15 @@ class StatusContainer extends React.Component<{
       <ColContainer>
         <RowContainer>
           <Icon
-            icon={this.props.isGood ? "tick-circle" : "error"}
+            icon={this.props.isGood ? 'tick-circle' : 'error'}
             iconSize={50}
             intent={this.props.isGood ? Intent.SUCCESS : Intent.DANGER}
-            style={{ padding: "0 1em 0 0 " }}
+            style={{ padding: '0 1em 0 0 ' }}
           />
           <h1>
             {this.props.isGood
-              ? "All of your information has been checked and verified"
-              : "There are critical errors in your shipping documents"}
+              ? 'All of your information has been checked and verified'
+              : 'There are critical errors in your shipping documents'}
           </h1>
         </RowContainer>
         {this.props.damages === undefined ||
