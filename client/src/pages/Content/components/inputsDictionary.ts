@@ -53,19 +53,39 @@ const inputsDictionary = (
 ) as InputsDictionary;
 
 export const assignTargetString = (inputEl: any): string => {
-  const inputID = $(inputEl).attr("id");
-  const dictionaryLookup = inputID ? inputsDictionary[inputID] : undefined;
-  if (dictionaryLookup) return dictionaryLookup;
+  // Use jQuery to get the "name" attribute of the input element
+  const inputName = $(inputEl).attr("name");
+  
+  // Check if the name contains the substring 'gender'
+  if (inputName && inputName.includes('gender')) {
+    //const value = $(inputEl).val();
+    //return value ? value.toString() : "";  // Convert the value to string
+    return 'gender';
+  }
 
+  if (inputName) {
+    const modifiedInputName = inputName.replace(/_/g, ' ');
+    return modifiedInputName;
+  }
+
+  // If "name" is not available, check the dictionary using the input's ID
+  const inputID = $(inputEl).attr("id");
+  if (inputID) {
+    const modifiedInputID = inputID.replace(/_/g, ' ');
+    return modifiedInputID;
+  }
+
+  // If neither "name" nor dictionary lookup is available, use the "placeholder" attribute
   const inputPlaceholder = $(inputEl).attr("placeholder");
   if (inputPlaceholder) return inputPlaceholder;
 
-  const inputLabel: string | undefined = $(`label[for=${inputID}]`)[0]
-    ?.innerText;
+  // If none of the above are available, try to get the associated label using the input's ID
+  const inputLabel: string | undefined = $(`label[for=${inputID}]`)[0]?.innerText;
   if (inputLabel) return inputLabel;
 
   return "";
 };
+
 
 export const handleFreightTerms = (
   selectEl: any,
